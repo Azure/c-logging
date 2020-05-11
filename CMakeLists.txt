@@ -109,8 +109,6 @@ if(WIN32)
     endif()
 endif()
 
-message(WARNING ${XLOGGING_C_FILE})
-
 set(azure_c_logging_c_files
     ${LOGGING_C_FILE}
     ${XLOGGING_C_FILE}

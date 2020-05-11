@@ -3,7 +3,7 @@
 
 #include "windows.h"
 
-#include "azure_c_util/xlogging.h"
+#include "azure_c_logging/xlogging.h"
 
 int main(void)
 {

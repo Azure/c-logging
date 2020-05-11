@@ -13,7 +13,7 @@
 #include "azure_macro_utils/macro_utils.h"
 
 #ifdef LOGERROR_CAPTURES_STACK_TRACES
-#include "azure_c_util/logging_stacktrace.h"
+#include "azure_c_logging/logging_stacktrace.h"
 #endif
 
 #if defined(ESP8266_RTOS)
