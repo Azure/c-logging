@@ -8,9 +8,9 @@
 
 #include "windows.h"
 
-#include "azure_c_util/xlogging.h"
+#include "azure_c_logging/xlogging.h"
 
-#include "azure_c_util/consolelogger.h"
+#include "azure_c_logging/consolelogger.h"
 
 #ifdef USE_TRACELOGGING
 #include "TraceLoggingProvider.h"

@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
-if (TARGET azure_c_util)
+if (TARGET azure_c_logging)
     RETURN()
 endif()
 
@@ -41,7 +41,6 @@ set_default_build_options()
 
 include(CTest)
 enable_testing()
-
 
 if ((NOT TARGET azure_macro_utils_c) AND (EXISTS ${CMAKE_CURRENT_LIST_DIR}/deps/azure-macro-utils-c/CMakeLists.txt))
         add_subdirectory(deps/azure-macro-utils-c)
@@ -84,7 +83,7 @@ if(${logerror_captures_stack_traces})
     #set a preprocessor option (LOGERROR_CAPTURES_STACK_TRACES) and add the files that provide the functionality
     add_definitions(-DLOGERROR_CAPTURES_STACK_TRACES)
     set(LOGGING_STACKTRACE_C_FILE ./src/logging_stacktrace.c)
-    set(LOGGING_STACKTRACE_H_FILE ./inc/azure_c_util/logging_stacktrace.h)
+    set(LOGGING_STACKTRACE_H_FILE ./inc/azure_c_logging/logging_stacktrace.h)
 else()
     set(LOGGING_STACKTRACE_C_FILE)
     set(LOGGING_STACKTRACE_H_FILE)
@@ -94,28 +93,29 @@ if(${no_logging})
     add_definitions(-DNO_LOGGING)
 endif()
 
-# This function focuses on setting files which are unique to a given hardware platform.
-# The choice of tlsio is not unique per-platform, and is set in the main CMakeLists.txt
-if (WIN32)
+if(WIN32)
     if(${use_etw} STREQUAL "OFF")
-        set(XLOGGING_C_FILE ${c_util_dir}/src/xlogging.c PARENT_SCOPE)
-        set(LOGGING_C_FILE ${c_util_dir}/src/consolelogger.c PARENT_SCOPE)
-        set(LOGGING_H_FILE ${c_util_dir}/inc/azure_c_util/consolelogger.h PARENT_SCOPE)
+        set(XLOGGING_C_FILE ${CMAKE_CURRENT_LIST_DIR}/src/xlogging.c CACHE INTERNAL "this is the xlogging C file(s)" FORCE)
+        set(LOGGING_C_FILE ${CMAKE_CURRENT_LIST_DIR}/src/consolelogger.c CACHE INTERNAL "this is the logging C file(s)" FORCE)
+        set(LOGGING_H_FILE ${CMAKE_CURRENT_LIST_DIR}/inc/azure_c_logging/consolelogger.h CACHE INTERNAL "this is the logging H file(s)" FORCE)
     elseif(${use_etw} STREQUAL "TRACELOGGING")
-        set(XLOGGING_C_FILE ${c_util_dir}/src/etwxlogging.c PARENT_SCOPE)
-        set(LOGGING_C_FILE ${c_util_dir}/src/etwlogger_driver.c PARENT_SCOPE)
-        set(LOGGING_H_FILE ${c_util_dir}/inc/azure_c_util/etwlogger_driver.h PARENT_SCOPE)
+        set(XLOGGING_C_FILE ${CMAKE_CURRENT_LIST_DIR}/src/etwxlogging.c CACHE INTERNAL "this is the xlogging C file(s)" FORCE)
+        set(LOGGING_C_FILE ${CMAKE_CURRENT_LIST_DIR}/src/etwlogger_driver.c CACHE INTERNAL "this is the logging C file(s)" FORCE)
+        set(LOGGING_H_FILE ${CMAKE_CURRENT_LIST_DIR}/inc/azure_c_logging/etwlogger_driver.h CACHE INTERNAL "this is the logging H file(s)" FORCE)
     elseif(${use_etw} STREQUAL "TRACELOGGING_WITH_CONSOLE")
-        set(XLOGGING_C_FILE ${c_util_dir}/src/etwxlogging.c PARENT_SCOPE)
-        set(LOGGING_C_FILE ${c_util_dir}/src/etwlogger_driver.c ${c_util_dir}/src/consolelogger.c PARENT_SCOPE)
-        set(LOGGING_H_FILE ${c_util_dir}/inc/azure_c_util/etwlogger_driver.h ${c_util_dir}/inc/azure_c_util/consolelogger.h PARENT_SCOPE)
+        set(XLOGGING_C_FILE ${CMAKE_CURRENT_LIST_DIR}/src/etwxlogging.c CACHE INTERNAL "this is the xlogging C file(s)" FORCE)
+        set(LOGGING_C_FILE ${CMAKE_CURRENT_LIST_DIR}/src/etwlogger_driver.c ${CMAKE_CURRENT_LIST_DIR}/src/consolelogger.c CACHE INTERNAL "this is the logging C file(s)" FORCE)
+        set(LOGGING_H_FILE ${CMAKE_CURRENT_LIST_DIR}/inc/azure_c_logging/etwlogger_driver.h ${CMAKE_CURRENT_LIST_DIR}/inc/azure_c_logging/consolelogger.h CACHE INTERNAL "this is the logging H file(s)" FORCE)
     endif()
 endif()
+
+message(WARNING ${XLOGGING_C_FILE})
 
 set(azure_c_logging_c_files
     ${LOGGING_C_FILE}
     ${XLOGGING_C_FILE}
     ${LOGGING_STACKTRACE_C_FILE}
+    ./src/dummy.c
     )
 
 set(azure_c_logging_h_files
@@ -123,27 +123,15 @@ set(azure_c_logging_h_files
     ${LOGGING_STACKTRACE_H_FILE}
     )
 
-add_library(azure_c_logging ${azure_c_logging_c_files} ${azure_c_logging_h_files})
-
 FILE(GLOB azure_c_logging_md_files "devdoc/*.md")
 SOURCE_GROUP(devdoc FILES ${azure_c_logging_md_files})
-
-if(MSVC)
-    set(azure_c_logging_h_files ${azure_c_logging_h_files}
-        ./pal/windows/refcount_os.h
-    )
-else()
-    set(azure_c_logging_h_files ${azure_c_logging_h_files}
-        ./pal/linux/refcount_os.h
-    )
-endif()
 
 #this is the product (a logging library)
 add_library(azure_c_logging ${azure_c_logging_c_files} ${azure_c_logging_h_files} ${azure_c_logging_md_files})
 
 target_include_directories(azure_c_logging PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/inc>)
 
-set(azure_c_util_target_libs)
+set(azure_c_logging_target_libs)
 
 if(${logerror_captures_stack_traces})
     set(azure_c_logging_target_libs ${azure_c_logging_target_libs} dbghelp)
