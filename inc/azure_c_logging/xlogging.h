@@ -12,8 +12,6 @@
 
 #include "azure_macro_utils/macro_utils.h"
 
-#include "azure_c_util/agenttime.h"
-
 #ifdef LOGERROR_CAPTURES_STACK_TRACES
 #include "azure_c_util/logging_stacktrace.h"
 #endif

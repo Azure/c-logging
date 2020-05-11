@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include "azure_c_util/xlogging.h"
+#include "azure_c_logging/xlogging.h"
 
 #include "windows.h"
-#include "azure_c_util/etwlogger_driver.h"
+#include "azure_c_logging/etwlogger_driver.h"
 
 #ifndef NO_LOGGING
 

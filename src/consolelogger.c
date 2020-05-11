@@ -4,8 +4,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <time.h>
-#include "azure_c_util/xlogging.h"
-#include "azure_c_util/consolelogger.h"
+#include "azure_c_logging/xlogging.h"
+#include "azure_c_logging/consolelogger.h"
 
 #if (defined(_MSC_VER))
 #include "windows.h"
