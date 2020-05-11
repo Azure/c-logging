@@ -57,11 +57,6 @@ if ((NOT TARGET testrunnerswitcher) AND (EXISTS ${CMAKE_CURRENT_LIST_DIR}/deps/a
         include_directories(deps/azure-c-testrunnerswitcher/inc)
 endif()
 
-if ((NOT TARGET umock_c) AND (EXISTS ${CMAKE_CURRENT_LIST_DIR}/deps/umock-c/CMakeLists.txt))
-        add_subdirectory(deps/umock-c)
-        include_directories(deps/umock-c/inc)
-endif()
-
 include_directories(${MACRO_UTILS_INC_FOLDER})
 include_directories(${UMOCK_C_INC_FOLDER})
 include_directories(${CMAKE_CURRENT_LIST_DIR}/inc)
