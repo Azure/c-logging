@@ -130,7 +130,7 @@ target_link_libraries(azure_c_logging ${azure_c_logging_target_libs})
 if((WIN32) AND (${run_traceability}))
     #add traceability custom target
     add_custom_target(azure_c_logging_traceability ALL
-        COMMAND ${CMAKE_CURRENT_LIST_DIR}/deps/azure-c-build-tools/traceabilitytool/traceability_tool/bin/$<CONFIG>/traceabilitytool.exe -buildcheck -e ${CMAKE_CURRENT_LIST_DIR}/deps -i ${CMAKE_CURRENT_LIST_DIR})
+        COMMAND traceabilitytool -buildcheck -e ${CMAKE_CURRENT_LIST_DIR}/deps -i ${CMAKE_CURRENT_LIST_DIR})
     add_dependencies(azure_c_logging_traceability traceabilitytool)
 endif()
 
