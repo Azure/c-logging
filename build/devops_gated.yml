@@ -311,7 +311,7 @@ jobs:
   - task: BatchScript@1
     displayName: 'Run traceability tool'
     inputs:
-      filename: 'deps/azure-c-build-tools/traceabilitytool/traceability_tool/bin/Release/traceabilitytool.exe'
+      filename: 'build/deps/azure-c-build-tools/traceabilitytool/Release/traceabilitytool.exe'
       arguments: '-i $(Build.SourcesDirectory) -buildcheck -e deps'
       modifyEnvironment: false
       workingFolder: '$(Build.SourcesDirectory)'
