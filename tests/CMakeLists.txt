@@ -5,5 +5,7 @@ cmake_minimum_required(VERSION 2.8.11)
 
 #unit tests
 if(${run_unittests})
-    add_subdirectory(logging_ut)
+    if(WIN32)
+       add_subdirectory(logging_ut)
+    endif()
 endif()
