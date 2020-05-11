@@ -71,7 +71,7 @@ jobs:
     displayName: 'Build solution build_x64\*.sln'
     inputs:
       solution: 'build_x64\*.sln'
-      msbuildArgs: '/p:ForceImportBeforeCppTargets=$(Build.SourcesDirectory)/vld.props'
+      msbuildArgs: '/t:restore /t:build /p:ForceImportBeforeCppTargets=$(Build.SourcesDirectory)/vld.props'
       platform: x64
       configuration: Debug
       maximumCpuCount: true
@@ -132,6 +132,7 @@ jobs:
     inputs:
       solution: 'build_x64\*.sln'
       platform: Win32
+      msbuildArgs: '/t:restore /t:build /p:ForceImportBeforeCppTargets=$(Build.SourcesDirectory)/vld.props'
       configuration: RelWithDebInfo
       maximumCpuCount: true
 
@@ -213,6 +214,7 @@ jobs:
     inputs:
       solution: 'build_x86\*.sln'
       platform: Win32
+      msbuildArgs: '/t:restore /t:build /p:ForceImportBeforeCppTargets=$(Build.SourcesDirectory)/vld.props'
       configuration: Debug
       maximumCpuCount: true
 
@@ -264,7 +266,7 @@ jobs:
     displayName: 'Git submodule update'
     inputs:
       filename: 'C:\Program Files\Git\bin\git.exe'
-      arguments: 'submodule update --init --force deps/azure-c-build-tools'
+      arguments: 'submodule update --init --force'
 
   - task: BatchScript@1
     displayName: 'Git submodule clean'
@@ -289,18 +291,27 @@ jobs:
     inputs:
       restoreSolution: deps/azure-c-build-tools/traceabilitytool/traceabilitytool.sln
 
-  - task: VSBuild@1
-    displayName: 'Build solution deps/azure-c-build-tools/traceabilitytool/traceabilitytool.sln'
+  - task: CMake@1
+    displayName: CMake
     inputs:
-      solution: deps/azure-c-build-tools/traceabilitytool/traceabilitytool.sln
-      platform: 'Any CPU'
-      configuration: Release
+      workingDirectory: 'build'
+      cmakeArgs: '.. -Ax64'
+
+  - task: VSBuild@1
+    displayName: 'Build traceabilitytool only'
+    inputs:
+      solution: 'build\azure_c_logging.sln'
+      vsVersion: 16.0
+      platform: x64
+      configuration: RelWithDebInfo
+      msbuildArgs: '/t:restore /t:build /t:traceabilitytool'
+      clean: true
       maximumCpuCount: true
-      
+
   - task: BatchScript@1
     displayName: 'Run traceability tool'
     inputs:
-      filename: 'deps/azure-c-build-tools/traceabilitytool/traceability_tool/bin/Release/traceabilitytool.exe'
+      filename: 'build/deps/azure-c-build-tools/traceabilitytool/RelWithDebInfo/traceabilitytool.exe'
       arguments: '-i $(Build.SourcesDirectory) -buildcheck -e deps'
       modifyEnvironment: false
       workingFolder: '$(Build.SourcesDirectory)'
