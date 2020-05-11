@@ -293,7 +293,7 @@ jobs:
     displayName: CMake
     inputs:
       workingDirectory: 'build'
-      cmakeArgs: '..'
+      cmakeArgs: '.. -Ax64'
 
   - task: VSBuild@1
     displayName: 'Build traceabilitytool only'
