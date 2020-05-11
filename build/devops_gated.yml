@@ -289,14 +289,23 @@ jobs:
     inputs:
       restoreSolution: deps/azure-c-build-tools/traceabilitytool/traceabilitytool.sln
 
-  - task: VSBuild@1
-    displayName: 'Build solution deps/azure-c-build-tools/traceabilitytool/traceabilitytool.sln'
+  - task: CMake@1
+    displayName: CMake
     inputs:
-      solution: deps/azure-c-build-tools/traceabilitytool/traceabilitytool.sln
-      platform: 'Any CPU'
-      configuration: Release
+      workingDirectory: 'build'
+      cmakeArgs: '..'
+
+  - task: VSBuild@1
+    displayName: 'Build traceabilitytool only'
+    inputs:
+      solution: 'build\azure_c_logging.sln'
+      vsVersion: 16.0
+      platform: x64
+      configuration: RelWithDebInfo
+      msbuildArgs: '/t:restore /t:build /t:traceabilitytool'
+      clean: true
       maximumCpuCount: true
-      
+
   - task: BatchScript@1
     displayName: 'Run traceability tool'
     inputs:
