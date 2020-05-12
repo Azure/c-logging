@@ -97,6 +97,10 @@ if(WIN32)
         set(LOGGING_C_FILE ${CMAKE_CURRENT_LIST_DIR}/src/etwlogger_driver.c ${CMAKE_CURRENT_LIST_DIR}/src/consolelogger.c CACHE INTERNAL "this is the logging C file(s)" FORCE)
         set(LOGGING_H_FILE ${CMAKE_CURRENT_LIST_DIR}/inc/azure_c_logging/etwlogger_driver.h ${CMAKE_CURRENT_LIST_DIR}/inc/azure_c_logging/consolelogger.h CACHE INTERNAL "this is the logging H file(s)" FORCE)
     endif()
+else()
+    set(XLOGGING_C_FILE ${CMAKE_CURRENT_LIST_DIR}/src/xlogging.c CACHE INTERNAL "this is the xlogging C file(s)" FORCE)
+    set(LOGGING_C_FILE ${CMAKE_CURRENT_LIST_DIR}/src/consolelogger.c CACHE INTERNAL "this is the logging C file(s)" FORCE)
+    set(LOGGING_H_FILE ${CMAKE_CURRENT_LIST_DIR}/inc/azure_c_logging/consolelogger.h CACHE INTERNAL "this is the logging H file(s)" FORCE)
 endif()
 
 set(azure_c_logging_c_files
