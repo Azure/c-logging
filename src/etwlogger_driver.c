@@ -55,6 +55,7 @@ static char* vprintf_alloc(const char* format, va_list va)
                 }
                 else
                 {
+                    result = temp;
                     int vsnprintf_result_2 = vsnprintf(result, (size_t)vsnprintf_result + 1, format, va);
                     if ((vsnprintf_result_2 < 0) || (vsnprintf_result_2 != vsnprintf_result))
                     {
