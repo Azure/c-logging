@@ -10,31 +10,63 @@
 #if (defined(_MSC_VER))
 #include "windows.h"
 
+/*a define to a size that is not expected to be exceeded by most messages*/
+#define LOG_SIZE_REGULAR 2048 /*in bytes*/
+
 /*returns a string as if printed by vprintf*/
 static char* vprintf_alloc(const char* format, va_list va)
 {
     char* result;
-    int neededSize = vsnprintf(NULL, 0, format, va);
-    if (neededSize < 0)
+
+    /*allocate first, ask questions about the right size after*/
+    result = (char*)malloc(LOG_SIZE_REGULAR);
+    if (result == NULL)
     {
-        result = NULL;
+        /*return as is*/
     }
     else
     {
-        result = (char*)malloc(neededSize + 1);
-        if (result == NULL)
+        int vsnprintf_result = vsnprintf(result, LOG_SIZE_REGULAR, format, va);
+        if (vsnprintf_result < 0) /*C11 chapter 7.21.6.12: The vsnprintf function returns [...] a negative value if an encoding error occurred.*/
         {
-            /*return as is*/
+            (void)printf("a negative value has been returned from vsnprintf, this means an encoding error occurred.");
         }
         else
         {
-            if (vsnprintf(result, neededSize + 1, format, va) != neededSize)
+            if (vsnprintf_result < LOG_SIZE_REGULAR) /*C11: the null-terminated output has been completely written if and only if the returned value is nonnegative and less than n*/
             {
-                free(result);
-                result = NULL;
+                /*return as is, we good*/
+                goto allOk;
+            }
+            else
+            {
+                /*here we go again*/
+                char* temp = realloc(result, vsnprintf_result + 1);
+                if (temp == NULL)
+                {
+                    (void)printf("failed to realloc(result=%p, vsnprintf_result=%d + 1)", result, vsnprintf_result);
+                }
+                else
+                {
+                    result = temp;
+                    int vsnprintf_result_2 = vsnprintf(result, (size_t)vsnprintf_result + 1, format, va);
+                    if ((vsnprintf_result_2 < 0) || (vsnprintf_result_2 != vsnprintf_result))
+                    {
+                        (void)printf("an unexpected return vsnprintf_result_2=%d = vsnprintf(result=%p, vsnprintf_result=%d + 1, format, va)",
+                            vsnprintf_result_2, result, vsnprintf_result);
+                    }
+                    else
+                    {
+                        goto allOk;
+                    }
+                }
             }
         }
+        free(result);
+        result = NULL;
+    allOk:;
     }
+
     return result;
 }
 
