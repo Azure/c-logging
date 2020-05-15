@@ -113,6 +113,7 @@ set(azure_c_logging_c_files
 set(azure_c_logging_h_files
     ${LOGGING_H_FILE}
     ${LOGGING_STACKTRACE_H_FILE}
+    ./inc/azure_c_logging/xlogging.h
     )
 
 FILE(GLOB azure_c_logging_md_files "devdoc/*.md")

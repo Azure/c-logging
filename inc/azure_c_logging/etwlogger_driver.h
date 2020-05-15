@@ -10,10 +10,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-    extern void etwlogger_log(LOG_CATEGORY log_category, const char* file, const char* func, int line, unsigned int options, const char* format, ...);
+    void etwlogger_log(LOG_CATEGORY log_category, const char* file, const char* func, int line, unsigned int options, const char* format, ...);
 
 #if (defined(_MSC_VER))
-    extern void etwlogger_log_with_GetLastError(const char* file, const char* func, int line, const char* format, ...);
+    void etwlogger_log_with_GetLastError(const char* file, const char* func, int line, const char* format, ...);
 #endif
 
 #ifdef __cplusplus

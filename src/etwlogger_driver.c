@@ -190,14 +190,31 @@ static void perform_EventWriteLogErrorEvent(const char* content, const char* fil
     TraceLoggingWrite(g_hMyComponentProvider,
         "LogError",
         TraceLoggingLevel(TRACE_LEVEL_ERROR),
+        TraceLoggingString(content, "content"),
         TraceLoggingString(file, "file"),
         TraceLoggingString(func, "func"),
-        TraceLoggingInt32(line, "line"),
-        TraceLoggingString(content, "content")
+        TraceLoggingInt32(line, "line")
     );
 
 #if CALL_CONSOLE_LOGGER
     consolelogger_log(AZ_LOG_ERROR, file, func, line, LOG_LINE, "%s", content);
+#endif
+}
+
+static void perform_EventWriteLogWarningEvent(const char* content, const char* file, const SYSTEMTIME* t, const char* func, int line)
+{
+    (void)t;
+    TraceLoggingWrite(g_hMyComponentProvider,
+        "LogError",
+        TraceLoggingLevel(TRACE_LEVEL_WARNING),
+        TraceLoggingString(content, "content"),
+        TraceLoggingString(file, "file"),
+        TraceLoggingString(func, "func"),
+        TraceLoggingInt32(line, "line")
+    );
+
+#if CALL_CONSOLE_LOGGER
+    consolelogger_log(AZ_LOG_WARNING, file, func, line, LOG_LINE, "%s", content);
 #endif
 }
 
@@ -207,10 +224,10 @@ static void perform_EventWriteLogLastError(const char* userMessage, const char* 
     TraceLoggingWrite(g_hMyComponentProvider,
         "LogLastError",
         TraceLoggingLevel(TRACE_LEVEL_ERROR),
+        TraceLoggingString(userMessage, "content"),
         TraceLoggingString(file, "file"),
         TraceLoggingString(func, "func"),
         TraceLoggingInt32(line, "line"),
-        TraceLoggingString(userMessage, "content"),
         TraceLoggingString(lastErrorAsString, "GetLastError")
     );
 
@@ -230,7 +247,19 @@ static void perform_EventWriteLogInfoEvent(const char* message)
 #if CALL_CONSOLE_LOGGER
     consolelogger_log(AZ_LOG_INFO, NULL, NULL, 0, LOG_LINE, "%s", message);
 #endif
+}
 
+static void perform_EventWriteLogVerboseEvent(const char* message)
+{
+    TraceLoggingWrite(g_hMyComponentProvider,
+        "LogVerbose",
+        TraceLoggingLevel(TRACE_LEVEL_VERBOSE),
+        TraceLoggingString(message, "content")
+    );
+
+#if CALL_CONSOLE_LOGGER
+    consolelogger_log(AZ_LOG_VERBOSE, NULL, NULL, 0, LOG_LINE, "%s", message);
+#endif
 }
 
 void etwlogger_log_with_GetLastError(const char* file, const char* func, int line, const char* format, ...)
@@ -288,45 +317,48 @@ void etwlogger_log(LOG_CATEGORY log_category, const char* file, const char* func
     va_list args;
     va_start(args, format);
     char* text = vprintf_alloc(format, args);
+    const char* text_to_log;
     if (text == NULL)
     {
-        switch (log_category)
-        {
-            case AZ_LOG_INFO:
-            {
-                perform_EventWriteLogInfoEvent("INTERNAL LOGGING ERROR: failed in vprintf_alloc");
-                break;
-            }
-            case AZ_LOG_ERROR:
-            {
-                SYSTEMTIME t;
-                GetSystemTime(&t);
-                perform_EventWriteLogErrorEvent("INTERNAL LOGGING ERROR: failed in vprintf_alloc", file, &t, func, line);
-                break;
-            }
-            default:
-                break;
-        }
+        text_to_log = "INTERNAL LOGGING ERROR: failed in vprintf_alloc";
     }
     else
     {
-        switch (log_category)
+        text_to_log = text;
+    }
+
+    switch (log_category)
+    {
+        case AZ_LOG_ERROR:
         {
-            case AZ_LOG_INFO:
-            {
-                perform_EventWriteLogInfoEvent(text);
-                break;
-            }
-            case AZ_LOG_ERROR:
-            {
-                SYSTEMTIME t;
-                GetSystemTime(&t);
-                perform_EventWriteLogErrorEvent(text, file, &t, func, line);
-                break;
-            }
-            default:
-                break;
+            SYSTEMTIME t;
+            GetSystemTime(&t);
+            perform_EventWriteLogErrorEvent(text_to_log, file, &t, func, line);
+            break;
         }
+        case AZ_LOG_WARNING:
+        {
+            SYSTEMTIME t;
+            GetSystemTime(&t);
+            perform_EventWriteLogWarningEvent(text_to_log, file, &t, func, line);
+            break;
+        }
+        case AZ_LOG_INFO:
+        {
+            perform_EventWriteLogInfoEvent(text_to_log);
+            break;
+        }
+        case AZ_LOG_VERBOSE:
+        {
+            perform_EventWriteLogVerboseEvent(text_to_log);
+            break;
+        }
+        default:
+            break;
+    }
+
+    if (text != NULL)
+    {
         free(text);
     }
     va_end(args);
