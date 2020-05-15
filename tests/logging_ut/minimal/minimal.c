@@ -7,10 +7,13 @@
 
 int main(void)
 {
-
     LogError("Hello World from LogError, here's a value: %d", 42);
 
+    LogWarning("Hello World from LogWarning, here's a value: %d", 4242);
+
     LogInfo("Hello World from LogInfo, here's a value: %d", 0x42);
+
+    LogVerbose("Hello World from LogVerbose, here's a value: %d", 0x4242);
 
     SetLastError(ERROR_ACCESS_DENIED);
 
