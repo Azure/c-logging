@@ -184,9 +184,8 @@ static void lazyRegisterEventProvider(void)
     }
 }
 
-static void perform_EventWriteLogErrorEvent(const char* content, const char* file, const SYSTEMTIME* t, const char* func, int line)
+static void perform_EventWriteLogErrorEvent(const char* content, const char* file, const char* func, int line)
 {
-    (void)t;
     TraceLoggingWrite(g_hMyComponentProvider,
         "LogError",
         TraceLoggingLevel(TRACE_LEVEL_ERROR),
@@ -201,9 +200,8 @@ static void perform_EventWriteLogErrorEvent(const char* content, const char* fil
 #endif
 }
 
-static void perform_EventWriteLogWarningEvent(const char* content, const char* file, const SYSTEMTIME* t, const char* func, int line)
+static void perform_EventWriteLogWarningEvent(const char* content, const char* file, const char* func, int line)
 {
-    (void)t;
     TraceLoggingWrite(g_hMyComponentProvider,
         "LogError",
         TraceLoggingLevel(TRACE_LEVEL_WARNING),
@@ -218,9 +216,8 @@ static void perform_EventWriteLogWarningEvent(const char* content, const char* f
 #endif
 }
 
-static void perform_EventWriteLogLastError(const char* userMessage, const char* file, const SYSTEMTIME* t, const char* func, int line, const char* lastErrorAsString)
+static void perform_EventWriteLogLastError(const char* userMessage, const char* file, const char* func, int line, const char* lastErrorAsString)
 {
-    (void)t;
     TraceLoggingWrite(g_hMyComponentProvider,
         "LogLastError",
         TraceLoggingLevel(TRACE_LEVEL_ERROR),
@@ -236,12 +233,15 @@ static void perform_EventWriteLogLastError(const char* userMessage, const char* 
 #endif
 }
 
-static void perform_EventWriteLogInfoEvent(const char* message)
+static void perform_EventWriteLogInfoEvent(const char* message, const char* file, const char* func, int line)
 {
     TraceLoggingWrite(g_hMyComponentProvider,
         "LogInfo",
         TraceLoggingLevel(TRACE_LEVEL_INFORMATION),
-        TraceLoggingString(message, "content")
+        TraceLoggingString(message, "content"),
+        TraceLoggingString(file, "file"),
+        TraceLoggingString(func, "func"),
+        TraceLoggingInt32(line, "line")
     );
 
 #if CALL_CONSOLE_LOGGER
@@ -249,12 +249,15 @@ static void perform_EventWriteLogInfoEvent(const char* message)
 #endif
 }
 
-static void perform_EventWriteLogVerboseEvent(const char* message)
+static void perform_EventWriteLogVerboseEvent(const char* message, const char* file, const char* func, int line)
 {
     TraceLoggingWrite(g_hMyComponentProvider,
         "LogVerbose",
         TraceLoggingLevel(TRACE_LEVEL_VERBOSE),
-        TraceLoggingString(message, "content")
+        TraceLoggingString(message, "content"),
+        TraceLoggingString(file, "file"),
+        TraceLoggingString(func, "func"),
+        TraceLoggingInt32(line, "line")
     );
 
 #if CALL_CONSOLE_LOGGER
@@ -273,20 +276,17 @@ void etwlogger_log_with_GetLastError(const char* file, const char* func, int lin
     va_list args;
     va_start(args, format);
 
-    SYSTEMTIME t;
-    GetSystemTime(&t);
-
     lastErrorAsString = lastErrorToString(lastError);
     if (lastErrorAsString == NULL)
     {
         char* userMessage = vprintf_alloc(format, args);
         if (userMessage == NULL)
         {
-            perform_EventWriteLogLastError("unable to print user error", file, &t, func, line, "last error was erroneously NULL");
+            perform_EventWriteLogLastError("unable to print user error", file, func, line, "last error was erroneously NULL");
         }
         else
         {
-            perform_EventWriteLogLastError(userMessage, file, &t, func, line, "last error was erroneously NULL");
+            perform_EventWriteLogLastError(userMessage, file, func, line, "last error was erroneously NULL");
             free(userMessage);
         }
     }
@@ -295,11 +295,11 @@ void etwlogger_log_with_GetLastError(const char* file, const char* func, int lin
         char* userMessage = vprintf_alloc(format, args);
         if (userMessage == NULL)
         {
-            perform_EventWriteLogLastError("unable to print user error", file, &t, func, line, lastErrorAsString);
+            perform_EventWriteLogLastError("unable to print user error", file, func, line, lastErrorAsString);
         }
         else
         {
-            perform_EventWriteLogLastError(userMessage, file, &t, func, line, lastErrorAsString);
+            perform_EventWriteLogLastError(userMessage, file, func, line, lastErrorAsString);
             free(userMessage);
         }
         free(lastErrorAsString);
@@ -331,26 +331,22 @@ void etwlogger_log(LOG_CATEGORY log_category, const char* file, const char* func
     {
         case AZ_LOG_ERROR:
         {
-            SYSTEMTIME t;
-            GetSystemTime(&t);
-            perform_EventWriteLogErrorEvent(text_to_log, file, &t, func, line);
+            perform_EventWriteLogErrorEvent(text_to_log, file, func, line);
             break;
         }
         case AZ_LOG_WARNING:
         {
-            SYSTEMTIME t;
-            GetSystemTime(&t);
-            perform_EventWriteLogWarningEvent(text_to_log, file, &t, func, line);
+            perform_EventWriteLogWarningEvent(text_to_log, file, func, line);
             break;
         }
         case AZ_LOG_INFO:
         {
-            perform_EventWriteLogInfoEvent(text_to_log);
+            perform_EventWriteLogInfoEvent(text_to_log, file, func, line);
             break;
         }
         case AZ_LOG_VERBOSE:
         {
-            perform_EventWriteLogVerboseEvent(text_to_log);
+            perform_EventWriteLogVerboseEvent(text_to_log, file, func, line);
             break;
         }
         default:
