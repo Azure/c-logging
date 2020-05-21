@@ -27,6 +27,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #define LOG_CATEGORY_VALUES \
+    AZ_LOG_CRITICAL, \
     AZ_LOG_ERROR, \
     AZ_LOG_WARNING, \
     AZ_LOG_INFO, \
@@ -52,6 +53,7 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
 /*no logging is useful when time and fprintf are mocked*/
 #ifdef NO_LOGGING
 #define LOG(...)
+#define LogCritical(...)
 #define LogError(...)
 #define LogWarning(...)
 #define LogInfo(...)
@@ -128,6 +130,9 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
     }                                                                                                                                                                   \
 }
 
+#define LOG_AZ_LOG_CRITICAL(log_category, log_options, format, ...) \
+    LOG_AZ_LOG_WITH_STACK(log_category, log_options, format, __VA_ARGS__)
+
 #define LOG_AZ_LOG_ERROR(log_category, log_options, format, ...) \
     LOG_AZ_LOG_WITH_STACK(log_category, log_options, format, __VA_ARGS__)
 
@@ -155,6 +160,7 @@ void xlogging_set_log_function_GetLastError(LOGGER_LOG_GETLASTERROR log_function
 LOGGER_LOG_GETLASTERROR xlogging_get_log_function_GetLastError(void);
 #define LogLastError(FORMAT, ...) do{ LOGGER_LOG_GETLASTERROR logger_function = xlogging_get_log_function_GetLastError(); if(logger_function != NULL) logger_function(__FILE__, FUNC_NAME, __LINE__, FORMAT, __VA_ARGS__); }while((void)0,0)
 
+#define LogCritical(FORMAT, ...) do{ LOG(AZ_LOG_CRITICAL, LOG_LINE, FORMAT, __VA_ARGS__); }while((void)0,0)
 #define LogError(FORMAT, ...) do{ LOG(AZ_LOG_ERROR, LOG_LINE, FORMAT, __VA_ARGS__); }while((void)0,0)
 #define LogWarning(FORMAT, ...) do{ LOG(AZ_LOG_WARNING, LOG_LINE, FORMAT, __VA_ARGS__); }while((void)0,0)
 #define LogInfo(FORMAT, ...) do{LOG(AZ_LOG_INFO, LOG_LINE, FORMAT, __VA_ARGS__); }while((void)0,0)
@@ -167,6 +173,7 @@ LOGGER_LOG_GETLASTERROR xlogging_get_log_function_GetLastError(void);
             } while((void)0,0)
 #else // _MSC_VER
 
+#define LogCritical(FORMAT, ...) do{ LOG(AZ_LOG_CRITICAL, LOG_LINE, FORMAT, ##__VA_ARGS__); }while((void)0,0)
 #define LogError(FORMAT, ...) do{ LOG(AZ_LOG_ERROR, LOG_LINE, FORMAT, ##__VA_ARGS__); }while((void)0,0)
 #define LogWarning(FORMAT, ...) do{ LOG(AZ_LOG_WARNING, LOG_LINE, FORMAT, ##__VA_ARGS__); }while((void)0,0)
 #define LogInfo(FORMAT, ...) do{LOG(AZ_LOG_INFO, LOG_LINE, FORMAT, ##__VA_ARGS__); }while((void)0,0)

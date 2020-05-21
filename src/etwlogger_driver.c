@@ -184,6 +184,22 @@ static void lazyRegisterEventProvider(void)
     }
 }
 
+static void perform_EventWriteLogCriticalEvent(const char* content, const char* file, const char* func, int line)
+{
+    TraceLoggingWrite(g_hMyComponentProvider,
+        "LogCritical",
+        TraceLoggingLevel(TRACE_LEVEL_CRITICAL),
+        TraceLoggingString(content, "content"),
+        TraceLoggingString(file, "file"),
+        TraceLoggingString(func, "func"),
+        TraceLoggingInt32(line, "line")
+    );
+
+#if CALL_CONSOLE_LOGGER
+    consolelogger_log(AZ_LOG_CRITICAL, file, func, line, LOG_LINE, "%s", content);
+#endif
+}
+
 static void perform_EventWriteLogErrorEvent(const char* content, const char* file, const char* func, int line)
 {
     TraceLoggingWrite(g_hMyComponentProvider,
@@ -329,6 +345,11 @@ void etwlogger_log(LOG_CATEGORY log_category, const char* file, const char* func
 
     switch (log_category)
     {
+        case AZ_LOG_CRITICAL:
+        {
+            perform_EventWriteLogCriticalEvent(text_to_log, file, func, line);
+            break;
+        }
         case AZ_LOG_ERROR:
         {
             perform_EventWriteLogErrorEvent(text_to_log, file, func, line);

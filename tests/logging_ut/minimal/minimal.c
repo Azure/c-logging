@@ -7,6 +7,8 @@
 
 int main(void)
 {
+    LogCritical("Hello World from LogCritical, here's a value: %d", 4546);
+
     LogError("Hello World from LogError, here's a value: %d", 42);
 
     LogWarning("Hello World from LogWarning, here's a value: %d", 4242);
