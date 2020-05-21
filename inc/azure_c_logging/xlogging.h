@@ -71,10 +71,10 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
 { \
     (void)(0 && printf(format, __VA_ARGS__)); \
     { \
-        LOGGER_LOG l = xlogging_get_log_function(); \
-        if (l != NULL) \
+        LOGGER_LOG logger_function = xlogging_get_log_function(); \
+        if (logger_function != NULL) \
         { \
-            l(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, __VA_ARGS__); \
+            logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, __VA_ARGS__); \
         } \
     } \
 }
@@ -87,13 +87,13 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
 {                                                                                                                                                                       \
     (void)(0 && printf(format, __VA_ARGS__));                                                                                                                           \
     {                                                                                                                                                                   \
-        LOGGER_LOG l = xlogging_get_log_function();                                                                                                                     \
-        if (l != NULL)                                                                                                                                                  \
+        LOGGER_LOG logger_function = xlogging_get_log_function();                                                                                                                     \
+        if (logger_function != NULL)                                                                                                                                                  \
         {                                                                                                                                                               \
             char* stackAsString = getStackAsString();                                                                                                                   \
             if (stackAsString == NULL)                                                                                                                                  \
             {                                                                                                                                                           \
-                l(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, __VA_ARGS__);                                                                       \
+                logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, __VA_ARGS__);                                                                       \
             }                                                                                                                                                           \
             else                                                                                                                                                        \
             {                                                                                                                                                           \
@@ -101,13 +101,13 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
                 char* formatWithStack = (char*)logging_malloc(formatSize + sizeof("STACK_PRINT_FORMAT"));                                                               \
                 if (formatWithStack == NULL)                                                                                                                            \
                 {                                                                                                                                                       \
-                    l(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, __VA_ARGS__);                                                                   \
+                    logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, __VA_ARGS__);                                                                   \
                 }                                                                                                                                                       \
                 else                                                                                                                                                    \
                 {                                                                                                                                                       \
                     (void)memcpy(formatWithStack, format, formatSize);                                                                                                  \
                     (void)memcpy(formatWithStack + formatSize, STACK_PRINT_FORMAT, sizeof(STACK_PRINT_FORMAT));                                                         \
-                    l(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, formatWithStack, __VA_ARGS__, stackAsString);                                           \
+                    logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, formatWithStack, __VA_ARGS__, stackAsString);                                           \
                     logging_free(formatWithStack);                                                                                                                      \
                 }                                                                                                                                                       \
                 logging_free(stackAsString);                                                                                                                            \
@@ -120,10 +120,10 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
 {                                                                                                                                                                       \
     (void)(0 && printf(format, __VA_ARGS__));                                                                                                                           \
     {                                                                                                                                                                   \
-        LOGGER_LOG l = xlogging_get_log_function();                                                                                                                     \
-        if (l != NULL)                                                                                                                                                  \
+        LOGGER_LOG logger_function = xlogging_get_log_function();                                                                                                                     \
+        if (logger_function != NULL)                                                                                                                                                  \
         {                                                                                                                                                               \
-            l(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, __VA_ARGS__);                                                                           \
+            logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, __VA_ARGS__);                                                                           \
         }                                                                                                                                                               \
     }                                                                                                                                                                   \
 }
@@ -142,7 +142,7 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
 
 #endif /*LOGERROR_CAPTURES_STACK_TRACES */
 #else /* _MSC_VER */
-#define LOG(log_category, log_options, format, ...) { (void)(0 && printf(format, ##__VA_ARGS__)); { LOGGER_LOG l = xlogging_get_log_function(); if (l != NULL) l(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, ##__VA_ARGS__); } }
+#define LOG(log_category, log_options, format, ...) { (void)(0 && printf(format, ##__VA_ARGS__)); { LOGGER_LOG logger_function = xlogging_get_log_function(); if (logger_function != NULL) logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, ##__VA_ARGS__); } }
 #endif /* _MSC_VER */
 
 #ifdef WIN32
@@ -153,7 +153,7 @@ void xlogging_LogErrorWinHTTPWithGetLastErrorAsStringFormatter(int errorMessageI
 
 void xlogging_set_log_function_GetLastError(LOGGER_LOG_GETLASTERROR log_function);
 LOGGER_LOG_GETLASTERROR xlogging_get_log_function_GetLastError(void);
-#define LogLastError(FORMAT, ...) do{ LOGGER_LOG_GETLASTERROR l = xlogging_get_log_function_GetLastError(); if(l!=NULL) l(__FILE__, FUNC_NAME, __LINE__, FORMAT, __VA_ARGS__); }while((void)0,0)
+#define LogLastError(FORMAT, ...) do{ LOGGER_LOG_GETLASTERROR logger_function = xlogging_get_log_function_GetLastError(); if(logger_function != NULL) logger_function(__FILE__, FUNC_NAME, __LINE__, FORMAT, __VA_ARGS__); }while((void)0,0)
 
 #define LogError(FORMAT, ...) do{ LOG(AZ_LOG_ERROR, LOG_LINE, FORMAT, __VA_ARGS__); }while((void)0,0)
 #define LogWarning(FORMAT, ...) do{ LOG(AZ_LOG_WARNING, LOG_LINE, FORMAT, __VA_ARGS__); }while((void)0,0)
