@@ -107,7 +107,6 @@ set(azure_c_logging_c_files
     ${LOGGING_C_FILE}
     ${XLOGGING_C_FILE}
     ${LOGGING_STACKTRACE_C_FILE}
-    ./src/dummy.c
     )
 
 set(azure_c_logging_h_files

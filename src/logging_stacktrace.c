@@ -15,19 +15,9 @@
 
 #define TRACE_MAX_STACK_FRAMES  1024
 #define TRACE_MAX_SYMBOL_SIZE   1024
-#define TRACE_MAX_STACK_AS_STRING_SIZE 10*1024
 #define TRACE_MAX_STACK_LINE_AS_STRING_SIZE 1024
 
 static volatile LONG doSymInit = 0; /*0 = not initialized, 1 = initializing, 2= initialized*/
-
-void* logging_malloc(size_t size)
-{
-    return malloc(size);
-}
-void logging_free(void* ptr)
-{
-    free(ptr);
-}
 
 typedef union SYMBOL_INFO_EXTENDED_TAG
 {
@@ -48,6 +38,10 @@ static size_t memcat(char* destination, size_t destinationSize, const char* sour
 static const char SymFromAddrFailed[] = "SymFromAddr failed\n";
 static const char snprintfFailed[] = "snprintf failed\n";
 
+/*returned by getStackAsString, used with __declspec(thread). Whenever Microsoft C compiler will have support for C11 (and _Thread_local) replace __decspec(thread) with _Thread_local*/
+__declspec(thread) static char getStackAsString_result[TRACE_MAX_STACK_AS_STRING_SIZE];
+__declspec(thread) char formatWithStack[FORMAT_WITH_STACK_SIZE];
+
 char* getStackAsString(void)
 {
     /*lazily call once SymInitialize*/
@@ -61,94 +55,88 @@ char* getStackAsString(void)
         }
     }
 
-    char* result = malloc(TRACE_MAX_STACK_AS_STRING_SIZE);
-    if (result == NULL)
+    char* result = getStackAsString_result;
+    
+    char* destination = result;
+    size_t destinationSize = TRACE_MAX_STACK_AS_STRING_SIZE -1 ; /*-1 to save the last character for '\0'*/
+    size_t copied;
+
+    void* stack[TRACE_MAX_STACK_FRAMES];
+
+    /*all following function calls are protected by the same SRW*/
+    AcquireSRWLockExclusive(&lockOverSymCalls);
+
+    uint16_t numberOfFrames = CaptureStackBackTrace(1, TRACE_MAX_STACK_FRAMES, stack, NULL);
+    HANDLE process = GetCurrentProcess();
+
+    SYMBOL_INFO_EXTENDED symbolExtended;
+    SYMBOL_INFO* symbol = &symbolExtended.symbol;
+
+    symbol->MaxNameLen = TRACE_MAX_SYMBOL_SIZE;
+    symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+
+    for (uint16_t j = 0; j < numberOfFrames; j++)
     {
-        /*return as is!*/
-    }
-    else
-    {
-        char* destination = result;
-        size_t destinationSize = TRACE_MAX_STACK_AS_STRING_SIZE -1 ; /*-1 to save the last character for '\0'*/
-        size_t copied;
+        DWORD64 address = (DWORD64)(stack[j]);
+        DWORD displacement = 0;
 
-        void* stack[TRACE_MAX_STACK_FRAMES];
-
-        /*all following function calls are protected by the same SRW*/
-        AcquireSRWLockExclusive(&lockOverSymCalls);
-
-        uint16_t numberOfFrames = CaptureStackBackTrace(1, TRACE_MAX_STACK_FRAMES, stack, NULL);
-        HANDLE process = GetCurrentProcess();
-
-        SYMBOL_INFO_EXTENDED symbolExtended;
-        SYMBOL_INFO* symbol = &symbolExtended.symbol;
-
-       
-        symbol->MaxNameLen = TRACE_MAX_SYMBOL_SIZE;
-        symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-
-        for (uint16_t j = 0; j < numberOfFrames; j++)
+        if (!SymFromAddr(process, address, NULL, symbol))
         {
-            DWORD64 address = (DWORD64)(stack[j]);
-            DWORD displacement = 0;
+            copied = memcat(destination, destinationSize, SymFromAddrFailed, sizeof(SymFromAddrFailed)-1);
+            destination += copied;
+            destinationSize -= copied;
+        }
+        else
+        {
+            IMAGEHLP_LINE64 line;
+            line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
 
-            if (!SymFromAddr(process, address, NULL, symbol))
+            char resultLine[TRACE_MAX_STACK_LINE_AS_STRING_SIZE];
+
+            if (SymGetLineFromAddr64(process, address, &displacement, &line))
             {
-                copied = memcat(destination, destinationSize, SymFromAddrFailed, sizeof(SymFromAddrFailed)-1);
-                destination += copied;
-                destinationSize -= copied;
-            }
-            else
-            {
-                IMAGEHLP_LINE64 line;
-                line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
-
-                char resultLine[TRACE_MAX_STACK_LINE_AS_STRING_SIZE];
-
-                if (SymGetLineFromAddr64(process, address, &displacement, &line))
+                int snprintfResult = snprintf(resultLine, sizeof(resultLine), "!%s %s:%" PRIu32 "%s", symbol->Name, line.FileName, line.LineNumber, (j<numberOfFrames-1)?"\n":"");
+                if (!(
+                    (snprintfResult >= 0) && /*the returned value is nonnegative [...]*/
+                    (snprintfResult < sizeof(resultLine)) /*[...] and less than n.*/
+                    ))
                 {
-                    int snprintfResult = snprintf(resultLine, sizeof(resultLine), "!%s %s:%" PRIu32 "%s", symbol->Name, line.FileName, line.LineNumber, (j<numberOfFrames-1)?"\n":"");
-                    if (!(
-                        (snprintfResult >= 0) && /*the returned value is nonnegative [...]*/
-                        (snprintfResult < sizeof(resultLine)) /*[...] and less than n.*/
-                        ))
-                    {
-                        copied = memcat(destination, destinationSize, snprintfFailed, sizeof(snprintfFailed) - 1);
-                        destination += copied;
-                        destinationSize -= copied;
-                    }
-                    else
-                    {
-                        copied = memcat(destination, destinationSize, resultLine, snprintfResult);
-                        destination += copied;
-                        destinationSize -= copied;
-                    }
+                    copied = memcat(destination, destinationSize, snprintfFailed, sizeof(snprintfFailed) - 1);
+                    destination += copied;
+                    destinationSize -= copied;
                 }
                 else
                 {
-                    int snprintfResult = snprintf(resultLine, sizeof(resultLine), "!%s Address 0x%" PRIX64 "%s", symbol->Name, line.Address, (j < numberOfFrames - 1) ? "\n" : "");
-                    if (!(
-                        (snprintfResult >= 0) && /*the returned value is nonnegative [...]*/
-                        (snprintfResult < sizeof(resultLine)) /*[...] and less than n.*/
-                        ))
-                    {
-                        copied = memcat(destination, destinationSize, snprintfFailed, sizeof(snprintfFailed) - 1);
-                        destination += copied;
-                        destinationSize -= copied;
-                    }
-                    else
-                    {
-                        copied = memcat(destination, destinationSize, resultLine, snprintfResult);
-                        destination += copied;
-                        destinationSize -= copied;
-                    }
+                    copied = memcat(destination, destinationSize, resultLine, snprintfResult);
+                    destination += copied;
+                    destinationSize -= copied;
+                }
+            }
+            else
+            {
+                int snprintfResult = snprintf(resultLine, sizeof(resultLine), "!%s Address 0x%" PRIX64 "%s", symbol->Name, line.Address, (j < numberOfFrames - 1) ? "\n" : "");
+                if (!(
+                    (snprintfResult >= 0) && /*the returned value is nonnegative [...]*/
+                    (snprintfResult < sizeof(resultLine)) /*[...] and less than n.*/
+                    ))
+                {
+                    copied = memcat(destination, destinationSize, snprintfFailed, sizeof(snprintfFailed) - 1);
+                    destination += copied;
+                    destinationSize -= copied;
+                }
+                else
+                {
+                    copied = memcat(destination, destinationSize, resultLine, snprintfResult);
+                    destination += copied;
+                    destinationSize -= copied;
                 }
             }
         }
-        destination[0] = '\0';
-
-        ReleaseSRWLockExclusive(&lockOverSymCalls);
-
     }
+    destination[0] = '\0';
+
+    ReleaseSRWLockExclusive(&lockOverSymCalls);
+
+    
     return result;
 }

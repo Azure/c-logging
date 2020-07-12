@@ -16,6 +16,8 @@
 #include "azure_c_logging/logging_stacktrace.h"
 #endif
 
+#define LOG_SIZE_REGULAR 4096 /*in bytes - a message is not expected to exceed this size in bytes, if it does, only LOG_SIZE_REGULAR characters are retained*/
+
 #ifdef __cplusplus
 #include <cstdio>
 #else
@@ -44,10 +46,8 @@ MU_DEFINE_ENUM(LOG_CATEGORY, LOG_CATEGORY_VALUES)
 typedef void(*LOGGER_LOG)(LOG_CATEGORY log_category, const char* file, const char* func, int line, unsigned int options, const char* format, ...);
 typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int line, const char* format, ...);
 
-#define TEMP_BUFFER_SIZE 1024
 #define MESSAGE_BUFFER_SIZE 260
 
-#define LOG_NONE 0x00
 #define LOG_LINE 0x01
 
 /*no logging is useful when time and fprintf are mocked*/
@@ -85,40 +85,30 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
 
 #define LOG(log_category, log_options, format, ...) MU_C2(LOG_,log_category)(log_category, log_options, format, __VA_ARGS__)
 
-#define LOG_AZ_LOG_WITH_STACK(log_category, log_options, format, ...)                                                                                                        \
+#define LOG_AZ_LOG_WITH_STACK(log_category, log_options, format, ...)                                                                                                   \
 {                                                                                                                                                                       \
     (void)(0 && printf(format, __VA_ARGS__));                                                                                                                           \
     {                                                                                                                                                                   \
-        LOGGER_LOG logger_function = xlogging_get_log_function();                                                                                                                     \
-        if (logger_function != NULL)                                                                                                                                                  \
+        LOGGER_LOG logger_function = xlogging_get_log_function();                                                                                                       \
+        if (logger_function != NULL)                                                                                                                                    \
         {                                                                                                                                                               \
             char* stackAsString = getStackAsString();                                                                                                                   \
-            if (stackAsString == NULL)                                                                                                                                  \
+            size_t formatSize = strlen(format);                                                                                                                         \
+            if(formatSize+sizeof(STACK_PRINT_FORMAT)+1>sizeof(formatWithStack))                                                                                         \
             {                                                                                                                                                           \
-                logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, __VA_ARGS__);                                                                       \
+                logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, __VA_ARGS__);                                                         \
             }                                                                                                                                                           \
             else                                                                                                                                                        \
             {                                                                                                                                                           \
-                size_t formatSize = strlen(format);                                                                                                                     \
-                char* formatWithStack = (char*)logging_malloc(formatSize + sizeof("STACK_PRINT_FORMAT"));                                                               \
-                if (formatWithStack == NULL)                                                                                                                            \
-                {                                                                                                                                                       \
-                    logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, __VA_ARGS__);                                                                   \
-                }                                                                                                                                                       \
-                else                                                                                                                                                    \
-                {                                                                                                                                                       \
-                    (void)memcpy(formatWithStack, format, formatSize);                                                                                                  \
-                    (void)memcpy(formatWithStack + formatSize, STACK_PRINT_FORMAT, sizeof(STACK_PRINT_FORMAT));                                                         \
-                    logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, formatWithStack, __VA_ARGS__, stackAsString);                                           \
-                    logging_free(formatWithStack);                                                                                                                      \
-                }                                                                                                                                                       \
-                logging_free(stackAsString);                                                                                                                            \
+                (void)memcpy(formatWithStack, format, formatSize);                                                                                                      \
+                (void)memcpy(formatWithStack + formatSize, STACK_PRINT_FORMAT, sizeof(STACK_PRINT_FORMAT));                                                             \
+                logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, formatWithStack, __VA_ARGS__, stackAsString);                                 \
             }                                                                                                                                                           \
         }                                                                                                                                                               \
     }                                                                                                                                                                   \
 }
 
-#define LOG_AZ_LOG_WITHOUT_STACK(log_category, log_options, format, ...)                                                                                                         \
+#define LOG_AZ_LOG_WITHOUT_STACK(log_category, log_options, format, ...)                                                                                                \
 {                                                                                                                                                                       \
     (void)(0 && printf(format, __VA_ARGS__));                                                                                                                           \
     {                                                                                                                                                                   \

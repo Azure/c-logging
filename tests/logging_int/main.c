@@ -7,7 +7,7 @@
 int main(void)
 {
 
-    char really_big_string[4096]; /*4096 (the size of this array) needs top be bigger than LOG_SIZE_REGULAR from etwlogger_driver.c*/
+    char really_big_string[4096]; /*4096 (the size of this array) needs to be bigger than LOG_SIZE_REGULAR from etwlogger_driver.c*/
     (void)memset(really_big_string, '3', sizeof(really_big_string));
     really_big_string[4095] = '\0';
 
