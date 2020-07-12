@@ -6,10 +6,9 @@
 /*not much in the way of testing, but "should not crash" */
 int main(void)
 {
-
-    char really_big_string[4096]; /*4096 (the size of this array) needs to be bigger than LOG_SIZE_REGULAR from etwlogger_driver.c*/
+    char really_big_string[LOG_SIZE_REGULAR/2]; /*if the size of this array is greater than LOG_SIZE_REGULAR than it will not get printed as all memory is statically allocated and cannot grow*/
     (void)memset(really_big_string, '3', sizeof(really_big_string));
-    really_big_string[4095] = '\0';
+    really_big_string[sizeof(really_big_string)-1] = '\0';
 
     /*LogInfo*/
     LogInfo("LogInfo: hello world!");
