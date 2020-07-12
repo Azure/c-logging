@@ -4,16 +4,17 @@
 #ifndef LOGGING_STACKTRACE_H
 #define LOGGING_STACKTRACE_H
 
-#define TRACE_MAX_STACK_AS_STRING_SIZE 10*1024
-#define FORMAT_WITH_STACK_SIZE 1024
+#ifdef __cplusplus
+#include <cstddef>
+#else
+#include <stddef.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern __declspec(thread) char formatWithStack[FORMAT_WITH_STACK_SIZE];
-
-char* getStackAsString(void);
+void getStackAsString(char* destination, size_t size);
 
 #ifdef __cplusplus
 }

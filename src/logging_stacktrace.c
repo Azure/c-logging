@@ -38,11 +38,8 @@ static size_t memcat(char* destination, size_t destinationSize, const char* sour
 static const char SymFromAddrFailed[] = "SymFromAddr failed\n";
 static const char snprintfFailed[] = "snprintf failed\n";
 
-/*returned by getStackAsString, used with __declspec(thread). Whenever Microsoft C compiler will have support for C11 (and _Thread_local) replace __decspec(thread) with _Thread_local*/
-__declspec(thread) static char getStackAsString_result[TRACE_MAX_STACK_AS_STRING_SIZE];
-__declspec(thread) char formatWithStack[FORMAT_WITH_STACK_SIZE];
-
-char* getStackAsString(void)
+/*tries to get as much as possible from the stack filling destination*/
+void getStackAsString(char* destination, size_t size)
 {
     /*lazily call once SymInitialize*/
     LONG state;
@@ -55,10 +52,7 @@ char* getStackAsString(void)
         }
     }
 
-    char* result = getStackAsString_result;
-    
-    char* destination = result;
-    size_t destinationSize = TRACE_MAX_STACK_AS_STRING_SIZE -1 ; /*-1 to save the last character for '\0'*/
+    size_t destinationSize = size;
     size_t copied;
 
     void* stack[TRACE_MAX_STACK_FRAMES];
@@ -136,7 +130,4 @@ char* getStackAsString(void)
     destination[0] = '\0';
 
     ReleaseSRWLockExclusive(&lockOverSymCalls);
-
-    
-    return result;
 }
