@@ -45,7 +45,7 @@ void consolelogger_log_with_GetLastError(const char* file, const char* func, int
         }
         else
         {
-            if (snprintf_result >= sizeof(message) - size)
+            if (snprintf_result >= (int)sizeof(message) - size)
             {
                 (void)puts("not enough caracters in message to hold the system message");
             }
@@ -64,7 +64,7 @@ void consolelogger_log_with_GetLastError(const char* file, const char* func, int
         }
         else
         {
-            if (snprintf_result >= sizeof(message) - size)
+            if (snprintf_result >= (int)sizeof(message) - size)
             {
                 (void)puts("not enough characters in message to hold the user message");
             }
@@ -85,7 +85,7 @@ void consolelogger_log_with_GetLastError(const char* file, const char* func, int
         }
         else
         {
-            if (snprintf_result >= sizeof(message) - size)
+            if (snprintf_result >= (int)sizeof(message) - size)
             {
                 (void)puts("not enough characters in message to hold  GetLastError's value");
             }
