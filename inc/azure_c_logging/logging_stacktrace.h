@@ -14,9 +14,7 @@
 extern "C" {
 #endif
 
-char* getStackAsString(void); 
-void* logging_malloc(size_t size); /*same as malloc from stdlib, always.*/
-void logging_free(void* ptr); /*same as free from stdlib, always.*/
+void getStackAsString(char* destination, size_t size);
 
 #ifdef __cplusplus
 }

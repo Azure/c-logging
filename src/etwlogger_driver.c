@@ -3,6 +3,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <inttypes.h>
 
@@ -17,139 +18,6 @@
 #include "evntrace.h"
 #endif
 
-/*a define to a size that is not expected to be exceeded by most messages*/
-#define LOG_SIZE_REGULAR 2048 /*in bytes*/
-
-/*returns a string as if printed by vprintf*/
-static char* vprintf_alloc(const char* format, va_list va)
-{
-    char* result;
-    
-    /*allocate first, ask questions about the right size after*/
-    result = (char*)malloc(LOG_SIZE_REGULAR);
-    if (result == NULL)
-    {
-        /*return as is*/
-    }
-    else
-    {
-        int vsnprintf_result = vsnprintf(result, LOG_SIZE_REGULAR, format, va);
-        if (vsnprintf_result < 0) /*C11 chapter 7.21.6.12: The vsnprintf function returns [...] a negative value if an encoding error occurred.*/
-        {
-            (void)printf("a negative value has been returned from vsnprintf, this means an encoding error occurred.");
-        }
-        else
-        {
-            if (vsnprintf_result < LOG_SIZE_REGULAR) /*C11: the null-terminated output has been completely written if and only if the returned value is nonnegative and less than n*/
-            {
-                /*return as is, we good*/
-                goto allOk;
-            }
-            else
-            {
-                /*here we go again*/
-                char* temp = realloc(result, vsnprintf_result + 1);
-                if (temp == NULL)
-                {
-                    (void)printf("failed to realloc(result=%p, vsnprintf_result=%d + 1)", result, vsnprintf_result);
-                }
-                else
-                {
-                    result = temp;
-                    int vsnprintf_result_2 = vsnprintf(result, (size_t)vsnprintf_result + 1, format, va);
-                    if ((vsnprintf_result_2 < 0) || (vsnprintf_result_2 != vsnprintf_result))
-                    {
-                        (void)printf("an unexpected return vsnprintf_result_2=%d = vsnprintf(result=%p, vsnprintf_result=%d + 1, format, va)",
-                            vsnprintf_result_2, result, vsnprintf_result);
-                    }
-                    else
-                    {
-                        goto allOk;
-                    }
-                }
-            }
-        }
-        free(result);
-        result = NULL;
-allOk:;
-    }
-    
-    return result;
-}
-
-/*returns a string as if printed by printf*/
-static char* printf_alloc(const char* format, ...)
-{
-    char* result;
-    va_list va;
-    va_start(va, format);
-    result = vprintf_alloc(format, va);
-    va_end(va);
-    return result;
-}
-
-/*returns NULL if it fails*/
-static char* lastErrorToString(DWORD lastError)
-{
-    char* result;
-    if (lastError == 0)
-    {
-        result = printf_alloc(""); /*no error should appear*/
-        if (result == NULL)
-        {
-            (void)printf("failure in printf_alloc\r\n");
-        }
-        else
-        {
-            /*return as is*/
-        }
-    }
-    else
-    {
-        char temp[MESSAGE_BUFFER_SIZE];
-        if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, lastError, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), temp, MESSAGE_BUFFER_SIZE, NULL) == 0)
-        {
-            result = printf_alloc("GetLastError()=0X%x", lastError);
-            if (result == NULL)
-            {
-                (void)printf("failure in printf_alloc\r\n");
-                /*return as is*/
-            }
-            else
-            {
-                /*return as is*/
-            }
-        }
-        else
-        {
-            /*eliminate the \r or \n from the string*/
-            /*one replace of each is enough*/
-            char* whereAreThey;
-            if ((whereAreThey = strchr(temp, '\r')) != NULL)
-            {
-                *whereAreThey = '\0';
-            }
-            if ((whereAreThey = strchr(temp, '\n')) != NULL)
-            {
-                *whereAreThey = '\0';
-            }
-
-            result = printf_alloc("GetLastError()==0X%x (%s)", lastError, temp);
-
-            if (result == NULL)
-            {
-                (void)printf("failure in printf_alloc\r\n");
-                /*return as is*/
-            }
-            else
-            {
-                /*return as is*/
-            }
-        }
-    }
-    return result;
-}
-
 #ifdef USE_TRACELOGGING
 
 TRACELOGGING_DEFINE_PROVIDER(
@@ -158,29 +26,29 @@ TRACELOGGING_DEFINE_PROVIDER(
     (0xDAD29F36, 0x0A48, 0x4DEF, 0x9D, 0x50, 0x8E, 0xF9, 0x03, 0x6B, 0x92, 0xB4));
 /*DAD29F36-0A48-4DEF-9D50-8EF9036B92B4*/
 
-    
-static volatile LONG isETWLoggerInit = 0;
+static volatile LONG isETWLoggerRegistered = 0;
 
 static void lazyRegisterEventProvider(void)
 {
     /*lazily init the logger*/
-    if (InterlockedCompareExchange(&isETWLoggerInit, 1, 0) == 0)
+    LONG state;
+    while ((state=InterlockedCompareExchange(&isETWLoggerRegistered, 1, 0)) != 2) /*0 - not init, 1 - initializing, 2 - initialized*/
     {
-        // Register the provider
-        TLG_STATUS t = TraceLoggingRegister(g_hMyComponentProvider);
-        if (SUCCEEDED(t))
+        if (state == 0)
         {
-            LogInfo("block_storage_2 ETW provider was registered succesfully (self test). Executable file full path name = %s", _pgmptr); /*_pgmptr comes from https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getmodulefilenamea */
+            /* register the provider*/
+            TLG_STATUS t = TraceLoggingRegister(g_hMyComponentProvider);
+            if (SUCCEEDED(t))
+            {
+                (void)InterlockedExchange(&isETWLoggerRegistered, 2);
+                LogInfo("block_storage_2 ETW provider was registered succesfully (self test). Executable file full path name = %s", _pgmptr); /*_pgmptr comes from https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getmodulefilenamea */
+            }
+            else
+            {
+                (void)printf("block_storage_2 ETW provider was NOT registered.");
+                (void)InterlockedExchange(&isETWLoggerRegistered, 0);
+            }
         }
-        else
-        {
-            (void)printf("block_storage_2 ETW provider was NOT registered.");
-            (void)InterlockedExchange(&isETWLoggerInit, 0);
-        }
-    }
-    else
-    {
-        /*do nothing, already registered/attempted*/
     }
 }
 
@@ -219,7 +87,7 @@ static void perform_EventWriteLogErrorEvent(const char* content, const char* fil
 static void perform_EventWriteLogWarningEvent(const char* content, const char* file, const char* func, int line)
 {
     TraceLoggingWrite(g_hMyComponentProvider,
-        "LogError",
+        "LogWarning",
         TraceLoggingLevel(TRACE_LEVEL_WARNING),
         TraceLoggingString(content, "content"),
         TraceLoggingString(file, "file"),
@@ -261,7 +129,7 @@ static void perform_EventWriteLogInfoEvent(const char* message, const char* file
     );
 
 #if CALL_CONSOLE_LOGGER
-    consolelogger_log(AZ_LOG_INFO, NULL, NULL, 0, LOG_LINE, "%s", message);
+    consolelogger_log(AZ_LOG_INFO, file, func, line, LOG_LINE, "%s", message);
 #endif
 }
 
@@ -277,14 +145,16 @@ static void perform_EventWriteLogVerboseEvent(const char* message, const char* f
     );
 
 #if CALL_CONSOLE_LOGGER
-    consolelogger_log(AZ_LOG_VERBOSE, NULL, NULL, 0, LOG_LINE, "%s", message);
+    consolelogger_log(AZ_LOG_VERBOSE, file, func, line, LOG_LINE, "%s", message);
 #endif
 }
 
+
+static const char vsnprintf_failure_message[] = "failure in vsnprintf";
+static const char FormatMessageA_failure_message[] = "failure in FormatMessageA";
 void etwlogger_log_with_GetLastError(const char* file, const char* func, int line, const char* format, ...)
 {
     DWORD lastError;
-    char* lastErrorAsString;
 
     lastError = GetLastError();
     lazyRegisterEventProvider();
@@ -292,34 +162,43 @@ void etwlogger_log_with_GetLastError(const char* file, const char* func, int lin
     va_list args;
     va_start(args, format);
 
-    lastErrorAsString = lastErrorToString(lastError);
-    if (lastErrorAsString == NULL)
-    {
-        char* userMessage = vprintf_alloc(format, args);
-        if (userMessage == NULL)
+    char message[LOG_SIZE_REGULAR * (LOG_SIZE_REGULAR>=sizeof(vsnprintf_failure_message))]; /*this construct will generate a compile time error (array of size 0) when LOG_SIZE_REGULAR is not enough to hold even the failure message*/
+    {/*scope for constructing the user (format,...)*/
+        int vsnprintf_result;
+        vsnprintf_result = vsnprintf(message, sizeof(message), format, args);
+        if (
+            (vsnprintf_result < 0)||
+            (vsnprintf_result >= sizeof(message))
+            )
         {
-            perform_EventWriteLogLastError("unable to print user error", file, func, line, "last error was erroneously NULL");
+            (void)memcpy(message, vsnprintf_failure_message, sizeof(vsnprintf_failure_message));
         }
         else
         {
-            perform_EventWriteLogLastError(userMessage, file, func, line, "last error was erroneously NULL");
-            free(userMessage);
+            /*all fine, message now contains user message*/
         }
+    }
+
+    char lastErrorAsString[MESSAGE_BUFFER_SIZE *(MESSAGE_BUFFER_SIZE>sizeof(FormatMessageA_failure_message))];
+    if (FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, lastError, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), lastErrorAsString, sizeof(lastErrorAsString), NULL) == 0)
+    {
+        (void)memcpy(lastErrorAsString, FormatMessageA_failure_message, sizeof(FormatMessageA_failure_message));
     }
     else
     {
-        char* userMessage = vprintf_alloc(format, args);
-        if (userMessage == NULL)
+        /*remove extraneous newlines from FormatMessageA's output*/
+        char* whereAreThey;
+        if ((whereAreThey = strchr(lastErrorAsString, '\r')) != NULL)
         {
-            perform_EventWriteLogLastError("unable to print user error", file, func, line, lastErrorAsString);
+            *whereAreThey = '\0';
         }
-        else
+        if ((whereAreThey = strchr(lastErrorAsString, '\n')) != NULL)
         {
-            perform_EventWriteLogLastError(userMessage, file, func, line, lastErrorAsString);
-            free(userMessage);
+            *whereAreThey = '\0';
         }
-        free(lastErrorAsString);
     }
+
+    perform_EventWriteLogLastError(message, file, func, line, lastErrorAsString);
 
     va_end(args);
 }
@@ -332,51 +211,53 @@ void etwlogger_log(LOG_CATEGORY log_category, const char* file, const char* func
 
     va_list args;
     va_start(args, format);
-    char* text = vprintf_alloc(format, args);
-    const char* text_to_log;
-    if (text == NULL)
-    {
-        text_to_log = "INTERNAL LOGGING ERROR: failed in vprintf_alloc";
-    }
-    else
-    {
-        text_to_log = text;
+
+    char message[LOG_SIZE_REGULAR * (LOG_SIZE_REGULAR >= sizeof(vsnprintf_failure_message))]; /*this construct will generate a compile time error (array of size 0) when LOG_SIZE_REGULAR is not enough to hold even the failure message*/
+    {/*scope for constructing the user (format,...)*/
+        int vsnprintf_result;
+        vsnprintf_result = vsnprintf(message, sizeof(message), format, args);
+        if (
+            (vsnprintf_result < 0) ||
+            (vsnprintf_result >= sizeof(message))
+            )
+        {
+            (void)memcpy(message, vsnprintf_failure_message, sizeof(vsnprintf_failure_message));
+        }
+        else
+        {
+            /*all fine, message now contains user message*/
+        }
     }
 
     switch (log_category)
     {
         case AZ_LOG_CRITICAL:
         {
-            perform_EventWriteLogCriticalEvent(text_to_log, file, func, line);
+            perform_EventWriteLogCriticalEvent(message, file, func, line);
             break;
         }
         case AZ_LOG_ERROR:
         {
-            perform_EventWriteLogErrorEvent(text_to_log, file, func, line);
+            perform_EventWriteLogErrorEvent(message, file, func, line);
             break;
         }
         case AZ_LOG_WARNING:
         {
-            perform_EventWriteLogWarningEvent(text_to_log, file, func, line);
+            perform_EventWriteLogWarningEvent(message, file, func, line);
             break;
         }
         case AZ_LOG_INFO:
         {
-            perform_EventWriteLogInfoEvent(text_to_log, file, func, line);
+            perform_EventWriteLogInfoEvent(message, file, func, line);
             break;
         }
         case AZ_LOG_VERBOSE:
         {
-            perform_EventWriteLogVerboseEvent(text_to_log, file, func, line);
+            perform_EventWriteLogVerboseEvent(message, file, func, line);
             break;
         }
         default:
             break;
-    }
-
-    if (text != NULL)
-    {
-        free(text);
     }
     va_end(args);
 }

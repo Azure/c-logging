@@ -10,219 +10,115 @@
 #if (defined(_MSC_VER))
 #include "windows.h"
 
-/*a define to a size that is not expected to be exceeded by most messages*/
-#define LOG_SIZE_REGULAR 2048 /*in bytes*/
-
-/*returns a string as if printed by vprintf*/
-static char* vprintf_alloc(const char* format, va_list va)
-{
-    char* result;
-
-    /*allocate first, ask questions about the right size after*/
-    result = (char*)malloc(LOG_SIZE_REGULAR);
-    if (result == NULL)
-    {
-        /*return as is*/
-    }
-    else
-    {
-        int vsnprintf_result = vsnprintf(result, LOG_SIZE_REGULAR, format, va);
-        if (vsnprintf_result < 0) /*C11 chapter 7.21.6.12: The vsnprintf function returns [...] a negative value if an encoding error occurred.*/
-        {
-            (void)printf("a negative value has been returned from vsnprintf, this means an encoding error occurred.");
-        }
-        else
-        {
-            if (vsnprintf_result < LOG_SIZE_REGULAR) /*C11: the null-terminated output has been completely written if and only if the returned value is nonnegative and less than n*/
-            {
-                /*return as is, we good*/
-                goto allOk;
-            }
-            else
-            {
-                /*here we go again*/
-                char* temp = realloc(result, vsnprintf_result + 1);
-                if (temp == NULL)
-                {
-                    (void)printf("failed to realloc(result=%p, vsnprintf_result=%d + 1)", result, vsnprintf_result);
-                }
-                else
-                {
-                    result = temp;
-                    int vsnprintf_result_2 = vsnprintf(result, (size_t)vsnprintf_result + 1, format, va);
-                    if ((vsnprintf_result_2 < 0) || (vsnprintf_result_2 != vsnprintf_result))
-                    {
-                        (void)printf("an unexpected return vsnprintf_result_2=%d = vsnprintf(result=%p, vsnprintf_result=%d + 1, format, va)",
-                            vsnprintf_result_2, result, vsnprintf_result);
-                    }
-                    else
-                    {
-                        goto allOk;
-                    }
-                }
-            }
-        }
-        free(result);
-        result = NULL;
-    allOk:;
-    }
-
-    return result;
-}
-
-/*returns a string as if printed by printf*/
-static char* printf_alloc(const char* format, ...)
-{
-    char* result;
-    va_list va;
-    va_start(va, format);
-    result = vprintf_alloc(format, va);
-    va_end(va);
-    return result;
-}
-
-/*returns NULL if it fails*/
-static char* lastErrorToString(DWORD lastError)
-{
-    char* result;
-    if (lastError == 0)
-    {
-        result = printf_alloc(""); /*no error should appear*/
-        if (result == NULL)
-        {
-            (void)printf("failure in printf_alloc");
-        }
-        else
-        {
-            /*return as is*/
-        }
-    }
-    else
-    {
-        char temp[MESSAGE_BUFFER_SIZE];
-        if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, lastError, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), temp, MESSAGE_BUFFER_SIZE, NULL) == 0)
-        {
-            result = printf_alloc("GetLastError()=0X%x", lastError);
-            if (result == NULL)
-            {
-                (void)printf("failure in printf_alloc\n");
-                /*return as is*/
-            }
-            else
-            {
-                /*return as is*/
-            }
-        }
-        else
-        {
-            /*eliminate the \r or \n from the string*/
-            /*one replace of each is enough*/
-            char* whereAreThey;
-            if ((whereAreThey = strchr(temp, '\r')) != NULL)
-            {
-                *whereAreThey = '\0';
-            }
-            if ((whereAreThey = strchr(temp, '\n')) != NULL)
-            {
-                *whereAreThey = '\0';
-            }
-
-            result = printf_alloc("GetLastError()==0X%x (%s)", lastError, temp);
-
-            if (result == NULL)
-            {
-                (void)printf("failure in printf_alloc\n");
-                /*return as is*/
-            }
-            else
-            {
-                /*return as is*/
-            }
-        }
-    }
-    return result;
-}
-/*this function will use 1x printf (in the happy case) .*/
+/*this function will use 1x puts (in the happy case) .*/
 /*more than 1x printf / function call can mean intermingled LogErrors in a multithreaded env*/
 /*the function will also attempt to produce some human readable strings for GetLastError*/
 void consolelogger_log_with_GetLastError(const char* file, const char* func, int line, const char* format, ...)
 {
     DWORD lastError;
-    char* lastErrorAsString;
-    int lastErrorAsString_should_be_freed;
-    time_t t;
-    int systemMessage_should_be_freed;
-    char* systemMessage;
-    int userMessage_should_be_freed;
-    char* userMessage;
 
+    char message[LOG_SIZE_REGULAR];
+    
+    int size = 0; /*size tracks number of character from "message" that are used so far, not counting the last null character. Uses int as data type because snprintf functions return int*/
+
+    int snprintf_result;
+
+    /*this function builds a string in message variable from 3 sources
+    1) the system state (time, file, function, line)
+    2) the user (format,...)
+    3) whatever GetLastError can provide
+    */
     va_list args;
     va_start(args, format);
 
-    /*this is what this case will do:
-    1. snip the last error
-    2. create a string with what that last error means
-    3. printf the system message (__FILE__, __LINE__ etc) + the last error + whatever the user wanted
-    */
-    /*1. snip the last error*/
     lastError = GetLastError();
 
-    /*2. create a string with what that last error means*/
-    lastErrorAsString = lastErrorToString(lastError);
-    if (lastErrorAsString == NULL)
-    {
-        (void)printf("failure in lastErrorToString");
-        lastErrorAsString = "";
-        lastErrorAsString_should_be_freed = 0;
-    }
-    else
-    {
-        lastErrorAsString_should_be_freed = 1;
+    message[0] = '\0';
+
+    {/*scope for 1) the system state (time, file, function, line)*/
+        time_t t;
+        t = time(NULL);
+        snprintf_result = snprintf(message + size, sizeof(message) - size, "Error: Time:%.24s File:%s Func:%s Line:%d ", ctime(&t), file, func, line);
+        if (snprintf_result < 0)
+        {
+            (void)puts("error in snprintf trying to output the system message");
+        }
+        else
+        {
+            if (snprintf_result >= (int)sizeof(message) - size)
+            {
+                (void)puts("not enough caracters in message to hold the system message");
+            }
+            else
+            {
+                size += snprintf_result;
+            }
+        }
     }
 
-    t = time(NULL);
-    systemMessage = printf_alloc("Error: Time:%.24s File:%s Func:%s Line:%d %s", ctime(&t), file, func, line, lastErrorAsString);
-
-    if (systemMessage == NULL)
-    {
-        systemMessage = "";
-        (void)printf("Error: [FAILED] Time:%.24s File : %s Func : %s Line : %d %s", ctime(&t), file, func, line, lastErrorAsString);
-        systemMessage_should_be_freed = 0;
-    }
-    else
-    {
-        systemMessage_should_be_freed = 1;
-    }
-
-    userMessage = vprintf_alloc(format, args);
-    if (userMessage == NULL)
-    {
-        (void)printf("[FAILED] ");
-        (void)vprintf(format, args);
-        (void)printf("\n");
-        userMessage_should_be_freed = 0;
-    }
-    else
-    {
-        /*3. printf the system message(__FILE__, __LINE__ etc) + the last error + whatever the user wanted*/
-        (void)printf("%s %s\n", systemMessage, userMessage);
-        userMessage_should_be_freed = 1;
+    {/*scope for 2) the user (format,...)*/
+        snprintf_result = vsnprintf(message + size, sizeof(message) - size, format, args);
+        if (snprintf_result < 0)
+        {
+            (void)puts("error in vsnprintf trying to output the user message");
+        }
+        else
+        {
+            if (snprintf_result >= (int)sizeof(message) - size)
+            {
+                (void)puts("not enough characters in message to hold the user message");
+            }
+            else
+            {
+                size += snprintf_result;
+            }
+        }
     }
 
-    if (userMessage_should_be_freed == 1)
-    {
-        free(userMessage);
+    {/*scope for 3) whatever GetLastError can provide*/
+        
+        /*add the getlastError for good measure anyway*/
+        snprintf_result = snprintf(message + size, sizeof(message) - size, " GetLastError()=%#x ", lastError);
+        if (snprintf_result < 0)
+        {
+            (void)puts("error in snprintf trying to output GetLastError's value");
+        }
+        else
+        {
+            if (snprintf_result >= (int)sizeof(message) - size)
+            {
+                (void)puts("not enough characters in message to hold  GetLastError's value");
+            }
+            else
+            {
+                size += snprintf_result;
+
+                if (FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, lastError, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), message + size, sizeof(message) - size, NULL) == 0)
+                {
+                    (void)puts("error in snprintf trying to output GetLastError's value as string");
+                }
+                else
+                {
+                    /*remove extraneous newlines from FormatMessageA's output*/
+                    char* whereAreThey;
+                    if ((whereAreThey = strchr(message + size, '\r')) != NULL)
+                    {
+                        *whereAreThey = '\0';
+                    }
+                    if ((whereAreThey = strchr(message + size, '\n')) != NULL)
+                    {
+                        *whereAreThey = '\0';
+                    }
+
+                    /*everything has been compiled in message...*/
+                }
+            }
+        }
     }
 
-    if (systemMessage_should_be_freed == 1)
-    {
-        free(systemMessage);
-    }
+    /*in any case, print the string as is*/
+    (void)puts(message);
 
-    if (lastErrorAsString_should_be_freed == 1)
-    {
-        free(lastErrorAsString);
-    }
     va_end(args);
 }
 #endif
@@ -262,7 +158,6 @@ void consolelogger_log(LOG_CATEGORY log_category, const char* file, const char* 
     (void)vprintf(format, args);
     va_end(args);
 
-    (void)log_category;
     if (options & LOG_LINE)
     {
         (void)printf("\r\n");
