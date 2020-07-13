@@ -97,7 +97,7 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
             char stackAsString[STACK_MAX_CHARACTERS];                                                                                                                   \
             getStackAsString(stackAsString, sizeof(STACK_MAX_CHARACTERS));                                                                                              \
             size_t formatSize = strlen(format);                                                                                                                         \
-            if(formatSize+sizeof(STACK_PRINT_FORMAT)+1>FORMAT_MAX_CHARACTERS)                                                                                           \
+            if (formatSize + sizeof(STACK_PRINT_FORMAT) + 1 > FORMAT_MAX_CHARACTERS)                                                                                    \
             { /*skipping stack printing*/                                                                                                                               \
                 logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, __VA_ARGS__);                                                         \
             }                                                                                                                                                           \

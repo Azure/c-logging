@@ -129,7 +129,7 @@ static void perform_EventWriteLogInfoEvent(const char* message, const char* file
     );
 
 #if CALL_CONSOLE_LOGGER
-    consolelogger_log(AZ_LOG_INFO, NULL, NULL, 0, LOG_LINE, "%s", message);
+    consolelogger_log(AZ_LOG_INFO, file, func, line, LOG_LINE, "%s", message);
 #endif
 }
 
