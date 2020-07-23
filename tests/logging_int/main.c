@@ -26,6 +26,12 @@ int main(void)
     LogError("LogError: the most complicated hello with int=%d and a really big string that fits =%s.", 42, really_big_string_fits);
     LogError("LogError: the most complicated hello with int=%d and a really big string that does not fit=%s.", 42, really_big_string_doesnt_fit);
 
+    /*LogLastError*/
+    LogLastError("LogLastError: hello world!");
+    LogLastError("LogLastError: a more complicated hello with int=%d.", 42);
+    LogLastError("LogLastError: the most complicated hello with int=%d and a really big string that fits =%s.", 42, really_big_string_fits);
+    LogLastError("LogLastError: the most complicated hello with int=%d and a really big string that does not fit=%s.", 42, really_big_string_doesnt_fit);
+
     /*LogWarning*/
     LogWarning("LogWarning: hello world!");
     LogWarning("LogWarning: a more complicated hello with int=%d.", 42);

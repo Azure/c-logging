@@ -152,7 +152,7 @@ void xlogging_LogErrorWinHTTPWithGetLastErrorAsStringFormatter(int errorMessageI
 
 void xlogging_set_log_function_GetLastError(LOGGER_LOG_GETLASTERROR log_function);
 LOGGER_LOG_GETLASTERROR xlogging_get_log_function_GetLastError(void);
-#define LogLastError(FORMAT, ...) do{ LOGGER_LOG_GETLASTERROR logger_function = xlogging_get_log_function_GetLastError(); if(logger_function != NULL) logger_function(__FILE__, FUNC_NAME, __LINE__, FORMAT, __VA_ARGS__); }while((void)0,0)
+#define LogLastError(FORMAT, ...) do{  (void)(0 && printf(FORMAT, __VA_ARGS__)); LOGGER_LOG_GETLASTERROR logger_function = xlogging_get_log_function_GetLastError(); if(logger_function != NULL) logger_function(__FILE__, FUNC_NAME, __LINE__, FORMAT, __VA_ARGS__); }while((void)0,0)
 
 #define LogCritical(FORMAT, ...) do{ LOG(AZ_LOG_CRITICAL, LOG_LINE, FORMAT, __VA_ARGS__); }while((void)0,0)
 #define LogError(FORMAT, ...) do{ LOG(AZ_LOG_ERROR, LOG_LINE, FORMAT, __VA_ARGS__); }while((void)0,0)
