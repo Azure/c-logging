@@ -71,12 +71,12 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
 // ignore warning C4127 
 #define LOG(log_category, log_options, format, ...) \
 { \
-    (void)(0 && printf(format, __VA_ARGS__)); \
+    (void)(0 && printf(format, ##__VA_ARGS__)); \
     { \
         LOGGER_LOG logger_function = xlogging_get_log_function(); \
         if (logger_function != NULL) \
         { \
-            logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, __VA_ARGS__); \
+            logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, ##__VA_ARGS__); \
         } \
     } \
 }
@@ -85,11 +85,11 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
 #define STACK_MAX_CHARACTERS 2048 /*whatever we get from stack cannot exceed this size*/
 #define FORMAT_MAX_CHARACTERS 1024 /*user format + STACK_PRINT_FORMAT in a string cannot exceed this size*/
 
-#define LOG(log_category, log_options, format, ...) MU_C2(LOG_,log_category)(log_category, log_options, format, __VA_ARGS__)
+#define LOG(log_category, log_options, format, ...) MU_C2(LOG_,log_category)(log_category, log_options, format, ##__VA_ARGS__)
 
 #define LOG_AZ_LOG_WITH_STACK(log_category, log_options, format, ...)                                                                                                   \
 {                                                                                                                                                                       \
-    (void)(0 && printf(format, __VA_ARGS__));                                                                                                                           \
+    (void)(0 && printf(format, ##__VA_ARGS__));                                                                                                                           \
     {                                                                                                                                                                   \
         LOGGER_LOG logger_function = xlogging_get_log_function();                                                                                                       \
         if (logger_function != NULL)                                                                                                                                    \
@@ -99,14 +99,14 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
             size_t formatSize = strlen(format);                                                                                                                         \
             if (formatSize + sizeof(STACK_PRINT_FORMAT) + 1 > FORMAT_MAX_CHARACTERS)                                                                                    \
             { /*skipping stack printing*/                                                                                                                               \
-                logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, __VA_ARGS__);                                                         \
+                logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, ##__VA_ARGS__);                                                         \
             }                                                                                                                                                           \
             else                                                                                                                                                        \
             {                                                                                                                                                           \
                 char formatWithStack[FORMAT_MAX_CHARACTERS];                                                                                                            \
                 (void)memcpy(formatWithStack, format, formatSize);                                                                                                      \
                 (void)memcpy(formatWithStack + formatSize, STACK_PRINT_FORMAT, sizeof(STACK_PRINT_FORMAT));                                                             \
-                logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, formatWithStack, __VA_ARGS__, stackAsString);                                 \
+                logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, formatWithStack, ##__VA_ARGS__, stackAsString);                                 \
             }                                                                                                                                                           \
         }                                                                                                                                                               \
     }                                                                                                                                                                   \
@@ -114,30 +114,30 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
 
 #define LOG_AZ_LOG_WITHOUT_STACK(log_category, log_options, format, ...)                                                                                                \
 {                                                                                                                                                                       \
-    (void)(0 && printf(format, __VA_ARGS__));                                                                                                                           \
+    (void)(0 && printf(format, ##__VA_ARGS__));                                                                                                                           \
     {                                                                                                                                                                   \
         LOGGER_LOG logger_function = xlogging_get_log_function();                                                                                                                     \
         if (logger_function != NULL)                                                                                                                                                  \
         {                                                                                                                                                               \
-            logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, __VA_ARGS__);                                                                           \
+            logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, ##__VA_ARGS__);                                                                           \
         }                                                                                                                                                               \
     }                                                                                                                                                                   \
 }
 
 #define LOG_AZ_LOG_CRITICAL(log_category, log_options, format, ...) \
-    LOG_AZ_LOG_WITH_STACK(log_category, log_options, format, __VA_ARGS__)
+    LOG_AZ_LOG_WITH_STACK(log_category, log_options, format, ##__VA_ARGS__)
 
 #define LOG_AZ_LOG_ERROR(log_category, log_options, format, ...) \
-    LOG_AZ_LOG_WITH_STACK(log_category, log_options, format, __VA_ARGS__)
+    LOG_AZ_LOG_WITH_STACK(log_category, log_options, format, ##__VA_ARGS__)
 
 #define LOG_AZ_LOG_WARNING(log_category, log_options, format, ...) \
-    LOG_AZ_LOG_WITH_STACK(log_category, log_options, format, __VA_ARGS__)
+    LOG_AZ_LOG_WITH_STACK(log_category, log_options, format, ##__VA_ARGS__)
 
 #define LOG_AZ_LOG_INFO(log_category, log_options, format, ...) \
-    LOG_AZ_LOG_WITHOUT_STACK(log_category, log_options, format, __VA_ARGS__)
+    LOG_AZ_LOG_WITHOUT_STACK(log_category, log_options, format, ##__VA_ARGS__)
 
 #define LOG_AZ_LOG_VERBOSE(log_category, log_options, format, ...) \
-    LOG_AZ_LOG_WITHOUT_STACK(log_category, log_options, format, __VA_ARGS__)
+    LOG_AZ_LOG_WITHOUT_STACK(log_category, log_options, format, ##__VA_ARGS__)
 
 #endif /*LOGERROR_CAPTURES_STACK_TRACES */
 #else /* _MSC_VER */
@@ -152,17 +152,17 @@ void xlogging_LogErrorWinHTTPWithGetLastErrorAsStringFormatter(int errorMessageI
 
 void xlogging_set_log_function_GetLastError(LOGGER_LOG_GETLASTERROR log_function);
 LOGGER_LOG_GETLASTERROR xlogging_get_log_function_GetLastError(void);
-#define LogLastError(FORMAT, ...) do{  (void)(0 && printf(FORMAT, __VA_ARGS__)); LOGGER_LOG_GETLASTERROR logger_function = xlogging_get_log_function_GetLastError(); if(logger_function != NULL) logger_function(__FILE__, FUNC_NAME, __LINE__, FORMAT, __VA_ARGS__); }while((void)0,0)
+#define LogLastError(FORMAT, ...) do{  (void)(0 && printf(FORMAT, ##__VA_ARGS__)); LOGGER_LOG_GETLASTERROR logger_function = xlogging_get_log_function_GetLastError(); if(logger_function != NULL) logger_function(__FILE__, FUNC_NAME, __LINE__, FORMAT, ##__VA_ARGS__); }while((void)0,0)
 
-#define LogCritical(FORMAT, ...) do{ LOG(AZ_LOG_CRITICAL, LOG_LINE, FORMAT, __VA_ARGS__); }while((void)0,0)
-#define LogError(FORMAT, ...) do{ LOG(AZ_LOG_ERROR, LOG_LINE, FORMAT, __VA_ARGS__); }while((void)0,0)
-#define LogWarning(FORMAT, ...) do{ LOG(AZ_LOG_WARNING, LOG_LINE, FORMAT, __VA_ARGS__); }while((void)0,0)
-#define LogInfo(FORMAT, ...) do{LOG(AZ_LOG_INFO, LOG_LINE, FORMAT, __VA_ARGS__); }while((void)0,0)
-#define LogVerbose(FORMAT, ...) do{LOG(AZ_LOG_VERBOSE, LOG_LINE, FORMAT, __VA_ARGS__); }while((void)0,0)
+#define LogCritical(FORMAT, ...) do{ LOG(AZ_LOG_CRITICAL, LOG_LINE, FORMAT, ##__VA_ARGS__); }while((void)0,0)
+#define LogError(FORMAT, ...) do{ LOG(AZ_LOG_ERROR, LOG_LINE, FORMAT, ##__VA_ARGS__); }while((void)0,0)
+#define LogWarning(FORMAT, ...) do{ LOG(AZ_LOG_WARNING, LOG_LINE, FORMAT, ##__VA_ARGS__); }while((void)0,0)
+#define LogInfo(FORMAT, ...) do{LOG(AZ_LOG_INFO, LOG_LINE, FORMAT, ##__VA_ARGS__); }while((void)0,0)
+#define LogVerbose(FORMAT, ...) do{LOG(AZ_LOG_VERBOSE, LOG_LINE, FORMAT, ##__VA_ARGS__); }while((void)0,0)
 
 #define LogErrorWinHTTPWithGetLastErrorAsString(FORMAT, ...) do { \
                 int errorMessageID = GetLastError(); \
-                LogError(FORMAT, __VA_ARGS__); \
+                LogError(FORMAT, ##__VA_ARGS__); \
                 xlogging_LogErrorWinHTTPWithGetLastErrorAsStringFormatter(errorMessageID); \
             } while((void)0,0)
 #else // _MSC_VER
