@@ -62,10 +62,10 @@ jobs:
     displayName: 'Use NuGet 4.3.0 (required for .NET core assemblies)'
 
   - task: CMake@1
-    displayName: 'CMake .. -Drun_unittests:bool=ON -Drun_int_tests:bool=ON -Duse_cppunittest:bool=OFF -G "Visual Studio 16 2010" -A x64"'
+    displayName: 'CMake .. -Drun_unittests:bool=ON -Drun_int_tests:bool=ON -Duse_cppunittest:bool=OFF -G "Visual Studio 16 2019" -A x64"'
     inputs:
       workingDirectory: 'build_x64'
-      cmakeArgs: '.. -Drun_unittests:bool=ON -Drun_int_tests:bool=ON -Duse_cppunittest:bool=OFF -G "Visual Studio 16 2010" -A x64"'
+      cmakeArgs: '.. -Drun_unittests:bool=ON -Drun_int_tests:bool=ON -Duse_cppunittest:bool=OFF -G "Visual Studio 16 2019" -A x64"'
 
   - task: VSBuild@1
     displayName: 'Build solution build_x64\*.sln'
