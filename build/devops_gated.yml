@@ -55,17 +55,17 @@ jobs:
   - task: BatchScript@1
     displayName: 'Setup VS Vars'
     inputs:
-      filename: '"c:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat"'
+      filename: '"c:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"'
       modifyEnvironment: true
 
   - task: NuGetToolInstaller@0
     displayName: 'Use NuGet 4.3.0 (required for .NET core assemblies)'
 
   - task: CMake@1
-    displayName: 'CMake .. -Drun_unittests:bool=ON -Drun_int_tests:bool=ON -Duse_cppunittest:bool=OFF -G "Visual Studio 15 2017 Win64"'
+    displayName: 'CMake .. -Drun_unittests:bool=ON -Drun_int_tests:bool=ON -Duse_cppunittest:bool=OFF -G "Visual Studio 16 2010" -A x64"'
     inputs:
       workingDirectory: 'build_x64'
-      cmakeArgs: '.. -Drun_unittests:bool=ON -Drun_int_tests:bool=ON -Duse_cppunittest:bool=OFF -G "Visual Studio 15 2017 Win64"'
+      cmakeArgs: '.. -Drun_unittests:bool=ON -Drun_int_tests:bool=ON -Duse_cppunittest:bool=OFF -G "Visual Studio 16 2010" -A x64"'
 
   - task: VSBuild@1
     displayName: 'Build solution build_x64\*.sln'
@@ -115,7 +115,7 @@ jobs:
   - task: BatchScript@1
     displayName: 'Setup VS Vars'
     inputs:
-      filename: '"c:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat"'
+      filename: '"c:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"'
       modifyEnvironment: true
 
   - task: NuGetToolInstaller@0
@@ -197,7 +197,7 @@ jobs:
   - task: BatchScript@1
     displayName: 'Setup VS Vars'
     inputs:
-      filename: '"c:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat"'
+      filename: '"c:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"'
       modifyEnvironment: true
 
   - task: NuGetToolInstaller@0
@@ -285,7 +285,7 @@ jobs:
   - task: BatchScript@1
     displayName: 'Setup VS Vars'
     inputs:
-      filename: '"c:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat"'
+      filename: '"c:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"'
       modifyEnvironment: true
 
   - task: NuGetCommand@2
