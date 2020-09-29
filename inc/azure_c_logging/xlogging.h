@@ -85,7 +85,7 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
 #define STACK_MAX_CHARACTERS 2048 /*whatever we get from stack cannot exceed this size*/
 #define FORMAT_MAX_CHARACTERS 1024 /*user format + STACK_PRINT_FORMAT in a string cannot exceed this size*/
 
-#define LOG(log_category, log_options, format, ...) MU_C2(LOG_,log_category)(log_category, log_options, format, __VA_ARGS__)
+#define LOG(log_category, log_options, format, ...) MU_C2(LOG_,log_category)(log_category, log_options, format, ##__VA_ARGS__)
 
 #define LOG_AZ_LOG_WITH_STACK(log_category, log_options, format, ...)                                                                                                   \
 {                                                                                                                                                                       \
@@ -162,7 +162,7 @@ LOGGER_LOG_GETLASTERROR xlogging_get_log_function_GetLastError(void);
 
 #define LogErrorWinHTTPWithGetLastErrorAsString(FORMAT, ...) do { \
                 int errorMessageID = GetLastError(); \
-                LogError(FORMAT, __VA_ARGS__); \
+                LogError(FORMAT, ##__VA_ARGS__); \
                 xlogging_LogErrorWinHTTPWithGetLastErrorAsStringFormatter(errorMessageID); \
             } while((void)0,0)
 #else // _MSC_VER
