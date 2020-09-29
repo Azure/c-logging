@@ -3,6 +3,13 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
+# canon way of using azure-c-logging from another repo is below. It assumes the using repo has placed azure-c-logging in "deps"
+
+#if ((NOT TARGET azure_c_logging) AND (EXISTS ${CMAKE_CURRENT_LIST_DIR}/deps/azure-c-logging/CMakeLists.txt))
+#    add_subdirectory(deps/azure-c-logging)
+#    include_directories(deps/azure-c-logging/inc)
+#endif() 
+
 if (TARGET azure_c_logging)
     RETURN()
 endif()
