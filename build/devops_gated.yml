@@ -234,11 +234,6 @@ jobs:
 
   steps:
   - bash: |
-      sudo apt-get update
-      sudo apt-get install build-essential pkg-config git cmake uuid-dev valgrind
-    displayName: 'Bash Script'
-
-  - bash: |
      pushd $(Build.Repository.LocalPath)
      git submodule update --init
      git submodule foreach --recursive "git clean -xdff"
