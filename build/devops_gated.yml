@@ -131,7 +131,7 @@ jobs:
     displayName: 'Build solution build_x64\*.sln'
     inputs:
       solution: 'build_x64\*.sln'
-      platform: Win32
+      platform: x64
       msbuildArgs: '/t:restore /t:build'
       configuration: RelWithDebInfo
       maximumCpuCount: true
