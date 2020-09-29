@@ -207,7 +207,7 @@ jobs:
     displayName: CMake
     inputs:
       workingDirectory: 'build_x86'
-      cmakeArgs: '.. -Drun_unittests:bool=ON -Drun_int_tests:bool=ON -Drun_e2e_tests:bool=ON'
+      cmakeArgs: '.. -Drun_unittests:bool=ON -Drun_int_tests:bool=ON -Drun_e2e_tests:bool=ON -G "Visual Studio 16 2019" -A Win32'
 
   - task: VSBuild@1
     displayName: 'Build solution build_x86\*.sln'
