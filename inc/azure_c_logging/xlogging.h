@@ -82,8 +82,8 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
 }
 #else /*LOGERROR_CAPTURES_STACK_TRACES is defined*/ 
 #define STACK_PRINT_FORMAT "\nStack:\n%s"
-#define STACK_MAX_CHARACTERS 8192 /*whatever we get from stack cannot exceed this size*/
-#define FORMAT_MAX_CHARACTERS 4096 /*user format + STACK_PRINT_FORMAT in a string cannot exceed this size*/
+#define STACK_MAX_CHARACTERS 2048 /*whatever we get from stack cannot exceed this size*/
+#define FORMAT_MAX_CHARACTERS 1024 /*user format + STACK_PRINT_FORMAT in a string cannot exceed this size*/
 
 #define LOG(log_category, log_options, format, ...) MU_C2(LOG_,log_category)(log_category, log_options, format, ##__VA_ARGS__)
 
