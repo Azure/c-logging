@@ -127,7 +127,7 @@ void getStackAsString(char* destination, size_t size)
             }
         }
     }
-    destination[0] = '\0';
+    destination[-1] = '\0';
 
     ReleaseSRWLockExclusive(&lockOverSymCalls);
 }
