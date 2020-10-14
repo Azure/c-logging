@@ -45,6 +45,9 @@ static __declspec(thread) void* stack[TRACE_MAX_STACK_FRAMES];
 static _Thread_local void* stack[TRACE_MAX_STACK_FRAMES];
 #endif
 
+XLOGGING_THREAD_LOCAL char stackAsString[STACK_MAX_CHARACTERS];
+XLOGGING_THREAD_LOCAL char formatWithStack[FORMAT_MAX_CHARACTERS];
+
 /*tries to get as much as possible from the stack filling destination*/
 void getStackAsString(char* destination, size_t destinationSize)
 {
@@ -67,7 +70,7 @@ void getStackAsString(char* destination, size_t destinationSize)
     uint16_t numberOfFrames = CaptureStackBackTrace(1, TRACE_MAX_STACK_FRAMES, stack, NULL);
     if (numberOfFrames == 0)
     {
-        snprintf(destination, destinationSize, "!CaptureStackBackTrace returned 0 frames");
+        (void)snprintf(destination, destinationSize, "!CaptureStackBackTrace returned 0 frames");
     }
     else
     {
