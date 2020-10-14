@@ -87,6 +87,15 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
 
 #define LOG(log_category, log_options, format, ...) MU_C2(LOG_,log_category)(log_category, log_options, format, ##__VA_ARGS__)
 
+#ifdef _MSC_VER
+static __declspec(thread) char stackAsString[STACK_MAX_CHARACTERS];
+static __declspec(thread) char formatWithStack[FORMAT_MAX_CHARACTERS];
+#else
+/*for C11 compilers*/
+static _Thread_local char stackAsString[STACK_MAX_CHARACTERS];
+static _Thread_local char formatWithStack[FORMAT_MAX_CHARACTERS];
+#endif
+
 #define LOG_AZ_LOG_WITH_STACK(log_category, log_options, format, ...)                                                                                                   \
 {                                                                                                                                                                       \
     (void)(0 && printf(format, ##__VA_ARGS__));                                                                                                                         \
@@ -94,7 +103,6 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
         LOGGER_LOG logger_function = xlogging_get_log_function();                                                                                                       \
         if (logger_function != NULL)                                                                                                                                    \
         {                                                                                                                                                               \
-            char stackAsString[STACK_MAX_CHARACTERS];                                                                                                                   \
             getStackAsString(stackAsString, sizeof(stackAsString));                                                                                                     \
             size_t formatSize = strlen(format);                                                                                                                         \
             if (formatSize + sizeof(STACK_PRINT_FORMAT) + 1 > FORMAT_MAX_CHARACTERS)                                                                                    \
@@ -103,7 +111,6 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
             }                                                                                                                                                           \
             else                                                                                                                                                        \
             {                                                                                                                                                           \
-                char formatWithStack[FORMAT_MAX_CHARACTERS];                                                                                                            \
                 (void)memcpy(formatWithStack, format, formatSize);                                                                                                      \
                 (void)memcpy(formatWithStack + formatSize, STACK_PRINT_FORMAT, sizeof(STACK_PRINT_FORMAT));                                                             \
                 logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, formatWithStack, ##__VA_ARGS__, stackAsString);                               \

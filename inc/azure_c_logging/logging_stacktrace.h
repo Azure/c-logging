@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-void getStackAsString(char* destination, size_t size);
+void getStackAsString(char* destination, size_t destinationSize);
 
 #ifdef __cplusplus
 }
