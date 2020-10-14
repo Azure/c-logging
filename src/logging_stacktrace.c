@@ -39,7 +39,7 @@ static const char SymFromAddrFailed[] = "SymFromAddr failed\n";
 static const char snprintfFailed[] = "snprintf failed\n";
 
 #ifdef _MSC_VER
-static __declspec(thread) void* stack[TRACE_MAX_STACK_FRAMES];
+static XLOGGING_THREAD_LOCAL void* stack[TRACE_MAX_STACK_FRAMES];
 #else
 /*for C11 compilers*/
 static _Thread_local void* stack[TRACE_MAX_STACK_FRAMES];
