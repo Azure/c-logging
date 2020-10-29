@@ -1,6 +1,3 @@
-[submodule "deps/azure-c-build-tools"]
-	path = deps/azure-c-build-tools
-	url = https://github.com/Azure/azure-c-build-tools.git
 [submodule "deps/azure-macro-utils-c"]
 	path = deps/azure-macro-utils-c
 	url = https://github.com/Azure/azure-macro-utils-c.git
