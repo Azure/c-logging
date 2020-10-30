@@ -4,7 +4,7 @@
 #ifndef CONSOLELOGGER_H
 #define CONSOLELOGGER_H
 
-#include "azure_c_logging/xlogging.h"
+#include "c_logging/xlogging.h"
 
 #ifdef __cplusplus
 extern "C" {

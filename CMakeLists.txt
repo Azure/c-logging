@@ -3,18 +3,18 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
-# canon way of using azure-c-logging from another repo is below. It assumes the using repo has placed azure-c-logging in "deps"
+# canon way of using c-logging from another repo is below. It assumes the using repo has placed c-logging in "deps"
 
-#if ((NOT TARGET azure_c_logging) AND (EXISTS ${CMAKE_CURRENT_LIST_DIR}/deps/azure-c-logging/CMakeLists.txt))
-#    add_subdirectory(deps/azure-c-logging)
-#    include_directories(deps/azure-c-logging/inc)
+#if ((NOT TARGET c_logging) AND (EXISTS ${CMAKE_CURRENT_LIST_DIR}/deps/c-logging/CMakeLists.txt))
+#    add_subdirectory(deps/c-logging)
+#    include_directories(deps/c-logging/inc)
 #endif() 
 
-if (TARGET azure_c_logging)
+if (TARGET c_logging)
     RETURN()
 endif()
 
-project(azure_c_logging)
+project(c_logging)
 
 #the following variables are project-wide and can be used with cmake-gui
 option(run_unittests "set run_unittests to ON to run unittests (default is OFF)" OFF)
@@ -84,10 +84,10 @@ if(${logerror_captures_stack_traces})
     #set a preprocessor option (LOGERROR_CAPTURES_STACK_TRACES) and add the files that provide the functionality
     add_definitions(-DLOGERROR_CAPTURES_STACK_TRACES)
     set(LOGGING_STACKTRACE_C_FILE ./src/logging_stacktrace.c)
-    set(LOGGING_STACKTRACE_H_FILE ./inc/azure_c_logging/logging_stacktrace.h)
+    set(LOGGING_STACKTRACE_H_FILE ./inc/c_logging/logging_stacktrace.h)
 else()
     set(LOGGING_STACKTRACE_C_FILE ./src/logging_stacktrace_dummy.c)
-    set(LOGGING_STACKTRACE_H_FILE ./inc/azure_c_logging/logging_stacktrace.h)
+    set(LOGGING_STACKTRACE_H_FILE ./inc/c_logging/logging_stacktrace.h)
 endif()
 
 if(${no_logging})
@@ -98,57 +98,57 @@ if(WIN32)
     if(${use_etw} STREQUAL "OFF")
         set(XLOGGING_C_FILE ${CMAKE_CURRENT_LIST_DIR}/src/xlogging.c CACHE INTERNAL "this is the xlogging C file(s)" FORCE)
         set(LOGGING_C_FILE ${CMAKE_CURRENT_LIST_DIR}/src/consolelogger.c CACHE INTERNAL "this is the logging C file(s)" FORCE)
-        set(LOGGING_H_FILE ${CMAKE_CURRENT_LIST_DIR}/inc/azure_c_logging/consolelogger.h CACHE INTERNAL "this is the logging H file(s)" FORCE)
+        set(LOGGING_H_FILE ${CMAKE_CURRENT_LIST_DIR}/inc/c_logging/consolelogger.h CACHE INTERNAL "this is the logging H file(s)" FORCE)
     elseif(${use_etw} STREQUAL "TRACELOGGING")
         set(XLOGGING_C_FILE ${CMAKE_CURRENT_LIST_DIR}/src/etwxlogging.c CACHE INTERNAL "this is the xlogging C file(s)" FORCE)
         set(LOGGING_C_FILE ${CMAKE_CURRENT_LIST_DIR}/src/etwlogger_driver.c CACHE INTERNAL "this is the logging C file(s)" FORCE)
-        set(LOGGING_H_FILE ${CMAKE_CURRENT_LIST_DIR}/inc/azure_c_logging/etwlogger_driver.h CACHE INTERNAL "this is the logging H file(s)" FORCE)
+        set(LOGGING_H_FILE ${CMAKE_CURRENT_LIST_DIR}/inc/c_logging/etwlogger_driver.h CACHE INTERNAL "this is the logging H file(s)" FORCE)
     elseif(${use_etw} STREQUAL "TRACELOGGING_WITH_CONSOLE")
         set(XLOGGING_C_FILE ${CMAKE_CURRENT_LIST_DIR}/src/etwxlogging.c CACHE INTERNAL "this is the xlogging C file(s)" FORCE)
         set(LOGGING_C_FILE ${CMAKE_CURRENT_LIST_DIR}/src/etwlogger_driver.c ${CMAKE_CURRENT_LIST_DIR}/src/consolelogger.c CACHE INTERNAL "this is the logging C file(s)" FORCE)
-        set(LOGGING_H_FILE ${CMAKE_CURRENT_LIST_DIR}/inc/azure_c_logging/etwlogger_driver.h ${CMAKE_CURRENT_LIST_DIR}/inc/azure_c_logging/consolelogger.h CACHE INTERNAL "this is the logging H file(s)" FORCE)
+        set(LOGGING_H_FILE ${CMAKE_CURRENT_LIST_DIR}/inc/c_logging/etwlogger_driver.h ${CMAKE_CURRENT_LIST_DIR}/inc/c_logging/consolelogger.h CACHE INTERNAL "this is the logging H file(s)" FORCE)
     endif()
 else()
     set(XLOGGING_C_FILE ${CMAKE_CURRENT_LIST_DIR}/src/xlogging.c CACHE INTERNAL "this is the xlogging C file(s)" FORCE)
     set(LOGGING_C_FILE ${CMAKE_CURRENT_LIST_DIR}/src/consolelogger.c CACHE INTERNAL "this is the logging C file(s)" FORCE)
-    set(LOGGING_H_FILE ${CMAKE_CURRENT_LIST_DIR}/inc/azure_c_logging/consolelogger.h CACHE INTERNAL "this is the logging H file(s)" FORCE)
+    set(LOGGING_H_FILE ${CMAKE_CURRENT_LIST_DIR}/inc/c_logging/consolelogger.h CACHE INTERNAL "this is the logging H file(s)" FORCE)
 endif()
 
-set(azure_c_logging_c_files
+set(c_logging_c_files
     ${LOGGING_C_FILE}
     ${XLOGGING_C_FILE}
     ${LOGGING_STACKTRACE_C_FILE}
     )
 
-set(azure_c_logging_h_files
+set(c_logging_h_files
     ${LOGGING_H_FILE}
     ${LOGGING_STACKTRACE_H_FILE}
-    ./inc/azure_c_logging/xlogging.h
+    ./inc/c_logging/xlogging.h
     )
 
-FILE(GLOB azure_c_logging_md_files "devdoc/*.md")
-SOURCE_GROUP(devdoc FILES ${azure_c_logging_md_files})
+FILE(GLOB c_logging_md_files "devdoc/*.md")
+SOURCE_GROUP(devdoc FILES ${c_logging_md_files})
 
 #this is the product (a logging library)
-add_library(azure_c_logging ${azure_c_logging_c_files} ${azure_c_logging_h_files} ${azure_c_logging_md_files})
+add_library(c_logging ${c_logging_c_files} ${c_logging_h_files} ${c_logging_md_files})
 
-target_include_directories(azure_c_logging PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/inc>)
+target_include_directories(c_logging PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/inc>)
 
-set(azure_c_logging_target_libs)
+set(c_logging_target_libs)
 
 if(${logerror_captures_stack_traces})
-    set(azure_c_logging_target_libs ${azure_c_logging_target_libs} dbghelp)
+    set(c_logging_target_libs ${c_logging_target_libs} dbghelp)
 endif()
 
-target_link_libraries(azure_c_logging ${azure_c_logging_target_libs})
+target_link_libraries(c_logging ${c_logging_target_libs})
 
 if((WIN32) AND (${run_traceability}))
     #add traceability custom target
-    add_custom_target(azure_c_logging_traceability ALL
+    add_custom_target(c_logging_traceability ALL
         COMMAND traceabilitytool -buildcheck -e ${CMAKE_CURRENT_LIST_DIR}/deps -i ${CMAKE_CURRENT_LIST_DIR})
-    add_dependencies(azure_c_logging_traceability traceabilitytool)
+    add_dependencies(c_logging_traceability traceabilitytool)
 endif()
 
 add_subdirectory(tests)
 
-compileTargetAsC99(azure_c_logging)
+compileTargetAsC99(c_logging)

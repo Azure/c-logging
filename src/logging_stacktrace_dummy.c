@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#include "azure_c_logging/logging_stacktrace.h"
+#include "c_logging/logging_stacktrace.h"
 
 static const char message[] = "stack capture disabled";
 
