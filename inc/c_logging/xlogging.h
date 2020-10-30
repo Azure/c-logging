@@ -13,7 +13,7 @@
 #include "macro_utils/macro_utils.h"
 
 #ifdef LOGERROR_CAPTURES_STACK_TRACES
-#include "azure_c_logging/logging_stacktrace.h"
+#include "c_logging/logging_stacktrace.h"
 #endif
 
 #define LOG_SIZE_REGULAR 4096 /*in bytes - a message is not expected to exceed this size in bytes, if it does, only LOG_SIZE_REGULAR characters are retained*/

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include "azure_c_logging/xlogging.h"
-#include "azure_c_logging/consolelogger.h"
+#include "c_logging/xlogging.h"
+#include "c_logging/consolelogger.h"
 
 #ifndef NO_LOGGING
 

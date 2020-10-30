@@ -296,7 +296,7 @@ jobs:
   - task: VSBuild@1
     displayName: 'Build traceabilitytool only'
     inputs:
-      solution: 'build\azure_c_logging.sln'
+      solution: 'build\c_logging.sln'
       vsVersion: 16.0
       platform: x64
       configuration: RelWithDebInfo

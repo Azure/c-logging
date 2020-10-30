@@ -2,5 +2,5 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 add_executable(logging_int main.c)
-target_link_libraries(logging_int azure_c_logging)
+target_link_libraries(logging_int c_logging)
 

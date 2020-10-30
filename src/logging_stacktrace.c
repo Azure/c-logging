@@ -11,7 +11,7 @@
 #include "windows.h"
 #include "dbghelp.h"
 
-#include "azure_c_logging/logging_stacktrace.h"
+#include "c_logging/logging_stacktrace.h"
 
 #define TRACE_MAX_STACK_FRAMES  1024
 #define TRACE_MAX_SYMBOL_SIZE   1024
