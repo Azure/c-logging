@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if _MSC_VER
 #include "windows.h"
+#endif
 
 #include "c_logging/xlogging.h"
 
@@ -17,6 +19,7 @@ int main(void)
 
     LogVerbose("Hello World from LogVerbose, here's a value: %d", 0x4242);
 
+#if _MSC_VER
     SetLastError(ERROR_ACCESS_DENIED);
 
     LogLastError("Hello World from LogLastError, some access was denied! here's a value: 0x%x", '3');
@@ -24,6 +27,7 @@ int main(void)
     SetLastError(ERROR_SUCCESS);
 
     LogLastError("Hello World from LogLastError, everything is fine now! here's a value: 0x%x", '3');
+#endif
 
     return 0;
 }
