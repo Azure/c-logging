@@ -1,13 +1,20 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
 resources:
 - repo: self
   clean: true
+- repositories:
+    - repository: c_build_tools_repo
+      type: github
+      name: Azure/c-build-tools
+
 jobs:
 - job: windowsx64debug
   displayName: 'Build Windows x64 Debug'
   pool:
     name: Azure-MessagingStore
     demands:
+    - Build
     - Cmd
     - msbuild
     - visualstudio
@@ -196,6 +203,44 @@ jobs:
       filePath: './build/linux/build_linux.sh'
       arguments: '$(Build.Repository.LocalPath)'
       workingDirectory: '$(Build.Repository.LocalPath)'
+
+- job: Traceability
+  pool:
+    name: Azure-MessagingStore
+    demands:
+    - Cmd
+    - msbuild
+    - visualstudio
+
+  steps:
+  - task: BatchScript@1
+    displayName: 'Git submodule update'
+    inputs:
+      filename: 'C:\Program Files\Git\bin\git.exe'
+      arguments: 'submodule update --init --force'
+
+- job: includecheck
+  pool:
+    name: Azure-MessagingStore
+    demands:
+    - Cmd
+    - msbuild
+    - visualstudio
+
+  steps:
+  - checkout: self
+    submodules: true
+    clean: false
+
+  - task: CMake@1
+    displayName: 'Running cmake'
+    inputs:
+      cmakeArgs: '.. -GNinja -DCMAKE_C_INCLUDE_WHAT_YOU_USE:UNINITIALIZED=include-what-you-use;-Xiwyu;--mapping_file=d:\foo.imp;--driver-mode=cl -DCMAKE_CXX_INCLUDE_WHAT_YOU_USE:UNINITIALIZED=include-what-you-use;-Xiwyu;--mapping_file=d:\foo.imp;--driver-mode=cl -Drun_unittests:bool=ON -Drun_int_tests:bool=ON -Drun_perf_tests:bool=ON -Duse_cppunittest:bool=ON -Drun_traceability:bool=OFF'
+
+  - task: CMake@1
+    displayName: 'Build solution and check includes'
+    inputs:
+      cmakeArgs: '--build .'
 
 - job: Traceability
   pool:

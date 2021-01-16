@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#include <synchapi.h>                      // for AcquireSRWLockExclusive
+
 #include <stdint.h>
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
@@ -102,10 +103,10 @@ void getStackAsString(char* destination, size_t destinationSize)
 
                 if (SymGetLineFromAddr64(process, address, &displacement, &line))
                 {
-                    int snprintfResult = snprintf(resultLine, sizeof(resultLine), "!%s %s:%" PRIu32 "%s", symbol->Name, line.FileName, line.LineNumber, (j < numberOfFrames - 1) ? "\n" : "");
+                    int snprintfResult = snprintf(resultLine, sizeof(resultLine), "!%s %s:%" PRIu32 "%s", symbol->Name, line.FileName, (uint32_t)line.LineNumber, (j < numberOfFrames - 1) ? "\n" : "");
                     if (!(
                         (snprintfResult >= 0) && /*the returned value is nonnegative [...]*/
-                        (snprintfResult < sizeof(resultLine)) /*[...] and less than n.*/
+                        (snprintfResult < (int)sizeof(resultLine)) /*[...] and less than n.*/
                         ))
                     {
                         copied = memcat(destination, destinationSize, snprintfFailed, sizeof(snprintfFailed) - 1);
@@ -124,7 +125,7 @@ void getStackAsString(char* destination, size_t destinationSize)
                     int snprintfResult = snprintf(resultLine, sizeof(resultLine), "!%s Address 0x%" PRIX64 "%s", symbol->Name, line.Address, (j < numberOfFrames - 1) ? "\n" : "");
                     if (!(
                         (snprintfResult >= 0) && /*the returned value is nonnegative [...]*/
-                        (snprintfResult < sizeof(resultLine)) /*[...] and less than n.*/
+                        (snprintfResult < (int)sizeof(resultLine)) /*[...] and less than n.*/
                         ))
                     {
                         copied = memcat(destination, destinationSize, snprintfFailed, sizeof(snprintfFailed) - 1);
