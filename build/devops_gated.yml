@@ -3,10 +3,6 @@ name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Re
 resources:
 - repo: self
   clean: true
-- repositories:
-    - repository: c_build_tools_repo
-      type: github
-      name: Azure/c-build-tools
 
 jobs:
 - job: windowsx64debug
