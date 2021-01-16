@@ -200,21 +200,6 @@ jobs:
       arguments: '$(Build.Repository.LocalPath)'
       workingDirectory: '$(Build.Repository.LocalPath)'
 
-- job: Traceability
-  pool:
-    name: Azure-MessagingStore
-    demands:
-    - Cmd
-    - msbuild
-    - visualstudio
-
-  steps:
-  - task: BatchScript@1
-    displayName: 'Git submodule update'
-    inputs:
-      filename: 'C:\Program Files\Git\bin\git.exe'
-      arguments: 'submodule update --init --force'
-
 - job: includecheck
   pool:
     name: Azure-MessagingStore
