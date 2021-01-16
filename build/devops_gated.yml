@@ -204,6 +204,7 @@ jobs:
   pool:
     name: Azure-MessagingStore
     demands:
+    - cmake
     - Build
     - Cmd
     - msbuild
