@@ -13,6 +13,7 @@ jobs:
     - Build
     - Cmd
     - msbuild
+    - cmake
     - visualstudio
 
   steps:
@@ -67,8 +68,10 @@ jobs:
   pool:
     name: Azure-MessagingStore
     demands:
+    - Build
     - Cmd
     - msbuild
+    - cmake
     - visualstudio
     - vstest
 
@@ -124,8 +127,10 @@ jobs:
   pool:
     name: Azure-MessagingStore
     demands:
+    - Build
     - Cmd
     - msbuild
+    - cmake
     - visualstudio
 
   steps:
@@ -207,6 +212,7 @@ jobs:
     - Build
     - Cmd
     - msbuild
+    - cmake
     - visualstudio
 
   steps:
@@ -243,8 +249,10 @@ jobs:
   pool:
     name: Azure-MessagingStore
     demands:
+    - Build
     - Cmd
     - msbuild
+    - cmake
     - visualstudio
 
   steps:
