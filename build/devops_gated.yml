@@ -113,7 +113,7 @@ jobs:
     displayName: 'Run ctest'
     inputs:
       filename: ctest
-      arguments: '-C "Debug" -V --output-on-failure'
+      arguments: '-C "RelWithDebInfo" -V --output-on-failure'
       workingFolder: 'build_x64'
 
 - job: windowsx86debug
