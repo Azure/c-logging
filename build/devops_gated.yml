@@ -253,6 +253,7 @@ jobs:
   - task: CMake@1
     displayName: 'Build solution and check includes'
     inputs:
+      workingDirectory: 'build_ninja'
       cmakeArgs: '--build .'
 
 - job: Traceability
