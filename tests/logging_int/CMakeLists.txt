@@ -3,4 +3,4 @@
 
 add_executable(logging_int main.c)
 target_link_libraries(logging_int c_logging)
-
+add_test(NAME logging_int COMMAND logging_int)

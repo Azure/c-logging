@@ -47,9 +47,9 @@ elseif(${use_etw_value} STREQUAL "TRACELOGGING_WITH_CONSOLE")
 endif()
 
 
-add_executable(${exeName} 
-    ${LOGGING_STACKTRACE_C_FILE} 
-    ${LOGGING_STACKTRACE_H_FILE} 
+add_executable(${exeName}
+    ${LOGGING_STACKTRACE_C_FILE}
+    ${LOGGING_STACKTRACE_H_FILE}
     ${XLOGGING_C_FILE}
     ${LOGGING_C_FILE}
     ${LOGGING_H_FILE}
@@ -61,3 +61,4 @@ if(${logerror_captures_stack_traces_value})
 endif()
 
 set_target_properties(${exeName} PROPERTIES FOLDER "tests/c_logging_tests")
+add_test(NAME ${exeName} COMMAND ${exeName})

@@ -109,19 +109,18 @@ jobs:
       configuration: RelWithDebInfo
       maximumCpuCount: true
 
-  - task: VSTest@2
-    displayName: 'VsTest - testAssemblies'
+  - task: CmdLine@1
+    displayName: 'Run ctest'
     inputs:
-      testAssemblyVer2: |
-          **\*test*.dll
-          !**\obj\**
-      runTestsInIsolation: true
+      filename: ctest
+      arguments: '-C "RelWithDebInfo" -V --output-on-failure'
+      workingFolder: 'build_x64'
 
 - job: windowsx86debug
   displayName: 'Build Windows x86 Debug'
   pool:
     name: Azure-MessagingStore
-    demands: 
+    demands:
     - Cmd
     - msbuild
     - visualstudio
