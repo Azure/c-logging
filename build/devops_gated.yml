@@ -257,6 +257,7 @@ jobs:
       targetType: 'inline'
       script: |
           cmake --build . | tee build.log
+          if ((Select-String -Path "./build.log" -Pattern "Warning:") -ne $null) { throw "include check failed" }
 
 - job: Traceability
   pool:
