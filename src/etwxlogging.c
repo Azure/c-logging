@@ -3,10 +3,7 @@
 
 #include "c_logging/xlogging.h"
 
-#include "windows.h"
 #include "c_logging/etwlogger_driver.h"
-
-#ifndef NO_LOGGING
 
 #ifndef _MSC_VER
 #error only supported on Windows
@@ -40,4 +37,3 @@ void xlogging_LogErrorWinHTTPWithGetLastErrorAsStringFormatter(int errorMessageI
 {
     (void)errorMessageID;
 }
-#endif

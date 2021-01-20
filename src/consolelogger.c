@@ -4,6 +4,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
+
 #include "c_logging/xlogging.h"
 #include "c_logging/consolelogger.h"
 
@@ -78,7 +80,7 @@ void consolelogger_log_with_GetLastError(const char* file, const char* func, int
     {/*scope for 3) whatever GetLastError can provide*/
         
         /*add the getlastError for good measure anyway*/
-        snprintf_result = snprintf(message + size, sizeof(message) - size, " GetLastError()=%#x ", lastError);
+        snprintf_result = snprintf(message + size, sizeof(message) - size, " GetLastError()=%#lx ", lastError);
         if (snprintf_result < 0)
         {
             (void)puts("error in snprintf trying to output GetLastError's value");

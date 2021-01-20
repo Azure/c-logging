@@ -1,24 +1,22 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef USE_TRACELOGGING
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-
-#include <inttypes.h>
 
 #include "windows.h"
 
 #include "c_logging/xlogging.h"
 
-#include "c_logging/consolelogger.h"
-
-#ifdef USE_TRACELOGGING
 #include "TraceLoggingProvider.h"
 #include "evntrace.h"
-#endif
 
-#ifdef USE_TRACELOGGING
+#if CALL_CONSOLE_LOGGER
+#include "c_logging/consolelogger.h"
+#endif
 
 TRACELOGGING_DEFINE_PROVIDER(
     g_hMyComponentProvider,
@@ -168,7 +166,7 @@ void etwlogger_log_with_GetLastError(const char* file, const char* func, int lin
         vsnprintf_result = vsnprintf(message, sizeof(message), format, args);
         if (
             (vsnprintf_result < 0)||
-            (vsnprintf_result >= sizeof(message))
+            (vsnprintf_result >= (int)sizeof(message))
             )
         {
             (void)memcpy(message, vsnprintf_failure_message, sizeof(vsnprintf_failure_message));
@@ -218,7 +216,7 @@ void etwlogger_log(LOG_CATEGORY log_category, const char* file, const char* func
         vsnprintf_result = vsnprintf(message, sizeof(message), format, args);
         if (
             (vsnprintf_result < 0) ||
-            (vsnprintf_result >= sizeof(message))
+            (vsnprintf_result >= (int)sizeof(message))
             )
         {
             (void)memcpy(message, vsnprintf_failure_message, sizeof(vsnprintf_failure_message));
@@ -262,5 +260,4 @@ void etwlogger_log(LOG_CATEGORY log_category, const char* file, const char* func
     va_end(args);
 }
 
-#endif
-
+#endif /* USE_TRACELOGGING */
