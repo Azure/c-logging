@@ -109,12 +109,12 @@ jobs:
       configuration: RelWithDebInfo
       maximumCpuCount: true
 
-  - task: VSTest@2
-    displayName: 'VsTest - testAssemblies'
+  - task: CmdLine@1
+    displayName: 'Run ctest'
     inputs:
-      testAssemblyVer2: |
-          $(Build.BinariesDirectory)\RelWithDebInfo\*.dll
-      runTestsInIsolation: true
+      filename: ctest
+      arguments: '-C "Debug" -V --output-on-failure'
+      workingFolder: 'build_x64'
 
 - job: windowsx86debug
   displayName: 'Build Windows x86 Debug'
