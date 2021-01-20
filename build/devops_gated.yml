@@ -113,8 +113,7 @@ jobs:
     displayName: 'VsTest - testAssemblies'
     inputs:
       testAssemblyVer2: |
-          **\*test*.dll
-          !**\obj\**
+          RelWithDebInfo\**\*.dll
       runTestsInIsolation: true
 
 - job: windowsx86debug
