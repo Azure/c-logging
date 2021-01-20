@@ -15,6 +15,7 @@ jobs:
     - msbuild
     - cmake
     - visualstudio
+  condition: false
 
   steps:
   - task: BatchScript@1
@@ -74,6 +75,7 @@ jobs:
     - cmake
     - visualstudio
     - vstest
+  condition: false
 
   steps:
   - task: BatchScript@1
@@ -132,6 +134,7 @@ jobs:
     - msbuild
     - cmake
     - visualstudio
+  condition: false
 
   steps:
   - task: BatchScript@1
@@ -186,6 +189,7 @@ jobs:
     name: Azure-MessagingStore
     demands:
     - linux
+  condition: false
 
   steps:
   - bash: |
@@ -260,6 +264,7 @@ jobs:
     - msbuild
     - cmake
     - visualstudio
+  condition: false
 
   steps:
   - task: BatchScript@1
