@@ -251,17 +251,12 @@ jobs:
       cmakeArgs: '.. -GNinja -DCMAKE_C_INCLUDE_WHAT_YOU_USE:UNINITIALIZED=include-what-you-use;-Xiwyu;--mapping_file=./deps/c-build-tools/iwyu/rules.imp;--driver-mode=cl -DCMAKE_CXX_INCLUDE_WHAT_YOU_USE:UNINITIALIZED=include-what-you-use;-Xiwyu;--mapping_file=./deps/c-build-tools/iwyu/rules.imp;--driver-mode=cl -Drun_unittests:bool=OFF -Drun_int_tests:bool=OFF -Drun_perf_tests:bool=OFF -Drun_traceability:bool=OFF'
 
   - task: PowerShell@2
-    displayName: 'Build with cmake and write output to log file'
-    inputs:
-      targetType: 'inline'
-      script: |
-          cmake --build . | tee build.log
-
-  - task: CMake@1
     displayName: 'Build solution and check includes'
     inputs:
       workingDirectory: 'build_ninja'
-      cmakeArgs: '--build .'
+      targetType: 'inline'
+      script: |
+          cmake --build . | tee build.log
 
 - job: Traceability
   pool:
