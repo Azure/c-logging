@@ -5,10 +5,18 @@
 #define XLOGGING_H
 
 #ifdef __cplusplus
-#include <cstdlib>
+#include <cstdio>
 #else
-#include <stdlib.h>
+#include <stdio.h>
 #endif
+
+#if defined _MSC_VER && defined LOGERROR_CAPTURES_STACK_TRACES
+#ifdef __cplusplus
+#include <cstring>
+#else
+#include <string.h> // for memcpy, strlen
+#endif
+#endif // defined _MSC_VER && defined LOGERROR_CAPTURES_STACK_TRACES
 
 #include "macro_utils/macro_utils.h"
 
@@ -17,12 +25,6 @@
 #endif
 
 #define LOG_SIZE_REGULAR 4096 /*in bytes - a message is not expected to exceed this size in bytes, if it does, only LOG_SIZE_REGULAR characters are retained*/
-
-#ifdef __cplusplus
-#include <cstdio>
-#else
-#include <stdio.h>
-#endif /* __cplusplus */
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,7 +70,7 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
 // specifications, we call printf with the format and __VA_ARGS__. Since C && operator is shortcircuiting no actual runtime call to printf is performed.
 #if defined _MSC_VER
 #ifndef LOGERROR_CAPTURES_STACK_TRACES
-// ignore warning C4127 
+// ignore warning C4127
 #define LOG(log_category, log_options, format, ...) \
 { \
     (void)(0 && printf(format, ##__VA_ARGS__)); \
@@ -80,7 +82,7 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
         } \
     } \
 }
-#else /*LOGERROR_CAPTURES_STACK_TRACES is defined*/ 
+#else /*LOGERROR_CAPTURES_STACK_TRACES is defined*/
 
 #define LOG(log_category, log_options, format, ...) MU_C2(LOG_,log_category)(log_category, log_options, format, ##__VA_ARGS__)
 
