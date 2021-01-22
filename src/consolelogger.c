@@ -4,12 +4,12 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <time.h>
-#include <string.h>
 
 #include "c_logging/xlogging.h"
 #include "c_logging/consolelogger.h"
 
 #if (defined(_MSC_VER))
+#include <string.h>
 #include "windows.h"
 
 /*this function will use 1x puts (in the happy case) .*/
@@ -20,7 +20,7 @@ void consolelogger_log_with_GetLastError(const char* file, const char* func, int
     DWORD lastError;
 
     char message[LOG_SIZE_REGULAR];
-    
+
     int size = 0; /*size tracks number of character from "message" that are used so far, not counting the last null character. Uses int as data type because snprintf functions return int*/
 
     int snprintf_result;
@@ -78,7 +78,7 @@ void consolelogger_log_with_GetLastError(const char* file, const char* func, int
     }
 
     {/*scope for 3) whatever GetLastError can provide*/
-        
+
         /*add the getlastError for good measure anyway*/
         snprintf_result = snprintf(message + size, sizeof(message) - size, " GetLastError()=%#lx ", lastError);
         if (snprintf_result < 0)

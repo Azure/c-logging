@@ -3,8 +3,6 @@
 
 #ifndef NO_LOGGING
 
-#include <string.h>
-
 #include "c_logging/xlogging.h"
 #include "c_logging/consolelogger.h"
 
