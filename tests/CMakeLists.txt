@@ -3,13 +3,9 @@
 
 #unit tests
 if(${run_unittests})
-    if(WIN32)
-       add_subdirectory(logging_ut)
-    endif()
+   add_subdirectory(logging_ut)
 endif()
 
 if(${run_int_tests})
-    if(WIN32)
-       add_subdirectory(logging_int)
-    endif()
+   add_subdirectory(logging_int)
 endif()
