@@ -5,15 +5,25 @@
 #the tests will not recompile the complete c_logging library, only the relevant parts. These tests only target Windows
 
 if(${run_unittests})
-
-foreach(no_logging_value ON OFF)
-    foreach(logerror_captures_stack_traces_value ON OFF)
-        foreach(use_etw_value OFF TRACELOGGING TRACELOGGING_WITH_CONSOLE)
-
-            add_subdirectory(minimal "min${no_logging_value}${logerror_captures_stack_traces_value}${use_etw_value}")
-
-        endforeach(use_etw_value)
-    endforeach(logerror_captures_stack_traces_value)
-endforeach(no_logging_value)
-
+    if(${WIN32})
+        foreach(no_logging_value ON OFF)
+            foreach(logerror_captures_stack_traces_value ON OFF)
+                foreach(use_etw_value OFF TRACELOGGING TRACELOGGING_WITH_CONSOLE)
+        
+                    add_subdirectory(minimal "min${no_logging_value}${logerror_captures_stack_traces_value}${use_etw_value}")
+        
+                endforeach(use_etw_value)
+            endforeach(logerror_captures_stack_traces_value)
+        endforeach(no_logging_value)
+    else() #LINUX - note it doesn't have LogLastError/stack capturing/ETW
+        foreach(no_logging_value ON OFF)
+            foreach(logerror_captures_stack_traces_value OFF)
+                foreach(use_etw_value OFF)
+        
+                    add_subdirectory(minimal "min${no_logging_value}${logerror_captures_stack_traces_value}${use_etw_value}")
+        
+                endforeach(use_etw_value)
+            endforeach(logerror_captures_stack_traces_value)
+        endforeach(no_logging_value)
+    endif()
 endif()
