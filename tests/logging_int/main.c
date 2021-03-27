@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include "macro_utils/macro_utils.h"
+
 #include "c_logging/xlogging.h"
 
 /*not much in the way of testing, but "should not crash" */
