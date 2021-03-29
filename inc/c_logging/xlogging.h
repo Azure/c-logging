@@ -72,8 +72,6 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
 #ifndef LOGERROR_CAPTURES_STACK_TRACES
 #define LOG(log_category, log_options, format, ...) \
 { \
-    __pragma(warning(push))\
-    __pragma(warning(disable:4189)) /*MU_BOOL_VALUE yields warning C4189: '$S1': local variable is initialized but not referenced*/ \
     (void)(0 && printf(format, ##__VA_ARGS__)); \
     { \
         LOGGER_LOG logger_function = xlogging_get_log_function(); \
@@ -82,15 +80,11 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
             logger_function(log_category, __FILE__, FUNC_NAME, __LINE__, log_options, format, ##__VA_ARGS__); \
         } \
     } \
-    __pragma(warning(pop))\
 }
 #else /*LOGERROR_CAPTURES_STACK_TRACES is defined*/
 
 #define LOG(log_category, log_options, format, ...) \
-    __pragma(warning(push))\
-    __pragma(warning(disable:4189)) /*MU_BOOL_VALUE yields warning C4189: '$S1': local variable is initialized but not referenced*/ \
     MU_C2(LOG_,log_category)(log_category, log_options, format, ##__VA_ARGS__) \
-    __pragma(warning(pop))\
 
 #define LOG_AZ_LOG_WITH_STACK(log_category, log_options, format, ...)                                                                                                   \
 {                                                                                                                                                                       \
