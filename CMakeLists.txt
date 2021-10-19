@@ -24,6 +24,7 @@ option(run_int_tests "set run_int_tests to ON to run integration tests (default 
 option(run_e2e_tests "set run_e2e_tests to ON to run e2e tests (default is OFF)." OFF)
 option(use_cppunittest "set use_cppunittest to ON to build CppUnitTest tests on Windows (default is ON)" ON)
 option(run_traceability "run traceability tool (default is ON)" ON)
+option(run_reals_check "run reals check tool (default is OFF)" OFF)
 
 if(WIN32)
     option(logerror_captures_stack_traces "LogError will make a reasonable attempt to capture the stack trace at the time of calling LogError. Only available on Windows" OFF)
