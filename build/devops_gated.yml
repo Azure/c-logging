@@ -51,7 +51,7 @@ jobs:
     displayName: 'Build solution build_x64\*.sln'
     inputs:
       solution: 'build_x64\*.sln'
-      msbuildArgs: '/t:restore /t:build
+      msbuildArgs: '/t:restore /t:build'
       platform: x64
       configuration: Debug
       maximumCpuCount: true
