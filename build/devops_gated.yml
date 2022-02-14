@@ -1,4 +1,4 @@
-name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+6name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 
 resources:
 - repo: self
@@ -303,7 +303,6 @@ jobs:
     displayName: 'Build traceabilitytool only'
     inputs:
       solution: 'build\c_logging.sln'
-      vsVersion: 16.0
       platform: x64
       configuration: RelWithDebInfo
       msbuildArgs: '/t:restore /t:build /t:traceabilitytool'
