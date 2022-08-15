@@ -11,6 +11,17 @@ The API shall allow easy formatting of values to be placed in the contexts by us
 ## Exposed API
 
 ```
+#define LOG_LEVEL_VALUES \
+    LOG_LEVEL_CRITICAL, \
+    LOG_LEVEL_ERROR, \
+    LOG_LEVEL_WARNING, \
+    LOG_LEVEL_INFO, \
+    LOG_LEVEL_VERBOSE
+
+MU_DEFINE_ENUM_WITHOUT_INVALID(LOG_LEVEL, LOG_LEVEL_VALUES);
+
+typedef struct LOG_CONTEXT_TAG* LOG_CONTEXT_HANDLE;
+
 void logger_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line_no, const char* format, ...);
 
 #define LOGGER_LOG(log_level, log_context, format, ...) \
@@ -209,9 +220,9 @@ Example:
 
 Bonus:
 
-An ideal implementation for the stack allocated contexts is also to not do any memory copy until actually needed (until they are used).
+An ideal implementation for the stack allocated contexts will do as little work as possible at the definition of the local context.
 
-That would allow writing code like below while not performing the memory copies until the logging is actually executed.
+However the evaluation of the context property builder macros has to be done at the time of context construction (where `LOG_CONTEXT_LOCAL_DEFINE` is used).
 
 ```c
 void a(LOG_CONTEXT_HANDLE log_context, const char* correlation_id)
