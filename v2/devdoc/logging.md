@@ -8,6 +8,8 @@ The exposed API shall allow creating contexts both dynamically and on the stack 
 
 The API shall allow easy formatting of values to be placed in the contexts by using printf-like formatting.
 
+## Exposed API
+
 ```
 void logger_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line_no, const char* format, ...);
 
@@ -97,13 +99,13 @@ void examples(void)
 The above example produces:
 
 ```
-LOG_LEVEL_CRITICAL Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:89 Func:main unnamed={ property_name=a  }  some critical error with context
+LOG_LEVEL_CRITICAL Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:89 Func:main { property_name=a  }  some critical error with context
 LOG_LEVEL_ERROR Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:102 Func:main context_1={ name=haga  }  log error with context 1, value of some_var = 42
 LOG_LEVEL_WARNING Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:103 Func:main context_2={ context_1={ name=haga  } last name=uaga age=42  }  log warning with context 2, some other string value is mumu
 LOG_LEVEL_ERROR Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:16 Func:log_from_a_function context_2={ context_1={ name=haga  } last name=uaga age=42  }  log from a function!
 LOG_LEVEL_INFO Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:112 Func:main context_name={ context_2={ context_1={ name=haga  } last name=uaga age=42  } the_knights_that_say=Nee!  }  log info with local context
-LOG_LEVEL_VERBOSE Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:117 Func:main unnamed={ unnamed={ context_2={ context_1={ name=haga  } last name=uaga age=42  } the_knights_that_say=Nee!  } other_knights_that_say=Moo!  }  log with nee and moo
-LOG_LEVEL_ERROR Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:16 Func:log_from_a_function unnamed={ unnamed={ context_2={ context_1={ name=haga  } last name=uaga age=42  } the_knights_that_say=Nee!  } other_knights_that_say=Moo!  }  log from a function!
+LOG_LEVEL_VERBOSE Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:117 Func:main { { context_2={ context_1={ name=haga  } last name=uaga age=42  } the_knights_that_say=Nee!  } other_knights_that_say=Moo!  }  log with nee and moo
+LOG_LEVEL_ERROR Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:16 Func:log_from_a_function { { context_2={ context_1={ name=haga  } last name=uaga age=42  } the_knights_that_say=Nee!  } other_knights_that_say=Moo!  }  log from a function!
 ```
 
 ## Log levels
@@ -142,6 +144,8 @@ For the `ETW` sink there should be a posibility of specifying the provider GUID 
 
 A console sink shall be supported so that events are printed to the console using `printf`.
 
+The console sink shall have support for multithreading so that the output is not intermingled.
+
 ## API
 
 ### logger_log
@@ -173,7 +177,7 @@ For each log line the library shall support specifying a context to be added to 
 
 The context shall allow defining property-value pairs that are added to the event when the event is emitted.
 
-The properties are evaluated at context construction definition time (be that dynamiccally allocated or stack context).
+The properties are evaluated at context construction definition time (be that dynamically allocated or stack context).
 
 Once the context is built, the properties cannot be changed in the context.
 
@@ -206,10 +210,12 @@ void a(LOG_CONTEXT_HANDLE log_context, const char* correlation_id)
 
     if (malloc(42) == NULL)
     {
-        logger_log(LOG_LEVEL_ERROR, local_context, "malloc failed");
+        LOGGER_LOG(LOG_LEVEL_ERROR, &local_context, "malloc failed");
     }
 }
 ```
+
+Note: When logging with local contexts, the context passed to `LOGGER_LOG` has to be passed using the address of the context (&).
 
 ### Dynamically allocated context creation
 
@@ -275,7 +281,7 @@ Note: more types will be added as needed.
 
 `LOG_CONTEXT_NAME` shall allow specifying the context name to be used either when printing logs to console or when ETW events are published.
 
-By default if not specified, the context name shall be `unnamed`.
+By default if not specified, the context name shall be an empty string.
 
 Example:
 
@@ -300,6 +306,7 @@ Examples of what would fall in the extensions category are:
 - syntactic sugar for a message property
 - `GetLastError` on Windows
 - `HRESULT` on Windows
+- errno
 
 ### LOG_MESSAGE
 
@@ -335,5 +342,5 @@ LOGGER_LOG_EX(LOG_LEVEL_ERROR,
 This would output:
 
 ```
-LOG_LEVEL_ERROR Time:Mon Aug 15 11:15:35 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:125 Func:main unnamed={ name=gogu age=42  }
+LOG_LEVEL_ERROR Time:Mon Aug 15 11:15:35 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:125 Func:main { name=gogu age=42  }
 ```
