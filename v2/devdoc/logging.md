@@ -60,7 +60,7 @@ void examples(void)
     LOG_CONTEXT_HANDLE log_context;
     LOG_CONTEXT_CREATE(log_context, NULL, LOG_CONTEXT_STRING_PROPERTY(property_name, "%s", MU_P_OR_NULL(prop_value)));
 
-    LOGGER_LOG(LOG_LEVEL_ERROR, log_context, "some_error with context");
+    LOGGER_LOG(LOG_LEVEL_CRITICAL, log_context, "some critical error with context");
 
     LOG_CONTEXT_DESTROY(log_context);
 
@@ -73,8 +73,8 @@ void examples(void)
     LOG_CONTEXT_HANDLE context_2;
     LOG_CONTEXT_CREATE(context_2, context_1, LOG_CONTEXT_NAME(context_2), LOG_CONTEXT_STRING_PROPERTY(last name, "%s%s", "ua", "ga"), LOG_CONTEXT_PROPERTY(int32_t, age, 42));
     
-    LOGGER_LOG(LOG_LEVEL_CRITICAL, context_1, "log with context 1, value of some_var = %d", 42);
-    LOGGER_LOG(LOG_LEVEL_VERBOSE, context_2, "log with context 2, some other string value is %s", "mumu");
+    LOGGER_LOG(LOG_LEVEL_ERROR, context_1, "value of some_var = %d", 42);
+    LOGGER_LOG(LOG_LEVEL_WARNING, context_2, "some other string value is %s", "mumu");
     
     LOG_CONTEXT_DESTROY(context_1);
 
@@ -83,7 +83,7 @@ void examples(void)
     // stack allocated context
     LOG_CONTEXT_LOCAL_DEFINE(local_context, context_2, LOG_CONTEXT_STRING_PROPERTY(the_knights_that_say, "%s", "Nee!"));
 
-    LOGGER_LOG(LOG_LEVEL_VERBOSE, &local_context, "log with local context");
+    LOGGER_LOG(LOG_LEVEL_INFO, &local_context, "log info with local context");
     
     // local context chaining another local context
     LOG_CONTEXT_LOCAL_DEFINE(local_context_2, &local_context, LOG_CONTEXT_STRING_PROPERTY(other_knights_that_say, "%s", "Moo!"));
@@ -93,19 +93,29 @@ void examples(void)
     log_from_a_function(&local_context_2);
     
     LOG_CONTEXT_DESTROY(context_2);
+
+    LOGGER_LOG_EX(LOG_LEVEL_ERROR,
+        LOG_CONTEXT_STRING_PROPERTY(name, "%s%s", "go", "gu"),
+        LOG_CONTEXT_PROPERTY(int32_t, age, 42));
+
+    LOGGER_LOG_EX(LOG_LEVEL_ERROR,
+        LOG_CONTEXT_STRING_PROPERTY(name, "%s%s", "go", "gu"),
+        LOG_MESSAGE("some message here with and integer = %d", 42));
 }
 ```
 
 The above example produces:
 
 ```
-LOG_LEVEL_CRITICAL Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:89 Func:main { property_name=a  }  some critical error with context
-LOG_LEVEL_ERROR Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:102 Func:main context_1={ name=haga  }  log error with context 1, value of some_var = 42
-LOG_LEVEL_WARNING Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:103 Func:main context_2={ context_1={ name=haga  } last name=uaga age=42  }  log warning with context 2, some other string value is mumu
-LOG_LEVEL_ERROR Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:16 Func:log_from_a_function context_2={ context_1={ name=haga  } last name=uaga age=42  }  log from a function!
-LOG_LEVEL_INFO Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:112 Func:main context_name={ context_2={ context_1={ name=haga  } last name=uaga age=42  } the_knights_that_say=Nee!  }  log info with local context
-LOG_LEVEL_VERBOSE Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:117 Func:main { { context_2={ context_1={ name=haga  } last name=uaga age=42  } the_knights_that_say=Nee!  } other_knights_that_say=Moo!  }  log with nee and moo
-LOG_LEVEL_ERROR Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:16 Func:log_from_a_function { { context_2={ context_1={ name=haga  } last name=uaga age=42  } the_knights_that_say=Nee!  } other_knights_that_say=Moo!  }  log from a function!
+LOG_LEVEL_CRITICAL Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:89 Func:main { property_name=a } some critical error with context
+LOG_LEVEL_ERROR Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:102 Func:main context_1={ name=haga } value of some_var = 42
+LOG_LEVEL_WARNING Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:103 Func:main context_2={ context_1={ name=haga } last name=uaga age=42 } some other string value is mumu
+LOG_LEVEL_ERROR Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:16 Func:log_from_a_function context_2={ context_1={ name=haga } last name=uaga age=42 } log from a function!
+LOG_LEVEL_INFO Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:112 Func:main { context_2={ context_1={ name=haga } last name=uaga age=42 } the_knights_that_say=Nee! } log info with local context
+LOG_LEVEL_VERBOSE Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:117 Func:main { { context_2={ context_1={ name=haga } last name=uaga age=42 } the_knights_that_say=Nee! } other_knights_that_say=Moo! } log with nee and moo
+LOG_LEVEL_ERROR Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:16 Func:log_from_a_function { { context_2={ context_1={ name=haga } last name=uaga age=42 } the_knights_that_say=Nee! } other_knights_that_say=Moo! } log from a function!
+LOG_LEVEL_ERROR Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:125 Func:main { name=gogu age=42 }
+LOG_LEVEL_ERROR Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:129 Func:main { name=gogu message=some message here with and integer = 42 }
 ```
 
 ## Log levels
