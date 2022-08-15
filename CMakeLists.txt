@@ -165,3 +165,5 @@ if(${run_reals_check})
 endif()
 
 compileTargetAsC99(c_logging)
+
+add_subdirectory(v2)
