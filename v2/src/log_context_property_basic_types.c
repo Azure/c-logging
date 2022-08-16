@@ -8,6 +8,7 @@
 
 #include "c_logging/log_context_property_type.h"
 #include "c_logging/log_context_property_type_if.h"
+
 #include "c_logging/log_context_property_basic_types.h"
 
 #define DEFINE_BASIC_TYPE_TO_STRING(type_name, print_format_string) \
@@ -84,7 +85,6 @@
     DEFINE_BASIC_TYPE_COPY(type_name) \
     DEFINE_BASIC_TYPE_FREE(type_name) \
     DEFINE_BASIC_TYPE_GET_TYPE(type_name) \
-    DEFINE_BASIC_TYPE_IF(type_name)
 
 DEFINE_BASIC_TYPE(int64_t, PRId64)
 DEFINE_BASIC_TYPE(uint64_t, PRIu64)
@@ -94,3 +94,5 @@ DEFINE_BASIC_TYPE(int16_t, PRId16)
 DEFINE_BASIC_TYPE(uint16_t, PRIu16)
 DEFINE_BASIC_TYPE(int8_t, PRId8)
 DEFINE_BASIC_TYPE(uint8_t, PRIu8)
+
+MU_FOR_EACH_1(DEFINE_BASIC_TYPE_IF, SUPPORTED_BASIC_TYPES)
