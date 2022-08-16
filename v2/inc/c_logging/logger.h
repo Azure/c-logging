@@ -4,18 +4,8 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include "macro_utils/macro_utils.h"
-
 #include "c_logging/log_context.h"
-
-#define LOG_LEVEL_VALUES \
-    LOG_LEVEL_CRITICAL, \
-    LOG_LEVEL_ERROR, \
-    LOG_LEVEL_WARNING, \
-    LOG_LEVEL_INFO, \
-    LOG_LEVEL_VERBOSE
-
-MU_DEFINE_ENUM_WITHOUT_INVALID(LOG_LEVEL, LOG_LEVEL_VALUES);
+#include "c_logging/log_level.h"
 
 #ifdef __cplusplus
 extern "C" {
