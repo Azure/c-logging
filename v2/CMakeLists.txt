@@ -8,6 +8,7 @@ set(c_logging_v2_c_files
 set(c_logging_v2_h_files
     ./inc/c_logging/logger.h
     ./inc/c_logging/log_context.h
+    ./inc/c_logging/log_sink.h
     )
 
 FILE(GLOB c_logging_v2_md_files "devdoc/*.md")
