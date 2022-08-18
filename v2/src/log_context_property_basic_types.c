@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 #include <stdio.h>
+#include <string.h> 
 
 #include "macro_utils/macro_utils.h"
 
