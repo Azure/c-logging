@@ -42,13 +42,13 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* b
 
 `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int64_t).to_string` produces the string representation of an `int64_t`.
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_001: [** If `property_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int64_t).to_string` shall fail and return -1. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_001: [** If `property_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int64_t).to_string` shall fail and return a negative value. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_002: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int64_t).to_string` shall call `snprintf` with `buffer`, `buffer_length` and format string `PRId64` and pass in the values list the `int64_t` value pointed to be `property_value`. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_003: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int64_t).to_string` shall succeed and return the result of `snprintf`. **]**
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_004: [** If any error is encountered, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int64_t).to_string` shall fail and return -1. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_004: [** If any error is encountered, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int64_t).to_string` shall fail and return a negative value. **]**
 
 ## LOG_CONTEXT_PROPERTY_TYPE_IMPL(int64_t).copy
 
@@ -69,7 +69,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_IMPL(int64_t).free
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_009: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int64_t).free` shall return. **]**
@@ -90,13 +90,13 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* b
 
 `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint64_t).to_string` produces the string representation of an `uint64_t`.
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_011: [** If `property_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint64_t).to_string` shall fail and return -1. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_011: [** If `property_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint64_t).to_string` shall fail and return a negative value. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_012: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint64_t).to_string` shall call `snprintf` with `buffer`, `buffer_length` and format string `PRIu64` and pass in the values list the `uint64_t` value pointed to be `property_value`. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_013: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint64_t).to_string` shall succeed and return the result of `snprintf`. **]**
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_014: [** If any error is encountered, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint64_t).to_string` shall fail and return -1. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_014: [** If any error is encountered, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint64_t).to_string` shall fail and return a negative value. **]**
 
 ## LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint64_t).copy
 
@@ -117,7 +117,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint64_t).free
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_019: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint64_t).free` shall return. **]**
@@ -138,13 +138,13 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* b
 
 `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).to_string` produces the string representation of an `int32_t`.
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_021: [** If `property_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).to_string` shall fail and return -1. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_021: [** If `property_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).to_string` shall fail and return a negative value. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_022: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).to_string` shall call `snprintf` with `buffer`, `buffer_length` and format string `PRId32` and pass in the values list the `int32_t` value pointed to be `property_value`. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_023: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).to_string` shall succeed and return the result of `snprintf`. **]**
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_024: [** If any error is encountered, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).to_string` shall fail and return -1. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_024: [** If any error is encountered, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).to_string` shall fail and return a negative value. **]**
 
 ## LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).copy
 
@@ -165,7 +165,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).free
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_029: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).free` shall return. **]**
@@ -186,13 +186,13 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* b
 
 `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).to_string` produces the string representation of an `uint32_t`.
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_031: [** If `property_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).to_string` shall fail and return -1. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_031: [** If `property_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).to_string` shall fail and return a negative value. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_032: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).to_string` shall call `snprintf` with `buffer`, `buffer_length` and format string `PRIu32` and pass in the values list the `uint32_t` value pointed to be `property_value`. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_033: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).to_string` shall succeed and return the result of `snprintf`. **]**
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_034: [** If any error is encountered, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).to_string` shall fail and return -1. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_034: [** If any error is encountered, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).to_string` shall fail and return a negative value. **]**
 
 ## LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).copy
 
@@ -213,7 +213,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).free
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_039: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).free` shall return. **]**
@@ -234,13 +234,13 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* b
 
 `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).to_string` produces the string representation of an `int16_t`.
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_041: [** If `property_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).to_string` shall fail and return -1. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_041: [** If `property_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).to_string` shall fail and return a negative value. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_042: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).to_string` shall call `snprintf` with `buffer`, `buffer_length` and format string `PRId16` and pass in the values list the `int16_t` value pointed to be `property_value`. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_043: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).to_string` shall succeed and return the result of `snprintf`. **]**
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_044: [** If any error is encountered, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).to_string` shall fail and return -1. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_044: [** If any error is encountered, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).to_string` shall fail and return a negative value. **]**
 
 ## LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).copy
 
@@ -261,7 +261,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).free
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_049: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).free` shall return. **]**
@@ -282,13 +282,13 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* b
 
 `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).to_string` produces the string representation of an `uint16_t`.
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_051: [** If `property_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).to_string` shall fail and return -1. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_051: [** If `property_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).to_string` shall fail and return a negative value. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_052: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).to_string` shall call `snprintf` with `buffer`, `buffer_length` and format string `PRIu16` and pass in the values list the `uint16_t` value pointed to be `property_value`. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_053: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).to_string` shall succeed and return the result of `snprintf`. **]**
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_054: [** If any error is encountered, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).to_string` shall fail and return -1. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_054: [** If any error is encountered, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).to_string` shall fail and return a negative value. **]**
 
 ## LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).copy
 
@@ -309,7 +309,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).free
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_059: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).free` shall return. **]**
@@ -330,13 +330,13 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* b
 
 `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).to_string` produces the string representation of an `int8_t`.
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_061: [** If `property_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).to_string` shall fail and return -1. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_061: [** If `property_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).to_string` shall fail and return a negative value. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_062: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).to_string` shall call `snprintf` with `buffer`, `buffer_length` and format string `PRId8` and pass in the values list the `int8_t` value pointed to be `property_value`. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_063: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).to_string` shall succeed and return the result of `snprintf`. **]**
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_064: [** If any error is encountered, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).to_string` shall fail and return -1. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_064: [** If any error is encountered, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).to_string` shall fail and return a negative value. **]**
 
 ## LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).copy
 
@@ -350,14 +350,14 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_066: [** If `dst_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).copy` shall fail and return a non-zero value. **]**
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_067: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).copy` shall copy the bytes of the `int8_t` value from the address pointed by `src_value` to `dst_value`. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_067: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).copy` shall copy the byte of the `int8_t` value from the address pointed by `src_value` to `dst_value`. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_068: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).copy` shall succeed and return 0. **]**
 
 ## LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).free
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_069: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).free` shall return. **]**
@@ -378,13 +378,13 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* b
 
 `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).to_string` produces the string representation of an `uint8_t`.
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_071: [** If `property_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).to_string` shall fail and return -1. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_071: [** If `property_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).to_string` shall fail and return a negative value. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_072: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).to_string` shall call `snprintf` with `buffer`, `buffer_length` and format string `PRIu8` and pass in the values list the `uint8_t` value pointed to be `property_value`. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_073: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).to_string` shall succeed and return the result of `snprintf`. **]**
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_074: [** If any error is encountered, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).to_string` shall fail and return -1. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_074: [** If any error is encountered, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).to_string` shall fail and return a negative value. **]**
 
 ## LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).copy
 
@@ -398,14 +398,14 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_076: [** If `dst_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).copy` shall fail and return a non-zero value. **]**
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_077: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).copy` shall copy the bytes of the `uint8_t` value from the address pointed by `src_value` to `dst_value`. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_077: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).copy` shall copy the byte of the `uint8_t` value from the address pointed by `src_value` to `dst_value`. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_078: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).copy` shall succeed and return 0. **]**
 
 ## LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).free
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_079: [** `LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).free` shall return. **]**

@@ -15,14 +15,14 @@
     static int MU_C2(type_name,_log_context_property_to_string)(void* property_value, char* buffer, size_t buffer_size) \
     { \
         int result; \
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_001: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IMPL(int64_t).to_string shall fail and return -1. ]*/ \
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_011: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint64_t).to_string shall fail and return -1. ]*/ \
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_021: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).to_string shall fail and return -1. ]*/ \
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_031: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).to_string shall fail and return -1. ]*/ \
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_041: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).to_string shall fail and return -1. ]*/ \
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_051: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).to_string shall fail and return -1. ]*/ \
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_061: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).to_string shall fail and return -1. ]*/ \
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_071: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).to_string shall fail and return -1. ]*/ \
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_001: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IMPL(int64_t).to_string shall fail and return a negative value. ]*/ \
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_011: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint64_t).to_string shall fail and return a negative value. ]*/ \
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_021: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).to_string shall fail and return a negative value. ]*/ \
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_031: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).to_string shall fail and return a negative value. ]*/ \
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_041: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).to_string shall fail and return a negative value. ]*/ \
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_051: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).to_string shall fail and return a negative value. ]*/ \
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_061: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).to_string shall fail and return a negative value. ]*/ \
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_071: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).to_string shall fail and return a negative value. ]*/ \
         if (property_value == NULL) \
         { \
             (void)printf("Invalid arguments: void* property_value=%p, char* buffer=%p, size_t buffer_size=%zu\r\n", \
@@ -33,28 +33,28 @@
         { \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_002: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(int64_t).to_string shall call snprintf with buffer, buffer_length and format string PRId64 and pass in the values list the int64_t value pointed to be property_value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_003: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(int64_t).to_string shall succeed and return the result of snprintf. ]*/ \
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_004: [ If any error is encountered, LOG_CONTEXT_PROPERTY_TYPE_IMPL(int64_t).to_string shall fail and return -1. ]*/ \
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_004: [ If any error is encountered, LOG_CONTEXT_PROPERTY_TYPE_IMPL(int64_t).to_string shall fail and return a negative value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_012: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint64_t).to_string shall call snprintf with buffer, buffer_length and format string PRId64 and pass in the values list the uint64_t value pointed to be property_value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_013: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint64_t).to_string shall succeed and return the result of snprintf. ]*/ \
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_014: [ If any error is encountered, LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint64_t).to_string shall fail and return -1. ]*/ \
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_014: [ If any error is encountered, LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint64_t).to_string shall fail and return a negative value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_022: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).to_string shall call snprintf with buffer, buffer_length and format string PRId32 and pass in the values list the int32_t value pointed to be property_value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_023: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).to_string shall succeed and return the result of snprintf. ]*/ \
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_024: [ If any error is encountered, LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).to_string shall fail and return -1. ]*/ \
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_024: [ If any error is encountered, LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).to_string shall fail and return a negative value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_032: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).to_string shall call snprintf with buffer, buffer_length and format string PRId32 and pass in the values list the uint32_t value pointed to be property_value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_033: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).to_string shall succeed and return the result of snprintf. ]*/ \
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_034: [ If any error is encountered, LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).to_string shall fail and return -1. ]*/ \
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_034: [ If any error is encountered, LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).to_string shall fail and return a negative value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_042: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).to_string shall call snprintf with buffer, buffer_length and format string PRId16 and pass in the values list the int16_t value pointed to be property_value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_043: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).to_string shall succeed and return the result of snprintf. ]*/ \
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_044: [ If any error is encountered, LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).to_string shall fail and return -1. ]*/ \
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_044: [ If any error is encountered, LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).to_string shall fail and return a negative value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_052: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).to_string shall call snprintf with buffer, buffer_length and format string PRId16 and pass in the values list the uint16_t value pointed to be property_value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_053: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).to_string shall succeed and return the result of snprintf. ]*/ \
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_054: [ If any error is encountered, LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).to_string shall fail and return -1. ]*/ \
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_054: [ If any error is encountered, LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).to_string shall fail and return a negative value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_062: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).to_string shall call snprintf with buffer, buffer_length and format string PRId8 and pass in the values list the int8_t value pointed to be property_value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_063: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).to_string shall succeed and return the result of snprintf. ]*/ \
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_064: [ If any error is encountered, LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).to_string shall fail and return -1. ]*/ \
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_064: [ If any error is encountered, LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).to_string shall fail and return a negative value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_072: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).to_string shall call snprintf with buffer, buffer_length and format string PRId8 and pass in the values list the uint8_t value pointed to be property_value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_073: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).to_string shall succeed and return the result of snprintf. ]*/ \
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_074: [ If any error is encountered, LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).to_string shall fail and return -1. ]*/ \
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_074: [ If any error is encountered, LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).to_string shall fail and return a negative value. ]*/ \
             result = snprintf(buffer, buffer_size, "%" print_format_string "", *(type_name*)property_value); \
         } \
         return result; \
@@ -93,13 +93,13 @@
         { \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_007: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(int64_t).copy shall copy the bytes of the int64_t value from the address pointed by src_value to dst_value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_017: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint64_t).copy shall copy the bytes of the uint64_t value from the address pointed by src_value to dst_value. ]*/ \
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_027: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).copy shall copy the bytes of the int64_t value from the address pointed by src_value to dst_value. ]*/ \
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_037: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).copy shall copy the bytes of the uint64_t value from the address pointed by src_value to dst_value. ]*/ \
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_047: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).copy shall copy the bytes of the int64_t value from the address pointed by src_value to dst_value. ]*/ \
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_057: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).copy shall copy the bytes of the uint64_t value from the address pointed by src_value to dst_value. ]*/ \
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_067: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).copy shall copy the bytes of the int64_t value from the address pointed by src_value to dst_value. ]*/ \
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_077: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).copy shall copy the bytes of the uint64_t value from the address pointed by src_value to dst_value. ]*/ \
-            *(type_name*)dst_value = *(type_name*)src_value; \
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_027: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).copy shall copy the bytes of the int32_t value from the address pointed by src_value to dst_value. ]*/ \
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_037: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).copy shall copy the bytes of the uint32_t value from the address pointed by src_value to dst_value. ]*/ \
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_047: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(int16_t).copy shall copy the bytes of the int16_t value from the address pointed by src_value to dst_value. ]*/ \
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_057: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint16_t).copy shall copy the bytes of the uint16_t value from the address pointed by src_value to dst_value. ]*/ \
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_067: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(int8_t).copy shall copy the byte of the int8_t value from the address pointed by src_value to dst_value. ]*/ \
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_077: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint8_t).copy shall copy the byte of the uint8_t value from the address pointed by src_value to dst_value. ]*/ \
+            (void)memcpy(dst_value, src_value, sizeof(type_name)); \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_008: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).copy shall succeed and return 0. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_018: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(uint32_t).copy shall succeed and return 0. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_028: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(int32_t).copy shall succeed and return 0. ]*/ \
