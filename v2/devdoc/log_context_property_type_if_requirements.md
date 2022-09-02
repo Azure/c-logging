@@ -6,6 +6,8 @@
 - copy
 - free
 - get_type
+- init
+- get_init_data_size
 
 ## Exposed API
 
@@ -27,6 +29,12 @@ typedef struct LOG_CONTEXT_PROPERTY_TYPE_IF_TAG
 // in a consistent way
 #define LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(type_name) \
     MU_C2(type_name, _log_context_property_type)
+
+#define LOG_CONTEXT_PROPERTY_TYPE_INIT(type_name) \
+    MU_C2(type_name, _log_context_property_type_init)
+
+#define LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(type_name) \
+    MU_C2(type_name, _log_context_property_type_get_init_data_size)
 ```
 
 ## LOG_CONTEXT_PROPERTY_TYPE_TO_STRING
@@ -66,3 +74,19 @@ typedef LOG_CONTEXT_PROPERTY_TYPE (*LOG_CONTEXT_PROPERTY_TYPE_GET_TYPE)(void);
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(type_name)
 
 **SRS_LOG_CONTEXT_PROPERTY_TYPE_IF_01_001: [** `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(type_name)` shall produce the token `{type_name}_log_context_property_type`. **]**
+
+## LOG_CONTEXT_PROPERTY_TYPE_INIT(type_name)
+
+`LOG_CONTEXT_PROPERTY_TYPE_INIT(type_name)` initializes a property from some source value arguments.
+
+For example for basic types the initialization consists of simply copying the bytes that make up the value to the destination address.
+
+For more complex data types (like a reference counted value), this could mean storing the reference and incrementing the reference count.
+
+**SRS_LOG_CONTEXT_PROPERTY_TYPE_IF_01_002: [** `LOG_CONTEXT_PROPERTY_TYPE_INIT(type_name)` shall produce the token `{type_name}_log_context_property_type_init`. **]**
+
+## LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(type_name)
+
+`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(type_name)` returns the amount of data needed for initializing a property by using `LOG_CONTEXT_PROPERTY_TYPE_INIT(type_name)`.
+
+**SRS_LOG_CONTEXT_PROPERTY_TYPE_IF_01_003: [** `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(type_name)` shall produce the token `{type_name}_log_context_property_type_get_init_data_size`. **]**
