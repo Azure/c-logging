@@ -89,14 +89,37 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
     MU_C2(EXPAND_DEFINE_LOG_CONTEXT_NAME_AS_FIELD_, field_desc)
 
 #ifdef _MSC_VER
-#define LOG_CONTEXT_WARNING_SUPPRESS(warn_no) \
-    __pragma(warning(suppress:warn_no))
+/* VS does not need push/pop as it knows how to ignore just for one line */
+#define LOG_CONTEXT_WARNING_PUSH()
+
+/* Suppress 4094 untagged 'token' declared no symbols */
+#define LOG_CONTEXT_WARNING_SUPPRESS() \
+    __pragma(warning(suppress:4094))
+
+/* VS does not need push/pop as it knows how to ignore just for one line */
+#define LOG_CONTEXT_WARNING_POP()
+
+#elif __GNUC__
+/* GCC needs push/pop */
+#define LOG_CONTEXT_WARNING_PUSH(warn_no) \
+    _Pragma(GCC diagnostic push)
+
+#define LOG_CONTEXT_WARNING_SUPPRESS() \
+    /* https://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html */ \
+    _Pragma(GCC diagnostic ignored "-Wmissing-declarations")
+
+#define LOG_CONTEXT_WARNING_POP(warn_no) \
+    _Pragma(GCC diagnostic pop)
+
 #else
+#define LOG_CONTEXT_WARNING_PUSH()
 #define LOG_CONTEXT_WARNING_SUPPRESS(warn_no)
+#define LOG_CONTEXT_WARNING_POP()
 #endif
 
 #define LOG_CONTEXT_CHECK_VARIABLE_ARGS(...) \
-    LOG_CONTEXT_WARNING_SUPPRESS(4094) \
+    LOG_CONTEXT_WARNING_PUSH() \
+    LOG_CONTEXT_WARNING_SUPPRESS() \
     /* Codes_SRS_LOG_CONTEXT_01_019: [ If 2 properties have the same name for a context a compiler error shall be emitted. ]*/ \
     MU_IF(MU_COUNT_ARG(__VA_ARGS__), const struct { \
         int __dummy; \
@@ -107,6 +130,7 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
         int __dummy; \
         MU_FOR_EACH_1(DEFINE_LOG_CONTEXT_NAME_AS_FIELD, __VA_ARGS__) \
     };,) \
+    LOG_CONTEXT_WARNING_POP() \
 
 // Macro that can be used to create a context on the stack
 // We allocate on the stack enough space for a max payload for the context.
