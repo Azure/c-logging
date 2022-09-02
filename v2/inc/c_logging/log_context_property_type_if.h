@@ -27,8 +27,14 @@ typedef struct LOG_CONTEXT_PROPERTY_TYPE_IF_TAG
 
 // a convenient macro for obtaining a certain type concrete implementation
 // in a consistent way
-/* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_IF_01_001: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(type_name) shall produce the token {type_name}_log_context_property_type. ]*/
-#define LOG_CONTEXT_PROPERTY_TYPE_IMPL(type_name) \
+/* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_IF_01_001: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(type_name) shall produce the token {type_name}_log_context_property_type. ]*/
+#define LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(type_name) \
     MU_C2(type_name, _log_context_property_type)
+
+#define LOG_CONTEXT_PROPERTY_TYPE_INIT(type_name) \
+    MU_C2(type_name, _log_context_property_type_init)
+
+#define LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(type_name) \
+    MU_C2(type_name, _log_context_property_type_get_init_data_size)
 
 #endif /* LOG_CONTEXT_PROPERTY_TYPE_IF_H */

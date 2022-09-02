@@ -6,8 +6,10 @@
 
 #ifdef __cplusplus
 #include <cstdint>
+#include <cstddef>
 #else
 #include <stdint.h>
+#include <stddef.h>
 #endif
 
 #include "macro_utils/macro_utils.h"
@@ -25,7 +27,9 @@
     uint8_t
 
 #define DECLARE_BASIC_TYPE(type_name) \
-    extern const LOG_CONTEXT_PROPERTY_TYPE_IF MU_C2(type_name, _log_context_property_type);
+    int LOG_CONTEXT_PROPERTY_TYPE_INIT(type_name)(void* dst_value, type_name src_value); \
+    int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(type_name)(type_name src_value); \
+    extern const LOG_CONTEXT_PROPERTY_TYPE_IF LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(type_name); \
 
 MU_FOR_EACH_1(DECLARE_BASIC_TYPE, SUPPORTED_BASIC_TYPES)
 

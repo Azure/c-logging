@@ -272,7 +272,7 @@ It shall be supported to chain contexts (define a context or create a context dy
 
 The following types shall be supported out of the box:
 
-- ansi_charptr
+- ascii_char_ptr
 - wchar_t_ptr
 - int8_t
 - uint8_t
