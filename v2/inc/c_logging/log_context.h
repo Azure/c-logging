@@ -102,14 +102,14 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
 #elif __GNUC__
 /* GCC needs push/pop */
 #define LOG_CONTEXT_WARNING_PUSH(warn_no) \
-    _Pragma(GCC diagnostic push)
+    _Pragma("GCC diagnostic push")
 
 #define LOG_CONTEXT_WARNING_SUPPRESS() \
     /* https://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html */ \
-    _Pragma(GCC diagnostic ignored "-Wmissing-declarations")
+    _Pragma("GCC diagnostic ignored \"-Wmissing-declarations\"")
 
 #define LOG_CONTEXT_WARNING_POP(warn_no) \
-    _Pragma(GCC diagnostic pop)
+    _Pragma("GCC diagnostic pop"")
 
 #else
 #define LOG_CONTEXT_WARNING_PUSH()
