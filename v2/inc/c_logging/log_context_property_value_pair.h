@@ -4,9 +4,6 @@
 #ifndef LOG_CONTEXT_PROPERTY_VALUE_PAIR_H
 #define LOG_CONTEXT_PROPERTY_VALUE_PAIR_H
 
-#include "macro_utils/macro_utils.h"
-
-#include "c_logging/log_context_property_type.h"
 #include "c_logging/log_context_property_type_if.h"
 
 typedef struct LOG_CONTEXT_PROPERTY_VALUE_PAIR_TAG

@@ -10,7 +10,6 @@
 #include <stdint.h>
 #endif
 
-
 #include "c_logging/log_context_property_type_if.h"
 
 #ifdef __cplusplus
