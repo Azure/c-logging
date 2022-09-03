@@ -11,9 +11,6 @@ typedef struct LOG_CONTEXT_TAG* LOG_CONTEXT_HANDLE;
 
 uint32_t log_context_get_property_value_pair_count(LOG_CONTEXT_HANDLE log_context);
 const LOG_CONTEXT_PROPERTY_VALUE_PAIR* log_context_get_property_value_pairs(LOG_CONTEXT_HANDLE log_context);
-uint32_t log_context_get_values_data_length(LOG_CONTEXT_HANDLE log_context);
-uint8_t* log_context_get_values_data(LOG_CONTEXT_HANDLE log_context);
-int log_context_init_from_parent(LOG_CONTEXT_HANDLE dest_log_context, LOG_CONTEXT_HANDLE parent_log_context);
 
 #define LOG_CONTEXT_CREATE(dest_log_context, parent_context, ...) \
     ...
@@ -21,6 +18,8 @@ int log_context_init_from_parent(LOG_CONTEXT_HANDLE dest_log_context, LOG_CONTEX
 #define LOG_CONTEXT_DESTROY(log_context) \
     ...
 
+#define LOG_MAX_STACK_DATA_SIZE                 1024
+#define LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT 128
 ```
 
 ## LOG_CONTEXT_CREATE
@@ -120,6 +119,8 @@ Note: The number of properties that can be contained in a stack context and the 
 **SRS_LOG_CONTEXT_01_016: [** `LOG_CONTEXT_LOCAL_DEFINE` shall store the property types and values specified by using `LOG_CONTEXT_PROPERTY` in the context. **]**
 
 **SRS_LOG_CONTEXT_01_018: [** If `parent_context` is non-`NULL`, the created context shall include all the property/value pairs of `parent_context`. **]**
+
+If the number of properties to be stored in the log context exceeds `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT`, all properties exceeding `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT` shall be dropped.
 
 ## log_context_get_property_value_pair_count
 

@@ -1511,6 +1511,42 @@ static void log_context_get_property_value_pairs_with_a_dynamically_allocated_co
     LOG_CONTEXT_DESTROY(context);
 }
 
+/* Tests_SRS_LOG_CONTEXT_01_024: [ If the number of properties to be stored in the log context (including any `struct` propertuies) exceeds `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT`, all properties in excess of  `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT` shall be dropped. ]*/
+static void creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_minus_one_properties_succeeds(void)
+{
+    // arrange
+    setup_mocks();
+    setup_malloc_call();
+
+    LOG_CONTEXT_HANDLE context;
+    LOG_CONTEXT_CREATE(context, NULL,
+        LOG_CONTEXT_PROPERTY(int32_t, a0, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a0, 0),
+
+    );
+
+    setup_mocks();
+
+    // act
+    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* result = log_context_get_property_value_pairs(context);
+
+    // assert
+    POOR_MANS_ASSERT(result != NULL);
+    // context struct
+    POOR_MANS_ASSERT(*(uint8_t*)result[0].value == 1);
+    POOR_MANS_ASSERT(strcmp(result[0].name, "") == 0);
+    POOR_MANS_ASSERT(result[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    // parent context struct
+    POOR_MANS_ASSERT(*(int32_t*)result[1].value == 42);
+    POOR_MANS_ASSERT(strcmp(result[1].name, "a") == 0);
+    POOR_MANS_ASSERT(result[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int32_t);
+
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // cleanup
+    LOG_CONTEXT_DESTROY(context);
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
