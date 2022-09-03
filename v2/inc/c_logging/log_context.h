@@ -5,11 +5,11 @@
 #define LOG_CONTEXT_H
 
 #ifdef __cplusplus
-#include <cstdint>
+#include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 #else
-#include <stdint.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #endif
@@ -20,6 +20,7 @@
 #include "c_logging/log_context_property_basic_types.h"
 #include "c_logging/log_context_property_type_ascii_char_ptr.h"
 #include "c_logging/log_context_property_type_struct.h"
+#include "c_logging/log_internal_error.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,8 +45,7 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* log_context_get_property_value_pairs(LOG_
 
 // These is an internal API and it is not meant to be called by the users of this module
 int internal_log_context_init_from_parent(LOG_CONTEXT_HANDLE dest_log_context, LOG_CONTEXT_HANDLE parent_log_context);
-uint32_t internal_log_context_get_values_data_length(LOG_CONTEXT_HANDLE log_context);
-uint8_t* internal_log_context_get_values_data(LOG_CONTEXT_HANDLE log_context);
+uint32_t internal_log_context_get_values_data_length_or_zero(LOG_CONTEXT_HANDLE log_context);
 
 static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_CONTEXT_HANDLE log_context)
 {
@@ -93,37 +93,6 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
     (void (*)(int MU_FOR_EACH_1(DEFINE_PROPERTY_AS_PARAMETER, __VA_ARGS__)))0x4242; \
     /* Codes_SRS_LOG_CONTEXT_01_011: [ If LOG_CONTEXT_NAME is specified multiple times a compiler error shall be emitted. ]*/ \
     (void (*)(int MU_FOR_EACH_1(DEFINE_CONTEXT_NAME_AS_PARAMETER, __VA_ARGS__)))0x4242; \
-
-// Macro that can be used to create a context on the stack
-// We allocate on the stack enough space for a max payload for the context.
-#define LOG_CONTEXT_LOCAL_DEFINE(destination_context, parent_context, ...) \
-    uint8_t MU_C2(values_log_data_, destination_context)[LOG_MAX_STACK_DATA_SIZE]; \
-    LOG_CONTEXT destination_context; \
-    MU_IF(MU_COUNT_ARG(__VA_ARGS__), LOG_CONTEXT_CHECK_VARIABLE_ARGS(__VA_ARGS__),) \
-    LOG_CONTEXT_PROPERTY_VALUE_PAIR MU_C2(property_values_pair_, destination_context)[LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT]; \
-    { \
-        destination_context.values_data = MU_C2(values_log_data_, destination_context); \
-        destination_context.values_data_length = internal_log_context_get_property_value_pair_count_or_zero(parent_context) + 1 MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(COUNT_DATA_BYTES, __VA_ARGS__),); \
-        destination_context.property_value_pairs_ptr = MU_C2(property_values_pair_, destination_context); \
-        destination_context.property_value_pair_count = internal_log_context_get_property_value_pair_count_or_zero(parent_context) + 1 MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(COUNT_PROPERTY, __VA_ARGS__),); \
-        /* Codes_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall include all the property/value pairs of parent_context. ]*/ \
-        internal_log_context_init_from_parent(&destination_context, parent_context); \
-        LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_value_pair = destination_context.property_value_pairs_ptr + internal_log_context_get_property_value_pair_count_or_zero(parent_context) + 1; \
-        LOG_CONTEXT_PROPERTY_VALUE_PAIR* first_property_value_pair = destination_context.property_value_pairs_ptr; \
-        (void)property_value_pair; \
-        uint8_t* data_pos = destination_context.values_data; \
-        *data_pos = (uint8_t)(internal_log_context_get_property_value_pair_count_or_zero(parent_context) MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(COUNT_PROPERTY, __VA_ARGS__),)); \
-        /* Codes_SRS_LOG_CONTEXT_01_015: [ LOG_CONTEXT_LOCAL_DEFINE shall store one property/value pair that with a property type of struct with as many fields as the total number of properties passed to LOG_CONTEXT_LOCAL_DEFINE in the ... arguments. ]*/ \
-        first_property_value_pair->value = data_pos; \
-        first_property_value_pair->name = ""; \
-        first_property_value_pair->type = &struct_log_context_property_type; \
-        data_pos += 1 + internal_log_context_get_values_data_length(parent_context); \
-        /* Codes_SRS_LOG_CONTEXT_01_016: [ LOG_CONTEXT_LOCAL_DEFINE shall store the property types and values specified by using LOG_CONTEXT_PROPERTY in the context. ]*/ \
-        MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(SETUP_PROPERTY_PAIR, __VA_ARGS__),) \
-    } \
-
-LOG_CONTEXT_HANDLE log_context_create(LOG_CONTEXT_HANDLE parent_context, uint32_t properties_count, uint32_t data_size);
-void log_context_destroy(LOG_CONTEXT_HANDLE log_context);
 
 // SETUP_PROPERTY_PAIR
 
@@ -180,10 +149,60 @@ void log_context_destroy(LOG_CONTEXT_HANDLE log_context);
 #define COUNT_DATA_BYTES(field_desc) \
     MU_C2(EXPAND_COUNT_DATA_BYTES_, field_desc)
 
+// Macro that can be used to create a context on the stack
+// We allocate on the stack enough space for a max payload for the context.
+#define LOG_CONTEXT_LOCAL_DEFINE(destination_context, parent_context, ...) \
+    uint8_t MU_C2(values_log_data_, destination_context)[LOG_MAX_STACK_DATA_SIZE]; \
+    LOG_CONTEXT destination_context; \
+    MU_IF(MU_COUNT_ARG(__VA_ARGS__), LOG_CONTEXT_CHECK_VARIABLE_ARGS(__VA_ARGS__),) \
+    LOG_CONTEXT_PROPERTY_VALUE_PAIR MU_C2(property_values_pair_, destination_context)[LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT]; \
+    { \
+        destination_context.values_data = MU_C2(values_log_data_, destination_context); \
+        destination_context.values_data_length = internal_log_context_get_values_data_length_or_zero(parent_context) + 1 MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(COUNT_DATA_BYTES, __VA_ARGS__),); \
+        destination_context.property_value_pairs_ptr = MU_C2(property_values_pair_, destination_context); \
+        destination_context.property_value_pair_count = internal_log_context_get_property_value_pair_count_or_zero(parent_context) + 1 MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(COUNT_PROPERTY, __VA_ARGS__),); \
+        /* Codes_SRS_LOG_CONTEXT_01_024: [ If the number of properties to be stored in the log context exceeds `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT`, an error shall be reported by calling `log_internal_error_report` and no properties shall be stored in the context. ]*/ \
+        if (destination_context.property_value_pair_count > LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT) \
+        { \
+            (void)printf("Too many properties: property_value_pair_count = %" PRIu32 "\r\n", destination_context.property_value_pair_count); \
+            destination_context.property_value_pair_count = 0; \
+            destination_context.values_data_length = 0; \
+            log_internal_error_report(); \
+        } \
+        /* Codes_SRS_LOG_CONTEXT_01_025: [ If the amount of data needed for all properties to be stored in the context exceeds `LOG_MAX_STACK_DATA_SIZE`, an error shall be reported by calling `log_internal_error_report` and no properties shall be stored in the context. ]*/ \
+        else if (destination_context.values_data_length > LOG_MAX_STACK_DATA_SIZE) \
+        { \
+            (void)printf("Data length too big: values_data_length = %" PRIu32 "\r\n", destination_context.values_data_length); \
+            destination_context.property_value_pair_count = 0; \
+            destination_context.values_data_length = 0; \
+            log_internal_error_report(); \
+        } \
+        else \
+        { \
+            /* Codes_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall include all the property/value pairs of parent_context. ]*/ \
+            internal_log_context_init_from_parent(&destination_context, parent_context); \
+            LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_value_pair = destination_context.property_value_pairs_ptr + internal_log_context_get_property_value_pair_count_or_zero(parent_context) + 1; \
+            LOG_CONTEXT_PROPERTY_VALUE_PAIR* first_property_value_pair = destination_context.property_value_pairs_ptr; \
+            (void)property_value_pair; \
+            uint8_t* data_pos = destination_context.values_data; \
+            *data_pos = (uint8_t)(internal_log_context_get_property_value_pair_count_or_zero(parent_context) MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(COUNT_PROPERTY, __VA_ARGS__),)); \
+            /* Codes_SRS_LOG_CONTEXT_01_015: [ LOG_CONTEXT_LOCAL_DEFINE shall store one property/value pair that with a property type of struct with as many fields as the total number of properties passed to LOG_CONTEXT_LOCAL_DEFINE in the ... arguments. ]*/ \
+            first_property_value_pair->value = data_pos; \
+            first_property_value_pair->name = ""; \
+            first_property_value_pair->type = &struct_log_context_property_type; \
+            data_pos += 1 + internal_log_context_get_values_data_length_or_zero(parent_context); \
+            /* Codes_SRS_LOG_CONTEXT_01_016: [ LOG_CONTEXT_LOCAL_DEFINE shall store the property types and values specified by using LOG_CONTEXT_PROPERTY in the context. ]*/ \
+            MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(SETUP_PROPERTY_PAIR, __VA_ARGS__),) \
+        } \
+    } \
+
+LOG_CONTEXT_HANDLE log_context_create(LOG_CONTEXT_HANDLE parent_context, uint32_t properties_count, uint32_t data_size);
+void log_context_destroy(LOG_CONTEXT_HANDLE log_context);
+
 // macro that can be used to create a dynamically allocated context
 #define LOG_CONTEXT_CREATE(destination_context, parent_context, ...) \
     { \
-        destination_context = log_context_create(parent_context, internal_log_context_get_property_value_pair_count_or_zero(parent_context) + 1 MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(COUNT_PROPERTY, __VA_ARGS__),), internal_log_context_get_values_data_length(parent_context) + 1 MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(COUNT_DATA_BYTES, __VA_ARGS__),)); \
+        destination_context = log_context_create(parent_context, internal_log_context_get_property_value_pair_count_or_zero(parent_context) + 1 MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(COUNT_PROPERTY, __VA_ARGS__),), internal_log_context_get_values_data_length_or_zero(parent_context) + 1 MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(COUNT_DATA_BYTES, __VA_ARGS__),)); \
         MU_IF(MU_COUNT_ARG(__VA_ARGS__), LOG_CONTEXT_CHECK_VARIABLE_ARGS(__VA_ARGS__),) \
         if (destination_context != NULL) \
         { \
@@ -199,7 +218,7 @@ void log_context_destroy(LOG_CONTEXT_HANDLE log_context);
             /* Codes_SRS_LOG_CONTEXT_01_010: [** If LOG_CONTEXT_NAME is not used the name for the context shall be empty string. ]*/ \
             first_property_value_pair->name = ""; \
             first_property_value_pair->type = &struct_log_context_property_type; \
-            data_pos += 1 + internal_log_context_get_values_data_length(parent_context); \
+            data_pos += 1 + internal_log_context_get_values_data_length_or_zero(parent_context); \
             MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(SETUP_PROPERTY_PAIR, __VA_ARGS__),) \
         } \
     } \

@@ -47,14 +47,9 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* log_context_get_property_value_pairs(LOG_
     return result;
 }
 
-uint32_t internal_log_context_get_values_data_length(LOG_CONTEXT_HANDLE log_context)
+uint32_t internal_log_context_get_values_data_length_or_zero(LOG_CONTEXT_HANDLE log_context)
 {
     return (log_context == NULL) ? 0 : log_context->values_data_length;
-}
-
-uint8_t* internal_log_context_get_values_data(LOG_CONTEXT_HANDLE log_context)
-{
-    return (log_context == NULL) ? 0 : log_context->values_data;
 }
 
 int internal_log_context_init_from_parent(LOG_CONTEXT_HANDLE dest_log_context, LOG_CONTEXT_HANDLE parent_log_context)

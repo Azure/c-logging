@@ -19,7 +19,7 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* log_context_get_property_value_pairs(LOG_
     ...
 
 #define LOG_MAX_STACK_DATA_SIZE                 1024
-#define LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT 128
+#define LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT 64
 ```
 
 ## LOG_CONTEXT_CREATE
@@ -120,7 +120,11 @@ Note: The number of properties that can be contained in a stack context and the 
 
 **SRS_LOG_CONTEXT_01_018: [** If `parent_context` is non-`NULL`, the created context shall include all the property/value pairs of `parent_context`. **]**
 
-If the number of properties to be stored in the log context exceeds `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT`, all properties exceeding `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT` shall be dropped.
+**SRS_LOG_CONTEXT_01_024: [** If the number of properties to be stored in the log context exceeds `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT`, an error shall be reported by calling `log_internal_error_report` and no properties shall be stored in the context. **]**
+
+**SRS_LOG_CONTEXT_01_025: [** If the amount of data needed for all properties to be stored in the context exceeds `LOG_MAX_STACK_DATA_SIZE`, an error shall be reported by calling `log_internal_error_report` and no properties shall be stored in the context. **]**
+
+Note: No properties stored in the context means `log_context_get_property_value_pair_count` will return 0.
 
 ## log_context_get_property_value_pair_count
 

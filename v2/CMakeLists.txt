@@ -8,6 +8,7 @@ set(c_logging_v2_c_files
     ./src/log_context_property_basic_types.c
     ./src/log_context_property_type_ascii_char_ptr.c
     ./src/log_context_property_type_struct.c
+    ./src/log_internal_error.c
     )
 
 set(c_logging_v2_h_files
@@ -19,6 +20,7 @@ set(c_logging_v2_h_files
     ./inc/c_logging/log_context_property_type_ascii_char_ptr.h
     ./inc/c_logging/log_context_property_type_struct.h
     ./inc/c_logging/log_context_property_value_pair.h
+    ./inc/c_logging/log_internal_error.h
     ./inc/c_logging/log_level.h
     ./inc/c_logging/log_sink_if.h
     )

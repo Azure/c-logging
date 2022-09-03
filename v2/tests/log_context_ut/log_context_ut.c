@@ -8,6 +8,8 @@
 
 #include "macro_utils/macro_utils.h"
 
+#define log_internal_error_report mock_log_internal_error_report
+
 #include "c_logging/log_context_property_value_pair.h"
 #include "c_logging/log_context.h"
 
@@ -18,7 +20,8 @@ static size_t asserts_failed = 0;
 
 #define MOCK_CALL_TYPE_VALUES \
     MOCK_CALL_TYPE_malloc, \
-    MOCK_CALL_TYPE_free \
+    MOCK_CALL_TYPE_free, \
+    MOCK_CALL_TYPE_log_internal_error_report \
 
 MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
 
@@ -102,6 +105,19 @@ void mock_free(void* ptr)
     }
 }
 
+void mock_log_internal_error_report(void)
+{
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_log_internal_error_report))
+    {
+        actual_and_expected_match = false;
+    }
+    else
+    {
+        actual_call_count++;
+    }
+}
+
 #define POOR_MANS_ASSERT(cond) \
     if (!(cond)) \
     { \
@@ -111,14 +127,20 @@ void mock_free(void* ptr)
 
 static void setup_malloc_call(void)
 {
-    expected_calls[0].mock_call_type = MOCK_CALL_TYPE_malloc;
-    expected_calls[0].u.malloc_call.override_result = false;
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_malloc;
+    expected_calls[expected_call_count].u.malloc_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_free_call(void)
 {
-    expected_calls[0].mock_call_type = MOCK_CALL_TYPE_free;
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_free;
+    expected_call_count++;
+}
+
+static void setup_log_internal_error_report(void)
+{
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_log_internal_error_report;
     expected_call_count++;
 }
 
@@ -149,6 +171,8 @@ static void LOG_CONTEXT_CREATE_with_no_properties_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(result);
 }
 
@@ -225,6 +249,8 @@ static void LOG_CONTEXT_CREATE_with_one_int32_t_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // clean
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(result);
 }
 
@@ -263,6 +289,8 @@ static void LOG_CONTEXT_CREATE_with_two_properties_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // clean
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(result);
 }
 
@@ -332,6 +360,8 @@ static void LOG_CONTEXT_CREATE_with_all_int_property_types_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // clean
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(result);
 }
 
@@ -364,6 +394,8 @@ static void LOG_CONTEXT_CREATE_with_one_string_property_with_only_format_passed_
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // clean
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(result);
 }
 
@@ -400,6 +432,8 @@ static void LOG_CONTEXT_CREATE_with_2_string_properties_with_only_format_passed_
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // clean
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(result);
 }
 
@@ -432,6 +466,8 @@ static void LOG_CONTEXT_CREATE_with_a_string_property_using_printf_formatting_su
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // clean
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(result);
 }
 
@@ -468,6 +504,8 @@ static void LOG_CONTEXT_CREATE_with_a_string_property_followed_by_another_int_pr
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // clean
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(result);
 }
 
@@ -505,6 +543,8 @@ static void LOG_CONTEXT_CREATE_with_a_string_property_preceded_by_another_int_pr
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // clean
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(result);
 }
 
@@ -535,6 +575,8 @@ static void LOG_CONTEXT_CREATE_with_LOG_CONTEXT_NAME_uses_the_context_name(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // clean
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(result);
 }
 
@@ -692,6 +734,9 @@ static void LOG_CONTEXT_CREATE_with_a_parent_that_has_no_properties_succeeds(voi
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    setup_mocks();
+    setup_free_call();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(result);
     LOG_CONTEXT_DESTROY(parent_context);
 }
@@ -727,6 +772,9 @@ static void LOG_CONTEXT_CREATE_with_a_parent_that_has_one_int_property_succeeds(
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    setup_mocks();
+    setup_free_call();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(result);
     LOG_CONTEXT_DESTROY(parent_context);
 }
@@ -766,6 +814,9 @@ static void LOG_CONTEXT_CREATE_with_a_parent_that_has_2_int_properties_succeeds(
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    setup_mocks();
+    setup_free_call();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(result);
     LOG_CONTEXT_DESTROY(parent_context);
 }
@@ -801,6 +852,9 @@ static void LOG_CONTEXT_CREATE_with_a_parent_that_has_a_string_property_succeeds
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    setup_mocks();
+    setup_free_call();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(result);
     LOG_CONTEXT_DESTROY(parent_context);
 }
@@ -840,6 +894,9 @@ static void LOG_CONTEXT_CREATE_with_a_parent_that_has_2_string_properties_succee
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    setup_mocks();
+    setup_free_call();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(result);
     LOG_CONTEXT_DESTROY(parent_context);
 }
@@ -887,6 +944,9 @@ static void LOG_CONTEXT_CREATE_with_a_parent_that_has_a_context_name_succeeds(vo
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    setup_mocks();
+    setup_free_call();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(result);
     LOG_CONTEXT_DESTROY(parent_context);
 }
@@ -1112,6 +1172,8 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_no_properties_succee
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(parent_context);
 }
 
@@ -1143,6 +1205,8 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_one_int_property_suc
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(parent_context);
 }
 
@@ -1178,6 +1242,8 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_2_int_properties_suc
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(parent_context);
 }
 
@@ -1209,6 +1275,8 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_a_string_property_su
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(parent_context);
 }
 
@@ -1244,6 +1312,8 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_2_string_properties_
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(parent_context);
 }
 
@@ -1287,6 +1357,8 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_a_context_name_succe
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(parent_context);
 }
 
@@ -1366,6 +1438,8 @@ static void LOG_CONTEXT_CREATE_with_a_stack_log_context_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(context_2);
 }
 
@@ -1428,6 +1502,8 @@ static void log_context_get_property_value_pair_count_with_a_dynamically_allocat
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(context);
 }
 
@@ -1508,10 +1584,12 @@ static void log_context_get_property_value_pairs_with_a_dynamically_allocated_co
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(context);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_024: [ If the number of properties to be stored in the log context (including any `struct` propertuies) exceeds `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT`, all properties in excess of  `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT` shall be dropped. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_015: [ `LOG_CONTEXT_LOCAL_DEFINE` shall store one property/value pair that with a property type of `struct` with as many fields as the total number of properties passed to `LOG_CONTEXT_LOCAL_DEFINE` in the `...` arguments. ]*/
 static void creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_minus_one_properties_succeeds(void)
 {
     // arrange
@@ -1606,18 +1684,19 @@ static void creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_minu
     }
 
     // cleanup
+    setup_mocks();
+    setup_free_call();
     LOG_CONTEXT_DESTROY(context);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_024: [ If the number of properties to be stored in the log context (including any `struct` propertuies) exceeds `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT`, all properties in excess of  `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT` shall be dropped. ]*/
-static void creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_properties_truncates(void)
+/* Tests_SRS_LOG_CONTEXT_01_024: [ If the number of properties to be stored in the log context exceeds `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT`, an error shall be reported by calling `log_internal_error_report` and no properties shall be stored in the context. ]*/
+static void creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_properties_reports_error(void)
 {
     // arrange
     setup_mocks();
-    setup_malloc_call();
+    setup_log_internal_error_report();
 
-    LOG_CONTEXT_HANDLE context;
-    LOG_CONTEXT_CREATE(context, NULL,
+    LOG_CONTEXT_LOCAL_DEFINE(context, NULL,
         LOG_CONTEXT_PROPERTY(int32_t, a0, 0),
         LOG_CONTEXT_PROPERTY(int32_t, a1, 0),
         LOG_CONTEXT_PROPERTY(int32_t, a2, 0),
@@ -1685,27 +1764,36 @@ static void creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_prop
     );
 
     // act
-    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* result = log_context_get_property_value_pairs(context);
+    uint32_t property_count = log_context_get_property_value_pair_count(&context);
 
     // assert
-    POOR_MANS_ASSERT(result != NULL);
-    // context struct
-    POOR_MANS_ASSERT(*(uint8_t*)result[0].value == 63);
-    POOR_MANS_ASSERT(strcmp(result[0].name, "") == 0);
-    POOR_MANS_ASSERT(result[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    POOR_MANS_ASSERT(property_count == 0);
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
 
-    for (size_t i = 0; i < LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT - 1; i++)
-    {
-        char expected_property_name[4];
-        // parent context struct
-        POOR_MANS_ASSERT(*(int32_t*)result[i + 1].value == 0);
-        (void)sprintf(expected_property_name, "a%zu", i);
-        POOR_MANS_ASSERT(strcmp(result[i + 1].name, expected_property_name) == 0);
-        POOR_MANS_ASSERT(result[i + 1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int32_t);
-    }
+/* Tests_SRS_LOG_CONTEXT_01_025: [ If the amount of data needed for all properties to be stored in the context exceeds `LOG_MAX_STACK_DATA_SIZE`, an error shall be reported by calling `log_internal_error_report` and no properties shall be stored in the context. ]*/
+static void creating_a_context_with_too_much_data_reports_error(void)
+{
+    // arrange
+    char original_string[1024] = { 0 };
+    setup_mocks();
+    setup_log_internal_error_report();
 
-    // cleanup
-    LOG_CONTEXT_DESTROY(context);
+    (void)memset(original_string, 'x', sizeof(original_string) - 1);
+
+    // 1023 + 1 + 1 bytes (more than 1024 which is max)
+    LOG_CONTEXT_LOCAL_DEFINE(context, NULL,
+        LOG_CONTEXT_STRING_PROPERTY(str_property, original_string)
+    );
+
+    // act
+    uint32_t property_count = log_context_get_property_value_pair_count(&context);
+
+    // assert
+    POOR_MANS_ASSERT(property_count == 0);
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
@@ -1761,7 +1849,8 @@ int main(void)
     log_context_get_property_value_pairs_with_a_dynamically_allocated_context_returns_the_pairs();
 
     creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_minus_one_properties_succeeds();
-    creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_properties_truncates();
+    creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_properties_reports_error();
+    creating_a_context_with_too_much_data_reports_error();
 
     return asserts_failed;
 }
