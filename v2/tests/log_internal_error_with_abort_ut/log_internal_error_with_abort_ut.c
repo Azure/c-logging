@@ -75,7 +75,11 @@ unsigned int mock__set_abort_behavior(unsigned int _Flags, unsigned int _Mask)
     }
     else
     {
+#if defined _MSC_VER
         result = _set_abort_behavior(_Flags, _Mask);
+#else
+        result = 0;
+#endif
 
         actual_call_count++;
     }
