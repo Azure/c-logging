@@ -1784,7 +1784,7 @@ static void creating_a_context_with_too_much_data_reports_error(void)
 
     // 1023 + 1 + 1 bytes (more than 1024 which is max)
     LOG_CONTEXT_LOCAL_DEFINE(context, NULL,
-        LOG_CONTEXT_STRING_PROPERTY(str_property, original_string)
+        LOG_CONTEXT_STRING_PROPERTY(str_property, "%s", original_string)
     );
 
     // act
