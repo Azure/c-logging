@@ -11,7 +11,6 @@ endif() #(${log_abort_on_error})
 set(c_logging_v2_c_files
     ./src/logger.c
     ./src/log_context.c
-    ./src/log_context_property_value_pair.c
     ./src/log_context_property_basic_types.c
     ./src/log_context_property_type_ascii_char_ptr.c
     ./src/log_context_property_type_struct.c
