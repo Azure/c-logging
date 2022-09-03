@@ -1,6 +1,13 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#the following variables are project-wide and can be used with cmake-gui
+option(log_abort_on_error "set log_abort_on_error to ON abort in case an error is encountered while using stack contexts (default is OFF)" OFF)
+
+if(${log_abort_on_error})
+    add_definitions(-DLOG_ABORT_ON_ERROR)
+endif() #(${log_abort_on_error})
+
 set(c_logging_v2_c_files
     ./src/logger.c
     ./src/log_context.c
