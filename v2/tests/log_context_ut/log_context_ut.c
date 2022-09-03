@@ -1500,7 +1500,7 @@ static void log_context_get_property_value_pairs_with_a_dynamically_allocated_co
     POOR_MANS_ASSERT(*(uint8_t*)result[0].value == 1);
     POOR_MANS_ASSERT(strcmp(result[0].name, "") == 0);
     POOR_MANS_ASSERT(result[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
-    // parent context struct
+    // int32_t property
     POOR_MANS_ASSERT(*(int32_t*)result[1].value == 42);
     POOR_MANS_ASSERT(strcmp(result[1].name, "a") == 0);
     POOR_MANS_ASSERT(result[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int32_t);
@@ -1521,11 +1521,69 @@ static void creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_minu
     LOG_CONTEXT_HANDLE context;
     LOG_CONTEXT_CREATE(context, NULL,
         LOG_CONTEXT_PROPERTY(int32_t, a0, 0),
-        LOG_CONTEXT_PROPERTY(int32_t, a0, 0),
-
+        LOG_CONTEXT_PROPERTY(int32_t, a1, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a2, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a3, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a4, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a5, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a6, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a7, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a8, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a9, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a10, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a11, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a12, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a13, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a14, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a15, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a16, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a17, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a18, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a19, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a20, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a21, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a22, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a23, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a24, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a25, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a26, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a27, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a28, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a29, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a30, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a31, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a32, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a33, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a34, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a35, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a36, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a37, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a38, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a39, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a40, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a41, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a42, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a43, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a44, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a45, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a46, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a47, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a48, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a49, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a50, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a51, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a52, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a53, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a54, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a55, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a56, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a57, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a58, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a59, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a60, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a61, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a62, 0)
     );
-
-    setup_mocks();
 
     // act
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* result = log_context_get_property_value_pairs(context);
@@ -1533,15 +1591,118 @@ static void creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_minu
     // assert
     POOR_MANS_ASSERT(result != NULL);
     // context struct
-    POOR_MANS_ASSERT(*(uint8_t*)result[0].value == 1);
+    POOR_MANS_ASSERT(*(uint8_t*)result[0].value == 63);
     POOR_MANS_ASSERT(strcmp(result[0].name, "") == 0);
     POOR_MANS_ASSERT(result[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
-    // parent context struct
-    POOR_MANS_ASSERT(*(int32_t*)result[1].value == 42);
-    POOR_MANS_ASSERT(strcmp(result[1].name, "a") == 0);
-    POOR_MANS_ASSERT(result[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int32_t);
 
-    POOR_MANS_ASSERT(actual_and_expected_match);
+    for (size_t i = 0; i < LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT - 1; i++)
+    {
+        char expected_property_name[4];
+        // parent context struct
+        POOR_MANS_ASSERT(*(int32_t*)result[i + 1].value == 0);
+        (void)sprintf(expected_property_name, "a%zu", i);
+        POOR_MANS_ASSERT(strcmp(result[i + 1].name, expected_property_name) == 0);
+        POOR_MANS_ASSERT(result[i + 1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int32_t);
+    }
+
+    // cleanup
+    LOG_CONTEXT_DESTROY(context);
+}
+
+/* Tests_SRS_LOG_CONTEXT_01_024: [ If the number of properties to be stored in the log context (including any `struct` propertuies) exceeds `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT`, all properties in excess of  `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT` shall be dropped. ]*/
+static void creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_properties_truncates(void)
+{
+    // arrange
+    setup_mocks();
+    setup_malloc_call();
+
+    LOG_CONTEXT_HANDLE context;
+    LOG_CONTEXT_CREATE(context, NULL,
+        LOG_CONTEXT_PROPERTY(int32_t, a0, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a1, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a2, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a3, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a4, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a5, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a6, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a7, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a8, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a9, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a10, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a11, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a12, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a13, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a14, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a15, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a16, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a17, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a18, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a19, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a20, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a21, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a22, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a23, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a24, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a25, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a26, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a27, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a28, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a29, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a30, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a31, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a32, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a33, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a34, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a35, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a36, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a37, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a38, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a39, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a40, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a41, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a42, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a43, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a44, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a45, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a46, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a47, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a48, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a49, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a50, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a51, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a52, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a53, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a54, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a55, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a56, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a57, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a58, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a59, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a60, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a61, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a62, 0),
+        LOG_CONTEXT_PROPERTY(int32_t, a63, 0)
+    );
+
+    // act
+    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* result = log_context_get_property_value_pairs(context);
+
+    // assert
+    POOR_MANS_ASSERT(result != NULL);
+    // context struct
+    POOR_MANS_ASSERT(*(uint8_t*)result[0].value == 63);
+    POOR_MANS_ASSERT(strcmp(result[0].name, "") == 0);
+    POOR_MANS_ASSERT(result[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+
+    for (size_t i = 0; i < LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT - 1; i++)
+    {
+        char expected_property_name[4];
+        // parent context struct
+        POOR_MANS_ASSERT(*(int32_t*)result[i + 1].value == 0);
+        (void)sprintf(expected_property_name, "a%zu", i);
+        POOR_MANS_ASSERT(strcmp(result[i + 1].name, expected_property_name) == 0);
+        POOR_MANS_ASSERT(result[i + 1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int32_t);
+    }
 
     // cleanup
     LOG_CONTEXT_DESTROY(context);
@@ -1598,6 +1759,9 @@ int main(void)
     log_context_get_property_value_pairs_with_NULL_log_context_returns_NULL();
     log_context_get_property_value_pairs_with_a_local_stack_context_returns_the_pairs();
     log_context_get_property_value_pairs_with_a_dynamically_allocated_context_returns_the_pairs();
+
+    creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_minus_one_properties_succeeds();
+    creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_properties_truncates();
 
     return asserts_failed;
 }

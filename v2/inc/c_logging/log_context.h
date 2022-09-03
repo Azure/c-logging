@@ -26,7 +26,7 @@ extern "C" {
 #endif
 
 #define LOG_MAX_STACK_DATA_SIZE                 1024
-#define LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT 128
+#define LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT 64
 
 typedef struct LOG_CONTEXT_TAG
 {
