@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#include "macro_utils/macro_utils.h"
+
 #include "c_logging/log_context.h"
 #include "c_logging/log_context_property_value_pair.h"
 #include "c_logging/log_context_property_type.h"
