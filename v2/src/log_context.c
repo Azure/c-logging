@@ -9,9 +9,7 @@
 
 #include "c_logging/log_context.h"
 #include "c_logging/log_context_property_value_pair.h"
-#include "c_logging/log_context_property_type.h"
 #include "c_logging/log_context_property_type_if.h"
-#include "c_logging/log_context_property_type_struct.h"
 
 uint32_t log_context_get_property_value_pair_count(LOG_CONTEXT_HANDLE log_context)
 {
