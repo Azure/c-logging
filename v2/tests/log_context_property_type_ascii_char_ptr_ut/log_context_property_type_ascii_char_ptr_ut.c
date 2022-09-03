@@ -5,7 +5,6 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include <string.h>
-#include <inttypes.h>
 
 #include "macro_utils/macro_utils.h"
 
