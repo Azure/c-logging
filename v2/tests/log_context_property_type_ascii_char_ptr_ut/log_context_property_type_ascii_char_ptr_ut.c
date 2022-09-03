@@ -165,22 +165,22 @@ static void setup_mocks(void)
 
 static void setup_expected_snprintf_call(void)
 {
-    expected_calls[0].mock_call_type = MOCK_CALL_TYPE_snprintf;
-    expected_calls[0].u.snprintf_call.override_result = false;
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_snprintf;
+    expected_calls[expected_call_count].u.snprintf_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_expected_vsprintf_call(void)
 {
-    expected_calls[0].mock_call_type = MOCK_CALL_TYPE_vsprintf;
-    expected_calls[0].u.vsprintf_call.override_result = false;
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_vsprintf;
+    expected_calls[expected_call_count].u.vsprintf_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_expected_vsnprintf_call(void)
 {
-    expected_calls[0].mock_call_type = MOCK_CALL_TYPE_vsnprintf;
-    expected_calls[0].u.vsnprintf_call.override_result = false;
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_vsnprintf;
+    expected_calls[expected_call_count].u.vsnprintf_call.override_result = false;
     expected_call_count++;
 }
 

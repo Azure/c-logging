@@ -182,10 +182,10 @@ static void when_malloc_fails_LOG_CONTEXT_CREATE_with_no_properties_also_fails(v
     // arrange
     setup_mocks();
 
-    expected_calls[0].mock_call_type = MOCK_CALL_TYPE_malloc;
-    expected_calls[0].u.malloc_call.override_result = true;
-    expected_calls[0].u.malloc_call.call_result = NULL;
-    expected_call_count = 1;
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_malloc;
+    expected_calls[expected_call_count].u.malloc_call.override_result = true;
+    expected_calls[expected_call_count].u.malloc_call.call_result = NULL;
+    expected_call_count++;
 
     // act
     LOG_CONTEXT_HANDLE result;

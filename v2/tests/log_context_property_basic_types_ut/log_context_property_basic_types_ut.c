@@ -88,9 +88,9 @@ static void setup_mocks(void)
 
 static void setup_expected_snprintf_call(void)
 {
-    expected_calls[0].mock_call_type = MOCK_CALL_TYPE_snprintf;
-    expected_calls[0].u.snprintf_call.override_result = false;
-    expected_call_count = 1;
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_snprintf;
+    expected_calls[expected_call_count].u.snprintf_call.override_result = false;
+    expected_call_count++;
 }
 
 #define TEST_BUFFER_SIZE 1024
