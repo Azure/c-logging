@@ -161,7 +161,7 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
         destination_context.values_data_length = internal_log_context_get_values_data_length_or_zero(parent_context) + 1 MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(COUNT_DATA_BYTES, __VA_ARGS__),); \
         destination_context.property_value_pairs_ptr = MU_C2(property_values_pair_, destination_context); \
         destination_context.property_value_pair_count = internal_log_context_get_property_value_pair_count_or_zero(parent_context) + 1 MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(COUNT_PROPERTY, __VA_ARGS__),); \
-        /* Codes_SRS_LOG_CONTEXT_01_024: [ If the number of properties to be stored in the log context exceeds `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT`, an error shall be reported by calling `log_internal_error_report` and no properties shall be stored in the context. ]*/ \
+        /* Codes_SRS_LOG_CONTEXT_01_024: [ If the number of properties to be stored in the log context exceeds LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT, an error shall be reported by calling log_internal_error_report and no properties shall be stored in the context. ]*/ \
         if (destination_context.property_value_pair_count > LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT) \
         { \
             (void)printf("Too many properties: property_value_pair_count = %" PRIu32 "\r\n", destination_context.property_value_pair_count); \
@@ -169,7 +169,7 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
             destination_context.values_data_length = 0; \
             log_internal_error_report(); \
         } \
-        /* Codes_SRS_LOG_CONTEXT_01_025: [ If the amount of data needed for all properties to be stored in the context exceeds `LOG_MAX_STACK_DATA_SIZE`, an error shall be reported by calling `log_internal_error_report` and no properties shall be stored in the context. ]*/ \
+        /* Codes_SRS_LOG_CONTEXT_01_025: [ If the amount of data needed for all properties to be stored in the context exceeds LOG_MAX_STACK_DATA_SIZE, an error shall be reported by calling log_internal_error_report and no properties shall be stored in the context. ]*/ \
         else if (destination_context.values_data_length > LOG_MAX_STACK_DATA_SIZE) \
         { \
             (void)printf("Data length too big: values_data_length = %" PRIu32 "\r\n", destination_context.values_data_length); \

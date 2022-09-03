@@ -1445,7 +1445,7 @@ static void LOG_CONTEXT_CREATE_with_a_stack_log_context_succeeds(void)
 
 /* log_context_get_property_value_pair_count */
 
-/* Tests_SRS_LOG_CONTEXT_01_020: [ If `log_context` is `NULL`, `log_context_get_property_value_pair_count` shall return `UINT32_MAX`. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_020: [ If log_context is NULL, log_context_get_property_value_pair_count shall return UINT32_MAX. ]*/
 static void log_context_get_property_value_pair_count_with_NULL_log_context_returns_UINT32_MAX(void)
 {
     // arrange
@@ -1459,7 +1459,7 @@ static void log_context_get_property_value_pair_count_with_NULL_log_context_retu
     POOR_MANS_ASSERT(result == UINT32_MAX);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_021: [ Otherwise, `log_context_get_property_value_pair_count` shall return the  number of property/value pairs stored by `log_context`. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_021: [ Otherwise, log_context_get_property_value_pair_count shall return the  number of property/value pairs stored by log_context. ]*/
 static void log_context_get_property_value_pair_count_with_a_local_stack_context_returns_the_count(void)
 {
     // arrange
@@ -1480,7 +1480,7 @@ static void log_context_get_property_value_pair_count_with_a_local_stack_context
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_021: [ Otherwise, `log_context_get_property_value_pair_count` shall return the  number of property/value pairs stored by `log_context`. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_021: [ Otherwise, log_context_get_property_value_pair_count shall return the  number of property/value pairs stored by log_context. ]*/
 static void log_context_get_property_value_pair_count_with_a_dynamically_allocated_context_returns_the_count(void)
 {
     // arrange
@@ -1509,7 +1509,7 @@ static void log_context_get_property_value_pair_count_with_a_dynamically_allocat
 
 /* log_context_get_property_value_pairs */
 
-/* Tests_SRS_LOG_CONTEXT_01_022: [ If `log_context` is `NULL`, `log_context_get_property_value_pairs` shall fail and return `NULL`. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_022: [ If log_context is NULL, log_context_get_property_value_pairs shall fail and return NULL. ]*/
 static void log_context_get_property_value_pairs_with_NULL_log_context_returns_NULL(void)
 {
     // arrange
@@ -1523,7 +1523,7 @@ static void log_context_get_property_value_pairs_with_NULL_log_context_returns_N
     POOR_MANS_ASSERT(result == NULL);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_023: [ Otherwise, `log_context_get_property_value_pairs` shall return the array of property/value pairs stored by the context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_023: [ Otherwise, log_context_get_property_value_pairs shall return the array of property/value pairs stored by the context. ]*/
 static void log_context_get_property_value_pairs_with_a_local_stack_context_returns_the_pairs(void)
 {
     // arrange
@@ -1553,7 +1553,7 @@ static void log_context_get_property_value_pairs_with_a_local_stack_context_retu
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_023: [ Otherwise, `log_context_get_property_value_pairs` shall return the array of property/value pairs stored by the context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_023: [ Otherwise, log_context_get_property_value_pairs shall return the array of property/value pairs stored by the context. ]*/
 static void log_context_get_property_value_pairs_with_a_dynamically_allocated_context_returns_the_pairs(void)
 {
     // arrange
@@ -1589,7 +1589,7 @@ static void log_context_get_property_value_pairs_with_a_dynamically_allocated_co
     LOG_CONTEXT_DESTROY(context);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_015: [ `LOG_CONTEXT_LOCAL_DEFINE` shall store one property/value pair that with a property type of `struct` with as many fields as the total number of properties passed to `LOG_CONTEXT_LOCAL_DEFINE` in the `...` arguments. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_015: [ LOG_CONTEXT_LOCAL_DEFINE shall store one property/value pair that with a property type of struct with as many fields as the total number of properties passed to LOG_CONTEXT_LOCAL_DEFINE in the ... arguments. ]*/
 static void creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_minus_one_properties_succeeds(void)
 {
     // arrange
@@ -1689,7 +1689,7 @@ static void creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_minu
     LOG_CONTEXT_DESTROY(context);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_024: [ If the number of properties to be stored in the log context exceeds `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT`, an error shall be reported by calling `log_internal_error_report` and no properties shall be stored in the context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_024: [ If the number of properties to be stored in the log context exceeds LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT, an error shall be reported by calling log_internal_error_report and no properties shall be stored in the context. ]*/
 static void creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_properties_reports_error(void)
 {
     // arrange
@@ -1772,7 +1772,7 @@ static void creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_prop
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_025: [ If the amount of data needed for all properties to be stored in the context exceeds `LOG_MAX_STACK_DATA_SIZE`, an error shall be reported by calling `log_internal_error_report` and no properties shall be stored in the context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_025: [ If the amount of data needed for all properties to be stored in the context exceeds LOG_MAX_STACK_DATA_SIZE, an error shall be reported by calling log_internal_error_report and no properties shall be stored in the context. ]*/
 static void creating_a_context_with_too_much_data_reports_error(void)
 {
     // arrange
