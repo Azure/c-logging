@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <stdlib.h>
+#include <stdlib.h> // IWYU pragma: keep
 
 #define abort mock_abort
 #define _set_abort_behavior mock__set_abort_behavior
