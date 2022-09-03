@@ -238,6 +238,12 @@ void a(LOG_CONTEXT_HANDLE log_context, const char* correlation_id)
 
 Note: When logging with local contexts, the context passed to `LOGGER_LOG` has to be passed using the address of the context (&).
 
+If too many properties are passed when defining local contexts, the error shall be indicated by calling a log internal error report function.
+
+### LOG_ABORT_ON_ERROR
+
+The internal error report function shall abort the execution if `LOG_ABORT_ON_ERROR` is defined so that such error cases can easily be noticed during development.
+
 ### Dynamically allocated context creation
 
 The library shall support creating a dynamically allocated context.
