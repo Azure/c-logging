@@ -5,12 +5,17 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "macro_utils/macro_utils.h"
 
 #define log_internal_error_report mock_log_internal_error_report
 
+#include "c_logging/log_context_property_basic_types.h"
+#include "c_logging/log_context_property_type_ascii_char_ptr.h"
 #include "c_logging/log_context_property_value_pair.h"
+#include "c_logging/log_context_property_type.h"
+#include "c_logging/log_context_property_type_if.h"
 #include "c_logging/log_context.h"
 
 static size_t asserts_failed = 0;
