@@ -8,6 +8,7 @@ if(${run_unittests})
    add_subdirectory(log_context_property_type_if_ut)
    add_subdirectory(log_context_property_type_struct_ut)
    add_subdirectory(log_context_ut)
+   add_subdirectory(log_internal_error_ut)
 endif()
 
 if(${run_int_tests})

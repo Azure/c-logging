@@ -5,4 +5,5 @@
 
 void log_internal_error_report(void)
 {
+    /* Codes_SRS_LOG_INTERNAL_ERROR_01_002: [ Otherwise `log_internal_error_report` shall return. ]*/
 }
