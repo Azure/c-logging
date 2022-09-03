@@ -3,8 +3,9 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#if defined _MSC_VER
 #include <stdlib.h>
-#include <string.h>
+#endif
 
 #include "macro_utils/macro_utils.h"
 #include "c_logging/log_internal_error.h"
