@@ -1,6 +1,6 @@
 # `log_context_property_basic_types` requirements
 
-`log_context_property_basic_types` is a collection of log context property interface concrete implementations that implement the code needed for handling basic types (integers, bool, etc.).
+`log_context_property_basic_types` is a collection of log context property interface concrete implementations that implement the code needed for handling basic types (integers, bool etc.).
 
 The list of supported basic types is:
 
@@ -39,7 +39,7 @@ MU_FOR_EACH_1(DECLARE_BASIC_TYPE, SUPPORTED_BASIC_TYPES)
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int64_t).to_string
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* buffer, size_t buffer_length);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(const void* property_value, char* buffer, size_t buffer_length);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int64_t).to_string` produces the string representation of an `int64_t`.
@@ -55,7 +55,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* b
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int64_t).copy
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_value);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int64_t).copy` copies the `int64_t` value from the address pointed by `src_value` to `dst_value`.
@@ -111,7 +111,7 @@ int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int64_t)(int64_t src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint64_t).to_string
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* buffer, size_t buffer_length);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(const void* property_value, char* buffer, size_t buffer_length);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint64_t).to_string` produces the string representation of an `uint64_t`.
@@ -127,7 +127,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* b
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint64_t).copy
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_value);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint64_t).copy` copies the `uint64_t` value from the address pointed by `src_value` to `dst_value`.
@@ -183,7 +183,7 @@ int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint64_t)(uint64_t src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int32_t).to_string
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* buffer, size_t buffer_length);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(const void* property_value, char* buffer, size_t buffer_length);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int32_t).to_string` produces the string representation of an `int32_t`.
@@ -199,7 +199,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* b
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int32_t).copy
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_value);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int32_t).copy` copies the `int32_t` value from the address pointed by `src_value` to `dst_value`.
@@ -255,7 +255,7 @@ int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int32_t)(int32_t src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).to_string
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* buffer, size_t buffer_length);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(const void* property_value, char* buffer, size_t buffer_length);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).to_string` produces the string representation of an `uint32_t`.
@@ -271,7 +271,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* b
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).copy
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_value);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).copy` copies the `uint32_t` value from the address pointed by `src_value` to `dst_value`.
@@ -327,7 +327,7 @@ int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint32_t)(uint32_t src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int16_t).to_string
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* buffer, size_t buffer_length);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(const void* property_value, char* buffer, size_t buffer_length);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int16_t).to_string` produces the string representation of an `int16_t`.
@@ -343,7 +343,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* b
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int16_t).copy
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_value);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int16_t).copy` copies the `int16_t` value from the address pointed by `src_value` to `dst_value`.
@@ -399,7 +399,7 @@ int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int16_t)(int16_t src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).to_string
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* buffer, size_t buffer_length);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(const void* property_value, char* buffer, size_t buffer_length);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).to_string` produces the string representation of an `uint16_t`.
@@ -415,7 +415,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* b
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).copy
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_value);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).copy` copies the `uint16_t` value from the address pointed by `src_value` to `dst_value`.
@@ -471,7 +471,7 @@ int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint16_t)(uint16_t src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int8_t).to_string
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* buffer, size_t buffer_length);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(const void* property_value, char* buffer, size_t buffer_length);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int8_t).to_string` produces the string representation of an `int8_t`.
@@ -487,7 +487,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* b
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int8_t).copy
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_value);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int8_t).copy` copies the `int8_t` value from the address pointed by `src_value` to `dst_value`.
@@ -543,7 +543,7 @@ int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int8_t)(int8_t src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).to_string
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* buffer, size_t buffer_length);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(const void* property_value, char* buffer, size_t buffer_length);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).to_string` produces the string representation of an `uint8_t`.
@@ -559,7 +559,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* b
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).copy
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_value);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).copy` copies the `uint8_t` value from the address pointed by `src_value` to `dst_value`.

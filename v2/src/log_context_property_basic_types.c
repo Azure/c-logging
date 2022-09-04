@@ -14,7 +14,7 @@
 #include "c_logging/log_context_property_basic_types.h"
 
 #define DEFINE_BASIC_TYPE_TO_STRING(type_name, print_format_string) \
-    static int MU_C2(type_name,_log_context_property_type_to_string)(void* property_value, char* buffer, size_t buffer_length) \
+    static int MU_C2(type_name,_log_context_property_type_to_string)(const void* property_value, char* buffer, size_t buffer_length) \
     { \
         int result; \
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_001: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int64_t).to_string shall fail and return a negative value. ]*/ \
@@ -27,7 +27,7 @@
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_071: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).to_string shall fail and return a negative value. ]*/ \
         if (property_value == NULL) \
         { \
-            (void)printf("Invalid arguments: void* property_value=%p, char* buffer=%p, size_t buffer_length=%zu\r\n", \
+            (void)printf("Invalid arguments: const void* property_value=%p, char* buffer=%p, size_t buffer_length=%zu\r\n", \
                 property_value, buffer, buffer_length); \
             result = -1; \
         } \
@@ -63,7 +63,7 @@
     } \
 
 #define DEFINE_BASIC_TYPE_COPY(type_name, print_format_string) \
-    static int MU_C2(type_name,_log_context_property_type_copy)(void* dst_value, void* src_value) \
+    static int MU_C2(type_name,_log_context_property_type_copy)(void* dst_value, const void* src_value) \
     { \
         int result; \
         if ( \

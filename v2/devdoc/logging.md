@@ -2,7 +2,7 @@
 
 ## Basic functionality
 
-`c-logging` shall expose APIs allowing the user to log events that can be used for observing the software activity, debugging, etc.
+`c-logging` shall expose APIs allowing the user to log events that can be used for observing the software activity, debugging etc.
 
 The exposed API shall allow creating contexts both dynamically and on the stack and using those contexts for logging.
 
@@ -52,6 +52,9 @@ void logger_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char*
 
 // when a user wants to specify string fields in a context using printf-style formatting, they can use LOG_CONTEXT_STRING_PROPERTY
 // LOG_CONTEXT_STRING_PROPERTY(property_name, property_conversion_specifier, property_value)
+
+// when a user wants specify a string property with the property name message
+// LOG_MESSAGE(message)
 ```
 
 Various example usages:
@@ -333,19 +336,7 @@ Examples of what would fall in the extensions category are:
 - syntactic sugar for a message property
 - `GetLastError` on Windows
 - `HRESULT` on Windows
-- errno
-
-### LOG_MESSAGE
-
-`LOG_MESSAGE` is a macro that is syntactic sugar to wrap `LOG_CONTEXT_STRING_PROPERTY` in order to output a `message` property, while typing less.
-
-Example:
-
-```c
-LOGGER_LOG_EX(LOG_LEVEL_ERROR, 
-    LOG_CONTEXT_STRING_PROPERTY(int32_t, an_integer, 42),
-    LOG_MESSAGE("hello world"));
-```
+- `errno`
 
 ## LOGGER_LOG_EX
 
@@ -369,5 +360,17 @@ LOGGER_LOG_EX(LOG_LEVEL_ERROR,
 This would output:
 
 ```
-LOG_LEVEL_ERROR Time:Mon Aug 15 11:15:35 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:125 Func:main { name=gogu age=42  }
+LOG_LEVEL_ERROR Time:Mon Aug 15 11:15:35 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:125 Func:main { name=gogu age=42 }
+```
+
+## LOG_MESSAGE
+
+`LOG_MESSAGE` is a macro that is syntactic sugar to wrap `LOG_CONTEXT_STRING_PROPERTY` in order to output a `message` property, while typing less.
+
+Example:
+
+```c
+LOGGER_LOG_EX(LOG_LEVEL_ERROR, 
+    LOG_CONTEXT_STRING_PROPERTY(int32_t, an_integer, 42),
+    LOG_MESSAGE("hello world"));
 ```

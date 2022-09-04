@@ -15,7 +15,7 @@ extern const LOG_CONTEXT_PROPERTY_TYPE_IF LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(stru
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(struct).to_string
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* buffer, size_t buffer_length);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(const void* property_value, char* buffer, size_t buffer_length);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(struct).to_string` produces an empty string.
@@ -31,7 +31,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* b
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(struct).copy
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_value);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(struct).copy` copies the number of fields from `src_value` to `dst_value`.

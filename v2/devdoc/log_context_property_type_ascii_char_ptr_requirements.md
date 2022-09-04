@@ -15,7 +15,7 @@ extern const LOG_CONTEXT_PROPERTY_TYPE_IF LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(asci
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(void* property_value, char* buffer, size_t buffer_length);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(const void* property_value, char* buffer, size_t buffer_length);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string` produces the string representation of an `ascii_char_ptr`.
@@ -37,7 +37,7 @@ Note: the copying of the string can be somewhat optimized by not using `snprintf
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).copy
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, void* src_value);
+typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_value);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).copy` copies the `ascii_char_ptr` value from the address pointed by `src_value` to `dst_value`.

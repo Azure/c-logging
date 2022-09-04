@@ -12,14 +12,14 @@
 
 #include "c_logging/log_context_property_type_struct.h"
 
-static int struct_log_context_property_type_to_string(void* property_value, char* buffer, size_t buffer_length)
+static int struct_log_context_property_type_to_string(const void* property_value, char* buffer, size_t buffer_length)
 {
     int result;
 
     /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_STRUCT_01_001: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(struct).to_string shall fail and return a negative value. ]*/
     if (property_value == NULL)
     {
-        (void)printf("Invalid arguments: void* property_value=%p, char* buffer=%p, size_t buffer_length=%zu\r\n",
+        (void)printf("Invalid arguments: const void* property_value=%p, char* buffer=%p, size_t buffer_length=%zu\r\n",
             property_value, buffer, buffer_length);
         result = -1;
     }
@@ -46,7 +46,7 @@ static int struct_log_context_property_type_to_string(void* property_value, char
     return result;
 }
 
-static int struct_log_context_property_type_copy(void* dst_value, void* src_value)
+static int struct_log_context_property_type_copy(void* dst_value, const void* src_value)
 {
     int result;
 

@@ -13,7 +13,7 @@
 
 #include "c_logging/log_context_property_type_ascii_char_ptr.h"
 
-static int ascii_char_ptr_log_context_property_type_to_string(void* property_value, char* buffer, size_t buffer_length)
+static int ascii_char_ptr_log_context_property_type_to_string(const void* property_value, char* buffer, size_t buffer_length)
 {
     int result;
     if (
@@ -23,7 +23,7 @@ static int ascii_char_ptr_log_context_property_type_to_string(void* property_val
         (buffer == NULL) && (buffer_length > 0)
         )
     {
-        (void)printf("Invalid arguments: void* property_value=%p, char* buffer=%p, size_t buffer_length=%zu\r\n",
+        (void)printf("Invalid arguments: const void* property_value=%p, char* buffer=%p, size_t buffer_length=%zu\r\n",
             property_value, buffer, buffer_length);
         result = -1;
     }
@@ -38,7 +38,7 @@ static int ascii_char_ptr_log_context_property_type_to_string(void* property_val
     return result;
 }
 
-static int ascii_char_ptr_log_context_property_type_copy(void* dst_value, void* src_value)
+static int ascii_char_ptr_log_context_property_type_copy(void* dst_value, const void* src_value)
 {
     int result;
 
@@ -78,8 +78,6 @@ static LOG_CONTEXT_PROPERTY_TYPE ascii_char_ptr_log_context_property_type_get_ty
 
 int LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)(void* dst_value, const char* format, ...)
 {
-    va_list args;
-    va_start(args, format);
     int result;
 
     /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_011: [ If `dst_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)` shall fail and return a non-zero value. ]*/
@@ -91,6 +89,9 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)(void* dst_value, const char* 
     }
     else
     {
+        va_list args;
+        va_start(args, format);
+
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_012: [ `LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)` shall initialize the memory at `dst_value` with the `printf` style formatted string given by `format` and the arguments in `...`. ]*/
         int vsprintf_result = vsprintf(dst_value, format, args);
 
@@ -104,9 +105,10 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)(void* dst_value, const char* 
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_013: [ `LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)` shall succeed and return 0. ]*/
             result = 0;
         }
+
+        va_end(args);
     }
 
-    va_end(args);
     return result;
 }
 

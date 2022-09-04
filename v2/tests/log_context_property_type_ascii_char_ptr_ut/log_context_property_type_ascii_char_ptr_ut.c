@@ -215,7 +215,7 @@ static void ascii_char_ptr_to_string_with_NULL_buffer_and_non_zero_buffer_length
     setup_mocks();
 
     // act
-    int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string((void*)"cucu", NULL, 1);
+    int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string("cucu", NULL, 1);
 
     // assert
     POOR_MANS_ASSERT(result < 0);
@@ -231,10 +231,10 @@ static void ascii_char_ptr_to_string_with_NULL_buffer_and_zero_buffer_length_ret
     setup_expected_snprintf_call();
 
     // act
-    int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string((void*)"cucu", NULL, 0);
+    int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string("cucu", NULL, 0);
 
     // assert
-    POOR_MANS_ASSERT(result == 4);
+    POOR_MANS_ASSERT(result == strlen("cucu"));
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(actual_call_count == expected_call_count);
 }
@@ -249,7 +249,7 @@ static void ascii_char_ptr_to_string_copies_the_string(void)
     setup_expected_snprintf_call();
 
     // act
-    int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string((void*)"bau", buffer, sizeof(buffer));
+    int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string("bau", buffer, sizeof(buffer));
 
     // assert
     POOR_MANS_ASSERT(result == 3);
@@ -270,7 +270,7 @@ static void when_snprintf_fails_ascii_char_ptr_to_string_also_fails(void)
     expected_call_count = 1;
 
     // act
-    int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string((void*)"bau", buffer, sizeof(buffer));
+    int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string("bau", buffer, sizeof(buffer));
 
     // assert
     POOR_MANS_ASSERT(result < 0);

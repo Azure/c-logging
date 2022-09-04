@@ -1,12 +1,12 @@
 # `log_context` requirements
 
-`log_context` encapsulates storing a series of properties and their values (that meant to be used when logging is done).
+`log_context` encapsulates storing a series of properties and their values (that are meant to be used when logging is done).
 
 A `log_context` holds a count of properties and the backing memory to hold the properties name and values.
 
 ## Exposed API
 
-```
+```c
 typedef struct LOG_CONTEXT_TAG* LOG_CONTEXT_HANDLE;
 
 uint32_t log_context_get_property_value_pair_count(LOG_CONTEXT_HANDLE log_context);
