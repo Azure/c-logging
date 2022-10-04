@@ -53,15 +53,15 @@ The result is placed in `buffer`, while observing the size of `buffer` to be `bu
 typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_value);
 ```
 
-`LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int64_t).copy` copies the value pointed by `src_value` to `dst_value`.
+`LOG_CONTEXT_PROPERTY_TYPE_COPY` copies the value pointed by `src_value` to `dst_value`.
 
-## LOG_CONTEXT_PROPERTY_TYPE_COPY
+## LOG_CONTEXT_PROPERTY_TYPE_FREE
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* value);
+typedef void (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
-`LOG_CONTEXT_PROPERTY_TYPE_COPY` releases any resources associated with `value`.
+`LOG_CONTEXT_PROPERTY_TYPE_FREE` releases any resources associated with `value`.
 
 ## LOG_CONTEXT_PROPERTY_TYPE_GET_TYPE
 

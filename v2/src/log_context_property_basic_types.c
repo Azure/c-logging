@@ -178,8 +178,8 @@
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_094: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint32_t) shall copy the src_value bytes of the uint32_t to dst_value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_098: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int16_t) shall copy the src_value bytes of the int16_t to dst_value. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_102: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint16_t) shall copy the src_value bytes of the uint16_t to dst_value. ]*/ \
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_106: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t) shall copy the src_value bytes of the int8_t to dst_value. ]*/ \
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_110: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t) shall copy the src_value bytes of the uint8_t to dst_value. ]*/ \
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_106: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t) shall copy the src_value byte of the int8_t to dst_value. ]*/ \
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_110: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t) shall copy the src_value byte of the uint8_t to dst_value. ]*/ \
             (void)memcpy(dst_value, &src_value, sizeof(type_name)); \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_083: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int64_t) shall succeed and return 0. ]*/ \
             /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_087: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint64_t) shall succeed and return 0. ]*/ \

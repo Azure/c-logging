@@ -47,7 +47,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_v
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(struct).free
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
+typedef void (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
 **SRS_LOG_CONTEXT_PROPERTY_TYPE_STRUCT_01_009: [** `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(struct).free` shall return. **]**

@@ -258,7 +258,7 @@ static void ascii_char_ptr_to_string_copies_the_string(void)
     POOR_MANS_ASSERT(actual_call_count == expected_call_count);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_005: [ If any error is encountered, `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string` shall fail and return a negative value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_005: [ If any error is encountered (truncation is not an error), `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string` shall fail and return a negative value. ]*/
 static void when_snprintf_fails_ascii_char_ptr_to_string_also_fails(void)
 {
     // arrange
@@ -315,7 +315,7 @@ static void ascii_char_ptr_copy_with_NULL_dst_value_fails(void)
     POOR_MANS_ASSERT(actual_call_count == expected_call_count);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_008: [ `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).copy` shall copy the entire string (including the `NULL` terminator) from `src_value` to `dst_value`. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_008: [ `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).copy` shall copy the entire string (including the null terminator) from `src_value` to `dst_value`. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_009: [ `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).copy` shall succeed and return 0. ]*/
 static void ascii_char_ptr_copy_succeeds(void)
 {
@@ -391,7 +391,7 @@ static void ascii_char_ptr_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fa
     POOR_MANS_ASSERT(actual_call_count == expected_call_count);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_012: [ `LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)` shall initialize the memory at `dst_value` with the `printf` style formatted string given by `format` and the arguments in `...`. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_012: [ `LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)` shall initialize by calling snprintf the memory at `dst_value` with the `printf` style formatted string given by `format` and the arguments in `...`. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_013: [ `LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)` shall succeed and return 0. ]*/
 static void ascii_char_ptr_LOG_CONTEXT_PROPERTY_TYPE_INIT_succeeds(void)
 {
@@ -449,7 +449,7 @@ static void when_underlying_call_fails_ascii_char_ptr_LOG_CONTEXT_PROPERTY_TYPE_
 
 /* LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(ascii_char_ptr)*/
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_015: [ If the underlying C runtime call used to obtain the amount of memory needed fails, `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(ascii_char_ptr)` shall return a negative value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_015: [ If snprintf fails, `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(ascii_char_ptr)` shall return a negative value. ]*/
 static void when_underlying_call_fails_ascii_char_ptr_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_also_fails(void)
 {
     // arrange

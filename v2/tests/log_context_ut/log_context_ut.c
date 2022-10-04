@@ -1464,7 +1464,7 @@ static void log_context_get_property_value_pair_count_with_NULL_log_context_retu
     POOR_MANS_ASSERT(result == UINT32_MAX);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_021: [ Otherwise, log_context_get_property_value_pair_count shall return the  number of property/value pairs stored by log_context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_021: [ Otherwise, log_context_get_property_value_pair_count shall return the number of property/value pairs stored by log_context. ]*/
 static void log_context_get_property_value_pair_count_with_a_local_stack_context_returns_the_count(void)
 {
     // arrange
@@ -1485,7 +1485,7 @@ static void log_context_get_property_value_pair_count_with_a_local_stack_context
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_021: [ Otherwise, log_context_get_property_value_pair_count shall return the  number of property/value pairs stored by log_context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_021: [ Otherwise, log_context_get_property_value_pair_count shall return the number of property/value pairs stored by log_context. ]*/
 static void log_context_get_property_value_pair_count_with_a_dynamically_allocated_context_returns_the_count(void)
 {
     // arrange

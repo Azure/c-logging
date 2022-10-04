@@ -2186,7 +2186,7 @@ static void int8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(void
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_106: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t) shall copy the src_value bytes of the int8_t to dst_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_106: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t) shall copy the src_value byte of the int8_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_107: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t) shall succeed and return 0. ]*/
 static void int8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int8_t_min_value_succeeds(void)
 {
@@ -2203,7 +2203,7 @@ static void int8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int8_t_min_value_succeeds
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_106: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t) shall copy the src_value bytes of the int8_t to dst_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_106: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t) shall copy the src_value byte of the int8_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_107: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t) shall succeed and return 0. ]*/
 static void int8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int8_t_max_value_succeeds(void)
 {
@@ -2479,7 +2479,7 @@ static void uint8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(voi
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_110: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t) shall copy the src_value bytes of the uint8_t to dst_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_110: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t) shall copy the src_value byte of the uint8_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_111: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t) shall succeed and return 0. ]*/
 static void uint8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint8_t_min_value_succeeds(void)
 {
@@ -2496,7 +2496,7 @@ static void uint8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint8_t_min_value_succee
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_110: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t) shall copy the src_value bytes of the uint8_t to dst_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_110: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t) shall copy the src_value byte of the uint8_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_111: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t) shall succeed and return 0. ]*/
 static void uint8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint8_t_max_value_succeeds(void)
 {

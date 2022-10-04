@@ -71,7 +71,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_v
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int64_t).free
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
+typedef void (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_009: [** `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int64_t).free` shall return. **]**
@@ -143,7 +143,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_v
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint64_t).free
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
+typedef void (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_019: [** `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint64_t).free` shall return. **]**
@@ -215,7 +215,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_v
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int32_t).free
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
+typedef void (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_029: [** `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int32_t).free` shall return. **]**
@@ -287,7 +287,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_v
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).free
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
+typedef void (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_039: [** `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).free` shall return. **]**
@@ -359,7 +359,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_v
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int16_t).free
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
+typedef void (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_049: [** `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int16_t).free` shall return. **]**
@@ -431,7 +431,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_v
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).free
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
+typedef void (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_059: [** `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).free` shall return. **]**
@@ -503,7 +503,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_v
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int8_t).free
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
+typedef void (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_069: [** `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int8_t).free` shall return. **]**
@@ -526,7 +526,7 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t)(void* dst_value, int8_t src_value);
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_105: [** If `dst_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t)` shall fail and return a non-zero value. **]**
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_106: [** `LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t)` shall copy the `src_value` bytes of the `int8_t` to `dst_value`. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_106: [** `LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t)` shall copy the `src_value` byte of the `int8_t` to `dst_value`. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_107: [** `LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t)` shall succeed and return 0. **]**
 
@@ -575,7 +575,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_v
 ## LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).free
 
 ```c
-typedef int (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
+typedef void (*LOG_CONTEXT_PROPERTY_TYPE_FREE)(void* value);
 ```
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_079: [** `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).free` shall return. **]**
@@ -598,7 +598,7 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t)(void* dst_value, uint8_t src_value);
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_109: [** If `dst_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t)` shall fail and return a non-zero value. **]**
 
-**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_110: [** `LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t)` shall copy the `src_value` bytes of the `uint8_t` to `dst_value`. **]**
+**SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_110: [** `LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t)` shall copy the `src_value` byte of the `uint8_t` to `dst_value`. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_111: [** `LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t)` shall succeed and return 0. **]**
 

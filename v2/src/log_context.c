@@ -22,7 +22,7 @@ uint32_t log_context_get_property_value_pair_count(LOG_CONTEXT_HANDLE log_contex
     }
     else
     {
-        /* Codes_SRS_LOG_CONTEXT_01_021: [ Otherwise, `log_context_get_property_value_pair_count` shall return the  number of property/value pairs stored by `log_context`. ]*/
+        /* Codes_SRS_LOG_CONTEXT_01_021: [ Otherwise, `log_context_get_property_value_pair_count` shall return the number of property/value pairs stored by `log_context`. ]*/
         result = log_context->property_value_pair_count;
     }
 
