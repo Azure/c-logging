@@ -28,7 +28,7 @@
 
 #define DECLARE_BASIC_TYPE(type_name) \
     int LOG_CONTEXT_PROPERTY_TYPE_INIT(type_name)(void* dst_value, type_name src_value); \
-    int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(type_name)(type_name src_value); \
+    int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(type_name)(void); \
     extern const LOG_CONTEXT_PROPERTY_TYPE_IF LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(type_name); \
 
 MU_FOR_EACH_1(DECLARE_BASIC_TYPE, SUPPORTED_BASIC_TYPES)

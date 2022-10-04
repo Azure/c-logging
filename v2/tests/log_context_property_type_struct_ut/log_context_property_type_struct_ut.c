@@ -212,7 +212,7 @@ static void struct_get_init_data_size_returns_1(void)
     // arrange
 
     // act
-    int result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(struct)(43);
+    int result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(struct)();
 
     // assert
     POOR_MANS_ASSERT(result == sizeof(uint8_t));

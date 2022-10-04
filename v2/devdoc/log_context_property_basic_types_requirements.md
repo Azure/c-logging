@@ -30,7 +30,7 @@ Note: More types will be added as needed.
 
 #define DECLARE_BASIC_TYPE(type_name) \
     int LOG_CONTEXT_PROPERTY_TYPE_INIT(type_name)(void* dst_value, type_name src_value); \
-    size_t LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(type_name)(type_name src_value); \
+    size_t LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(type_name)(void); \
     extern const LOG_CONTEXT_PROPERTY_TYPE_IF LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(type_name); \
 
 MU_FOR_EACH_1(DECLARE_BASIC_TYPE, SUPPORTED_BASIC_TYPES)
@@ -101,10 +101,10 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(int64_t)(void* dst_value, int64_t src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int64_t)
 
 ```c
-int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int64_t)(int64_t src_value);
+int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int64_t)(void);
 ```
 
-`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int64_t)` returns the number of bytes needed to hold `src_value`.
+`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int64_t)` returns the number of bytes needed to hold an `int64_t`.
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_084: [** `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int64_t)` shall return `sizeof(int64_t)`. **]**
 
@@ -173,10 +173,10 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(uint64_t)(void* dst_value, uint64_t src_value
 ## LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint64_t)
 
 ```c
-int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint64_t)(uint64_t src_value);
+int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint64_t)(void);
 ```
 
-`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint64_t)` returns the number of bytes needed to hold `src_value`.
+`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint64_t)` returns the number of bytes needed to hold an `uint64_t`.
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_088: [** `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint64_t)` shall return `sizeof(uint64_t)`. **]**
 
@@ -245,10 +245,10 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(int32_t)(void* dst_value, int32_t src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int32_t)
 
 ```c
-int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int32_t)(int32_t src_value);
+int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int32_t)(void);
 ```
 
-`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int32_t)` returns the number of bytes needed to hold `src_value`.
+`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int32_t)` returns the number of bytes needed to hold an `int32_t`.
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_092: [** `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int32_t)` shall return `sizeof(int32_t)`. **]**
 
@@ -317,10 +317,10 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(uint32_t)(void* dst_value, uint32_t src_value
 ## LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint32_t)
 
 ```c
-int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint32_t)(uint32_t src_value);
+int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint32_t)(void);
 ```
 
-`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint32_t)` returns the number of bytes needed to hold `src_value`.
+`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint32_t)` returns the number of bytes needed to hold an `uint32_t`.
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_096: [** `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint32_t)` shall return `sizeof(uint32_t)`. **]**
 
@@ -389,10 +389,10 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(int16_t)(void* dst_value, int16_t src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int16_t)
 
 ```c
-int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int16_t)(int16_t src_value);
+int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int16_t)(void);
 ```
 
-`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int16_t)` returns the number of bytes needed to hold `src_value`.
+`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int16_t)` returns the number of bytes needed to hold an `int16_t`.
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_100: [** `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int16_t)` shall return `sizeof(int16_t)`. **]**
 
@@ -461,10 +461,10 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(uint16_t)(void* dst_value, uint16_t src_value
 ## LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint16_t)
 
 ```c
-int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint16_t)(uint16_t src_value);
+int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint16_t)(void);
 ```
 
-`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint16_t)` returns the number of bytes needed to hold `src_value`.
+`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint16_t)` returns the number of bytes needed to hold an `uint16_t`.
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_104: [** `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint16_t)` shall return `sizeof(uint16_t)`. **]**
 
@@ -533,10 +533,10 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t)(void* dst_value, int8_t src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int8_t)
 
 ```c
-int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int8_t)(int8_t src_value);
+int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int8_t)(void);
 ```
 
-`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int8_t)` returns the number of bytes needed to hold `src_value`.
+`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int8_t)` returns the number of bytes needed to hold an `int8_t`.
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_108: [** `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int8_t)` shall return `sizeof(int8_t)`. **]**
 
@@ -605,9 +605,9 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t)(void* dst_value, uint8_t src_value);
 ## LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint8_t)
 
 ```c
-int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint8_t)(uint8_t src_value);
+int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint8_t)(void);
 ```
 
-`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint8_t)` returns the number of bytes needed to hold `src_value`.
+`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint8_t)` returns the number of bytes needed to hold an `uint8_t`.
 
 **SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_112: [** `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint8_t)` shall return `sizeof(uint8_t)`. **]**

@@ -409,7 +409,7 @@ static void int64_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(void)
     setup_mocks();
 
     // act
-    size_t result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int64_t)(INT64_MAX);
+    size_t result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int64_t)();
 
     // assert
     POOR_MANS_ASSERT(result == sizeof(int64_t));
@@ -702,7 +702,7 @@ static void uint64_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(void)
     setup_mocks();
 
     // act
-    size_t result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint64_t)(UINT64_MAX);
+    size_t result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint64_t)();
 
     // assert
     POOR_MANS_ASSERT(result == sizeof(uint64_t));
@@ -1015,7 +1015,7 @@ static void int32_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(void)
     setup_mocks();
 
     // act
-    size_t result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int32_t)(INT32_MAX);
+    size_t result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int32_t)();
 
     // assert
     POOR_MANS_ASSERT(result == sizeof(int32_t));
@@ -1308,7 +1308,7 @@ static void uint32_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(void)
     setup_mocks();
 
     // act
-    size_t result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint32_t)(UINT32_MAX);
+    size_t result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint32_t)();
 
     // assert
     POOR_MANS_ASSERT(result == sizeof(uint32_t));
@@ -1622,7 +1622,7 @@ static void int16_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(void)
     setup_mocks();
 
     // act
-    size_t result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int16_t)(INT16_MAX);
+    size_t result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int16_t)();
 
     // assert
     POOR_MANS_ASSERT(result == sizeof(int16_t));
@@ -1915,7 +1915,7 @@ static void uint16_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(void)
     setup_mocks();
 
     // act
-    size_t result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint16_t)(UINT16_MAX);
+    size_t result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint16_t)();
 
     // assert
     POOR_MANS_ASSERT(result == sizeof(uint16_t));
@@ -2229,7 +2229,7 @@ static void int8_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(void)
     setup_mocks();
 
     // act
-    size_t result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int8_t)(INT8_MAX);
+    size_t result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int8_t)();
 
     // assert
     POOR_MANS_ASSERT(result == sizeof(int8_t));
@@ -2522,7 +2522,7 @@ static void uint8_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(void)
     setup_mocks();
 
     // act
-    size_t result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint8_t)(UINT8_MAX);
+    size_t result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint8_t)();
 
     // assert
     POOR_MANS_ASSERT(result == sizeof(uint8_t));

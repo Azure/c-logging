@@ -195,9 +195,8 @@
     }
 
 #define DEFINE_BASIC_TYPE_GET_INIT_DATA_SIZE(type_name) \
-    int MU_C2(type_name,_log_context_property_type_get_init_data_size)(type_name src_value) \
+    int MU_C2(type_name,_log_context_property_type_get_init_data_size)(void) \
     { \
-        (void)src_value; \
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_084: [ LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int64_t) shall return sizeof(int64_t). ]*/ \
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_088: [ LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint64_t) shall return sizeof(uint64_t). ]*/ \
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_092: [ LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int32_t) shall return sizeof(int32_t). ]*/ \

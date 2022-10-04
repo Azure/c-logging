@@ -6,7 +6,7 @@
 
 ```
 int LOG_CONTEXT_PROPERTY_TYPE_INIT(struct)(void* dst_value, uint8_t src_value);
-int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(struct)(uint8_t src_value);
+int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(struct)();
 
 extern const LOG_CONTEXT_PROPERTY_TYPE_IF LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(struct);
 
@@ -77,7 +77,7 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(struct)(void* dst_value, uint8_t field_count)
 ## LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(struct)
 
 ```c
-int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(struct)(uit8_t field_count);
+int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(struct)(void);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(struct)` returns the amount of memory needed to store the fields for a struct.

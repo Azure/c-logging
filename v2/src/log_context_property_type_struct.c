@@ -108,10 +108,8 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(struct)(void* dst_value, uint8_t src_value)
     return result;
 }
 
-int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(struct)(uint8_t src_value)
+int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(struct)(void)
 {
-    (void)src_value;
-
     /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_STRUCT_01_014: [ LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(struct) shall return sizeof(uint8_t). ]*/
     return sizeof(uint8_t);
 }
