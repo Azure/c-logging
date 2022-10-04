@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-void log_internal_error_report();
+void log_internal_error_report(void);
 
 #ifdef __cplusplus
 }

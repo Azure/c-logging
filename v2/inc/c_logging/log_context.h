@@ -228,7 +228,7 @@ void log_context_destroy(LOG_CONTEXT_HANDLE log_context);
     log_context_destroy(log_context_handle)
 
 // when a user wants to specify the log context name to be printed or published, the user can use this macro
-// otherwise, the default is to use 'unnamed' string as context name
+// otherwise, the default is to use empty string ("") as context name
 // LOG_CONTEXT_NAME(log_context_name)
 
 // when a user wants to specify properties for a context, they can use LOG_CONTEXT_PROPERTY

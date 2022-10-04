@@ -16,7 +16,8 @@
 extern "C" {
 #endif
 
-int LOG_CONTEXT_PROPERTY_TYPE_INIT(struct)(void* dst_value, uint8_t src_value);
+// For the moment we only save the field count in the "struct" type
+int LOG_CONTEXT_PROPERTY_TYPE_INIT(struct)(void* dst_value, uint8_t src_field_count);
 int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(struct)(void);
 
 extern const LOG_CONTEXT_PROPERTY_TYPE_IF LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(struct);

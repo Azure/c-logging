@@ -278,6 +278,24 @@ static void when_snprintf_fails_ascii_char_ptr_to_string_also_fails(void)
     POOR_MANS_ASSERT(actual_call_count == expected_call_count);
 }
 
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_005: [ If any error is encountered (truncation is not an error), `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string` shall fail and return a negative value. ]*/
+static void when_snprintf_fails_ascii_char_ptr_to_string_with_truncation(void)
+{
+    // arrange
+    char buffer[2];
+    setup_mocks();
+    setup_expected_snprintf_call();
+
+    // act
+    int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string("bau", buffer, sizeof(buffer));
+
+    // assert
+    POOR_MANS_ASSERT(result == 3);
+    POOR_MANS_ASSERT(strcmp(buffer, "b") == 0);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+    POOR_MANS_ASSERT(actual_call_count == expected_call_count);
+}
+
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).copy */
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_006: [ If `src_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).copy` shall fail and return a non-zero value. ]*/
@@ -508,6 +526,7 @@ int main(void)
     ascii_char_ptr_to_string_with_NULL_buffer_and_zero_buffer_length_returns_string_length();
     ascii_char_ptr_to_string_copies_the_string();
     when_snprintf_fails_ascii_char_ptr_to_string_also_fails();
+    when_snprintf_fails_ascii_char_ptr_to_string_with_truncation();
 
     ascii_char_ptr_copy_with_NULL_src_value_fails();
     ascii_char_ptr_copy_with_NULL_dst_value_fails();

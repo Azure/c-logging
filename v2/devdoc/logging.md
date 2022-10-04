@@ -114,7 +114,7 @@ void examples(void)
 
     LOGGER_LOG_EX(LOG_LEVEL_ERROR,
         LOG_CONTEXT_STRING_PROPERTY(name, "%s%s", "go", "gu"),
-        LOG_MESSAGE("some message here with and integer = %d", 42));
+        LOG_MESSAGE("some message here with an integer = %d", 42));
 }
 ```
 
@@ -129,7 +129,7 @@ LOG_LEVEL_INFO Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger
 LOG_LEVEL_VERBOSE Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:117 Func:main { { context_2={ context_1={ name=haga } last name=uaga age=42 } the_knights_that_say=Nee! } other_knights_that_say=Moo! } log with nee and moo
 LOG_LEVEL_ERROR Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:16 Func:log_from_a_function { { context_2={ context_1={ name=haga } last name=uaga age=42 } the_knights_that_say=Nee! } other_knights_that_say=Moo! } log from a function!
 LOG_LEVEL_ERROR Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:125 Func:main { name=gogu age=42 }
-LOG_LEVEL_ERROR Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:129 Func:main { name=gogu message=some message here with and integer = 42 }
+LOG_LEVEL_ERROR Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:129 Func:main { name=gogu message=some message here with an integer = 42 }
 ```
 
 ## Log levels
@@ -330,7 +330,7 @@ LOG_LEVEL_ERROR Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logge
 
 ### Extensions
 
-An extensions set of properties shall be available in order to ease writing logging code.
+A set of extensions properties shall be available in order to ease writing logging code.
 Examples of what would fall in the extensions category are:
 
 - syntactic sugar for a message property
