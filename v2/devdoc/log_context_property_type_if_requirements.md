@@ -87,6 +87,6 @@ For more complex data types (like a reference counted value), this could mean st
 
 ## LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(type_name)
 
-`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(type_name)` returns the amount of data needed for initializing a property by using `LOG_CONTEXT_PROPERTY_TYPE_INIT(type_name)`.
+`LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(type_name)` returns the memory size needed for initializing a property by using `LOG_CONTEXT_PROPERTY_TYPE_INIT(type_name)`.
 
 **SRS_LOG_CONTEXT_PROPERTY_TYPE_IF_01_003: [** `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(type_name)` shall produce the token `{type_name}_log_context_property_type_get_init_data_size`. **]**

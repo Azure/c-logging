@@ -169,7 +169,7 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
             destination_context.values_data_length = 0; \
             log_internal_error_report(); \
         } \
-        /* Codes_SRS_LOG_CONTEXT_01_025: [ If the amount of data needed for all properties to be stored in the context exceeds LOG_MAX_STACK_DATA_SIZE, an error shall be reported by calling log_internal_error_report and no properties shall be stored in the context. ]*/ \
+        /* Codes_SRS_LOG_CONTEXT_01_025: [ If the memory size needed for all properties to be stored in the context exceeds LOG_MAX_STACK_DATA_SIZE, an error shall be reported by calling log_internal_error_report and no properties shall be stored in the context. ]*/ \
         else if (destination_context.values_data_length > LOG_MAX_STACK_DATA_SIZE) \
         { \
             (void)printf("Data length too big: values_data_length = %" PRIu32 "\r\n", destination_context.values_data_length); \

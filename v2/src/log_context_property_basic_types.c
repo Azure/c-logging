@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <inttypes.h>
 #include <stdio.h>
-#include <string.h> 
+#include <string.h>
 
 #include "macro_utils/macro_utils.h"
 
@@ -62,7 +62,7 @@
         return result; \
     } \
 
-#define DEFINE_BASIC_TYPE_COPY(type_name, print_format_string) \
+#define DEFINE_BASIC_TYPE_COPY(type_name) \
     static int MU_C2(type_name,_log_context_property_type_copy)(void* dst_value, const void* src_value) \
     { \
         int result; \
@@ -210,7 +210,7 @@
 
 #define DEFINE_BASIC_TYPE(type_name, print_format_string) \
     DEFINE_BASIC_TYPE_TO_STRING(type_name, print_format_string) \
-    DEFINE_BASIC_TYPE_COPY(type_name, print_format_string) \
+    DEFINE_BASIC_TYPE_COPY(type_name) \
     DEFINE_BASIC_TYPE_FREE(type_name) \
     DEFINE_BASIC_TYPE_GET_TYPE(type_name) \
     DEFINE_BASIC_TYPE_INIT(type_name, print_format_string) \

@@ -353,7 +353,7 @@ static void int64_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_int64_t(void)
 /* LOG_CONTEXT_PROPERTY_TYPE_INIT(int64_t) */
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_081: [ If dst_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_INIT(int64_t) shall fail and return a non-zero value. ]*/
-static void int64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int64_t), _with_NULL_dst_value_fails)(void)
 {
     // arrange
     setup_mocks();
@@ -368,7 +368,7 @@ static void int64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(voi
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_082: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int64_t) shall copy the src_value bytes of the int64_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_083: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int64_t) shall succeed and return 0. ]*/
-static void int64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int64_t_min_value_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int64_t),_with_int64_t_min_value_succeeds)(void)
 {
     // arrange
     int64_t dst = 43;
@@ -385,7 +385,7 @@ static void int64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int64_t_min_value_succee
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_082: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int64_t) shall copy the src_value bytes of the int64_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_083: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int64_t) shall succeed and return 0. ]*/
-static void int64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int64_t_max_value_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int64_t),_with_int64_t_max_value_succeeds)(void)
 {
     // arrange
     int64_t dst = 43;
@@ -403,7 +403,7 @@ static void int64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int64_t_max_value_succee
 /* LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int64_t) */
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_084: [ LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int64_t) shall return sizeof(int64_t). ]*/
-static void int64_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int64_t), _succeeds)(void)
 {
     // arrange
     setup_mocks();
@@ -646,7 +646,7 @@ static void uint64_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_uint64_t(void)
 /* LOG_CONTEXT_PROPERTY_TYPE_INIT(uint64_t) */
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_085: [ If dst_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_INIT(uint64_t) shall fail and return a non-zero value. ]*/
-static void uint64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint64_t), _with_NULL_dst_value_fails)(void)
 {
     // arrange
     setup_mocks();
@@ -661,7 +661,7 @@ static void uint64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(vo
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_086: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint64_t) shall copy the src_value bytes of the uint64_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_087: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint64_t) shall succeed and return 0. ]*/
-static void uint64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint64_t_min_value_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint64_t), _with_uint64_t_min_value_succeeds)(void)
 {
     // arrange
     uint64_t dst = 43;
@@ -678,7 +678,7 @@ static void uint64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint64_t_min_value_succ
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_086: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint64_t) shall copy the src_value bytes of the uint64_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_087: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint64_t) shall succeed and return 0. ]*/
-static void uint64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint64_t_max_value_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint64_t), _with_uint64_t_max_value_succeeds)(void)
 {
     // arrange
     uint64_t dst = 43;
@@ -696,7 +696,7 @@ static void uint64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint64_t_max_value_succ
 /* LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint64_t) */
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_088: [ LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint64_t) shall return sizeof(uint64_t). ]*/
-static void uint64_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint64_t), _succeeds)(void)
 {
     // arrange
     setup_mocks();
@@ -959,7 +959,7 @@ static void int32_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_int32_t(void)
 /* LOG_CONTEXT_PROPERTY_TYPE_INIT(int32_t) */
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_089: [ If dst_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_INIT(int32_t) shall fail and return a non-zero value. ]*/
-static void int32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int32_t), _with_NULL_dst_value_fails)(void)
 {
     // arrange
     setup_mocks();
@@ -974,7 +974,7 @@ static void int32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(voi
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_090: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int32_t) shall copy the src_value bytes of the int32_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_091: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int32_t) shall succeed and return 0. ]*/
-static void int32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int32_t_min_value_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int32_t), _with_int32_t_min_value_succeeds)(void)
 {
     // arrange
     int32_t dst = 43;
@@ -991,7 +991,7 @@ static void int32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int32_t_min_value_succee
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_090: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int32_t) shall copy the src_value bytes of the int32_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_091: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int32_t) shall succeed and return 0. ]*/
-static void int32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int32_t_max_value_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int32_t), _with_int32_t_max_value_succeeds)(void)
 {
     // arrange
     int32_t dst = 43;
@@ -1009,7 +1009,7 @@ static void int32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int32_t_max_value_succee
 /* LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int32_t) */
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_092: [ LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int32_t) shall return sizeof(int32_t). ]*/
-static void int32_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int32_t), _succeeds)(void)
 {
     // arrange
     setup_mocks();
@@ -1252,7 +1252,7 @@ static void uint32_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_uint32_t(void)
 /* LOG_CONTEXT_PROPERTY_TYPE_INIT(uint32_t) */
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_093: [ If dst_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_INIT(uint32_t) shall fail and return a non-zero value. ]*/
-static void uint32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint32_t), _with_NULL_dst_value_fails)(void)
 {
     // arrange
     setup_mocks();
@@ -1267,7 +1267,7 @@ static void uint32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(vo
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_094: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint32_t) shall copy the src_value bytes of the uint32_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_095: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint32_t) shall succeed and return 0. ]*/
-static void uint32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint32_t_min_value_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint32_t), _with_uint32_t_min_value_succeeds)(void)
 {
     // arrange
     uint32_t dst = 43;
@@ -1284,7 +1284,7 @@ static void uint32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint32_t_min_value_succ
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_094: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint32_t) shall copy the src_value bytes of the uint32_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_095: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint32_t) shall succeed and return 0. ]*/
-static void uint32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint32_t_max_value_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint32_t), _with_uint32_t_max_value_succeeds)(void)
 {
     // arrange
     uint32_t dst = 43;
@@ -1302,7 +1302,7 @@ static void uint32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint32_t_max_value_succ
 /* LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint32_t) */
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_096: [ LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint32_t) shall return sizeof(uint32_t). ]*/
-static void uint32_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint32_t), _succeeds)(void)
 {
     // arrange
     setup_mocks();
@@ -1566,7 +1566,7 @@ static void int16_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_int16_t(void)
 /* LOG_CONTEXT_PROPERTY_TYPE_INIT(int16_t) */
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_097: [ If dst_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_INIT(int16_t) shall fail and return a non-zero value. ]*/
-static void int16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int16_t), _with_NULL_dst_value_fails)(void)
 {
     // arrange
     setup_mocks();
@@ -1581,7 +1581,7 @@ static void int16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(voi
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_098: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int16_t) shall copy the src_value bytes of the int16_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_099: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int16_t) shall succeed and return 0. ]*/
-static void int16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int16_t_min_value_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int16_t), _with_int16_t_min_value_succeeds)(void)
 {
     // arrange
     int16_t dst = 43;
@@ -1598,7 +1598,7 @@ static void int16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int16_t_min_value_succee
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_098: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int16_t) shall copy the src_value bytes of the int16_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_099: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int16_t) shall succeed and return 0. ]*/
-static void int16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int16_t_max_value_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int16_t), _with_int16_t_max_value_succeeds)(void)
 {
     // arrange
     int16_t dst = 43;
@@ -1616,7 +1616,7 @@ static void int16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int16_t_max_value_succee
 /* LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int16_t) */
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_100: [ LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int16_t) shall return sizeof(int16_t). ]*/
-static void int16_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int16_t), _succeeds)(void)
 {
     // arrange
     setup_mocks();
@@ -1859,7 +1859,7 @@ static void uint16_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_uint16_t(void)
 /* LOG_CONTEXT_PROPERTY_TYPE_INIT(uint16_t) */
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_101: [ If dst_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_INIT(uint16_t) shall fail and return a non-zero value. ]*/
-static void uint16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint16_t), _with_NULL_dst_value_fails)(void)
 {
     // arrange
     setup_mocks();
@@ -1874,7 +1874,7 @@ static void uint16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(vo
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_102: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint16_t) shall copy the src_value bytes of the uint16_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_103: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint16_t) shall succeed and return 0. ]*/
-static void uint16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint16_t_min_value_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint16_t), _with_uint16_t_min_value_succeeds)(void)
 {
     // arrange
     uint16_t dst = 43;
@@ -1891,7 +1891,7 @@ static void uint16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint16_t_min_value_succ
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_102: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint16_t) shall copy the src_value bytes of the uint16_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_103: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint16_t) shall succeed and return 0. ]*/
-static void uint16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint16_t_max_value_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint16_t), _with_uint16_t_max_value_succeeds)(void)
 {
     // arrange
     uint16_t dst = 43;
@@ -1909,7 +1909,7 @@ static void uint16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint16_t_max_value_succ
 /* LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint16_t) */
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_104: [ LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint16_t) shall return sizeof(uint16_t). ]*/
-static void uint16_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint16_t), _succeeds)(void)
 {
     // arrange
     setup_mocks();
@@ -2173,7 +2173,7 @@ static void int8_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_int8_t(void)
 /* LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t) */
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_105: [ If dst_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t) shall fail and return a non-zero value. ]*/
-static void int8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t), _with_NULL_dst_value_fails)(void)
 {
     // arrange
     setup_mocks();
@@ -2188,7 +2188,7 @@ static void int8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(void
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_106: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t) shall copy the src_value byte of the int8_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_107: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t) shall succeed and return 0. ]*/
-static void int8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int8_t_min_value_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t), _with_int8_t_min_value_succeeds)(void)
 {
     // arrange
     int8_t dst = 43;
@@ -2205,7 +2205,7 @@ static void int8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int8_t_min_value_succeeds
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_106: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t) shall copy the src_value byte of the int8_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_107: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t) shall succeed and return 0. ]*/
-static void int8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int8_t_max_value_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t), _with_int8_t_max_value_succeeds)(void)
 {
     // arrange
     int8_t dst = 43;
@@ -2223,7 +2223,7 @@ static void int8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int8_t_max_value_succeeds
 /* LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int8_t) */
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_108: [ LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int8_t) shall return sizeof(int8_t). ]*/
-static void int8_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int8_t), _succeeds)(void)
 {
     // arrange
     setup_mocks();
@@ -2466,7 +2466,7 @@ static void uint8_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_uint8_t(void)
 /* LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t) */
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_109: [ If dst_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t) shall fail and return a non-zero value. ]*/
-static void uint8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t), _with_NULL_dst_value_fails)(void)
 {
     // arrange
     setup_mocks();
@@ -2481,7 +2481,7 @@ static void uint8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails(voi
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_110: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t) shall copy the src_value byte of the uint8_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_111: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t) shall succeed and return 0. ]*/
-static void uint8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint8_t_min_value_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t), _with_uint8_t_min_value_succeeds)(void)
 {
     // arrange
     uint8_t dst = 43;
@@ -2498,7 +2498,7 @@ static void uint8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint8_t_min_value_succee
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_110: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t) shall copy the src_value byte of the uint8_t to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_111: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t) shall succeed and return 0. ]*/
-static void uint8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint8_t_max_value_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t), _with_uint8_t_max_value_succeeds)(void)
 {
     // arrange
     uint8_t dst = 43;
@@ -2516,7 +2516,7 @@ static void uint8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint8_t_max_value_succee
 /* LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint8_t) */
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_112: [ LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint8_t) shall return sizeof(uint8_t). ]*/
-static void uint8_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint8_t), _succeeds)(void)
 {
     // arrange
     setup_mocks();
@@ -2549,11 +2549,11 @@ int main(void)
 
     int64_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_int64_t();
 
-    int64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails();
-    int64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int64_t_min_value_succeeds();
-    int64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int64_t_max_value_succeeds();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int64_t), _with_NULL_dst_value_fails)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int64_t), _with_int64_t_min_value_succeeds)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int64_t), _with_int64_t_max_value_succeeds)();
 
-    int64_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int64_t), _succeeds)();
 
     uint64_t_to_string_with_NULL_value_fails();
     uint64_t_to_string_succeeds();
@@ -2571,11 +2571,11 @@ int main(void)
 
     uint64_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_uint64_t();
 
-    uint64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails();
-    uint64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint64_t_min_value_succeeds();
-    uint64_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint64_t_max_value_succeeds();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint64_t), _with_NULL_dst_value_fails)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint64_t), _with_uint64_t_min_value_succeeds)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint64_t), _with_uint64_t_max_value_succeeds)();
 
-    uint64_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint64_t), _succeeds)();
 
     int32_t_to_string_with_NULL_value_fails();
     int32_t_to_string_succeeds();
@@ -2594,11 +2594,11 @@ int main(void)
 
     int32_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_int32_t();
 
-    int32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails();
-    int32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int32_t_min_value_succeeds();
-    int32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int32_t_max_value_succeeds();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int32_t), _with_NULL_dst_value_fails)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int32_t), _with_int32_t_min_value_succeeds)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int32_t), _with_int32_t_max_value_succeeds)();
 
-    int32_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int32_t), _succeeds)();
 
     uint32_t_to_string_with_NULL_value_fails();
     uint32_t_to_string_succeeds();
@@ -2616,11 +2616,11 @@ int main(void)
 
     uint32_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_uint32_t();
 
-    uint32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails();
-    uint32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint32_t_min_value_succeeds();
-    uint32_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint32_t_max_value_succeeds();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint32_t), _with_NULL_dst_value_fails)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint32_t), _with_uint32_t_min_value_succeeds)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint32_t), _with_uint32_t_max_value_succeeds)();
 
-    uint32_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint32_t), _succeeds)();
 
     int16_t_to_string_with_NULL_value_fails();
     int16_t_to_string_succeeds();
@@ -2639,11 +2639,11 @@ int main(void)
 
     int16_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_int16_t();
 
-    int16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails();
-    int16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int16_t_min_value_succeeds();
-    int16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int16_t_max_value_succeeds();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int16_t), _with_NULL_dst_value_fails)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int16_t), _with_int16_t_min_value_succeeds)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int16_t), _with_int16_t_max_value_succeeds)();
 
-    int16_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int16_t), _succeeds)();
 
     uint16_t_to_string_with_NULL_value_fails();
     uint16_t_to_string_succeeds();
@@ -2661,11 +2661,11 @@ int main(void)
 
     uint16_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_uint16_t();
 
-    uint16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails();
-    uint16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint16_t_min_value_succeeds();
-    uint16_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint16_t_max_value_succeeds();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint16_t), _with_NULL_dst_value_fails)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint16_t), _with_uint16_t_min_value_succeeds)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint16_t), _with_uint16_t_max_value_succeeds)();
 
-    uint16_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint16_t), _succeeds)();
 
     int8_t_to_string_with_NULL_value_fails();
     int8_t_to_string_succeeds();
@@ -2684,11 +2684,11 @@ int main(void)
 
     int8_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_int8_t();
 
-    int8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails();
-    int8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int8_t_min_value_succeeds();
-    int8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_int8_t_max_value_succeeds();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t), _with_NULL_dst_value_fails)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t), _with_int8_t_min_value_succeeds)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(int8_t), _with_int8_t_max_value_succeeds)();
 
-    int8_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(int8_t), _succeeds)();
 
     uint8_t_to_string_with_NULL_value_fails();
     uint8_t_to_string_succeeds();
@@ -2706,11 +2706,11 @@ int main(void)
 
     uint8_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_uint8_t();
 
-    uint8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails();
-    uint8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint8_t_min_value_succeeds();
-    uint8_t_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_uint8_t_max_value_succeeds();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t), _with_NULL_dst_value_fails)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t), _with_uint8_t_min_value_succeeds)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(uint8_t), _with_uint8_t_max_value_succeeds)();
 
-    uint8_t_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint8_t), _succeeds)();
 
     return asserts_failed;
 }

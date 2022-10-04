@@ -108,7 +108,7 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* log_context_get_property_value_pairs(LOG_
 
 `LOG_CONTEXT_LOCAL_DEFINE` allows defining a stack log context in a similar way to how dynamically allocated contexts are defined, but without having a heap allocation.
 
-Note: The number of properties that can be contained in a stack context and the amount of data is limited in order to not use too much of the stack.
+Note: The number of properties that can be contained in a stack context and the amount of data bytes is limited in order to not use too much of the stack.
 
 `...` is a list of `LOG_CONTEXT_PROPERTY`, `LOG_CONTEXT_STRING_PROPERTY` or `LOG_CONTEXT_NAME` entries.
 
@@ -122,7 +122,7 @@ Note: The number of properties that can be contained in a stack context and the 
 
 **SRS_LOG_CONTEXT_01_024: [** If the number of properties to be stored in the log context exceeds `LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT`, an error shall be reported by calling `log_internal_error_report` and no properties shall be stored in the context. **]**
 
-**SRS_LOG_CONTEXT_01_025: [** If the amount of data needed for all properties to be stored in the context exceeds `LOG_MAX_STACK_DATA_SIZE`, an error shall be reported by calling `log_internal_error_report` and no properties shall be stored in the context. **]**
+**SRS_LOG_CONTEXT_01_025: [** If the memory size needed for all properties to be stored in the context exceeds `LOG_MAX_STACK_DATA_SIZE`, an error shall be reported by calling `log_internal_error_report` and no properties shall be stored in the context. **]**
 
 Note: No properties stored in the context means `log_context_get_property_value_pair_count` will return 0.
 
