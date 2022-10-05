@@ -55,6 +55,8 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_COPY)(void* dst_value, const void* src_v
 
 `LOG_CONTEXT_PROPERTY_TYPE_COPY` copies the value pointed by `src_value` to `dst_value`.
 
+The caller ensures that enough memory is available at `dst_value` for the value that is being copied.
+
 ## LOG_CONTEXT_PROPERTY_TYPE_FREE
 
 ```c
