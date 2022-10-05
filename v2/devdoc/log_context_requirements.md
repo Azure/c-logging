@@ -18,7 +18,7 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* log_context_get_property_value_pairs(LOG_
 #define LOG_CONTEXT_DESTROY(log_context) \
     ...
 
-#define LOG_MAX_STACK_DATA_SIZE                 1024
+#define LOG_MAX_STACK_DATA_SIZE                 4096
 #define LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT 64
 ```
 

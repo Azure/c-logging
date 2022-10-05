@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-#define LOG_MAX_STACK_DATA_SIZE                 1024
+#define LOG_MAX_STACK_DATA_SIZE                 4096
 #define LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT 64
 
 typedef struct LOG_CONTEXT_TAG
@@ -88,6 +88,8 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
 #define DEFINE_CONTEXT_NAME_AS_PARAMETER(field_desc) \
     MU_C2(EXPAND_DEFINE_CONTEXT_NAME_AS_PARAMETER_, field_desc)
 
+// ... here is a list of properties, for example:
+// LOG_CONTEXT_PROPERTY(int32_t, x, 42), LOG_CONTEXT_STRING_PROPERTY(y, "gogu"), ...
 #define LOG_CONTEXT_CHECK_VARIABLE_ARGS(...) \
     /* Codes_SRS_LOG_CONTEXT_01_019: [ If 2 properties have the same property_name for a context a compiler error shall be emitted. ]*/ \
     /* Codes_SRS_LOG_CONTEXT_01_026: [ If 2 properties have the same `property_name` for a context a compiler error shall be emitted. ]*/ \
@@ -139,13 +141,14 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
 
 // COUNT_DATA_BYTES
 
+// ... here is expected to be (format, ...) for a printf invocation
 #define EXPAND_COUNT_DATA_BYTES_LOG_CONTEXT_STRING_PROPERTY(property_name, ...) \
-    + snprintf(NULL, 0, __VA_ARGS__) + 1
+    + ascii_char_ptr_log_context_property_type_get_init_data_size(__VA_ARGS__)
 
 #define EXPAND_COUNT_DATA_BYTES_LOG_CONTEXT_NAME(log_context_name) \
 
 #define EXPAND_COUNT_DATA_BYTES_LOG_CONTEXT_PROPERTY(property_type, property_name, field_value) \
-    + sizeof(property_type)
+    + property_type##_log_context_property_type_get_init_data_size()
 
 #define COUNT_DATA_BYTES(field_desc) \
     MU_C2(EXPAND_COUNT_DATA_BYTES_, field_desc)
