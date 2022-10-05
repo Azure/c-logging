@@ -13,6 +13,7 @@ if(${run_unittests})
 endif()
 
 if(${run_int_tests})
+   add_subdirectory(log_context_property_basic_types_int)
 endif()
 
 if(${run_perf_tests})
