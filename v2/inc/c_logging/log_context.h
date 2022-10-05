@@ -92,7 +92,7 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
 // LOG_CONTEXT_PROPERTY(int32_t, x, 42), LOG_CONTEXT_STRING_PROPERTY(y, "gogu"), ...
 #define LOG_CONTEXT_CHECK_VARIABLE_ARGS(...) \
     /* Codes_SRS_LOG_CONTEXT_01_019: [ If 2 properties have the same property_name for a context a compiler error shall be emitted. ]*/ \
-    /* Codes_SRS_LOG_CONTEXT_01_026: [ If 2 properties have the same `property_name` for a context a compiler error shall be emitted. ]*/ \
+    /* Codes_SRS_LOG_CONTEXT_01_026: [ If 2 properties have the same property_name for a context a compiler error shall be emitted. ]*/ \
     (void)(void (*)(int MU_FOR_EACH_1(DEFINE_PROPERTY_AS_PARAMETER, __VA_ARGS__)))0x4242; \
     /* Codes_SRS_LOG_CONTEXT_01_011: [ If LOG_CONTEXT_NAME is specified multiple times a compiler error shall be emitted. ]*/ \
     (void)(void (*)(int MU_FOR_EACH_1(DEFINE_CONTEXT_NAME_AS_PARAMETER, __VA_ARGS__)))0x4242; \

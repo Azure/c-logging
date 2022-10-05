@@ -17,12 +17,12 @@ uint32_t log_context_get_property_value_pair_count(LOG_CONTEXT_HANDLE log_contex
 
     if (log_context == NULL)
     {
-        /* Codes_SRS_LOG_CONTEXT_01_020: [ If `log_context` is `NULL`, `log_context_get_property_value_pair_count` shall return `UINT32_MAX`. ]*/
+        /* Codes_SRS_LOG_CONTEXT_01_020: [ If log_context is NULL, log_context_get_property_value_pair_count shall return UINT32_MAX. ]*/
         result = UINT32_MAX;
     }
     else
     {
-        /* Codes_SRS_LOG_CONTEXT_01_021: [ Otherwise, `log_context_get_property_value_pair_count` shall return the number of property/value pairs stored by `log_context`. ]*/
+        /* Codes_SRS_LOG_CONTEXT_01_021: [ Otherwise, log_context_get_property_value_pair_count shall return the number of property/value pairs stored by log_context. ]*/
         result = log_context->property_value_pair_count;
     }
 
@@ -35,12 +35,12 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* log_context_get_property_value_pairs(LOG_
 
     if (log_context == NULL)
     {
-        /* Codes_SRS_LOG_CONTEXT_01_022: [ If `log_context` is `NULL`, `log_context_get_property_value_pairs` shall fail and return `NULL`. ]*/
+        /* Codes_SRS_LOG_CONTEXT_01_022: [ If log_context is NULL, log_context_get_property_value_pairs shall fail and return NULL. ]*/
         result = NULL;
     }
     else
     {
-        /* Codes_SRS_LOG_CONTEXT_01_023: [ Otherwise, `log_context_get_property_value_pairs` shall return the array of property/value pairs stored by the context. ]*/
+        /* Codes_SRS_LOG_CONTEXT_01_023: [ Otherwise, log_context_get_property_value_pairs shall return the array of property/value pairs stored by the context. ]*/
         result = log_context->property_value_pairs_ptr;
     }
 

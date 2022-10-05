@@ -98,7 +98,7 @@ unsigned int mock__set_abort_behavior(unsigned int _Flags, unsigned int _Mask)
 
 /* LOG_CONTEXT_CREATE */
 
-/* Tests_SRS_LOG_INTERNAL_ERROR_01_002: [ Otherwise `log_internal_error_report` shall return. ]*/
+/* Tests_SRS_LOG_INTERNAL_ERROR_01_002: [ Otherwise log_internal_error_report shall return. ]*/
 static void log_internal_error_report_returns(void)
 {
     // arrange

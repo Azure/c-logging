@@ -626,7 +626,7 @@ static void LOG_CONTEXT_CREATE_with_2_properties_with_the_same_name_does_not_com
 }
 #endif
 
-/* Tests_SRS_LOG_CONTEXT_01_026: [ If 2 properties have the same `property_name` for a context a compiler error shall be emitted. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_026: [ If 2 properties have the same property_name for a context a compiler error shall be emitted. ]*/
 #if 0
 // If this code compiles we are not passing the test
 static void LOG_CONTEXT_CREATE_with_2_properties_with_the_same_name_when_one_is_a_string_property_does_not_compile(void)
@@ -1174,7 +1174,7 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_2_properties_with_the_same_name_fails(
 }
 #endif
 
-/* Tests_SRS_LOG_CONTEXT_01_026: [ If 2 properties have the same `property_name` for a context a compiler error shall be emitted. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_026: [ If 2 properties have the same property_name for a context a compiler error shall be emitted. ]*/
 #if 0
 // If this code compiles we are not passing the test
 static void LOG_CONTEXT_LOCAL_DEFINE_with_2_properties_with_the_same_name_when_one_is_a_string_property_fails(void)

@@ -128,7 +128,7 @@ static void ascii_char_ptr_copy_succeeds(void)
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).free */
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_018: [ `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).free` shall return. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_018: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).free shall return. ]*/
 static void ascii_char_ptr_free_returns(void)
 {
     // arrange

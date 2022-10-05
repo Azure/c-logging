@@ -17,9 +17,9 @@ static int ascii_char_ptr_log_context_property_type_to_string(const void* proper
 {
     int result;
     if (
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_001: [ If `property_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string` shall fail and return a negative value. ]*/
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_001: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string shall fail and return a negative value. ]*/
         (property_value == NULL) ||
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_017: [ If `buffer` is `NULL` and `buffer_length` is greater than 0, `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string` shall fail and return a negative value. ]*/
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_017: [ If buffer is NULL and buffer_length is greater than 0, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string shall fail and return a negative value. ]*/
         (buffer == NULL) && (buffer_length > 0)
         )
     {
@@ -29,10 +29,10 @@ static int ascii_char_ptr_log_context_property_type_to_string(const void* proper
     }
     else
     {
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_002: [ If `buffer` is `NULL` and `buffer_length` is 0, `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string` shall return the length of the string pointed to by `property_value`. ]*/
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_003: [ Otherwise, `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string` shall copy the string pointed to by `property_value` to `buffer` by using `snprintf` with `buffer`, `buffer_length` and format string `%s` and pass in the values list the `const char*` value pointed to be `property_value`. ]*/
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_004: [ `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string` shall succeed and return the result of `snprintf`. ]*/
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_005: [ If any error is encountered (truncation is not an error), `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string` shall fail and return a negative value. ]*/
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_002: [ If buffer is NULL and buffer_length is 0, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string shall return the length of the string pointed to by property_value. ]*/
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_003: [ Otherwise, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string shall copy the string pointed to by property_value to buffer by using snprintf with buffer, buffer_length and format string %s and pass in the values list the const char* value pointed to be property_value. ]*/
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_004: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string shall succeed and return the result of snprintf. ]*/
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_005: [ If any error is encountered (truncation is not an error), LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string shall fail and return a negative value. ]*/
         result = snprintf(buffer, buffer_length, "%s", (const char*)property_value);
     }
     return result;
@@ -43,9 +43,9 @@ static int ascii_char_ptr_log_context_property_type_copy(void* dst_value, const 
     int result;
 
     if (
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_007: [ If `dst_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).copy` shall fail and return a non-zero value. ]*/
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_007: [ If dst_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).copy shall fail and return a non-zero value. ]*/
         (dst_value == NULL) ||
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_006: [ If `src_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).copy` shall fail and return a non-zero value. ]*/
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_006: [ If src_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).copy shall fail and return a non-zero value. ]*/
         (src_value == NULL)
         )
     {
@@ -55,9 +55,9 @@ static int ascii_char_ptr_log_context_property_type_copy(void* dst_value, const 
     }
     else
     {
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_008: [ `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).copy` shall copy the entire string (including the null terminator) from `src_value` to `dst_value`. ]*/
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_008: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).copy shall copy the entire string (including the null terminator) from src_value to dst_value. ]*/
         (void)strcpy(dst_value, src_value);
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_009: [ `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).copy` shall succeed and return 0. ]*/
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_009: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).copy shall succeed and return 0. ]*/
         result = 0;
     }
 
@@ -66,13 +66,13 @@ static int ascii_char_ptr_log_context_property_type_copy(void* dst_value, const 
 
 static void ascii_char_ptr_log_context_property_type_free(void* value)
 {
-    /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_018: [ `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).free` shall return. ]*/
+    /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_018: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).free shall return. ]*/
     (void)value;
 }
 
 static LOG_CONTEXT_PROPERTY_TYPE ascii_char_ptr_log_context_property_type_get_type(void)
 {
-    /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_010: [ `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).get_type` shall return the property type `LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr`. ]*/
+    /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_010: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).get_type shall return the property type LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr. ]*/
     return LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr;
 }
 
@@ -81,9 +81,9 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)(void* dst_value, const char* 
     int result;
 
     if (
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_011: [ If `dst_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)` shall fail and return a non-zero value. ]*/
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_011: [ If dst_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr) shall fail and return a non-zero value. ]*/
         (dst_value == NULL) ||
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_019: [ If `format` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)` shall fail and return a non-zero value. ]*/
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_019: [ If format is NULL, LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr) shall fail and return a non-zero value. ]*/
         (format == NULL)
        )
     {
@@ -96,17 +96,17 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)(void* dst_value, const char* 
         va_list args;
         va_start(args, format);
 
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_012: [ `LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)` shall initialize by calling snprintf the memory at `dst_value` with the `printf` style formatted string given by `format` and the arguments in `...`. ]*/
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_012: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr) shall initialize by calling snprintf the memory at dst_value with the printf style formatted string given by format and the arguments in .... ]*/
         int vsprintf_result = vsprintf(dst_value, format, args);
 
         if (vsprintf_result < 0)
         {
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_014: [ If formatting the string fails, `LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)` shall fail and return a non-zero value. ]*/
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_014: [ If formatting the string fails, LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr) shall fail and return a non-zero value. ]*/
             result = MU_FAILURE;
         }
         else
         {
-            /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_013: [ `LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)` shall succeed and return 0. ]*/
+            /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_013: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr) shall succeed and return 0. ]*/
             result = 0;
         }
 
@@ -120,8 +120,8 @@ int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(ascii_char_ptr)(const char* for
 {
     va_list args;
     va_start(args, format);
-    /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_015: [ If snprintf fails, `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(ascii_char_ptr)` shall return a negative value. ]*/
-    /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_016: [ Otherwise, on success, `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(ascii_char_ptr)` shall return the amount of memory needed to store the `printf` style formatted string given by `format` and the arguments in `...`. ]*/
+    /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_015: [ If snprintf fails, LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(ascii_char_ptr) shall return a negative value. ]*/
+    /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_016: [ Otherwise, on success, LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(ascii_char_ptr) shall return the amount of memory needed to store the printf style formatted string given by format and the arguments in .... ]*/
     int result = vsnprintf(NULL, 0, format, args);
     if (result >= 0)
     {
