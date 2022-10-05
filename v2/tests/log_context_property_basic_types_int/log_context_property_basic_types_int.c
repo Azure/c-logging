@@ -187,6 +187,7 @@ static void int64_t_free_returns(void)
     LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int64_t).free(&value);
 
     // assert
+    // no explicit assert, no crash expected
 }
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int64_t).get_type */
@@ -389,6 +390,7 @@ static void uint64_t_free_returns(void)
     LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint64_t).free(&value);
 
     // assert
+    // no explicit assert, no crash expected
 }
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint64_t).get_type */
@@ -619,6 +621,7 @@ static void int32_t_free_returns(void)
     LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int32_t).free(&value);
 
     // assert
+    // no explicit assert, no crash expected
 }
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int32_t).get_type */
@@ -821,6 +824,7 @@ static void uint32_t_free_returns(void)
     LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).free(&value);
 
     // assert
+    // no explicit assert, no crash expected
 }
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).get_type */
@@ -1050,6 +1054,7 @@ static void int16_t_free_returns(void)
     LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int16_t).free(&value);
 
     // assert
+    // no explicit assert, no crash expected
 }
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int16_t).get_type */
@@ -1252,6 +1257,7 @@ static void uint16_t_free_returns(void)
     LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).free(&value);
 
     // assert
+    // no explicit assert, no crash expected
 }
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).get_type */
@@ -1482,6 +1488,7 @@ static void int8_t_free_returns(void)
     LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int8_t).free(&value);
 
     // assert
+    // no explicit assert, no crash expected
 }
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int8_t).get_type */
@@ -1684,6 +1691,7 @@ static void uint8_t_free_returns(void)
     LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).free(&value);
 
     // assert
+    // no explicit assert, no crash expected
 }
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).get_type */

@@ -279,7 +279,7 @@ static void when_snprintf_fails_ascii_char_ptr_to_string_also_fails(void)
 }
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_005: [ If any error is encountered (truncation is not an error), `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string` shall fail and return a negative value. ]*/
-static void when_snprintf_fails_ascii_char_ptr_to_string_with_truncation(void)
+static void to_string_with_truncation_succeeds(void)
 {
     // arrange
     char buffer[2];
@@ -542,7 +542,7 @@ int main(void)
     ascii_char_ptr_to_string_with_NULL_buffer_and_zero_buffer_length_returns_string_length();
     ascii_char_ptr_to_string_copies_the_string();
     when_snprintf_fails_ascii_char_ptr_to_string_also_fails();
-    when_snprintf_fails_ascii_char_ptr_to_string_with_truncation();
+    to_string_with_truncation_succeeds();
 
     ascii_char_ptr_copy_with_NULL_src_value_fails();
     ascii_char_ptr_copy_with_NULL_dst_value_fails();
