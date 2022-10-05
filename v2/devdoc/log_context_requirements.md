@@ -84,6 +84,8 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* log_context_get_property_value_pairs(LOG_
 
 **SRS_LOG_CONTEXT_01_008: [** `LOG_CONTEXT_STRING_PROPERTY` shall expand to code that stores as value a string that is constructed using `printf`-like formatting based on `format` and all the arguments in `...`. **]**
 
+**SRS_LOG_CONTEXT_01_026: [** If 2 properties have the same `property_name` for a context a compiler error shall be emitted. **]**
+
 ## LOG_CONTEXT_NAME
 
 ```c

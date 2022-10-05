@@ -626,6 +626,27 @@ static void LOG_CONTEXT_CREATE_with_2_properties_with_the_same_name_does_not_com
 }
 #endif
 
+/* Tests_SRS_LOG_CONTEXT_01_026: [ If 2 properties have the same `property_name` for a context a compiler error shall be emitted. ]*/
+#if 0
+// If this code compiles we are not passing the test
+static void LOG_CONTEXT_CREATE_with_2_properties_with_the_same_name_when_one_is_a_string_property_does_not_compile(void)
+{
+    // arrange
+
+    // act
+    LOG_CONTEXT_HANDLE result;
+    LOG_CONTEXT_CREATE(result, NULL,
+        LOG_CONTEXT_NAME(grrrrr),
+        LOG_CONTEXT_PROPERTY(int32_t, x, 42),
+        LOG_CONTEXT_STRING_PROPERTY(x, "x")
+    );
+
+    // assert
+
+    // clean
+}
+#endif
+
 static LOG_CONTEXT_HANDLE setup_parent_context_with_no_properties(void)
 {
     LOG_CONTEXT_HANDLE parent_context;
@@ -1145,6 +1166,26 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_2_properties_with_the_same_name_fails(
         LOG_CONTEXT_NAME(grrrrr),
         LOG_CONTEXT_PROPERTY(int32_t, x, 42),
         LOG_CONTEXT_PROPERTY(int16_t, x, 43)
+    );
+
+    // assert
+
+    // clean
+}
+#endif
+
+/* Tests_SRS_LOG_CONTEXT_01_026: [ If 2 properties have the same `property_name` for a context a compiler error shall be emitted. ]*/
+#if 0
+// If this code compiles we are not passing the test
+static void LOG_CONTEXT_LOCAL_DEFINE_with_2_properties_with_the_same_name_when_one_is_a_string_property_fails(void)
+{
+    // arrange
+
+    // act
+    LOG_CONTEXT_LOCAL_DEFINE(local_context, NULL,
+        LOG_CONTEXT_NAME(grrrrr),
+        LOG_CONTEXT_PROPERTY(int32_t, x, 42),
+        LOG_CONTEXT_PROPERTY(x, "x")
     );
 
     // assert
