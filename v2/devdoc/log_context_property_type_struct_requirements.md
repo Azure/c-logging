@@ -1,6 +1,6 @@
 # `log_context_property_type_struct` requirements
 
-`log_context_property_type_struct` implements the code needed for handling a structure that contains several fields.
+`log_context_property_type_struct` implements the code needed for handling a type that saves the number of field in a "structure".
 
 ## Exposed API
 

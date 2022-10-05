@@ -63,7 +63,7 @@
     } \
 
 #define DEFINE_BASIC_TYPE_COPY(type_name) \
-    static int MU_C2(type_name,_log_context_property_type_copy)(void* dst_value, const void* src_value) \
+    static int MU_C2(type_name,_log_context_property_type_copy)(type_name* dst_value, const void* src_value) \
     { \
         int result; \
         if ( \

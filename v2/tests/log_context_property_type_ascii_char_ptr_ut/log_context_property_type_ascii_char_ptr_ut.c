@@ -126,7 +126,7 @@ int mock_vsprintf(char* s, const char* format, va_list args)
     return result;
 }
 
-int mock_vsnprintf(char* s, size_t n, const char* format, va_list args)
+int mock_vsnprintf(char* s, size_t n, const char* format, va_list arg_list)
 {
     int result;
 
@@ -146,7 +146,7 @@ int mock_vsnprintf(char* s, size_t n, const char* format, va_list args)
         {
             expected_calls[actual_call_count].u.vsnprintf_call.format_arg = format;
 
-            result = vsnprintf(s, n, format, args);
+            result = vsnprintf(s, n, format, arg_list);
         }
 
         actual_call_count++;
@@ -338,8 +338,8 @@ static void ascii_char_ptr_copy_with_NULL_dst_value_fails(void)
 static void ascii_char_ptr_copy_succeeds(void)
 {
     // arrange
-    char src_buffer[128];
-    char dst_buffer[128];
+    char src_buffer[5];
+    char dst_buffer[5];
     setup_mocks();
     setup_expected_vsprintf_call();
     LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)(src_buffer, "cucu");
@@ -402,6 +402,22 @@ static void ascii_char_ptr_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fa
 
     // act
     int result = LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)(NULL, "cucu");
+
+    // assert
+    POOR_MANS_ASSERT(result != 0);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+    POOR_MANS_ASSERT(actual_call_count == expected_call_count);
+}
+
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_019: [ If `format` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)` shall fail and return a non-zero value. ]*/
+static void ascii_char_ptr_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_format_fails(void)
+{
+    // arrange
+    char buffer[5];
+    setup_mocks();
+
+    // act
+    int result = LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)(buffer, NULL);
 
     // assert
     POOR_MANS_ASSERT(result != 0);
@@ -537,6 +553,7 @@ int main(void)
     ascii_char_ptr_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr();
 
     ascii_char_ptr_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_dst_value_fails();
+    ascii_char_ptr_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_format_fails();
     ascii_char_ptr_LOG_CONTEXT_PROPERTY_TYPE_INIT_succeeds();
     ascii_char_ptr_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_multiple_args_succeeds();
     when_underlying_call_fails_ascii_char_ptr_LOG_CONTEXT_PROPERTY_TYPE_INIT_also_fails();

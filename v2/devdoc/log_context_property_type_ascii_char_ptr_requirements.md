@@ -76,6 +76,8 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)(void* dst_value, const char* 
 
 **SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_011: [** If `dst_value` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)` shall fail and return a non-zero value. **]**
 
+**SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_019: [** If `format` is `NULL`, `LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)` shall fail and return a non-zero value. **]**
+
 **SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_012: [** `LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)` shall initialize by calling `snprintf` the memory at `dst_value` with the `printf` style formatted string given by `format` and the arguments in `...`. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_013: [** `LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)` shall succeed and return 0. **]**

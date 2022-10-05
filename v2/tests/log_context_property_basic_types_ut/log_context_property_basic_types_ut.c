@@ -184,6 +184,27 @@ static void int64_t_to_string_with_truncation_succeeds(void)
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_002: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int64_t).to_string shall call snprintf with buffer, buffer_length and format string PRId64 and pass in the values list the int64_t value pointed to be property_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_003: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int64_t).to_string shall succeed and return the result of snprintf. ]*/
+static void int64_t_to_string_with_truncation_minus_1_succeeds(void)
+{
+    // arrange
+    char buffer[2];
+    int64_t int64_t_value = -1;
+
+    setup_mocks();
+    setup_expected_snprintf_call();
+
+    // act
+    int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int64_t).to_string(&int64_t_value, buffer, sizeof(buffer));
+
+    // assert
+    POOR_MANS_ASSERT(result == 2);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId64) == 0);
+    POOR_MANS_ASSERT(strcmp(buffer, "-") == 0);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_002: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int64_t).to_string shall call snprintf with buffer, buffer_length and format string PRId64 and pass in the values list the int64_t value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_003: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int64_t).to_string shall succeed and return the result of snprintf. ]*/
 static void int64_t_to_string_with_negative_value_succeeds(void)
 {
     // arrange
@@ -785,6 +806,26 @@ static void int32_t_to_string_with_truncation_succeeds(void)
     // assert
     POOR_MANS_ASSERT(result == 2);
     POOR_MANS_ASSERT(strcmp(buffer, "4") == 0);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_022: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int32_t).to_string shall call snprintf with buffer, buffer_length and format string PRId32 and pass in the values list the int32_t value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_023: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int32_t).to_string shall succeed and return the result of snprintf. ]*/
+static void int32_t_to_string_with_truncation_minus_1_succeeds(void)
+{
+    // arrange
+    char buffer[2];
+    int32_t int32_t_value = -1;
+
+    setup_mocks();
+    setup_expected_snprintf_call();
+
+    // act
+    int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int32_t).to_string(&int32_t_value, buffer, sizeof(buffer));
+
+    // assert
+    POOR_MANS_ASSERT(result == 2);
+    POOR_MANS_ASSERT(strcmp(buffer, "-") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
@@ -1397,6 +1438,27 @@ static void int16_t_to_string_with_truncation_succeeds(void)
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_042: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int16_t).to_string shall call snprintf with buffer, buffer_length and format string PRId16 and pass in the values list the int16_t value pointed to be property_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_043: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int16_t).to_string shall succeed and return the result of snprintf. ]*/
+static void int16_t_to_string_with_truncation_minus_1_succeeds(void)
+{
+    // arrange
+    char buffer[2];
+    int16_t int16_t_value = -1;
+
+    setup_mocks();
+    setup_expected_snprintf_call();
+
+    // act
+    int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int16_t).to_string(&int16_t_value, buffer, sizeof(buffer));
+
+    // assert
+    POOR_MANS_ASSERT(result == 2);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId16) == 0);
+    POOR_MANS_ASSERT(strcmp(buffer, "-") == 0);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_042: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int16_t).to_string shall call snprintf with buffer, buffer_length and format string PRId16 and pass in the values list the int16_t value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_043: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int16_t).to_string shall succeed and return the result of snprintf. ]*/
 static void int16_t_to_string_with_negative_value_succeeds(void)
 {
     // arrange
@@ -2004,6 +2066,27 @@ static void int8_t_to_string_with_truncation_succeeds(void)
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_062: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int8_t).to_string shall call snprintf with buffer, buffer_length and format string PRId8 and pass in the values list the int8_t value pointed to be property_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_063: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int8_t).to_string shall succeed and return the result of snprintf. ]*/
+static void int8_t_to_string_with_truncation_minus_1_succeeds(void)
+{
+    // arrange
+    char buffer[2];
+    int8_t int8_t_value = -1;
+
+    setup_mocks();
+    setup_expected_snprintf_call();
+
+    // act
+    int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int8_t).to_string(&int8_t_value, buffer, sizeof(buffer));
+
+    // assert
+    POOR_MANS_ASSERT(result == 2);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId8) == 0);
+    POOR_MANS_ASSERT(strcmp(buffer, "-") == 0);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_062: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int8_t).to_string shall call snprintf with buffer, buffer_length and format string PRId8 and pass in the values list the int8_t value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_063: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int8_t).to_string shall succeed and return the result of snprintf. ]*/
 static void int8_t_to_string_with_negative_value_succeeds(void)
 {
     // arrange
@@ -2536,8 +2619,9 @@ int main(void)
     int64_t_to_string_succeeds();
     int64_t_to_string_INT64_MAX_succeeds();
     int64_t_to_string_with_truncation_succeeds();
+    int64_t_to_string_with_truncation_minus_1_succeeds();
     int64_t_to_string_with_negative_value_succeeds();
-    int16_t_to_string_with_just_enough_big_buffer_succeeds();
+    int64_t_to_string_with_just_enough_big_buffer_succeeds();
     when_snprintf_fails_int64_t_to_string_also_fails();
 
     int64_t_copy_called_with_NULL_dst_value_fails();
@@ -2581,6 +2665,7 @@ int main(void)
     int32_t_to_string_succeeds();
     int32_t_to_string_INT32_MAX_succeeds();
     int32_t_to_string_with_truncation_succeeds();
+    int32_t_to_string_with_truncation_minus_1_succeeds();
     int32_t_to_string_with_negative_value_succeeds();
     int32_t_to_string_with_just_enough_big_buffer_succeeds();
     when_snprintf_fails_int32_t_to_string_also_fails();
@@ -2626,6 +2711,7 @@ int main(void)
     int16_t_to_string_succeeds();
     int16_t_to_string_INT16_MAX_succeeds();
     int16_t_to_string_with_truncation_succeeds();
+    int16_t_to_string_with_truncation_minus_1_succeeds();
     int16_t_to_string_with_negative_value_succeeds();
     int16_t_to_string_with_just_enough_big_buffer_succeeds();
     when_snprintf_fails_int16_t_to_string_also_fails();
@@ -2671,6 +2757,7 @@ int main(void)
     int8_t_to_string_succeeds();
     int8_t_to_string_INT8_MAX_succeeds();
     int8_t_to_string_with_truncation_succeeds();
+    int8_t_to_string_with_truncation_minus_1_succeeds();
     int8_t_to_string_with_negative_value_succeeds();
     int8_t_to_string_with_just_enough_big_buffer_succeeds();
     when_snprintf_fails_int8_t_to_string_also_fails();

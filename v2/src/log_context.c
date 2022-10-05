@@ -97,7 +97,8 @@ LOG_CONTEXT_HANDLE log_context_create(LOG_CONTEXT_HANDLE parent_context, uint32_
     if (result == NULL)
     {
         /* Codes_SRS_LOG_CONTEXT_01_002: [ If any error occurs, LOG_CONTEXT_CREATE shall fail and return NULL. ]*/
-        (void)printf("malloc(sizeof(LOG_CONTEXT)) failed\r\n");
+        (void)printf("malloc(sizeof(LOG_CONTEXT)) failed, properties_count=%" PRIu32 ", data_size=%" PRIu32 "\r\n",
+            properties_count, data_size);
     }
     else
     {

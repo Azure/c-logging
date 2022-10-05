@@ -57,7 +57,7 @@ void logger_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char*
 // LOG_MESSAGE(message)
 ```
 
-Various example usages:
+Various example usages (note that `LOG_CONTEXT_NAME` is described later in the document):
 
 ```c
 void log_from_a_function(LOG_CONTEXT_HANDLE log_context)
@@ -74,12 +74,12 @@ void examples(void)
     LOG_CONTEXT_HANDLE log_context;
     LOG_CONTEXT_CREATE(log_context, NULL, LOG_CONTEXT_STRING_PROPERTY(property_name, "%s", MU_P_OR_NULL(prop_value)));
 
+    // free the string, showing that a copy is made in the context
+    free(prop_value);
+
     LOGGER_LOG(LOG_LEVEL_CRITICAL, log_context, "some critical error with context");
 
     LOG_CONTEXT_DESTROY(log_context);
-
-    // free the string, showing that a copy is made in the context
-    free(prop_value);
 
     // chained allocated context
     LOG_CONTEXT_HANDLE context_1;
