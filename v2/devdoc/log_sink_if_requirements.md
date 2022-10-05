@@ -2,7 +2,7 @@
 
 `log_sink_if` defines an interface for a log sink (as a structure that contains one function pointer).
 
-A log sink has the responsibility to output a logging event (be that to the console, producting an ETW event, writing it to a file, etc.)
+A log sink has the responsibility to output a logging event (be that to the console, producting an ETW event, writing it to a file etc.)
 
 ## Exposed API
 

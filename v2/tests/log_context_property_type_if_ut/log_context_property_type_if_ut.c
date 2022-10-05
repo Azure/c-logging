@@ -25,24 +25,54 @@ MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
         asserts_failed++; \
     } \
 
-/* LOG_CONTEXT_PROPERTY_TYPE_IMPL(type_name) */
+/* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(type_name) */
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_IF_01_001: [ LOG_CONTEXT_PROPERTY_TYPE_IMPL(type_name) shall produce the token {type_name}_log_context_property_type. ]*/
-static void LOG_CONTEXT_PROPERTY_TYPE_IMPL_produces_the_correct_token(void)
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_IF_01_001: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(type_name) shall produce the token {type_name}_log_context_property_type. ]*/
+static void LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL_produces_the_correct_token(void)
 {
     // arrange
 
     // act
-    const char* result = MU_TOSTRING(LOG_CONTEXT_PROPERTY_TYPE_IMPL(gogu));
+    const char* result = MU_TOSTRING(LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(gogu));
 
     // assert
     POOR_MANS_ASSERT(strcmp(result, "gogu_log_context_property_type") == 0);
 }
 
+/* LOG_CONTEXT_PROPERTY_TYPE_INIT(type_name) */
+
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_IF_01_002: [ LOG_CONTEXT_PROPERTY_TYPE_INIT(type_name) shall produce the token {type_name}_log_context_property_type_init. ]*/
+static void LOG_CONTEXT_PROPERTY_TYPE_INIT_produces_the_correct_token(void)
+{
+    // arrange
+
+    // act
+    const char* result = MU_TOSTRING(LOG_CONTEXT_PROPERTY_TYPE_INIT(gogu));
+
+    // assert
+    POOR_MANS_ASSERT(strcmp(result, "gogu_log_context_property_type_init") == 0);
+}
+
+/* LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(type_name) */
+
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_IF_01_003: [ LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(type_name) shall produce the token {type_name}_log_context_property_type_get_init_data_size. ]*/
+static void LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_produces_the_correct_token(void)
+{
+    // arrange
+
+    // act
+    const char* result = MU_TOSTRING(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(gogu));
+
+    // assert
+    POOR_MANS_ASSERT(strcmp(result, "gogu_log_context_property_type_get_init_data_size") == 0);
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
-    LOG_CONTEXT_PROPERTY_TYPE_IMPL_produces_the_correct_token();
+    LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL_produces_the_correct_token();
+    LOG_CONTEXT_PROPERTY_TYPE_INIT_produces_the_correct_token();
+    LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_produces_the_correct_token();
 
     return asserts_failed;
 }

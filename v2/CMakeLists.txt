@@ -1,9 +1,20 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#the following variables are project-wide and can be used with cmake-gui
+option(log_abort_on_error "set log_abort_on_error to ON abort in case an error is encountered while using stack contexts (default is OFF)" OFF)
+
+if(${log_abort_on_error})
+    add_definitions(-DLOG_ABORT_ON_ERROR)
+endif() #(${log_abort_on_error})
+
 set(c_logging_v2_c_files
     ./src/logger.c
+    ./src/log_context.c
     ./src/log_context_property_basic_types.c
+    ./src/log_context_property_type_ascii_char_ptr.c
+    ./src/log_context_property_type_struct.c
+    ./src/log_internal_error.c
     )
 
 set(c_logging_v2_h_files
@@ -12,6 +23,10 @@ set(c_logging_v2_h_files
     ./inc/c_logging/log_context_property_type.h
     ./inc/c_logging/log_context_property_type_if.h
     ./inc/c_logging/log_context_property_basic_types.h
+    ./inc/c_logging/log_context_property_type_ascii_char_ptr.h
+    ./inc/c_logging/log_context_property_type_struct.h
+    ./inc/c_logging/log_context_property_value_pair.h
+    ./inc/c_logging/log_internal_error.h
     ./inc/c_logging/log_level.h
     ./inc/c_logging/log_sink_if.h
     )

@@ -2,7 +2,7 @@
 
 ## Basic functionality
 
-`c-logging` shall expose APIs allowing the user to log events that can be used for observing the software activity, debugging, etc.
+`c-logging` shall expose APIs allowing the user to log events that can be used for observing the software activity, debugging etc.
 
 The exposed API shall allow creating contexts both dynamically and on the stack and using those contexts for logging.
 
@@ -52,9 +52,12 @@ void logger_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char*
 
 // when a user wants to specify string fields in a context using printf-style formatting, they can use LOG_CONTEXT_STRING_PROPERTY
 // LOG_CONTEXT_STRING_PROPERTY(property_name, property_conversion_specifier, property_value)
+
+// when a user wants specify a string property with the property name message
+// LOG_MESSAGE(message)
 ```
 
-Various example usages:
+Various example usages (note that `LOG_CONTEXT_NAME` is described later in the document):
 
 ```c
 void log_from_a_function(LOG_CONTEXT_HANDLE log_context)
@@ -71,12 +74,12 @@ void examples(void)
     LOG_CONTEXT_HANDLE log_context;
     LOG_CONTEXT_CREATE(log_context, NULL, LOG_CONTEXT_STRING_PROPERTY(property_name, "%s", MU_P_OR_NULL(prop_value)));
 
+    // free the string, showing that a copy is made in the context
+    free(prop_value);
+
     LOGGER_LOG(LOG_LEVEL_CRITICAL, log_context, "some critical error with context");
 
     LOG_CONTEXT_DESTROY(log_context);
-
-    // free the string, showing that a copy is made in the context
-    free(prop_value);
 
     // chained allocated context
     LOG_CONTEXT_HANDLE context_1;
@@ -111,7 +114,7 @@ void examples(void)
 
     LOGGER_LOG_EX(LOG_LEVEL_ERROR,
         LOG_CONTEXT_STRING_PROPERTY(name, "%s%s", "go", "gu"),
-        LOG_MESSAGE("some message here with and integer = %d", 42));
+        LOG_MESSAGE("some message here with an integer = %d", 42));
 }
 ```
 
@@ -126,7 +129,7 @@ LOG_LEVEL_INFO Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger
 LOG_LEVEL_VERBOSE Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:117 Func:main { { context_2={ context_1={ name=haga } last name=uaga age=42 } the_knights_that_say=Nee! } other_knights_that_say=Moo! } log with nee and moo
 LOG_LEVEL_ERROR Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:16 Func:log_from_a_function { { context_2={ context_1={ name=haga } last name=uaga age=42 } the_knights_that_say=Nee! } other_knights_that_say=Moo! } log from a function!
 LOG_LEVEL_ERROR Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:125 Func:main { name=gogu age=42 }
-LOG_LEVEL_ERROR Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:129 Func:main { name=gogu message=some message here with and integer = 42 }
+LOG_LEVEL_ERROR Time:Mon Aug 15 15:14:03 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:129 Func:main { name=gogu message=some message here with an integer = 42 }
 ```
 
 ## Log levels
@@ -238,6 +241,12 @@ void a(LOG_CONTEXT_HANDLE log_context, const char* correlation_id)
 
 Note: When logging with local contexts, the context passed to `LOGGER_LOG` has to be passed using the address of the context (&).
 
+If too many properties are passed when defining local contexts, the error shall be indicated by calling a log internal error report function.
+
+### LOG_ABORT_ON_ERROR
+
+The internal error report function shall abort the execution if `LOG_ABORT_ON_ERROR` is defined so that such error cases can easily be noticed during development.
+
 ### Dynamically allocated context creation
 
 The library shall support creating a dynamically allocated context.
@@ -272,7 +281,7 @@ It shall be supported to chain contexts (define a context or create a context dy
 
 The following types shall be supported out of the box:
 
-- ansi_charptr
+- ascii_char_ptr
 - wchar_t_ptr
 - int8_t
 - uint8_t
@@ -321,25 +330,13 @@ LOG_LEVEL_ERROR Time:Mon Aug 15 11:16:09 2022 File:G:\w\c-logging\v2\tests\logge
 
 ### Extensions
 
-An extensions set of properties shall be available in order to ease writing logging code.
+A set of extensions properties shall be available in order to ease writing logging code.
 Examples of what would fall in the extensions category are:
 
 - syntactic sugar for a message property
 - `GetLastError` on Windows
 - `HRESULT` on Windows
-- errno
-
-### LOG_MESSAGE
-
-`LOG_MESSAGE` is a macro that is syntactic sugar to wrap `LOG_CONTEXT_STRING_PROPERTY` in order to output a `message` property, while typing less.
-
-Example:
-
-```c
-LOGGER_LOG_EX(LOG_LEVEL_ERROR, 
-    LOG_CONTEXT_STRING_PROPERTY(int32_t, an_integer, 42),
-    LOG_MESSAGE("hello world"));
-```
+- `errno`
 
 ## LOGGER_LOG_EX
 
@@ -363,5 +360,17 @@ LOGGER_LOG_EX(LOG_LEVEL_ERROR,
 This would output:
 
 ```
-LOG_LEVEL_ERROR Time:Mon Aug 15 11:15:35 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:125 Func:main { name=gogu age=42  }
+LOG_LEVEL_ERROR Time:Mon Aug 15 11:15:35 2022 File:G:\w\c-logging\v2\tests\logger_int\main.c:125 Func:main { name=gogu age=42 }
+```
+
+## LOG_MESSAGE
+
+`LOG_MESSAGE` is a macro that is syntactic sugar to wrap `LOG_CONTEXT_STRING_PROPERTY` in order to output a `message` property, while typing less.
+
+Example:
+
+```c
+LOGGER_LOG_EX(LOG_LEVEL_ERROR, 
+    LOG_CONTEXT_STRING_PROPERTY(int32_t, an_integer, 42),
+    LOG_MESSAGE("hello world"));
 ```
