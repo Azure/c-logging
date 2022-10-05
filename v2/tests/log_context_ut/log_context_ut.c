@@ -1822,7 +1822,7 @@ static void creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_prop
 static void creating_a_context_with_too_much_data_reports_error(void)
 {
     // arrange
-    char original_string[1024] = { 0 };
+    char original_string[4096] = { 0 };
     setup_mocks();
     setup_log_internal_error_report();
 
