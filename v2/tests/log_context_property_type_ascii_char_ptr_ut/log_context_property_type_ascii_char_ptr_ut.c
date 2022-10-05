@@ -234,7 +234,7 @@ static void ascii_char_ptr_to_string_with_NULL_buffer_and_zero_buffer_length_ret
     int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string("cucu", NULL, 0);
 
     // assert
-    POOR_MANS_ASSERT(result == strlen("cucu"));
+    POOR_MANS_ASSERT(result == (int)strlen("cucu"));
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(actual_call_count == expected_call_count);
 }
