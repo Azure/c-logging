@@ -89,7 +89,7 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
     MU_C2(EXPAND_DEFINE_CONTEXT_NAME_AS_PARAMETER_, field_desc)
 
 #define LOG_CONTEXT_CHECK_VARIABLE_ARGS(...) \
-    /* Codes_SRS_LOG_CONTEXT_01_019: [ If 2 properties have the same name for a context a compiler error shall be emitted. ]*/ \
+    /* Codes_SRS_LOG_CONTEXT_01_019: [ If 2 properties have the same property_name for a context a compiler error shall be emitted. ]*/ \
     (void)(void (*)(int MU_FOR_EACH_1(DEFINE_PROPERTY_AS_PARAMETER, __VA_ARGS__)))0x4242; \
     /* Codes_SRS_LOG_CONTEXT_01_011: [ If LOG_CONTEXT_NAME is specified multiple times a compiler error shall be emitted. ]*/ \
     (void)(void (*)(int MU_FOR_EACH_1(DEFINE_CONTEXT_NAME_AS_PARAMETER, __VA_ARGS__)))0x4242; \
@@ -179,7 +179,7 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
         } \
         else \
         { \
-            /* Codes_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall include all the property/value pairs of parent_context. ]*/ \
+            /* Codes_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall copy all the property/value pairs of parent_context. ]*/ \
             internal_log_context_init_from_parent(&destination_context, parent_context); \
             LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_value_pair = destination_context.property_value_pairs_ptr + internal_log_context_get_property_value_pair_count_or_zero(parent_context) + 1; \
             LOG_CONTEXT_PROPERTY_VALUE_PAIR* first_property_value_pair = destination_context.property_value_pairs_ptr; \

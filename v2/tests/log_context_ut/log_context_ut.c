@@ -605,7 +605,7 @@ static void LOG_CONTEXT_CREATE_with_LOG_CONTEXT_NAME_twice_does_not_compile(void
 }
 #endif
 
-/* Tests_SRS_LOG_CONTEXT_01_019: [ If 2 properties have the same name for a context a compiler error shall be emitted. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_019: [ If 2 properties have the same property_name for a context a compiler error shall be emitted. ]*/
 #if 0
 // If this code compiles we are not passing the test
 static void LOG_CONTEXT_CREATE_with_2_properties_with_the_same_name_does_not_compile(void)
@@ -712,7 +712,7 @@ static LOG_CONTEXT_HANDLE setup_parent_context_shawarma_with_everything(void)
     return parent_context;
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_014: [ If parent_context is non-NULL, the created context shall include all the property/value pairs of parent_context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_014: [ If parent_context is non-NULL, the created context shall copy all the property/value pairs of parent_context. ]*/
 static void LOG_CONTEXT_CREATE_with_a_parent_that_has_no_properties_succeeds(void)
 {
     // arrange
@@ -746,7 +746,7 @@ static void LOG_CONTEXT_CREATE_with_a_parent_that_has_no_properties_succeeds(voi
     LOG_CONTEXT_DESTROY(parent_context);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_014: [ If parent_context is non-NULL, the created context shall include all the property/value pairs of parent_context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_014: [ If parent_context is non-NULL, the created context shall copy all the property/value pairs of parent_context. ]*/
 static void LOG_CONTEXT_CREATE_with_a_parent_that_has_one_int_property_succeeds(void)
 {
     // arrange
@@ -784,7 +784,7 @@ static void LOG_CONTEXT_CREATE_with_a_parent_that_has_one_int_property_succeeds(
     LOG_CONTEXT_DESTROY(parent_context);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_014: [ If parent_context is non-NULL, the created context shall include all the property/value pairs of parent_context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_014: [ If parent_context is non-NULL, the created context shall copy all the property/value pairs of parent_context. ]*/
 static void LOG_CONTEXT_CREATE_with_a_parent_that_has_2_int_properties_succeeds(void)
 {
     // arrange
@@ -826,7 +826,7 @@ static void LOG_CONTEXT_CREATE_with_a_parent_that_has_2_int_properties_succeeds(
     LOG_CONTEXT_DESTROY(parent_context);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_014: [ If parent_context is non-NULL, the created context shall include all the property/value pairs of parent_context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_014: [ If parent_context is non-NULL, the created context shall copy all the property/value pairs of parent_context. ]*/
 static void LOG_CONTEXT_CREATE_with_a_parent_that_has_a_string_property_succeeds(void)
 {
     // arrange
@@ -864,7 +864,7 @@ static void LOG_CONTEXT_CREATE_with_a_parent_that_has_a_string_property_succeeds
     LOG_CONTEXT_DESTROY(parent_context);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_014: [ If parent_context is non-NULL, the created context shall include all the property/value pairs of parent_context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_014: [ If parent_context is non-NULL, the created context shall copy all the property/value pairs of parent_context. ]*/
 static void LOG_CONTEXT_CREATE_with_a_parent_that_has_2_string_properties_succeeds(void)
 {
     // arrange
@@ -906,7 +906,7 @@ static void LOG_CONTEXT_CREATE_with_a_parent_that_has_2_string_properties_succee
     LOG_CONTEXT_DESTROY(parent_context);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_014: [ If parent_context is non-NULL, the created context shall include all the property/value pairs of parent_context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_014: [ If parent_context is non-NULL, the created context shall copy all the property/value pairs of parent_context. ]*/
 static void LOG_CONTEXT_CREATE_with_a_parent_that_has_a_context_name_succeeds(void)
 {
     // arrange
@@ -1133,7 +1133,7 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_LOG_CONTEXT_NAME_twice_does_not_compil
 }
 #endif
 
-/* Tests_SRS_LOG_CONTEXT_01_019: [ If 2 properties have the same name for a context a compiler error shall be emitted. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_019: [ If 2 properties have the same property_name for a context a compiler error shall be emitted. ]*/
 #if 0
 // If this code compiles we are not passing the test
 static void LOG_CONTEXT_LOCAL_DEFINE_with_2_properties_with_the_same_name_fails(void)
@@ -1153,7 +1153,7 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_2_properties_with_the_same_name_fails(
 }
 #endif
 
-/* Tests_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall include all the property/value pairs of parent_context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall copy all the property/value pairs of parent_context. ]*/
 static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_no_properties_succeeds(void)
 {
     // arrange
@@ -1182,7 +1182,7 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_no_properties_succee
     LOG_CONTEXT_DESTROY(parent_context);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall include all the property/value pairs of parent_context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall copy all the property/value pairs of parent_context. ]*/
 static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_one_int_property_succeeds(void)
 {
     // arrange
@@ -1215,7 +1215,7 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_one_int_property_suc
     LOG_CONTEXT_DESTROY(parent_context);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall include all the property/value pairs of parent_context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall copy all the property/value pairs of parent_context. ]*/
 static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_2_int_properties_succeeds(void)
 {
     // arrange
@@ -1252,7 +1252,7 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_2_int_properties_suc
     LOG_CONTEXT_DESTROY(parent_context);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall include all the property/value pairs of parent_context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall copy all the property/value pairs of parent_context. ]*/
 static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_a_string_property_succeeds(void)
 {
     // arrange
@@ -1285,7 +1285,7 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_a_string_property_su
     LOG_CONTEXT_DESTROY(parent_context);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall include all the property/value pairs of parent_context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall copy all the property/value pairs of parent_context. ]*/
 static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_2_string_properties_succeeds(void)
 {
     // arrange
@@ -1322,7 +1322,7 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_2_string_properties_
     LOG_CONTEXT_DESTROY(parent_context);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall include all the property/value pairs of parent_context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall copy all the property/value pairs of parent_context. ]*/
 static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_a_context_name_succeeds(void)
 {
     // arrange
@@ -1367,7 +1367,7 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_a_context_name_succe
     LOG_CONTEXT_DESTROY(parent_context);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall include all the property/value pairs of parent_context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_018: [ If parent_context is non-NULL, the created context shall copy all the property/value pairs of parent_context. ]*/
 static void LOG_CONTEXT_LOCAL_DEFINE_with_a_stack_log_context_succeeds(void)
 {
     // arrange
@@ -1404,7 +1404,7 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_stack_log_context_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_01_014: [ If parent_context is non-NULL, the created context shall include all the property/value pairs of parent_context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_014: [ If parent_context is non-NULL, the created context shall copy all the property/value pairs of parent_context. ]*/
 static void LOG_CONTEXT_CREATE_with_a_stack_log_context_succeeds(void)
 {
     // arrange
