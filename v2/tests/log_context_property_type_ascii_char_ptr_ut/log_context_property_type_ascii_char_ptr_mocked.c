@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdio.h>
+#include <stdarg.h>
 
 #define snprintf mock_snprintf
 #define vsprintf mock_vsprintf

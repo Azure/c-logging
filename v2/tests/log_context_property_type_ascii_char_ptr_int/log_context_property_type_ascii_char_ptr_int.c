@@ -2,11 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdio.h>
-#include <stdbool.h>
-#include <stdarg.h>
 #include <string.h>
-
-#include "macro_utils/macro_utils.h"
 
 #include "c_logging/log_context_property_type.h"
 #include "c_logging/log_context_property_type_if.h"
