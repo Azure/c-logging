@@ -8,13 +8,18 @@ if(${log_abort_on_error})
     add_definitions(-DLOG_ABORT_ON_ERROR)
 endif() #(${log_abort_on_error})
 
+add_definitions(-DTLG_DEBUG=0)
+
 set(c_logging_v2_c_files
     ./src/logger.c
+    ./src/log_sink_console.c
+    ./src/log_sink_etw.c
     ./src/log_context.c
     ./src/log_context_property_basic_types.c
     ./src/log_context_property_type_ascii_char_ptr.c
     ./src/log_context_property_type_struct.c
     ./src/log_internal_error.c
+    ./src/log_context_property_value_pair.c
     )
 
 set(c_logging_v2_h_files
@@ -27,8 +32,11 @@ set(c_logging_v2_h_files
     ./inc/c_logging/log_context_property_type_struct.h
     ./inc/c_logging/log_context_property_value_pair.h
     ./inc/c_logging/log_internal_error.h
+    ./inc/c_logging/log_extensions.h
     ./inc/c_logging/log_level.h
     ./inc/c_logging/log_sink_if.h
+    ./inc/c_logging/log_sink_console.h
+    ./inc/c_logging/log_sink_etw.h
     )
 
 FILE(GLOB c_logging_v2_md_files "devdoc/*.md")
@@ -47,5 +55,9 @@ if((CMAKE_GENERATOR MATCHES "Visual Studio") AND (${run_traceability}))
 endif()
 
 add_subdirectory(tests)
+
+if(${run_reals_check})
+    add_reals_check_target()
+endif()
 
 compileTargetAsC99(c_logging_v2)

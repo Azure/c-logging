@@ -20,55 +20,55 @@ int main(void)
     really_big_string_doesnt_fit[sizeof(really_big_string_doesnt_fit) - 1] = '\0';
 
     /*LogCritical*/
-    LogCritical("LogCritical: hello world!");
-    LogCritical("LogCritical: a more complicated hello with int=%d.", 42);
-    LogCritical("LogCritical: the most complicated hello with int=%d and a really big string that fits =%s.", 42, really_big_string_fits);
-    LogCritical("LogCritical: the most complicated hello with int=%d and a really big string that does not fit=%s.", 42, really_big_string_doesnt_fit);
-    LogCritical("LogCritical: does PRI_BOOL work? %" PRI_BOOL "", MU_BOOL_VALUE(true) /*answer is yes, it works*/);
-    LogCritical("LogCritical: does PRI_BOOL work with amazingly out of bounds value? %" PRI_BOOL "", MU_BOOL_VALUE(42));
-    LogCritical("LogCritical: does PRI_BOOL works with false? %" PRI_BOOL "", MU_BOOL_VALUE(false));
+    LogCritical("hello world!");
+    LogCritical("a more complicated hello with int=%d.", 42);
+    LogCritical("the most complicated hello with int=%d and a really big string that fits =%s.", 42, really_big_string_fits);
+    LogCritical("the most complicated hello with int=%d and a really big string that does not fit=%s.", 42, really_big_string_doesnt_fit);
+    LogCritical("does PRI_BOOL work? %" PRI_BOOL "", MU_BOOL_VALUE(true) /*answer is yes, it works*/);
+    LogCritical("does PRI_BOOL work with amazingly out of bounds value? %" PRI_BOOL "", MU_BOOL_VALUE(42));
+    LogCritical("does PRI_BOOL works with false? %" PRI_BOOL "", MU_BOOL_VALUE(false));
 
     /*LogError*/
-    LogError("LogError: hello world!");
-    LogError("LogError: a more complicated hello with int=%d.", 42);
-    LogError("LogError: the most complicated hello with int=%d and a really big string that fits =%s.", 42, really_big_string_fits);
-    LogError("LogError: the most complicated hello with int=%d and a really big string that does not fit=%s.", 42, really_big_string_doesnt_fit);
-    LogError("LogCritical: does PRI_BOOL work? %" PRI_BOOL "", MU_BOOL_VALUE(true) /*answer is yes, it works*/);
-    LogError("LogCritical: does PRI_BOOL work with amazingly out of bounds value? %" PRI_BOOL "", MU_BOOL_VALUE(42));
-    LogError("LogCritical: does PRI_BOOL works with false? %" PRI_BOOL "", MU_BOOL_VALUE(false));
+    LogError("hello world!");
+    LogError("a more complicated hello with int=%d.", 42);
+    LogError("the most complicated hello with int=%d and a really big string that fits =%s.", 42, really_big_string_fits);
+    LogError("the most complicated hello with int=%d and a really big string that does not fit=%s.", 42, really_big_string_doesnt_fit);
+    LogError("does PRI_BOOL work? %" PRI_BOOL "", MU_BOOL_VALUE(true) /*answer is yes, it works*/);
+    LogError("does PRI_BOOL work with amazingly out of bounds value? %" PRI_BOOL "", MU_BOOL_VALUE(42));
+    LogError("does PRI_BOOL works with false? %" PRI_BOOL "", MU_BOOL_VALUE(false));
 
 #ifdef _MSC_VER /*linux doesn't have LogLastError*/
     /*LogLastError*/
-    LogLastError("LogLastError: hello world!");
-    LogLastError("LogLastError: a more complicated hello with int=%d.", 42);
-    LogLastError("LogLastError: the most complicated hello with int=%d and a really big string that fits =%s.", 42, really_big_string_fits);
-    LogLastError("LogLastError: the most complicated hello with int=%d and a really big string that does not fit=%s.", 42, really_big_string_doesnt_fit);
+    LogLastError("hello world!");
+    LogLastError("a more complicated hello with int=%d.", 42);
+    LogLastError("the most complicated hello with int=%d and a really big string that fits =%s.", 42, really_big_string_fits);
+    LogLastError("the most complicated hello with int=%d and a really big string that does not fit=%s.", 42, really_big_string_doesnt_fit);
 #endif
     /*LogWarning*/
-    LogWarning("LogWarning: hello world!");
-    LogWarning("LogWarning: a more complicated hello with int=%d.", 42);
-    LogWarning("LogWarning: the most complicated hello with int=%d and a really big string that fits =%s.", 42, really_big_string_fits);
-    LogWarning("LogWarning: the most complicated hello with int=%d and a really big string that does not fit=%s.", 42, really_big_string_doesnt_fit);
-    LogWarning("LogCritical: does PRI_BOOL work? %" PRI_BOOL "", MU_BOOL_VALUE(true) /*answer is yes, it works*/);
-    LogWarning("LogCritical: does PRI_BOOL work with amazingly out of bounds value? %" PRI_BOOL "", MU_BOOL_VALUE(42));
-    LogWarning("LogCritical: does PRI_BOOL works with false? %" PRI_BOOL "", MU_BOOL_VALUE(false));
+    LogWarning("hello world!");
+    LogWarning("a more complicated hello with int=%d.", 42);
+    LogWarning("the most complicated hello with int=%d and a really big string that fits =%s.", 42, really_big_string_fits);
+    LogWarning("the most complicated hello with int=%d and a really big string that does not fit=%s.", 42, really_big_string_doesnt_fit);
+    LogWarning("does PRI_BOOL work? %" PRI_BOOL "", MU_BOOL_VALUE(true) /*answer is yes, it works*/);
+    LogWarning("does PRI_BOOL work with amazingly out of bounds value? %" PRI_BOOL "", MU_BOOL_VALUE(42));
+    LogWarning("does PRI_BOOL works with false? %" PRI_BOOL "", MU_BOOL_VALUE(false));
 
     /*LogInfo*/
-    LogInfo("LogInfo: hello world!");
-    LogInfo("LogInfo: a more complicated hello with int=%d.", 42);
-    LogInfo("LogInfo: the most complicated hello with int=%d and a really big string that fits=%s.", 42, really_big_string_fits);
-    LogInfo("LogInfo: the most complicated hello with int=%d and a really big string that does not fit=%s.", 42, really_big_string_doesnt_fit);
-    LogInfo("LogCritical: does PRI_BOOL work? %" PRI_BOOL "", MU_BOOL_VALUE(true) /*answer is yes, it works*/);
-    LogInfo("LogCritical: does PRI_BOOL work with amazingly out of bounds value? %" PRI_BOOL "", MU_BOOL_VALUE(42));
-    LogInfo("LogCritical: does PRI_BOOL works with false? %" PRI_BOOL "", MU_BOOL_VALUE(false));
+    LogInfo("hello world!");
+    LogInfo("a more complicated hello with int=%d.", 42);
+    LogInfo("the most complicated hello with int=%d and a really big string that fits=%s.", 42, really_big_string_fits);
+    LogInfo("the most complicated hello with int=%d and a really big string that does not fit=%s.", 42, really_big_string_doesnt_fit);
+    LogInfo("does PRI_BOOL work? %" PRI_BOOL "", MU_BOOL_VALUE(true) /*answer is yes, it works*/);
+    LogInfo("does PRI_BOOL work with amazingly out of bounds value? %" PRI_BOOL "", MU_BOOL_VALUE(42));
+    LogInfo("does PRI_BOOL works with false? %" PRI_BOOL "", MU_BOOL_VALUE(false));
 
     /*LogVerbose*/
-    LogVerbose("LogVerbose: hello world!");
-    LogVerbose("LogVerbose: a more complicated hello with int=%d.", 42);
-    LogVerbose("LogVerbose: the most complicated hello with int=%d and a really big string that fits =%s.", 42, really_big_string_fits);
-    LogVerbose("LogVerbose: the most complicated hello with int=%d and a really big string that does not fit=%s.", 42, really_big_string_doesnt_fit);
-    LogVerbose("LogCritical: does PRI_BOOL work? %" PRI_BOOL "", MU_BOOL_VALUE(true) /*answer is yes, it works*/);
-    LogVerbose("LogCritical: does PRI_BOOL work with amazingly out of bounds value? %" PRI_BOOL "", MU_BOOL_VALUE(42));
-    LogVerbose("LogCritical: does PRI_BOOL works with false? %" PRI_BOOL "", MU_BOOL_VALUE(false));
+    LogVerbose("hello world!");
+    LogVerbose("a more complicated hello with int=%d.", 42);
+    LogVerbose("the most complicated hello with int=%d and a really big string that fits =%s.", 42, really_big_string_fits);
+    LogVerbose("the most complicated hello with int=%d and a really big string that does not fit=%s.", 42, really_big_string_doesnt_fit);
+    LogVerbose("does PRI_BOOL work? %" PRI_BOOL "", MU_BOOL_VALUE(true) /*answer is yes, it works*/);
+    LogVerbose("does PRI_BOOL work with amazingly out of bounds value? %" PRI_BOOL "", MU_BOOL_VALUE(42));
+    LogVerbose("does PRI_BOOL works with false? %" PRI_BOOL "", MU_BOOL_VALUE(false));
 }
 

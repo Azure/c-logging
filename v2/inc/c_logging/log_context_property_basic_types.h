@@ -31,6 +31,10 @@
     int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(type_name)(void); \
     extern const LOG_CONTEXT_PROPERTY_TYPE_IF LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(type_name); \
 
+
 MU_FOR_EACH_1(DECLARE_BASIC_TYPE, SUPPORTED_BASIC_TYPES)
+
+extern const LOG_CONTEXT_PROPERTY_TYPE_IF ansi_charptr_log_context_property_type;
+extern const LOG_CONTEXT_PROPERTY_TYPE_IF struct_log_context_property_type;
 
 #endif /* LOG_CONTEXT_PROPERTY_BASIC_TYPES_H */
