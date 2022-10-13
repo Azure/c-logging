@@ -7,7 +7,7 @@
 #include "c_logging/log_context.h"
 #include "c_logging/log_level.h"
 
-typedef void (*LOG_SINK_LOG_FUNC)(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* message, const char* file, const char* func, int line);
+typedef void (*LOG_SINK_LOG_FUNC)(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* format, ...);
 
 typedef struct LOG_SINK_IF_TAG
 {

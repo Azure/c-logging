@@ -15,6 +15,7 @@ set(c_logging_v2_c_files
     ./src/log_context_property_type_ascii_char_ptr.c
     ./src/log_context_property_type_struct.c
     ./src/log_internal_error.c
+    ./src/log_sink_console.c
     )
 
 set(c_logging_v2_h_files
@@ -29,6 +30,7 @@ set(c_logging_v2_h_files
     ./inc/c_logging/log_internal_error.h
     ./inc/c_logging/log_level.h
     ./inc/c_logging/log_sink_if.h
+    ./inc/c_logging/log_sink_console.h
     )
 
 FILE(GLOB c_logging_v2_md_files "devdoc/*.md")
