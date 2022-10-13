@@ -4,6 +4,8 @@
 #include "c_logging/logger.h"
 #include "c_logging/log_context.h"
 
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(LOG_LEVEL, LOG_LEVEL_VALUES);
+
 void logger_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line_no, const char* format, ...)
 {
     (void)log_level;
