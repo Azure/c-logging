@@ -29,7 +29,7 @@ If `message_format` is `NULL`, `log_sink_console.log_sink_log` shall return.
 
 `{log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message}`
 
-`log_sink_console.log_sink_log` shall print the line in such a way that only one `printf` call is made in order to not break the line in multiple parts when displayed on the console.
+In order to not break the line in multiple parts when displayed on the console, `log_sink_console.log_sink_log` shall print the line in such a way that only one `printf` call is made.
 
 `log_sink_console.log_sink_log` shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows:
 
