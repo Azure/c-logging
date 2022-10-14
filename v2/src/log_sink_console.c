@@ -52,24 +52,34 @@ static void log_n_properties(const LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_val
     }
 }
 
-static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* format, ...)
+static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...)
 {
-    time_t t = time(NULL);
-
-    (void)printf("%s%s Time:%.24s File:%s:%d Func:%s ", level_colors[log_level], MU_ENUM_TO_STRING(LOG_LEVEL, log_level), ctime(&t), MU_P_OR_NULL(file), line, MU_P_OR_NULL(func));
-
-    if (log_context != NULL)
+    if (message_format == NULL)
     {
-        size_t property_value_pair_count = log_context_get_property_value_pair_count(log_context);
-        const LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_value_pairs = log_context_get_property_value_pairs(log_context);
-        log_n_properties(property_value_pairs, property_value_pair_count);
+        /* Codes_SRS_LOG_SINK_CONSOLE_01_001: [ If `message_format` is `NULL`, `log_sink_console.log_sink_log` shall print an error and return. ]*/
+        (void)printf("Invalid arguments: LOG_LEVEL log_level=%" PRI_MU_ENUM ", LOG_CONTEXT_HANDLE log_context=%p, const char* file=%s, const char* func=%s, int line=%d, const char* message_format=%s\r\n",
+            MU_ENUM_VALUE(LOG_LEVEL, log_level), log_context, MU_P_OR_NULL(file), MU_P_OR_NULL(func), line, MU_P_OR_NULL(message_format));
     }
+    else
+    {
+        /* Codes_SRS_LOG_SINK_CONSOLE_01_002: [ `log_sink_console.log_sink_log` shall obtain the time by calling `time`. ]*/
+        time_t t = time(NULL);
 
-    va_list args;
-    va_start(args, format);
-    (void)vprintf(format, args);
-    (void)printf("%s\r\n", LOG_SINK_CONSOLE_ANSI_COLOR_RESET);
-    va_end(args);
+        (void)printf("%s%s Time:%.24s File:%s:%d Func:%s ", level_colors[log_level], MU_ENUM_TO_STRING(LOG_LEVEL, log_level), ctime(&t), MU_P_OR_NULL(file), line, MU_P_OR_NULL(func));
+
+        if (log_context != NULL)
+        {
+            size_t property_value_pair_count = log_context_get_property_value_pair_count(log_context);
+            const LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_value_pairs = log_context_get_property_value_pairs(log_context);
+            log_n_properties(property_value_pairs, property_value_pair_count);
+        }
+
+        va_list args;
+        va_start(args, message_format);
+        (void)vprintf(message_format, args);
+        (void)printf("%s\r\n", LOG_SINK_CONSOLE_ANSI_COLOR_RESET);
+        va_end(args);
+    }
 }
 
 const LOG_SINK_IF log_sink_console = { .log_sink_log = log_sink_console_log };

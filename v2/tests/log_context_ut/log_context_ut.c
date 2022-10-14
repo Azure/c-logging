@@ -73,7 +73,7 @@ void* mock_malloc(size_t size)
         (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_malloc))
     {
         actual_and_expected_match = false;
-        return NULL;
+        result = NULL;
     }
     else
     {

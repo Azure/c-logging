@@ -10,6 +10,7 @@ if(${run_unittests})
    add_subdirectory(log_context_ut)
    add_subdirectory(log_internal_error_ut)
    add_subdirectory(log_internal_error_with_abort_ut)
+   add_subdirectory(log_sink_console_ut)
 endif()
 
 if(${run_int_tests})
