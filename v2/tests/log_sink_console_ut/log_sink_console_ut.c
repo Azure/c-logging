@@ -417,6 +417,29 @@ static void log_sink_console_log_prints_one_VERBOSE_log_line(void)
     validate_log_line(expected_calls[3].u.printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
+/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any `printf` class functions fails), `log_sink_console.log_sink_log` shall print `Error formatting log line` and return. ]*/
+static void when_vsnprintf_fails_log_sink_console_log_prints_error_formatting(void)
+{
+    // arrange
+    setup_mocks();
+    setup_time_call();
+    setup_ctime_call();
+    setup_vsnprintf_call();
+    setup_printf_call();
+    expected_calls[2].u.vsnprintf_call.override_result = true;
+    expected_calls[2].u.vsnprintf_call.call_result = -1;
+
+    // act
+    int line_no = __LINE__;
+    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+    POOR_MANS_ASSERT(strcmp(expected_calls[3].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
@@ -426,6 +449,8 @@ int main(void)
     log_sink_console_log_prints_one_WARNING_log_line();
     log_sink_console_log_prints_one_INFO_log_line();
     log_sink_console_log_prints_one_VERBOSE_log_line();
+
+    when_vsnprintf_fails_log_sink_console_log_prints_error_formatting();
 
     return asserts_failed;
 }

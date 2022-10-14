@@ -36,9 +36,9 @@ X**SRS_LOG_SINK_CONSOLE_01_006: [** `log_sink_console.log_sink_log` shall color 
 
   X**SRS_LOG_SINK_CONSOLE_01_009: [** `LOG_LEVEL_WARNING` shall be displayed with bright yellow `\x1b[33;1m`. **]**
 
-  **SRS_LOG_SINK_CONSOLE_01_010: [** `LOG_LEVEL_INFO` shall be displayed with yellow `\x1b[33m`. **]**
+  X**SRS_LOG_SINK_CONSOLE_01_010: [** `LOG_LEVEL_INFO` shall be displayed with yellow `\x1b[33m`. **]**
 
-  **SRS_LOG_SINK_CONSOLE_01_011: [** `LOG_LEVEL_VERBOSE` shall be displayed with white `\x1b[37m`. **]**
+  X**SRS_LOG_SINK_CONSOLE_01_011: [** `LOG_LEVEL_VERBOSE` shall be displayed with white `\x1b[37m`. **]**
 
 X**SRS_LOG_SINK_CONSOLE_01_012: [** At the end of each line that is printed, the color shall be reset by using the `\x1b[0m` code. **]**
 
@@ -59,3 +59,5 @@ X**SRS_LOG_SINK_CONSOLE_01_012: [** At the end of each line that is printed, the
    **SRS_LOG_SINK_CONSOLE_01_020: [** Otherwise `log_sink_console.log_sink_log` shall call `to_string` for the property and print its name and value. **]**
 
 **SRS_LOG_SINK_CONSOLE_01_021: [** `log_sink_console.log_sink_log` shall print at most `LOG_MAX_MESSAGE_LENGTH` characters including the null terminator (the rest of the context shall be truncated). **]**
+
+**SRS_LOG_SINK_CONSOLE_01_022: [** If any encoding error occurs during formatting of the line (i.e. if any `printf` class functions fails), `log_sink_console.log_sink_log` shall print `Error formatting log line` and return. **]**
