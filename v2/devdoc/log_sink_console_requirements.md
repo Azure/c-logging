@@ -26,6 +26,10 @@ X**SRS_LOG_SINK_CONSOLE_01_003: [** `log_sink_console.log_sink_log` shall conver
 
 X**SRS_LOG_SINK_CONSOLE_01_004: [** `log_sink_console.log_sink_log` shall print a line in the format: `{log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message}` **]**
 
+X**SRS_LOG_SINK_CONSOLE_01_023: [** If the call to `time` fails then `log_sink_console.log_sink_log` shall print the time as `NULL`. **]**
+
+X**SRS_LOG_SINK_CONSOLE_01_024: [** If the call to `ctime` fails then `log_sink_console.log_sink_log` shall print the time as `NULL`. **]**
+
 X**SRS_LOG_SINK_CONSOLE_01_005: [** In order to not break the line in multiple parts when displayed on the console, `log_sink_console.log_sink_log` shall print the line in such a way that only one `printf` call is made. **]**
 
 X**SRS_LOG_SINK_CONSOLE_01_006: [** `log_sink_console.log_sink_log` shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: **]**
@@ -60,4 +64,5 @@ X**SRS_LOG_SINK_CONSOLE_01_012: [** At the end of each line that is printed, the
 
 **SRS_LOG_SINK_CONSOLE_01_021: [** `log_sink_console.log_sink_log` shall print at most `LOG_MAX_MESSAGE_LENGTH` characters including the null terminator (the rest of the context shall be truncated). **]**
 
-**SRS_LOG_SINK_CONSOLE_01_022: [** If any encoding error occurs during formatting of the line (i.e. if any `printf` class functions fails), `log_sink_console.log_sink_log` shall print `Error formatting log line` and return. **]**
+X**SRS_LOG_SINK_CONSOLE_01_022: [** If any encoding error occurs during formatting of the line (i.e. if any `printf` class functions fails), `log_sink_console.log_sink_log` shall print `Error formatting log line` and return. **]**
+

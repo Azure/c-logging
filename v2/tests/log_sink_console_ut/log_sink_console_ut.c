@@ -23,7 +23,8 @@ static size_t asserts_failed = 0;
     MOCK_CALL_TYPE_printf, \
     MOCK_CALL_TYPE_time, \
     MOCK_CALL_TYPE_ctime, \
-    MOCK_CALL_TYPE_vsnprintf \
+    MOCK_CALL_TYPE_vsnprintf, \
+    MOCK_CALL_TYPE_snprintf \
 
 MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
 
@@ -41,7 +42,7 @@ typedef struct printf_CALL_TAG
 typedef struct time_CALL_TAG
 {
     bool override_result;
-    int call_result;
+    time_t call_result;
     time_t* captured__time;
 } time_CALL;
 
@@ -59,6 +60,13 @@ typedef struct vsnprintf_CALL_TAG
     const char* captured_format_arg;
 } vsnprintf_CALL;
 
+typedef struct snprintf_CALL_TAG
+{
+    bool override_result;
+    int call_result;
+    const char* captured_format_arg;
+} snprintf_CALL;
+
 typedef struct MOCK_CALL_TAG
 {
     MOCK_CALL_TYPE mock_call_type;
@@ -68,6 +76,7 @@ typedef struct MOCK_CALL_TAG
         time_CALL time_call;
         ctime_CALL ctime_call;
         vsnprintf_CALL vsnprintf_call;
+        snprintf_CALL snprintf_call;
     } u;
 } MOCK_CALL;
 
@@ -207,6 +216,41 @@ int mock_vsnprintf(char* s, size_t n, const char* format, va_list args)
     return result;
 }
 
+int mock_snprintf(char* s, size_t n, const char* format, ...)
+{
+    int result;
+
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_snprintf))
+    {
+        actual_and_expected_match = false;
+        return -1;
+    }
+    else
+    {
+        if (expected_calls[actual_call_count].u.snprintf_call.override_result)
+        {
+            result = expected_calls[actual_call_count].u.snprintf_call.call_result;
+        }
+        else
+        {
+            expected_calls[actual_call_count].u.snprintf_call.captured_format_arg = format;
+            expected_calls[actual_call_count].u.snprintf_call.captured_format_arg = format;
+
+            va_list args;
+            va_start(args, format);
+
+            result = vsnprintf(s, n, format, args);
+
+            va_end(args);
+        }
+
+        actual_call_count++;
+    }
+
+    return result;
+}
+
 #define POOR_MANS_ASSERT(cond) \
     if (!(cond)) \
     { \
@@ -242,6 +286,13 @@ static void setup_vsnprintf_call(void)
     expected_call_count++;
 }
 
+static void setup_snprintf_call(void)
+{
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_snprintf;
+    expected_calls[expected_call_count].u.printf_call.override_result = false;
+    expected_call_count++;
+}
+
 static void validate_log_line(const char* actual_string, const char* expected_format, const char* expected_log_level_string, const char* file, int line, const char* func, const char* expected_message)
 {
     char expected_string[LOG_MAX_MESSAGE_LENGTH * 2];
@@ -254,11 +305,25 @@ static void validate_log_line(const char* actual_string, const char* expected_fo
     int minute;
     int second;
     int year;
-    //    char final_char;
     char reset_color_code[10];
     char anything_else[200];
     int scanned_values = sscanf(actual_string, expected_string, day_of_week, month, &day, &hour, &minute, &second, &year, reset_color_code, anything_else);
     POOR_MANS_ASSERT(scanned_values == 8); // the last one should not get scanned as there should be nothing past \r\n
+    size_t actual_string_length = strlen(actual_string);
+    POOR_MANS_ASSERT(actual_string[actual_string_length - 2] == '\r');
+    POOR_MANS_ASSERT(actual_string[actual_string_length - 1] == '\n');
+    POOR_MANS_ASSERT(strcmp(reset_color_code, "\x1b[0m") == 0);
+}
+
+static void validate_log_line_with_NULL_time(const char* actual_string, const char* expected_format, const char* expected_log_level_string, const char* file, int line, const char* func, const char* expected_message)
+{
+    char expected_string[LOG_MAX_MESSAGE_LENGTH * 2];
+    int snprintf_result = snprintf(expected_string, sizeof(expected_string), expected_format, expected_log_level_string, file, line, func, expected_message);
+    POOR_MANS_ASSERT(snprintf_result > 0);
+    char reset_color_code[10];
+    char anything_else[200];
+    int scanned_values = sscanf(actual_string, expected_string, reset_color_code, anything_else);
+    POOR_MANS_ASSERT(scanned_values == 1); // the last one should not get scanned as there should be nothing past \r\n
     size_t actual_string_length = strlen(actual_string);
     POOR_MANS_ASSERT(actual_string[actual_string_length - 2] == '\r');
     POOR_MANS_ASSERT(actual_string[actual_string_length - 1] == '\n');
@@ -295,6 +360,7 @@ static void log_sink_console_log_prints_one_CRITICAL_log_line(void)
     setup_mocks();
     setup_time_call();
     setup_ctime_call();
+    setup_snprintf_call();
     setup_vsnprintf_call();
     setup_printf_call();
 
@@ -306,7 +372,7 @@ static void log_sink_console_log_prints_one_CRITICAL_log_line(void)
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[3].u.printf_call.captured_output, "\x1b[31;1m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_CRITICAL), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[4].u.printf_call.captured_output, "\x1b[31;1m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_CRITICAL), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ `log_sink_console.log_sink_log` shall obtain the time by calling `time`. ]*/
@@ -322,6 +388,7 @@ static void log_sink_console_log_prints_one_ERROR_log_line(void)
     setup_mocks();
     setup_time_call();
     setup_ctime_call();
+    setup_snprintf_call();
     setup_vsnprintf_call();
     setup_printf_call();
 
@@ -333,7 +400,7 @@ static void log_sink_console_log_prints_one_ERROR_log_line(void)
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[3].u.printf_call.captured_output, "\x1b[31m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_ERROR), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[4].u.printf_call.captured_output, "\x1b[31m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_ERROR), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ `log_sink_console.log_sink_log` shall obtain the time by calling `time`. ]*/
@@ -349,6 +416,7 @@ static void log_sink_console_log_prints_one_WARNING_log_line(void)
     setup_mocks();
     setup_time_call();
     setup_ctime_call();
+    setup_snprintf_call();
     setup_vsnprintf_call();
     setup_printf_call();
 
@@ -360,7 +428,7 @@ static void log_sink_console_log_prints_one_WARNING_log_line(void)
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[3].u.printf_call.captured_output, "\x1b[33;1m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_WARNING), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[4].u.printf_call.captured_output, "\x1b[33;1m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_WARNING), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ `log_sink_console.log_sink_log` shall obtain the time by calling `time`. ]*/
@@ -376,6 +444,7 @@ static void log_sink_console_log_prints_one_INFO_log_line(void)
     setup_mocks();
     setup_time_call();
     setup_ctime_call();
+    setup_snprintf_call();
     setup_vsnprintf_call();
     setup_printf_call();
 
@@ -387,7 +456,7 @@ static void log_sink_console_log_prints_one_INFO_log_line(void)
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[3].u.printf_call.captured_output, "\x1b[33m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_INFO), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[4].u.printf_call.captured_output, "\x1b[33m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_INFO), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ `log_sink_console.log_sink_log` shall obtain the time by calling `time`. ]*/
@@ -403,6 +472,7 @@ static void log_sink_console_log_prints_one_VERBOSE_log_line(void)
     setup_mocks();
     setup_time_call();
     setup_ctime_call();
+    setup_snprintf_call();
     setup_vsnprintf_call();
     setup_printf_call();
 
@@ -414,20 +484,20 @@ static void log_sink_console_log_prints_one_VERBOSE_log_line(void)
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[3].u.printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[4].u.printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any `printf` class functions fails), `log_sink_console.log_sink_log` shall print `Error formatting log line` and return. ]*/
-static void when_vsnprintf_fails_log_sink_console_log_prints_error_formatting(void)
+static void when_snprintf_fails_log_sink_console_log_prints_error_formatting(void)
 {
     // arrange
     setup_mocks();
     setup_time_call();
     setup_ctime_call();
-    setup_vsnprintf_call();
+    setup_snprintf_call();
     setup_printf_call();
-    expected_calls[2].u.vsnprintf_call.override_result = true;
-    expected_calls[2].u.vsnprintf_call.call_result = -1;
+    expected_calls[2].u.snprintf_call.override_result = true;
+    expected_calls[2].u.snprintf_call.call_result = -1;
 
     // act
     int line_no = __LINE__;
@@ -440,17 +510,91 @@ static void when_vsnprintf_fails_log_sink_console_log_prints_error_formatting(vo
     POOR_MANS_ASSERT(strcmp(expected_calls[3].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
+/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any `printf` class functions fails), `log_sink_console.log_sink_log` shall print `Error formatting log line` and return. ]*/
+static void when_vsnprintf_fails_log_sink_console_log_prints_error_formatting(void)
+{
+    // arrange
+    setup_mocks();
+    setup_time_call();
+    setup_ctime_call();
+    setup_snprintf_call();
+    setup_vsnprintf_call();
+    setup_printf_call();
+    expected_calls[3].u.vsnprintf_call.override_result = true;
+    expected_calls[3].u.vsnprintf_call.call_result = -1;
+
+    // act
+    int line_no = __LINE__;
+    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+    POOR_MANS_ASSERT(strcmp(expected_calls[4].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
+}
+
+/* Tests_SRS_LOG_SINK_CONSOLE_01_023: [ If the call to `time` fails then `log_sink_console.log_sink_log` shall print the time as `NULL`. ]*/
+static void when_time_fails_log_sink_console_log_prints_time_as_NULL(void)
+{
+    // arrange
+    setup_mocks();
+    setup_time_call();
+    setup_snprintf_call();
+    setup_vsnprintf_call();
+    setup_printf_call();
+    expected_calls[0].u.time_call.override_result = true;
+    expected_calls[0].u.time_call.call_result = (time_t)-1;
+
+    // act
+    int line_no = __LINE__;
+    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+    validate_log_line_with_NULL_time(expected_calls[3].u.printf_call.captured_output, "\x1b[37m%s Time:NULL File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+}
+
+/* Tests_SRS_LOG_SINK_CONSOLE_01_024: [ If the call to `ctime` fails then `log_sink_console.log_sink_log` shall print the time as `NULL`. ]*/
+static void when_ctime_returns_NULL_log_sink_console_log_prints_time_as_NULL(void)
+{
+    // arrange
+    setup_mocks();
+    setup_time_call();
+    setup_ctime_call();
+    setup_snprintf_call();
+    setup_vsnprintf_call();
+    setup_printf_call();
+    expected_calls[1].u.ctime_call.override_result = true;
+    expected_calls[1].u.ctime_call.call_result = NULL;
+
+    // act
+    int line_no = __LINE__;
+    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+    validate_log_line_with_NULL_time(expected_calls[4].u.printf_call.captured_output, "\x1b[37m%s Time:NULL File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
-    //log_sink_console_log_with_NULL_message_format_returns();
+    log_sink_console_log_with_NULL_message_format_returns();
     log_sink_console_log_prints_one_CRITICAL_log_line();
     log_sink_console_log_prints_one_ERROR_log_line();
     log_sink_console_log_prints_one_WARNING_log_line();
     log_sink_console_log_prints_one_INFO_log_line();
     log_sink_console_log_prints_one_VERBOSE_log_line();
 
+    when_snprintf_fails_log_sink_console_log_prints_error_formatting();
     when_vsnprintf_fails_log_sink_console_log_prints_error_formatting();
+    when_time_fails_log_sink_console_log_prints_time_as_NULL();
+    when_ctime_returns_NULL_log_sink_console_log_prints_time_as_NULL();
 
     return asserts_failed;
 }

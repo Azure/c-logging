@@ -34,6 +34,8 @@ static const char* level_colors[] =
     LOG_SINK_CONSOLE_ANSI_COLOR_WHITE,          // LOG_LEVEL_VERBOSE
 };
 
+const char error_string[] = "Error formatting log line\r\n";
+
 static int log_n_properties(char* buffer, size_t buffer_size, const LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_value_pairs, size_t property_value_pair_count)
 {
     int result = 0;
@@ -98,6 +100,8 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
 
         /* Codes_SRS_LOG_SINK_CONSOLE_01_002: [ `log_sink_console.log_sink_log` shall obtain the time by calling `time`. ]*/
         time_t t = time(NULL);
+        /* Codes_SRS_LOG_SINK_CONSOLE_01_024: [ If the call to `ctime` fails then `log_sink_console.log_sink_log` shall print the time as `NULL`. ]*/
+        char* ctime_result = (t == (time_t)-1) ? NULL : ctime(&t);
 
         /* Codes_SRS_LOG_SINK_CONSOLE_01_003: [ `log_sink_console.log_sink_log` shall convert the time to string by calling `ctime`. ]*/
         /* Codes_SRS_LOG_SINK_CONSOLE_01_004: [ `log_sink_console.log_sink_log` shall print a line in the format: `{log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message}` ]*/
@@ -105,13 +109,15 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
             /* Codes_SRS_LOG_SINK_CONSOLE_01_006: [ `log_sink_console.log_sink_log` shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: ]*/
             level_colors[log_level],
             MU_ENUM_TO_STRING(LOG_LEVEL, log_level),
-            ctime(&t),
+            /* Codes_SRS_LOG_SINK_CONSOLE_01_023: [ If the call to `time` fails then `log_sink_console.log_sink_log` shall print the time as `NULL`. ]*/
+            MU_P_OR_NULL(ctime_result),
             MU_P_OR_NULL(file),
             line,
             MU_P_OR_NULL(func));
         if (snprintf_result < 0)
         {
-            // error
+            /* Codes_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any `printf` class functions fails), `log_sink_console.log_sink_log` shall print `Error formatting log line` and return. ]*/
+            (void)printf(error_string);
         }
         else
         {
@@ -136,15 +142,18 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
                 int vsnprintf_result = vsnprintf(buffer, buffer_size, message_format, args);
                 if (vsnprintf_result < 0)
                 {
-                    copy_error_string(buffer, buffer_size);
+                    /* Codes_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any `printf` class functions fails), `log_sink_console.log_sink_log` shall print `Error formatting log line` and return. ]*/
+                    (void)printf(error_string);
+                }
+                else
+                {
+                    /* Codes_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, `log_sink_console.log_sink_log` shall print the line in such a way that only one `printf` call is made. ]*/
+                    /* Codes_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the `\x1b[0m` code. ]*/
+                    (void)printf("%s%s\r\n", temp, LOG_SINK_CONSOLE_ANSI_COLOR_RESET);
                 }
                 va_end(args);
             }
         }
-
-        /* Codes_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, `log_sink_console.log_sink_log` shall print the line in such a way that only one `printf` call is made. ]*/
-        /* Codes_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the `\x1b[0m` code. ]*/
-        (void)printf("%s%s\r\n", temp, LOG_SINK_CONSOLE_ANSI_COLOR_RESET);
     }
 }
 
