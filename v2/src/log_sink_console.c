@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -39,49 +40,91 @@ const char error_string[] = "Error formatting log line\r\n";
 static int log_n_properties(char* buffer, size_t buffer_size, const LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_value_pairs, size_t property_value_pair_count)
 {
     int result = 0;
+
+    /* Codes_SRS_LOG_SINK_CONSOLE_01_016: [ For each property: ]*/
     for (size_t i = 0; i < property_value_pair_count; i++)
     {
+        /* Codes_SRS_LOG_SINK_CONSOLE_01_017: [ If the property type is `struct` (used as a container for context properties): ]*/
         if (property_value_pairs[i].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct)
         {
-            (void)printf("%s%s{ ", property_value_pairs[i].name, property_value_pairs[i].name[0] == 0 ? "" : "=");
-            uint8_t struct_properties_count = *(uint8_t*)(property_value_pairs[i].value);
-            log_n_properties(buffer, buffer_size, &property_value_pairs[i + 1], struct_properties_count);
-            i += struct_properties_count;
-            (void)printf("} ");
-        }
-        else
-        {
-            int snprintf_result = snprintf(buffer, buffer_size, " %s=", property_value_pairs[i].name);
+            /* Codes_SRS_LOG_SINK_CONSOLE_01_025: [ `log_sink_console.log_sink_log` shall print the `struct` property name and an opening brace. ]*/
+            int snprintf_result = snprintf(buffer, buffer_size, " %s%s{", property_value_pairs[i].name, property_value_pairs[i].name[0] == 0 ? "" : "=");
             if (snprintf_result < 0)
             {
                 // error
+                result = -1;
+                break;
             }
             else
             {
                 buffer += snprintf_result;
                 buffer_size -= snprintf_result;
+                result += snprintf_result;
+
+                /* Codes_SRS_LOG_SINK_CONSOLE_01_018: [ `log_sink_console.log_sink_log` shall obtain the number of fields in the `struct`. ]*/
+                uint8_t struct_properties_count = *(uint8_t*)(property_value_pairs[i].value);
+
+                /* Codes_SRS_LOG_SINK_CONSOLE_01_019: [ `log_sink_console.log_sink_log` shall print the next `n` properties as being the fields that are part of the `struct`. ]*/
+                int log_properties_result = log_n_properties(buffer, buffer_size, &property_value_pairs[i + 1], struct_properties_count);
+                if (log_properties_result < 0)
+                {
+                    result = -1;
+                    break;
+                }
+                else
+                {
+                    i += struct_properties_count;
+
+                    buffer += log_properties_result;
+                    buffer_size -= log_properties_result;
+                    result += log_properties_result;
+
+                    /* Codes_SRS_LOG_SINK_CONSOLE_01_026: [ `log_sink_console.log_sink_log` shall print a closing brace as end of the `struct`. ]*/
+                    snprintf_result = snprintf(buffer, buffer_size, " }");
+                    if (snprintf_result < 0)
+                    {
+                        result = -1;
+                        break;
+                    }
+                    else
+                    {
+                        buffer += snprintf_result;
+                        buffer_size -= snprintf_result;
+                        result += snprintf_result;
+                    }
+                }
+            }
+        }
+        else
+        {
+            /* Codes_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise `log_sink_console.log_sink_log` shall call `to_string` for the property and print its name and value. ]*/
+            int snprintf_result = snprintf(buffer, buffer_size, " %s=", property_value_pairs[i].name);
+            if (snprintf_result < 0)
+            {
+                result = -1;
+            }
+            else
+            {
+                buffer += snprintf_result;
+                buffer_size -= snprintf_result;
+                result += snprintf_result;
 
                 int to_string_result = property_value_pairs[i].type->to_string(property_value_pairs[i].value, buffer, buffer_size);
                 if (to_string_result < 0)
                 {
-                    // error
+                    result = -1;
                 }
                 else
                 {
                     buffer += to_string_result;
                     buffer_size -= to_string_result;
+                    result += to_string_result;
                 }
             }
         }
     }
 
     return result;
-}
-
-static void copy_error_string(char* buffer, size_t buffer_size)
-{
-    (void)buffer;
-    (void)buffer_size;
 }
 
 static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...)
@@ -105,7 +148,7 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
 
         /* Codes_SRS_LOG_SINK_CONSOLE_01_003: [ `log_sink_console.log_sink_log` shall convert the time to string by calling `ctime`. ]*/
         /* Codes_SRS_LOG_SINK_CONSOLE_01_004: [ `log_sink_console.log_sink_log` shall print a line in the format: `{log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message}` ]*/
-        int snprintf_result = snprintf(buffer, buffer_size, "%s%s Time:%.24s File:%s:%d Func:%s ",
+        int snprintf_result = snprintf(buffer, buffer_size, "%s%s Time:%.24s File:%s:%d Func:%s",
             /* Codes_SRS_LOG_SINK_CONSOLE_01_006: [ `log_sink_console.log_sink_log` shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: ]*/
             level_colors[log_level],
             MU_ENUM_TO_STRING(LOG_LEVEL, log_level),
@@ -121,6 +164,8 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
         }
         else
         {
+            bool error = false;
+
             if (snprintf_result > buffer_size)
             {
                 snprintf_result = (int)buffer_size;
@@ -128,30 +173,59 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
             buffer += snprintf_result;
             buffer_size -= snprintf_result;
 
+            /* Codes_SRS_LOG_SINK_CONSOLE_01_013: [ If `log_context` is non-`NULL`: ]*/
             if (log_context != NULL)
             {
+                /* Codes_SRS_LOG_SINK_CONSOLE_01_014: [ `log_sink_console.log_sink_log` shall call `log_context_get_property_value_pair_count` to obtain the count of properties to print. ]*/
                 size_t property_value_pair_count = log_context_get_property_value_pair_count(log_context);
+                /* Codes_SRS_LOG_SINK_CONSOLE_01_015: [ `log_sink_console.log_sink_log` shall call `log_context_get_property_value_pairs` to obtain the properties to print. ]*/
                 const LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_value_pairs = log_context_get_property_value_pairs(log_context);
-                log_n_properties(buffer, buffer_size, property_value_pairs, property_value_pair_count);
-            }
-
-            if (buffer_size > 0)
-            {
-                va_list args;
-                va_start(args, message_format);
-                int vsnprintf_result = vsnprintf(buffer, buffer_size, message_format, args);
-                if (vsnprintf_result < 0)
+                int log_n_properties_result =  log_n_properties(buffer, buffer_size, property_value_pairs, property_value_pair_count);
+                if (log_n_properties_result < 0)
                 {
                     /* Codes_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any `printf` class functions fails), `log_sink_console.log_sink_log` shall print `Error formatting log line` and return. ]*/
-                    (void)printf(error_string);
+                    error = true;
                 }
                 else
                 {
-                    /* Codes_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, `log_sink_console.log_sink_log` shall print the line in such a way that only one `printf` call is made. ]*/
-                    /* Codes_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the `\x1b[0m` code. ]*/
-                    (void)printf("%s%s\r\n", temp, LOG_SINK_CONSOLE_ANSI_COLOR_RESET);
+                    if (log_n_properties_result > buffer_size)
+                    {
+                        log_n_properties_result = (int)buffer_size;
+                    }
+                    buffer += log_n_properties_result;
+                    buffer_size -= log_n_properties_result;
                 }
-                va_end(args);
+            }
+
+            if (!error)
+            {
+                if (buffer_size > 1)
+                {
+                    *buffer = ' ';
+                    buffer++;
+                    buffer_size--;
+
+                    va_list args;
+                    va_start(args, message_format);
+                    int vsnprintf_result = vsnprintf(buffer, buffer_size, message_format, args);
+                    if (vsnprintf_result < 0)
+                    {
+                        /* Codes_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any `printf` class functions fails), `log_sink_console.log_sink_log` shall print `Error formatting log line` and return. ]*/
+                        error = true;
+                    }
+                    else
+                    {
+                        /* Codes_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, `log_sink_console.log_sink_log` shall print the line in such a way that only one `printf` call is made. ]*/
+                        /* Codes_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the `\x1b[0m` code. ]*/
+                        (void)printf("%s%s\r\n", temp, LOG_SINK_CONSOLE_ANSI_COLOR_RESET);
+                    }
+                    va_end(args);
+                }
+            }
+
+            if (error)
+            {
+                (void)printf(error_string);
             }
         }
     }
