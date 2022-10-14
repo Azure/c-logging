@@ -18,29 +18,29 @@ typedef void (*LOG_SINK_LOG_FUNC)(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_co
 
 `log_sink_console.log_sink_log` implements logging to console.
 
-**SRS_LOG_SINK_CONSOLE_01_001: [** If `message_format` is `NULL`, `log_sink_console.log_sink_log` shall print an error and return. **]**
+X**SRS_LOG_SINK_CONSOLE_01_001: [** If `message_format` is `NULL`, `log_sink_console.log_sink_log` shall print an error and return. **]**
 
-**SRS_LOG_SINK_CONSOLE_01_002: [** `log_sink_console.log_sink_log` shall obtain the time by calling `time`. **]**
+X**SRS_LOG_SINK_CONSOLE_01_002: [** `log_sink_console.log_sink_log` shall obtain the time by calling `time`. **]**
 
-**SRS_LOG_SINK_CONSOLE_01_003: [** `log_sink_console.log_sink_log` shall convert the time to string by calling `ctime`. **]**
+X**SRS_LOG_SINK_CONSOLE_01_003: [** `log_sink_console.log_sink_log` shall convert the time to string by calling `ctime`. **]**
 
-**SRS_LOG_SINK_CONSOLE_01_004: [** `log_sink_console.log_sink_log` shall print a line in the format: `{log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message}` **]**
+X**SRS_LOG_SINK_CONSOLE_01_004: [** `log_sink_console.log_sink_log` shall print a line in the format: `{log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message}` **]**
 
-**SRS_LOG_SINK_CONSOLE_01_005: [** In order to not break the line in multiple parts when displayed on the console, `log_sink_console.log_sink_log` shall print the line in such a way that only one `printf` call is made. **]**
+X**SRS_LOG_SINK_CONSOLE_01_005: [** In order to not break the line in multiple parts when displayed on the console, `log_sink_console.log_sink_log` shall print the line in such a way that only one `printf` call is made. **]**
 
-**SRS_LOG_SINK_CONSOLE_01_006: [** `log_sink_console.log_sink_log` shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: **]**
+X**SRS_LOG_SINK_CONSOLE_01_006: [** `log_sink_console.log_sink_log` shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: **]**
 
-  **SRS_LOG_SINK_CONSOLE_01_007: [** `LOG_LEVEL_CRITICAL` shall be displayed with bright red `\x1b[31;1m`. **]**
+  X**SRS_LOG_SINK_CONSOLE_01_007: [** `LOG_LEVEL_CRITICAL` shall be displayed with bright red `\x1b[31;1m`. **]**
 
-  **SRS_LOG_SINK_CONSOLE_01_008: [** `LOG_LEVEL_ERROR` shall be displayed with red `\x1b[31m`. **]**
+  X**SRS_LOG_SINK_CONSOLE_01_008: [** `LOG_LEVEL_ERROR` shall be displayed with red `\x1b[31m`. **]**
 
-  **SRS_LOG_SINK_CONSOLE_01_009: [** `LOG_LEVEL_WARNING` shall be displayed with bright yellow `\x1b[33;1m`. **]**
+  X**SRS_LOG_SINK_CONSOLE_01_009: [** `LOG_LEVEL_WARNING` shall be displayed with bright yellow `\x1b[33;1m`. **]**
 
   **SRS_LOG_SINK_CONSOLE_01_010: [** `LOG_LEVEL_INFO` shall be displayed with yellow `\x1b[33m`. **]**
 
   **SRS_LOG_SINK_CONSOLE_01_011: [** `LOG_LEVEL_VERBOSE` shall be displayed with white `\x1b[37m`. **]**
 
-**SRS_LOG_SINK_CONSOLE_01_012: [** At the end of each line that is printed, the color shall be reset by using the `\x1b[0m` code. **]**
+X**SRS_LOG_SINK_CONSOLE_01_012: [** At the end of each line that is printed, the color shall be reset by using the `\x1b[0m` code. **]**
 
 **SRS_LOG_SINK_CONSOLE_01_013: [** If `log_context` is non-`NULL`: **]**
 
