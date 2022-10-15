@@ -18,55 +18,55 @@ typedef void (*LOG_SINK_LOG_FUNC)(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_co
 
 `log_sink_console.log_sink_log` implements logging to console.
 
-X**SRS_LOG_SINK_CONSOLE_01_001: [** If `message_format` is `NULL`, `log_sink_console.log_sink_log` shall print an error and return. **]**
+**SRS_LOG_SINK_CONSOLE_01_001: [** If `message_format` is `NULL`, `log_sink_console.log_sink_log` shall print an error and return. **]**
 
-X**SRS_LOG_SINK_CONSOLE_01_002: [** `log_sink_console.log_sink_log` shall obtain the time by calling `time`. **]**
+**SRS_LOG_SINK_CONSOLE_01_002: [** `log_sink_console.log_sink_log` shall obtain the time by calling `time`. **]**
 
-X**SRS_LOG_SINK_CONSOLE_01_003: [** `log_sink_console.log_sink_log` shall convert the time to string by calling `ctime`. **]**
+**SRS_LOG_SINK_CONSOLE_01_003: [** `log_sink_console.log_sink_log` shall convert the time to string by calling `ctime`. **]**
 
-X**SRS_LOG_SINK_CONSOLE_01_004: [** `log_sink_console.log_sink_log` shall print a line in the format: `{log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message}` **]**
+**SRS_LOG_SINK_CONSOLE_01_004: [** `log_sink_console.log_sink_log` shall print a line in the format: `{log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message}` **]**
 
-X**SRS_LOG_SINK_CONSOLE_01_023: [** If the call to `time` fails then `log_sink_console.log_sink_log` shall print the time as `NULL`. **]**
+**SRS_LOG_SINK_CONSOLE_01_023: [** If the call to `time` fails then `log_sink_console.log_sink_log` shall print the time as `NULL`. **]**
 
-X**SRS_LOG_SINK_CONSOLE_01_024: [** If the call to `ctime` fails then `log_sink_console.log_sink_log` shall print the time as `NULL`. **]**
+**SRS_LOG_SINK_CONSOLE_01_024: [** If the call to `ctime` fails then `log_sink_console.log_sink_log` shall print the time as `NULL`. **]**
 
-X**SRS_LOG_SINK_CONSOLE_01_005: [** In order to not break the line in multiple parts when displayed on the console, `log_sink_console.log_sink_log` shall print the line in such a way that only one `printf` call is made. **]**
+**SRS_LOG_SINK_CONSOLE_01_005: [** In order to not break the line in multiple parts when displayed on the console, `log_sink_console.log_sink_log` shall print the line in such a way that only one `printf` call is made. **]**
 
-X**SRS_LOG_SINK_CONSOLE_01_006: [** `log_sink_console.log_sink_log` shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: **]**
+**SRS_LOG_SINK_CONSOLE_01_006: [** `log_sink_console.log_sink_log` shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: **]**
 
-  X**SRS_LOG_SINK_CONSOLE_01_007: [** `LOG_LEVEL_CRITICAL` shall be displayed with bright red `\x1b[31;1m`. **]**
+  **SRS_LOG_SINK_CONSOLE_01_007: [** `LOG_LEVEL_CRITICAL` shall be displayed with bright red `\x1b[31;1m`. **]**
 
-  X**SRS_LOG_SINK_CONSOLE_01_008: [** `LOG_LEVEL_ERROR` shall be displayed with red `\x1b[31m`. **]**
+  **SRS_LOG_SINK_CONSOLE_01_008: [** `LOG_LEVEL_ERROR` shall be displayed with red `\x1b[31m`. **]**
 
-  X**SRS_LOG_SINK_CONSOLE_01_009: [** `LOG_LEVEL_WARNING` shall be displayed with bright yellow `\x1b[33;1m`. **]**
+  **SRS_LOG_SINK_CONSOLE_01_009: [** `LOG_LEVEL_WARNING` shall be displayed with bright yellow `\x1b[33;1m`. **]**
 
-  X**SRS_LOG_SINK_CONSOLE_01_010: [** `LOG_LEVEL_INFO` shall be displayed with yellow `\x1b[33m`. **]**
+  **SRS_LOG_SINK_CONSOLE_01_010: [** `LOG_LEVEL_INFO` shall be displayed with yellow `\x1b[33m`. **]**
 
-  X**SRS_LOG_SINK_CONSOLE_01_011: [** `LOG_LEVEL_VERBOSE` shall be displayed with white `\x1b[37m`. **]**
+  **SRS_LOG_SINK_CONSOLE_01_011: [** `LOG_LEVEL_VERBOSE` shall be displayed with white `\x1b[37m`. **]**
 
-X**SRS_LOG_SINK_CONSOLE_01_012: [** At the end of each line that is printed, the color shall be reset by using the `\x1b[0m` code. **]**
+**SRS_LOG_SINK_CONSOLE_01_012: [** At the end of each line that is printed, the color shall be reset by using the `\x1b[0m` code. **]**
 
-X**SRS_LOG_SINK_CONSOLE_01_013: [** If `log_context` is non-`NULL`: **]**
+**SRS_LOG_SINK_CONSOLE_01_013: [** If `log_context` is non-`NULL`: **]**
 
-  X**SRS_LOG_SINK_CONSOLE_01_014: [** `log_sink_console.log_sink_log` shall call `log_context_get_property_value_pair_count` to obtain the count of properties to print. **]**
+  **SRS_LOG_SINK_CONSOLE_01_014: [** `log_sink_console.log_sink_log` shall call `log_context_get_property_value_pair_count` to obtain the count of properties to print. **]**
 
-  X**SRS_LOG_SINK_CONSOLE_01_015: [** `log_sink_console.log_sink_log` shall call `log_context_get_property_value_pairs` to obtain the properties to print. **]**
+  **SRS_LOG_SINK_CONSOLE_01_015: [** `log_sink_console.log_sink_log` shall call `log_context_get_property_value_pairs` to obtain the properties to print. **]**
 
-  X**SRS_LOG_SINK_CONSOLE_01_016: [** For each property: **]**
+  **SRS_LOG_SINK_CONSOLE_01_016: [** For each property: **]**
 
-   X**SRS_LOG_SINK_CONSOLE_01_017: [** If the property type is `struct` (used as a container for context properties): **]**
+   **SRS_LOG_SINK_CONSOLE_01_017: [** If the property type is `struct` (used as a container for context properties): **]**
 
-   X**SRS_LOG_SINK_CONSOLE_01_025: [** `log_sink_console.log_sink_log` shall print the `struct` property name and an opening brace. **]**
+   **SRS_LOG_SINK_CONSOLE_01_025: [** `log_sink_console.log_sink_log` shall print the `struct` property name and an opening brace. **]**
 
-   X**SRS_LOG_SINK_CONSOLE_01_018: [** `log_sink_console.log_sink_log` shall obtain the number of fields in the `struct`. **]**
+   **SRS_LOG_SINK_CONSOLE_01_018: [** `log_sink_console.log_sink_log` shall obtain the number of fields in the `struct`. **]**
 
-   X**SRS_LOG_SINK_CONSOLE_01_019: [** `log_sink_console.log_sink_log` shall print the next `n` properties as being the fields that are part of the `struct`. **]**
+   **SRS_LOG_SINK_CONSOLE_01_019: [** `log_sink_console.log_sink_log` shall print the next `n` properties as being the fields that are part of the `struct`. **]**
 
-   X**SRS_LOG_SINK_CONSOLE_01_026: [** `log_sink_console.log_sink_log` shall print a closing brace as end of the `struct`. **]**
+   **SRS_LOG_SINK_CONSOLE_01_026: [** `log_sink_console.log_sink_log` shall print a closing brace as end of the `struct`. **]**
 
-   X**SRS_LOG_SINK_CONSOLE_01_020: [** Otherwise `log_sink_console.log_sink_log` shall call `to_string` for the property and print its name and value. **]**
+   **SRS_LOG_SINK_CONSOLE_01_020: [** Otherwise `log_sink_console.log_sink_log` shall call `to_string` for the property and print its name and value. **]**
 
 **SRS_LOG_SINK_CONSOLE_01_021: [** `log_sink_console.log_sink_log` shall print at most `LOG_MAX_MESSAGE_LENGTH` characters including the null terminator (the rest of the context shall be truncated). **]**
 
-X**SRS_LOG_SINK_CONSOLE_01_022: [** If any encoding error occurs during formatting of the line (i.e. if any `printf` class functions fails), `log_sink_console.log_sink_log` shall print `Error formatting log line` and return. **]**
+**SRS_LOG_SINK_CONSOLE_01_022: [** If any encoding error occurs during formatting of the line (i.e. if any `printf` class functions fails), `log_sink_console.log_sink_log` shall print `Error formatting log line` and return. **]**
 
