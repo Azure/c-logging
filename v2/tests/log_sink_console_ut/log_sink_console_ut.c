@@ -1230,7 +1230,7 @@ static void when_printing_a_property_value_exceeds_log_line_size_it_is_truncated
     string_property_value_too_big[LOG_MAX_MESSAGE_LENGTH - 1] = '\0';
 
     LOG_CONTEXT_HANDLE context_1;
-    LOG_CONTEXT_CREATE(context_1, NULL, LOG_CONTEXT_STRING_PROPERTY(hagauaga, string_property_value_too_big));
+    LOG_CONTEXT_CREATE(context_1, NULL, LOG_CONTEXT_STRING_PROPERTY(hagauaga, "%s", string_property_value_too_big));
 
     // act
     int line_no = __LINE__;
