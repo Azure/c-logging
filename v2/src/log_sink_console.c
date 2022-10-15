@@ -16,6 +16,8 @@
 
 #include "c_logging/log_sink_console.h"
 
+#define MIN(a, b) ((a) < (b)) ? (a) : (b)
+
 /* Codes_SRS_LOG_SINK_CONSOLE_01_007: [ `LOG_LEVEL_CRITICAL` shall be displayed with bright red `\x1b[31;1m`. ]*/
 #define LOG_SINK_CONSOLE_ANSI_COLOR_BRIGHT_RED      "\x1b[31;1m"
 /* Codes_SRS_LOG_SINK_CONSOLE_01_008: [ `LOG_LEVEL_ERROR` shall be displayed with red `\x1b[31m`. ]*/
@@ -51,12 +53,13 @@ static int log_n_properties(char* buffer, size_t buffer_size, const LOG_CONTEXT_
             int snprintf_result = snprintf(buffer, buffer_size, " %s%s{", property_value_pairs[i].name, property_value_pairs[i].name[0] == 0 ? "" : "=");
             if (snprintf_result < 0)
             {
-                // error
+                /* Codes_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any `printf` class functions fails), `log_sink_console.log_sink_log` shall print `Error formatting log line` and return. ]*/
                 result = -1;
                 break;
             }
             else
             {
+                snprintf_result = MIN(snprintf_result, (int)buffer_size);
                 buffer += snprintf_result;
                 buffer_size -= snprintf_result;
                 result += snprintf_result;
@@ -65,29 +68,35 @@ static int log_n_properties(char* buffer, size_t buffer_size, const LOG_CONTEXT_
                 uint8_t struct_properties_count = *(uint8_t*)(property_value_pairs[i].value);
 
                 /* Codes_SRS_LOG_SINK_CONSOLE_01_019: [ `log_sink_console.log_sink_log` shall print the next `n` properties as being the fields that are part of the `struct`. ]*/
-                int log_properties_result = log_n_properties(buffer, buffer_size, &property_value_pairs[i + 1], struct_properties_count);
-                if (log_properties_result < 0)
+                int log_n_properties_result = log_n_properties(buffer, buffer_size, &property_value_pairs[i + 1], struct_properties_count);
+                if (log_n_properties_result < 0)
                 {
+                    /* Codes_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any `printf` class functions fails), `log_sink_console.log_sink_log` shall print `Error formatting log line` and return. ]*/
                     result = -1;
                     break;
                 }
                 else
                 {
-                    i += struct_properties_count;
+                    log_n_properties_result = MIN(log_n_properties_result, (int)buffer_size);
 
-                    buffer += log_properties_result;
-                    buffer_size -= log_properties_result;
-                    result += log_properties_result;
+                    buffer += log_n_properties_result;
+                    buffer_size -= log_n_properties_result;
+                    result += log_n_properties_result;
+
+                    i += struct_properties_count;
 
                     /* Codes_SRS_LOG_SINK_CONSOLE_01_026: [ `log_sink_console.log_sink_log` shall print a closing brace as end of the `struct`. ]*/
                     snprintf_result = snprintf(buffer, buffer_size, " }");
                     if (snprintf_result < 0)
                     {
+                        /* Codes_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any `printf` class functions fails), `log_sink_console.log_sink_log` shall print `Error formatting log line` and return. ]*/
                         result = -1;
                         break;
                     }
                     else
                     {
+                        snprintf_result = MIN(snprintf_result, (int)buffer_size);
+
                         buffer += snprintf_result;
                         buffer_size -= snprintf_result;
                         result += snprintf_result;
@@ -105,6 +114,8 @@ static int log_n_properties(char* buffer, size_t buffer_size, const LOG_CONTEXT_
             }
             else
             {
+                snprintf_result = MIN(snprintf_result, (int)buffer_size);
+
                 buffer += snprintf_result;
                 buffer_size -= snprintf_result;
                 result += snprintf_result;
@@ -112,10 +123,14 @@ static int log_n_properties(char* buffer, size_t buffer_size, const LOG_CONTEXT_
                 int to_string_result = property_value_pairs[i].type->to_string(property_value_pairs[i].value, buffer, buffer_size);
                 if (to_string_result < 0)
                 {
+                    /* Codes_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any `printf` class functions fails), `log_sink_console.log_sink_log` shall print `Error formatting log line` and return. ]*/
                     result = -1;
+                    break;
                 }
                 else
                 {
+                    to_string_result = MIN(to_string_result, (int)buffer_size);
+
                     buffer += to_string_result;
                     buffer_size -= to_string_result;
                     result += to_string_result;
@@ -137,6 +152,7 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
     }
     else
     {
+        /* Codes_SRS_LOG_SINK_CONSOLE_01_021: [ `log_sink_console.log_sink_log` shall print at most `LOG_MAX_MESSAGE_LENGTH` characters including the null terminator (the rest of the context shall be truncated). ]*/
         char temp[LOG_MAX_MESSAGE_LENGTH];
         char* buffer = temp;
         size_t buffer_size = sizeof(temp);
@@ -166,10 +182,7 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
         {
             bool error = false;
 
-            if (snprintf_result > buffer_size)
-            {
-                snprintf_result = (int)buffer_size;
-            }
+            snprintf_result = MIN(snprintf_result, (int)buffer_size);
             buffer += snprintf_result;
             buffer_size -= snprintf_result;
 
@@ -188,10 +201,7 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
                 }
                 else
                 {
-                    if (log_n_properties_result > buffer_size)
-                    {
-                        log_n_properties_result = (int)buffer_size;
-                    }
+                    log_n_properties_result = MIN(log_n_properties_result, (int)buffer_size);
                     buffer += log_n_properties_result;
                     buffer_size -= log_n_properties_result;
                 }
@@ -215,9 +225,6 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
                     }
                     else
                     {
-                        /* Codes_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, `log_sink_console.log_sink_log` shall print the line in such a way that only one `printf` call is made. ]*/
-                        /* Codes_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the `\x1b[0m` code. ]*/
-                        (void)printf("%s%s\r\n", temp, LOG_SINK_CONSOLE_ANSI_COLOR_RESET);
                     }
                     va_end(args);
                 }
@@ -226,6 +233,12 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
             if (error)
             {
                 (void)printf(error_string);
+            }
+            else
+            {
+                /* Codes_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, `log_sink_console.log_sink_log` shall print the line in such a way that only one `printf` call is made. ]*/
+                /* Codes_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the `\x1b[0m` code. ]*/
+                (void)printf("%s%s\r\n", temp, LOG_SINK_CONSOLE_ANSI_COLOR_RESET);
             }
         }
     }

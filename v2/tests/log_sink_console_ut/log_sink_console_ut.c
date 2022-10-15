@@ -1128,6 +1128,187 @@ static void when_snprintf_fails_for_closing_of_outer_context_log_sink_console_lo
     POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
+/* Tests_SRS_LOG_SINK_CONSOLE_01_021: [ `log_sink_console.log_sink_log` shall print at most `LOG_MAX_MESSAGE_LENGTH` characters including the null terminator (the rest of the context shall be truncated). ]*/
+static void when_printing_the_message_exceeds_log_line_size_it_is_truncated(void)
+{
+    // arrange
+    setup_mocks();
+    setup_time_call();
+    setup_snprintf_call();
+    setup_vsnprintf_call();
+    setup_printf_call();
+
+    expected_calls[0].u.time_call.override_result = true;
+    expected_calls[0].u.time_call.call_result = (time_t)-1;
+
+    char* message_string_too_big = malloc(LOG_MAX_MESSAGE_LENGTH);
+    POOR_MANS_ASSERT(message_string_too_big != NULL);
+
+    (void)memset(message_string_too_big, 'x', LOG_MAX_MESSAGE_LENGTH - 1);
+    message_string_too_big[LOG_MAX_MESSAGE_LENGTH - 1] = '\0';
+
+    // act
+    int line_no = __LINE__;
+    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, message_string_too_big);
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    char expected_string[LOG_MAX_MESSAGE_LENGTH];
+    char expected_logged_printf_string[LOG_MAX_MESSAGE_LENGTH * 2];
+    (void)snprintf(expected_string, sizeof(expected_string), "\x1b[37m%s Time:NULL File:%s:%d Func:%s %s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE),
+        __FILE__, line_no, __FUNCTION__, message_string_too_big);
+    (void)snprintf(expected_logged_printf_string, sizeof(expected_logged_printf_string), "%s\x1b[0m\r\n", expected_string);
+    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, expected_logged_printf_string) == 0);
+
+    // cleanup
+    free(message_string_too_big);
+}
+
+/* Tests_SRS_LOG_SINK_CONSOLE_01_021: [ `log_sink_console.log_sink_log` shall print at most `LOG_MAX_MESSAGE_LENGTH` characters including the null terminator (the rest of the context shall be truncated). ]*/
+static void when_printing_the_file_exceeds_log_line_size_it_is_truncated(void)
+{
+    // arrange
+    setup_mocks();
+    setup_time_call();
+    setup_snprintf_call();
+    setup_printf_call();
+
+    expected_calls[0].u.time_call.override_result = true;
+    expected_calls[0].u.time_call.call_result = (time_t)-1;
+
+    char* file_too_big = malloc(LOG_MAX_MESSAGE_LENGTH);
+    POOR_MANS_ASSERT(file_too_big != NULL);
+
+    (void)memset(file_too_big, 'x', LOG_MAX_MESSAGE_LENGTH - 1);
+    file_too_big[LOG_MAX_MESSAGE_LENGTH - 1] = '\0';
+
+    // act
+    int line_no = __LINE__;
+    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, NULL, file_too_big, __FUNCTION__, line_no, "a");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    char expected_string[LOG_MAX_MESSAGE_LENGTH];
+    char expected_logged_printf_string[LOG_MAX_MESSAGE_LENGTH * 2];
+    (void)snprintf(expected_string, sizeof(expected_string), "\x1b[37m%s Time:NULL File:%s:%d Func:%s a", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE),
+        file_too_big, line_no, __FUNCTION__);
+    (void)snprintf(expected_logged_printf_string, sizeof(expected_logged_printf_string), "%s\x1b[0m\r\n", expected_string);
+    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, expected_logged_printf_string) == 0);
+
+    // cleanup
+    free(file_too_big);
+}
+
+/* Tests_SRS_LOG_SINK_CONSOLE_01_021: [ `log_sink_console.log_sink_log` shall print at most `LOG_MAX_MESSAGE_LENGTH` characters including the null terminator (the rest of the context shall be truncated). ]*/
+static void when_printing_a_property_value_exceeds_log_line_size_it_is_truncated(void)
+{
+    // arrange
+    setup_mocks();
+    setup_time_call();
+    setup_snprintf_call();
+    setup_log_context_get_property_value_pair_count_call();
+    setup_log_context_get_property_value_pairs_call();
+
+    setup_snprintf_call(); // context opening
+    setup_snprintf_call(); // context opening
+    setup_snprintf_call(); // property
+    setup_printf_call();
+
+    expected_calls[0].u.time_call.override_result = true;
+    expected_calls[0].u.time_call.call_result = (time_t)-1;
+
+    char* string_property_value_too_big = malloc(LOG_MAX_MESSAGE_LENGTH);
+    POOR_MANS_ASSERT(string_property_value_too_big != NULL);
+
+    (void)memset(string_property_value_too_big, 'x', LOG_MAX_MESSAGE_LENGTH - 1);
+    string_property_value_too_big[LOG_MAX_MESSAGE_LENGTH - 1] = '\0';
+
+    LOG_CONTEXT_HANDLE context_1;
+    LOG_CONTEXT_CREATE(context_1, NULL, LOG_CONTEXT_STRING_PROPERTY(hagauaga, string_property_value_too_big));
+
+    // act
+    int line_no = __LINE__;
+    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, context_1, __FILE__, __FUNCTION__, line_no, "a");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    char expected_string[LOG_MAX_MESSAGE_LENGTH];
+    char expected_logged_printf_string[LOG_MAX_MESSAGE_LENGTH * 2];
+    (void)snprintf(expected_string, sizeof(expected_string), "\x1b[37m%s Time:NULL File:%s:%d Func:%s { hagauaga=%s } a", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE),
+        __FILE__, line_no, __FUNCTION__, string_property_value_too_big);
+    (void)snprintf(expected_logged_printf_string, sizeof(expected_logged_printf_string), "%s\x1b[0m\r\n", expected_string);
+    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, expected_logged_printf_string) == 0);
+
+    // cleanup
+    free(string_property_value_too_big);
+    LOG_CONTEXT_DESTROY(context_1);
+}
+
+/* Tests_SRS_LOG_SINK_CONSOLE_01_021: [ `log_sink_console.log_sink_log` shall print at most `LOG_MAX_MESSAGE_LENGTH` characters including the null terminator (the rest of the context shall be truncated). ]*/
+static void when_printing_a_property_name_exceeds_log_line_size_it_is_truncated(void)
+{
+    // arrange
+    setup_mocks();
+    setup_time_call();
+    setup_snprintf_call();
+    setup_log_context_get_property_value_pair_count_call();
+    setup_log_context_get_property_value_pairs_call();
+
+    setup_snprintf_call(); // context opening
+    setup_snprintf_call(); // context opening
+    setup_snprintf_call(); // property
+    setup_printf_call();
+
+    expected_calls[0].u.time_call.override_result = true;
+    expected_calls[0].u.time_call.call_result = (time_t)-1;
+
+    char* dummy_file_name = malloc(LOG_MAX_MESSAGE_LENGTH);
+    POOR_MANS_ASSERT(dummy_file_name != NULL);
+
+    char string_without_property_name[LOG_MAX_MESSAGE_LENGTH];
+    int line_no = __LINE__;
+    // obtain length without the property name (this is how many chars we have to substract from the max log message length)
+    int string_without_property_name_length = snprintf(string_without_property_name, sizeof(string_without_property_name), "\x1b[37m%s Time:NULL File::%d Func:%s { ", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE),
+        line_no, __FUNCTION__);
+
+    // build a filename of LOG_MAX_MESSAGE_LENGTH - string_without_property_name_length - 1
+    // this will leave only one char space for the property name, but we will use 2 chars when time comes for it
+    (void)memset(dummy_file_name, 'x', LOG_MAX_MESSAGE_LENGTH - string_without_property_name_length - 1 - 1);
+    dummy_file_name[LOG_MAX_MESSAGE_LENGTH - string_without_property_name_length - 1 - 1] = '\0';
+
+    LOG_CONTEXT_HANDLE context_1;
+    // 2 chars property name
+    LOG_CONTEXT_CREATE(context_1, NULL, LOG_CONTEXT_STRING_PROPERTY(ab, "x"));
+
+    // act
+    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, context_1, dummy_file_name, __FUNCTION__, line_no, "a");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    char expected_string[LOG_MAX_MESSAGE_LENGTH];
+    char expected_logged_printf_string[LOG_MAX_MESSAGE_LENGTH * 2];
+    (void)snprintf(expected_string, sizeof(expected_string), "\x1b[37m%s Time:NULL File:%s:%d Func:%s { ab=x } a", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE),
+        dummy_file_name, line_no, __FUNCTION__);
+    (void)snprintf(expected_logged_printf_string, sizeof(expected_logged_printf_string), "%s\x1b[0m\r\n", expected_string);
+    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, expected_logged_printf_string) == 0);
+
+    // cleanup
+    free(dummy_file_name);
+    LOG_CONTEXT_DESTROY(context_1);
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
@@ -1152,13 +1333,18 @@ int main(void)
     log_sink_console_log_with_non_NULL_empty_context_works();
     
     log_sink_console_log_with_non_NULL_dynamically_allocated_context();
-
+    
     when_snprintf_fails_for_context_open_brace_log_sink_console_log_prints_error_formatting();
     when_snprintf_fails_for_inner_context_open_brace_log_sink_console_log_prints_error_formatting();
     when_snprintf_fails_for_property_in_inner_context_log_sink_console_log_prints_error_formatting();
     when_snprintf_fails_for_closing_of_inner_context_log_sink_console_log_prints_error_formatting();
     when_snprintf_fails_for_property_in_outer_context_log_sink_console_log_prints_error_formatting();
     when_snprintf_fails_for_closing_of_outer_context_log_sink_console_log_prints_error_formatting();
+    
+    when_printing_the_message_exceeds_log_line_size_it_is_truncated();
+    when_printing_the_file_exceeds_log_line_size_it_is_truncated();
+    when_printing_a_property_value_exceeds_log_line_size_it_is_truncated();
+    when_printing_a_property_name_exceeds_log_line_size_it_is_truncated();
 
     return asserts_failed;
 }
