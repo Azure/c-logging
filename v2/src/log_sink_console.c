@@ -24,7 +24,9 @@
 #define LOG_SINK_CONSOLE_ANSI_COLOR_RED             "\x1b[31m"
 /* Codes_SRS_LOG_SINK_CONSOLE_01_009: [ LOG_LEVEL_WARNING shall be displayed with bright yellow \x1b[33;1m. ]*/
 #define LOG_SINK_CONSOLE_ANSI_COLOR_BRIGHT_YELLOW   "\x1b[33;1m"
+/* Codes_SRS_LOG_SINK_CONSOLE_01_010: [ LOG_LEVEL_INFO shall be displayed with yellow \x1b[33m. ]*/
 #define LOG_SINK_CONSOLE_ANSI_COLOR_YELLOW          "\x1b[33m"
+/* Codes_SRS_LOG_SINK_CONSOLE_01_011: [ LOG_LEVEL_VERBOSE shall be displayed with white \x1b[37m. ]*/
 #define LOG_SINK_CONSOLE_ANSI_COLOR_WHITE           "\x1b[37m"
 #define LOG_SINK_CONSOLE_ANSI_COLOR_RESET           "\x1b[0m"
 
