@@ -1,13 +1,16 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <stdlib.h>
 #include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
 #include <stdint.h>
 
 #include "macro_utils/macro_utils.h"
+
+#include "c_logging/log_context.h"
+#include "c_logging/log_context_property_basic_types.h"
+#include "c_logging/log_context_property_type_ascii_char_ptr.h"
+#include "c_logging/log_level.h"
+#include "c_logging/log_sink_if.h"
 
 #include "c_logging/log_sink_console.h"
 

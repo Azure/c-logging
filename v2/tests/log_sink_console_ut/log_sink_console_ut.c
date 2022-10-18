@@ -11,9 +11,15 @@
 
 #include "macro_utils/macro_utils.h"
 
-#include "c_logging/logger.h"
-#include "c_logging/log_sink_console.h"
+#include "c_logging/log_context_property_basic_types.h"
+#include "c_logging/log_context_property_type_ascii_char_ptr.h"
+#include "c_logging/log_context_property_value_pair.h"
+#include "c_logging/log_level.h"
+#include "c_logging/log_sink_if.h"
 #include "c_logging/log_context.h"
+#include "c_logging/logger.h"
+
+#include "c_logging/log_sink_console.h"
 
 static size_t asserts_failed = 0;
 

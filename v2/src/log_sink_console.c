@@ -3,18 +3,21 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdint.h>
 #include <stdarg.h>
 #include <time.h>
 
 #include "macro_utils/macro_utils.h"
 
 #include "c_logging/log_level.h"
-#include "c_logging/logger.h"
 #include "c_logging/log_context.h"
+#include "c_logging/log_context_property_type.h"
+#include "c_logging/log_context_property_type_if.h"
+#include "c_logging/log_context_property_value_pair.h"
 #include "c_logging/log_sink_if.h"
+#include "c_logging/logger.h"
 
-#include "c_logging/log_sink_console.h"
+#include "c_logging/log_sink_console.h" // IWYU pragma: keep
 
 #define MIN(a, b) ((a) < (b)) ? (a) : (b)
 
