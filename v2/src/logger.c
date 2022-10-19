@@ -3,8 +3,10 @@
 
 #include "macro_utils/macro_utils.h"
 
-#include "c_logging/logger.h"
+#include "c_logging/log_level.h"
 #include "c_logging/log_context.h"
+
+#include "c_logging/logger.h"
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(LOG_LEVEL, LOG_LEVEL_VALUES);
 
