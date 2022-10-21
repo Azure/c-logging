@@ -44,6 +44,12 @@ static const char* level_colors[] =
 
 const char error_string[] = "Error formatting log line\r\n";
 
+#define UPDATE_BUFFER_AND_SIZE(result, buffer, buffer_size, no_of_bytes) \
+    no_of_bytes = MIN(no_of_bytes, (int)buffer_size); \
+    buffer += no_of_bytes; \
+    buffer_size -= no_of_bytes; \
+    result += no_of_bytes; 
+
 static int log_n_properties(char* buffer, size_t buffer_size, const LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_value_pairs, size_t property_value_pair_count)
 {
     int result = 0;
@@ -64,10 +70,7 @@ static int log_n_properties(char* buffer, size_t buffer_size, const LOG_CONTEXT_
             }
             else
             {
-                snprintf_result = MIN(snprintf_result, (int)buffer_size);
-                buffer += snprintf_result;
-                buffer_size -= snprintf_result;
-                result += snprintf_result;
+                UPDATE_BUFFER_AND_SIZE(result, buffer, buffer_size, snprintf_result);
 
                 /* Codes_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log_sink_log shall obtain the number of fields in the struct. ]*/
                 uint8_t struct_properties_count = *(uint8_t*)(property_value_pairs[i].value);
@@ -82,11 +85,7 @@ static int log_n_properties(char* buffer, size_t buffer_size, const LOG_CONTEXT_
                 }
                 else
                 {
-                    log_n_properties_result = MIN(log_n_properties_result, (int)buffer_size);
-
-                    buffer += log_n_properties_result;
-                    buffer_size -= log_n_properties_result;
-                    result += log_n_properties_result;
+                    UPDATE_BUFFER_AND_SIZE(result, buffer, buffer_size, log_n_properties_result);
 
                     i += struct_properties_count;
 
@@ -119,11 +118,7 @@ static int log_n_properties(char* buffer, size_t buffer_size, const LOG_CONTEXT_
             }
             else
             {
-                snprintf_result = MIN(snprintf_result, (int)buffer_size);
-
-                buffer += snprintf_result;
-                buffer_size -= snprintf_result;
-                result += snprintf_result;
+                UPDATE_BUFFER_AND_SIZE(result, buffer, buffer_size, snprintf_result);
 
                 int to_string_result = property_value_pairs[i].type->to_string(property_value_pairs[i].value, buffer, buffer_size);
                 if (to_string_result < 0)
@@ -134,11 +129,7 @@ static int log_n_properties(char* buffer, size_t buffer_size, const LOG_CONTEXT_
                 }
                 else
                 {
-                    to_string_result = MIN(to_string_result, (int)buffer_size);
-
-                    buffer += to_string_result;
-                    buffer_size -= to_string_result;
-                    result += to_string_result;
+                    UPDATE_BUFFER_AND_SIZE(result, buffer, buffer_size, to_string_result);
                 }
             }
         }
@@ -230,6 +221,7 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
                     }
                     else
                     {
+                        // all ok
                     }
                     va_end(args);
                 }
