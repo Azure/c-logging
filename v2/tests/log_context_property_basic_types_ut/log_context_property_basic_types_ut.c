@@ -28,7 +28,7 @@ typedef struct snprintf_CALL_TAG
 {
     bool override_result;
     int call_result;
-    const char* format_arg;
+    const char* captured_format_arg;
 } snprintf_CALL;
 
 typedef struct MOCK_CALL_TAG
@@ -66,7 +66,7 @@ int mock_snprintf(char* s, size_t n, const char* format, ...)
             va_list args;
             va_start(args, format);
 
-            expected_calls[actual_call_count].u.snprintf_call.format_arg = format;
+            expected_calls[actual_call_count].u.snprintf_call.captured_format_arg = format;
 
             result = vsnprintf(s, n, format, args);
 
@@ -135,7 +135,7 @@ static void int64_t_to_string_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 1);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId64) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId64) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "0") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -156,7 +156,7 @@ static void int64_t_to_string_INT64_MAX_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 19);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId64) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId64) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "9223372036854775807") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -177,7 +177,7 @@ static void int64_t_to_string_with_truncation_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 2);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId64) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId64) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "4") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -198,7 +198,7 @@ static void int64_t_to_string_with_truncation_minus_1_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 2);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId64) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId64) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "-") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -219,7 +219,7 @@ static void int64_t_to_string_with_negative_value_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 2);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId64) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId64) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "-1") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -240,7 +240,7 @@ static void int64_t_to_string_with_just_enough_big_buffer_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 1);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId64) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId64) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "1") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -470,7 +470,7 @@ static void uint64_t_to_string_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 1);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRIu64) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRIu64) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "0") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -491,7 +491,7 @@ static void uint64_t_to_string_UINT64_MAX_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 20);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRIu64) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRIu64) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "18446744073709551615") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -512,7 +512,7 @@ static void uint64_t_to_string_with_truncation_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 2);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRIu64) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRIu64) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "4") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -533,7 +533,7 @@ static void uint64_t_to_string_with_just_enough_big_buffer_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 1);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRIu64) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRIu64) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "1") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -763,7 +763,7 @@ static void int32_t_to_string_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 1);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId32) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId32) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "0") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -784,7 +784,7 @@ static void int32_t_to_string_INT32_MAX_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 10);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId32) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId32) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "2147483647") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -845,7 +845,7 @@ static void int32_t_to_string_with_negative_value_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result > 0);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId32) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId32) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "-1") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -866,7 +866,7 @@ static void int32_t_to_string_with_just_enough_big_buffer_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 1);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId32) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId32) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "1") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -1096,7 +1096,7 @@ static void uint32_t_to_string_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 1);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRIu32) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRIu32) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "0") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -1117,7 +1117,7 @@ static void uint32_t_to_string_UINT32_MAX_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 10);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRIu32) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRIu32) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "4294967295") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -1138,7 +1138,7 @@ static void uint32_t_to_string_with_truncation_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 2);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRIu32) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRIu32) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "4") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -1159,7 +1159,7 @@ static void uint32_t_to_string_with_just_enough_big_buffer_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 1);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRIu32) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRIu32) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "1") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -1389,7 +1389,7 @@ static void int16_t_to_string_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 1);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId16) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId16) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "0") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -1410,7 +1410,7 @@ static void int16_t_to_string_INT16_MAX_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 5);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId16) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId16) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "32767") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -1431,7 +1431,7 @@ static void int16_t_to_string_with_truncation_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 2);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId16) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId16) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "4") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -1452,7 +1452,7 @@ static void int16_t_to_string_with_truncation_minus_1_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 2);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId16) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId16) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "-") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -1473,7 +1473,7 @@ static void int16_t_to_string_with_negative_value_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result > 0);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId16) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId16) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "-1") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -1494,7 +1494,7 @@ static void int16_t_to_string_with_just_enough_big_buffer_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 1);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId16) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId16) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "1") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -1724,7 +1724,7 @@ static void uint16_t_to_string_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 1);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRIu16) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRIu16) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "0") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -1745,7 +1745,7 @@ static void uint16_t_to_string_UINT16_MAX_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 5);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRIu16) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRIu16) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "65535") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -1766,7 +1766,7 @@ static void uint16_t_to_string_with_truncation_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 2);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRIu16) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRIu16) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "4") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -1787,7 +1787,7 @@ static void uint16_t_to_string_with_just_enough_big_buffer_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 1);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRIu16) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRIu16) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "1") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -2017,7 +2017,7 @@ static void int8_t_to_string_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 1);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId8) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId8) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "0") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -2038,7 +2038,7 @@ static void int8_t_to_string_INT8_MAX_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 3);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId8) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId8) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "127") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -2059,7 +2059,7 @@ static void int8_t_to_string_with_truncation_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 2);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId8) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId8) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "4") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -2080,7 +2080,7 @@ static void int8_t_to_string_with_truncation_minus_1_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 2);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId8) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId8) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "-") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -2101,7 +2101,7 @@ static void int8_t_to_string_with_negative_value_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result > 0);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId8) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId8) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "-1") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -2122,7 +2122,7 @@ static void int8_t_to_string_with_just_enough_big_buffer_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 1);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRId8) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRId8) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "1") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -2352,7 +2352,7 @@ static void uint8_t_to_string_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 1);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRIu8) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRIu8) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "0") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -2373,7 +2373,7 @@ static void uint8_t_to_string_UINT8_MAX_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 3);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRIu8) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRIu8) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "255") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -2394,7 +2394,7 @@ static void uint8_t_to_string_with_truncation_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 2);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRIu8) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRIu8) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "4") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
@@ -2415,7 +2415,7 @@ static void uint8_t_to_string_with_just_enough_big_buffer_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 1);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.format_arg, "%" PRIu8) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].u.snprintf_call.captured_format_arg, "%" PRIu8) == 0);
     POOR_MANS_ASSERT(strcmp(buffer, "1") == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }

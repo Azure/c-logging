@@ -7,6 +7,8 @@
 #include "c_logging/log_context.h"
 #include "c_logging/log_level.h"
 
+#define LOG_MAX_MESSAGE_LENGTH              4096 /*in bytes - a message is not expected to exceed this size in bytes, if it does, only LOG_MAX_MESSAGE_LENGTH characters are retained*/
+
 #ifdef __cplusplus
 extern "C" {
 #endif
