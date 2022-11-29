@@ -37,13 +37,13 @@ int main(void)
     LogError("LogCritical: does PRI_BOOL work with amazingly out of bounds value? %" PRI_BOOL "", MU_BOOL_VALUE(42));
     LogError("LogCritical: does PRI_BOOL works with false? %" PRI_BOOL "", MU_BOOL_VALUE(false));
 
-#ifdef _MSC_VER /*linux doesn't have LogLastError*/
+
     /*LogLastError*/
     LogLastError("LogLastError: hello world!");
     LogLastError("LogLastError: a more complicated hello with int=%d.", 42);
     LogLastError("LogLastError: the most complicated hello with int=%d and a really big string that fits =%s.", 42, really_big_string_fits);
     LogLastError("LogLastError: the most complicated hello with int=%d and a really big string that does not fit=%s.", 42, really_big_string_doesnt_fit);
-#endif
+
     /*LogWarning*/
     LogWarning("LogWarning: hello world!");
     LogWarning("LogWarning: a more complicated hello with int=%d.", 42);

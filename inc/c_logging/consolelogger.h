@@ -14,6 +14,8 @@ extern "C" {
 
 #if (defined(_MSC_VER))
     void consolelogger_log_with_GetLastError(const char* file, const char* func, int line, const char* format, ...);
+#else
+    void consolelogger_log_with_GetErrorNo(const char* file, const char* func, int line, const char* format, ...);
 #endif
 
 #ifdef __cplusplus

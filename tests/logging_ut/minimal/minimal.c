@@ -3,6 +3,8 @@
 
 #ifdef _MSC_VER
 #include "windows.h"
+#else
+#include <errno.h>
 #endif
 
 #include "c_logging/xlogging.h"
@@ -27,7 +29,16 @@ int main(void)
     SetLastError(ERROR_SUCCESS);
 
     LogLastError("Hello World from LogLastError, everything is fine now! here's a value: 0x%x", '3');
-    
+
+#else
+    errno = EACCES;
+
+    LogLastError("Hello World from LogLastError, some access was denied! here's a value: 0x%x", '3');
+
+    errno = 0;
+
+    LogLastError("Hello World from LogLastError, everything is fine now! here's a value: 0x%x", '3');
+
 #endif
 
     return 0;
