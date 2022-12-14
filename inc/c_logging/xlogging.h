@@ -62,6 +62,7 @@ typedef void(*LOGGER_LOG_GETERRORNO)(const char* file, const char* func, int lin
 #define LogInfo(...)
 #define LogVerbose(...)
 #define LogLastError(...)
+#define LogErrorNo(...)
 #define xlogging_get_log_function() NULL
 #define xlogging_set_log_function(...)
 #define LogErrorWinHTTPWithGetLastErrorAsString(...)
@@ -167,7 +168,7 @@ LOGGER_LOG_GETLASTERROR xlogging_get_log_function_GetLastError(void);
 
 void xlogging_set_log_function_GetErrorNo(LOGGER_LOG_GETERRORNO log_function);
 LOGGER_LOG_GETERRORNO xlogging_get_log_function_GetErrorNo(void);
-#define LogLastError(FORMAT, ...) do{  (void)(0 && printf(FORMAT, ##__VA_ARGS__)); LOGGER_LOG_GETERRORNO logger_function = xlogging_get_log_function_GetErrorNo(); if(logger_function != NULL) logger_function(__FILE__, FUNC_NAME, __LINE__, FORMAT, ##__VA_ARGS__); }while((void)0,0)
+#define LogErrorNo(FORMAT, ...) do{  (void)(0 && printf(FORMAT, ##__VA_ARGS__)); LOGGER_LOG_GETERRORNO logger_function = xlogging_get_log_function_GetErrorNo(); if(logger_function != NULL) logger_function(__FILE__, FUNC_NAME, __LINE__, FORMAT, ##__VA_ARGS__); }while((void)0,0)
 
 #define LogCritical(FORMAT, ...) do{ LOG(AZ_LOG_CRITICAL, LOG_LINE, FORMAT, ##__VA_ARGS__); }while((void)0,0)
 #define LogError(FORMAT, ...) do{ LOG(AZ_LOG_ERROR, LOG_LINE, FORMAT, ##__VA_ARGS__); }while((void)0,0)

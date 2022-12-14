@@ -33,11 +33,11 @@ int main(void)
 #else
     errno = EACCES;
 
-    LogLastError("Hello World from LogLastError, some access was denied! here's a value: 0x%x", '3');
+    //LogErrorNo("Hello World from LogLastError, some access was denied! here's a value: 0x%x", '3');
 
     errno = 0;
 
-    LogLastError("Hello World from LogLastError, everything is fine now! here's a value: 0x%x", '3');
+    LogErrorNo("Hello World from LogLastError, everything is fine now! here's a value: 0x%x", '3');
 
 #endif
 
