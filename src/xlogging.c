@@ -39,7 +39,7 @@ LOGGER_LOG_GETLASTERROR xlogging_get_log_function_GetLastError(void)
 #else
 LOGGER_LOG_GETERRORNO global_log_function_GetErrorNo = consolelogger_log_with_GetErrorNo;
 
-void xlogging_set_log_function_GetLastError(LOGGER_LOG_GETLASTERROR log_function_GetErrorNo)
+void xlogging_set_log_function_GetErrorNo(LOGGER_LOG_GETERRORNO log_function_GetErrorNo)
 {
     global_log_function_GetErrorNo = log_function_GetErrorNo;
 }
