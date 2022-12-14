@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 
 #include "c_logging/xlogging.h"
 #include "c_logging/consolelogger.h"
