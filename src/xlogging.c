@@ -36,6 +36,18 @@ LOGGER_LOG_GETLASTERROR xlogging_get_log_function_GetLastError(void)
 {
     return global_log_function_GetLastError;
 }
+#else
+LOGGER_LOG_GETERRORNO global_log_function_GetErrorNo = consolelogger_log_with_GetErrorNo;
+
+void xlogging_set_log_function_GetErrorNo(LOGGER_LOG_GETERRORNO log_function_GetErrorNo)
+{
+    global_log_function_GetErrorNo = log_function_GetErrorNo;
+}
+
+LOGGER_LOG_GETERRORNO xlogging_get_log_function_GetErrorNo(void)
+{
+    return global_log_function_GetErrorNo;
+}
 #endif
 
 #ifdef WIN32

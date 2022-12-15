@@ -5,3 +5,5 @@
 *.orig
 [cC]make*/
 
+# VS code config directory
+.vscode/

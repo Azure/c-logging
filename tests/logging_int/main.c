@@ -43,7 +43,14 @@ int main(void)
     LogLastError("LogLastError: a more complicated hello with int=%d.", 42);
     LogLastError("LogLastError: the most complicated hello with int=%d and a really big string that fits =%s.", 42, really_big_string_fits);
     LogLastError("LogLastError: the most complicated hello with int=%d and a really big string that does not fit=%s.", 42, really_big_string_doesnt_fit);
+#else   /*Windows doesn't have LogErrorNo for now*/
+    /*LogErrorNo*/
+    LogErrorNo("LogErrorNo: hello world!");
+    LogErrorNo("LogLastError: a more complicated hello with int=%d.", 42);
+    LogErrorNo("LogLastError: the most complicated hello with int=%d and a really big string that fits =%s.", 42, really_big_string_fits);
+    LogErrorNo("LogLastError: the most complicated hello with int=%d and a really big string that does not fit=%s.", 42, really_big_string_doesnt_fit);
 #endif
+
     /*LogWarning*/
     LogWarning("LogWarning: hello world!");
     LogWarning("LogWarning: a more complicated hello with int=%d.", 42);
