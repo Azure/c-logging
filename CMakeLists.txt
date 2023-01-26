@@ -158,6 +158,9 @@ if((CMAKE_GENERATOR MATCHES "Visual Studio") AND (${run_traceability}))
     add_dependencies(c_logging_traceability traceabilitytool)
 endif()
 
+# make an install target so we can produce a Linux native client package.
+install_library_with_prefix(c_logging c_logging ${c_logging_h_files})
+
 add_subdirectory(tests)
 
 if(${run_reals_check})
