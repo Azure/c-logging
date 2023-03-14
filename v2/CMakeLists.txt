@@ -50,4 +50,3 @@ endif()
 
 add_subdirectory(tests)
 
-compileTargetAsC99(c_logging_v2)
