@@ -5,7 +5,7 @@
 ## Exposed API
 
 ```
-    extern const LOG_SINK_IF console_log_sink;
+    extern const LOG_SINK_IF log_sink_console;
 ```
 
 ### log_sink_console.log_sink_log
