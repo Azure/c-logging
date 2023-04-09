@@ -20,11 +20,33 @@ The signature of `log_sink_etw.log_sink_log` is:
 typedef void (*LOG_SINK_LOG_FUNC)(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...);
 ```
 
-`log_sink_etw.log_sink_log` implements logging to an ETW provider.
+`log_sink_etw.log_sink_log` implements logging as an ETW provider.
 
-If `message_format` is `NULL`, `log_sink_etw.log_sink_log` shall fail and return.
+**SRS_LOG_SINK_ETW_01_001: [** If `message_format` is `NULL`, `log_sink_etw.log_sink_log` shall return. **]**
 
-`log_sink_etw_log` shall register the ETW TraceLogging provider by calling `TraceLoggingRegister` if it was not already done.
+**SRS_LOG_SINK_ETW_01_002: [** `log_sink_etw_log` shall maintain the state of whether `TraceLoggingRegister` was called in a variable accessed via `InterlockedXXX` APIs, which shall have 3 possible values: `NOT_REGISTERED` (1), `REGISTERING` (2), `REGISTERED`(3). **]**
+
+**SRS_LOG_SINK_ETW_01_003: [** `log_sink_etw_log` shall perform the below actions until the provider is registered or an error is encountered: **]**
+
+**SRS_LOG_SINK_ETW_01_004: [** If the state is `NOT_REGISTERED`: **]**
+
+- **SRS_LOG_SINK_ETW_01_005: [** `log_sink_etw_log` shall switch the state to `REGISTERING`. **]**
+
+- **SRS_LOG_SINK_ETW_01_006: [** `log_sink_etw_log` shall register the ETW TraceLogging provider by calling `TraceLoggingRegister` (`TraceLoggingRegister_EventRegister_EventSetInformation`). **]**
+
+- **SRS_LOG_SINK_ETW_01_007: [** `log_sink_etw_log` shall switch the state to `REGISTERED`. **]**
+
+- **SRS_LOG_SINK_ETW_01_008: [** `log_sink_etw_log` shall emit a `LOG_LEVEL_INFO` event as a self test , printing the fact that the provider was registered and from which executable (as obtained by calling `_get_pgmptr`). **]**
+
+Note: `_get_pgmptr` is documented [here](https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/get-pgmptr?view=msvc-170).
+
+If `_get_pgmptr` fails, the executable shall be printed as `UNKNOWN`.
+
+If the state is `REGISTERING` `log_sink_etw_log` shall wait until the state is not REGISTERING (1).
+
+If the state is `REGISTERED`, `log_sink_etw_log` shall proceed to log the ETW event.
+
+**SRS_LOG_SINK_ETW_01_009: [** Checking and changing the variable that maintains whether `TraceLoggingRegister` was called shall be done using `InterlockedCompareExchange` and `InterlockedExchange`. **]**
 
 `log_sink_etw_log` shall use as provider GUID `DAD29F36-0A48-4DEF-9D50-8EF9036B92B4`.
 
@@ -70,15 +92,15 @@ Note this can (and should) be improved to be configurable later.
 
 `log_sink_etw.log_sink_log` shall compute the metadata size for the self described event metadata as follows:
 
-- Length of the event name (excluding zero terminator) + 1.
+- Length of the event name (determined at compile time, excluding zero terminator) + 1.
 
-- Length of the `content` field name + 1.
+- Length of the `content` field name (determined at compile time, excluding zero terminator) + 1.
 
-- Length of the `file` field name + 1.
+- Length of the `file` field name (determined at compile time, excluding zero terminator) + 1.
 
-- Length of the `func` field name + 1.
+- Length of the `func` field name (determined at compile time, excluding zero terminator) + 1.
 
-- Length of the `line` field name + 1.
+- Length of the `line` field name (determined at compile time, excluding zero terminator) + 1.
 
 - For each property in `log_context`, the length of the property name + 1 and one extra byte for the type of the field.
 
@@ -136,7 +158,7 @@ For each property in `log_context` the following shall be added to the event met
 
   - If the property type is `LOG_CONTEXT_PROPERTY_TYPE_struct`, a byte with the value `_TlgInSTRUCT | _TlgInChain` shall be added in the metadata.
 
-  - If the property type is any other value, it shall be ignored.
+  - If the property type is any other value, no property data shall be added to the event.
 
 - If the property is a struct, an extra byte shall be added in the metadata containing the number of fields in the structure.
 
@@ -171,8 +193,6 @@ For each property in `log_context`:
 - If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint8_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`.
 
 - If the property type is `LOG_CONTEXT_PROPERTY_TYPE_struct`, no event data descriptor shall be used.
-
-- If the property type is any other value, it shall be ignored.
 
 `log_sink_etw.log_sink_log` shall emit the event by calling `_tlgWriteTransfer_EventWriteTransfer` passing the provider, channel, number of event data descriptors and the data descriptor array.
 
