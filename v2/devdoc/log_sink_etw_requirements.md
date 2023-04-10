@@ -44,7 +44,7 @@ If `_get_pgmptr` fails, the executable shall be printed as `UNKNOWN`.
 
 If the state is `REGISTERING` `log_sink_etw_log` shall wait until the state is not REGISTERING (1).
 
-If the state is `REGISTERED`, `log_sink_etw_log` shall proceed to log the ETW event.
+**SRS_LOG_SINK_ETW_01_011: [** If the state is `REGISTERED`, `log_sink_etw_log` shall proceed to log the ETW event. **]**
 
 **SRS_LOG_SINK_ETW_01_009: [** Checking and changing the variable that maintains whether `TraceLoggingRegister` was called shall be done using `InterlockedCompareExchange` and `InterlockedExchange`. **]**
 
@@ -52,9 +52,9 @@ If the state is `REGISTERED`, `log_sink_etw_log` shall proceed to log the ETW ev
 
 Note this can (and should) be improved to be configurable later.
 
-`log_sink_etw_log` shall emit a self described event that shall have the name of the event as follows:
+**SRS_LOG_SINK_ETW_01_010: [** `log_sink_etw_log` shall emit a self described event that shall have the name of the event as follows: **]**
 
-  - If `log_level` is `LOG_LEVEL_CRITICAL` the event name shall be `LogCritical`.
+  - **SRS_LOG_SINK_ETW_01_012: [** If `log_level` is `LOG_LEVEL_CRITICAL` the event name shall be `LogCritical`. **]**
 
   - If `log_level` is `LOG_LEVEL_ERROR` the event name shall be `LogError`.
 

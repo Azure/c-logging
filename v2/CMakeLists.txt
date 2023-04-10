@@ -16,6 +16,7 @@ set(c_logging_v2_c_files
     ./src/log_context_property_type_struct.c
     ./src/log_internal_error.c
     ./src/log_sink_console.c
+    ./src/log_sink_etw.c
     )
 
 set(c_logging_v2_h_files

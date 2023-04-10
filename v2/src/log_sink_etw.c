@@ -43,6 +43,7 @@ static void internal_log_sink_etw_lazy_register_provider(void)
     /* Codes_SRS_LOG_SINK_ETW_01_004: [ If the state is `NOT_REGISTERED`: ]*/
     /* Codes_SRS_LOG_SINK_ETW_01_005: [ `log_sink_etw_log` shall switch the state to `REGISTERING`. ]*/
     /* Codes_SRS_LOG_SINK_ETW_01_009: [ Checking and changing the variable that maintains whether `TraceLoggingRegister` was called shall be done using `InterlockedCompareExchange` and `InterlockedExchange`. ]*/
+    /* Codes_SRS_LOG_SINK_ETW_01_011: [ If the state is `REGISTERED`, `log_sink_etw_log` shall proceed to log the ETW event. ]*/
     while ((state = InterlockedCompareExchange(&etw_provider_state, PROVIDER_STATE_REGISTERING, PROVIDER_STATE_NOT_REGISTERED)) != PROVIDER_STATE_REGISTERED)
     {
         if (state == PROVIDER_STATE_NOT_REGISTERED)
@@ -68,7 +69,7 @@ static void internal_log_sink_etw_lazy_register_provider(void)
             }
             else
             {
-                (void)printf("ETW provider was NOT registered.");
+                (void)printf("ETW provider was NOT registered.\r\n");
                 (void)InterlockedExchange(&etw_provider_state, PROVIDER_STATE_NOT_REGISTERED);
             }
         }
@@ -93,7 +94,7 @@ __pragma(pack(pop))
 
 // This function was written with a little bit of reverse engineering of TraceLogging and guidance from 
 // the TraceLogging.h header about the format of the self described events
-static void emit_self_described_event(const char* event_name, uint32_t trace_level, const LOG_CONTEXT_PROPERTY_VALUE_PAIR* context_property_value_pairs, uint32_t property_value_count, const char* message, const char* file, const char* func, int line)
+static void internal_emit_self_described_event(const char* event_name, uint16_t event_name_length, uint8_t trace_level, const LOG_CONTEXT_PROPERTY_VALUE_PAIR* context_property_value_pairs, uint32_t property_value_count, const char* message, const char* file, const char* func, int line)
 {
     __pragma(warning(push))
     __pragma(warning(disable:4127 4132 6001))
@@ -101,7 +102,6 @@ static void emit_self_described_event(const char* event_name, uint32_t trace_lev
     __pragma(pack(push, 1))
     __pragma(execution_character_set(push, "UTF-8"))
     enum { _tlgTagConst = (0) };
-    enum { _tlgLevelConst = 5 & 0 | (5) };
 
     TraceLoggingHProvider const _tlgProv = (g_my_component_provider);
     if (trace_level < _tlgProv->LevelPlus1 && _tlgKeywordOn(_tlgProv, 0))
@@ -110,7 +110,6 @@ static void emit_self_described_event(const char* event_name, uint32_t trace_lev
         uint8_t _tlgEvent[MAX_SELF_DESCRIBED_EVENT_WITH_METADATA];
 
         // compute event metadata size
-        size_t event_name_length = strlen(event_name);
         uint16_t metadata_size = (uint16_t)(event_name_length + 1);
         metadata_size += sizeof("content") + 1 + sizeof("file") + 1 + sizeof("func") + 1 + sizeof("line") + 1;
         for (uint32_t i = 0; i < property_value_count; i++)
@@ -127,7 +126,7 @@ static void emit_self_described_event(const char* event_name, uint32_t trace_lev
         SELF_DESCRIBED_EVENT* self_described_event = (SELF_DESCRIBED_EVENT*)_tlgEvent;
         self_described_event->_tlgBlobTyp = _TlgBlobEvent4;
         self_described_event->_tlgChannel = 11;
-        self_described_event->_tlgLevel = _tlgLevelConst;
+        self_described_event->_tlgLevel = trace_level;
         self_described_event->_tlgOpcode = 0;
         self_described_event->_tlgKeyword = 0;
         self_described_event->_tlgEvtMetaSize = metadata_size + 4;
@@ -227,69 +226,61 @@ static void emit_self_described_event(const char* event_name, uint32_t trace_lev
         TraceLoggingString(func, "func"), \
         TraceLoggingInt32(line, "line")) \
 
+static char event_name_critical[] = "LogCritical";
+static char event_name_error[] = "LogError";
+static char event_name_warning[] = "LogWarning";
+static char event_name_info[] = "LogInfo";
+static char event_name_verbose[] = "LogVerbose";
+static char event_name_unknown[] = "Unknown";
+
 static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...)
 {
     if (message_format == NULL)
     {
-        (void)printf("Invalid arguments: LOG_LEVEL log_level=%" PRI_MU_ENUM ", LOG_CONTEXT_HANDLE log_context=%p, const char* file=%s, const char* func=%s, int line=%d, const char* message_format=%s",
+        /* Codes_SRS_LOG_SINK_ETW_01_001: [ If `message_format` is `NULL`, `log_sink_etw.log_sink_log` shall return. ]*/
+        (void)printf("Invalid arguments: LOG_LEVEL log_level=%" PRI_MU_ENUM ", LOG_CONTEXT_HANDLE log_context=%p, const char* file=%s, const char* func=%s, int line=%d, const char* message_format=%s\r\n",
             MU_ENUM_VALUE(LOG_LEVEL, log_level), log_context, file, func, line, message_format);
     }
     else
     {
+        const LOG_CONTEXT_PROPERTY_VALUE_PAIR* value_pairs;
+        uint16_t values_count;
+
         internal_log_sink_etw_lazy_register_provider();
 
         /* Codes_SRS_LOG_SINK_ETW_01_010: [ `log_sink_etw_log` shall emit a self described event that shall have the name of the event as follows: ]*/
-
-        if (log_context == NULL)
+        if (log_context != NULL)
         {
-            switch (log_level)
-            {
-            default:
-                ETW_TRACE_LOGGING_WRAPPER("Unknown", TRACE_LEVEL_NONE, message_format, file, func, line);
-                break;
-            case LOG_LEVEL_CRITICAL:
-                ETW_TRACE_LOGGING_WRAPPER("LogCritical", TRACE_LEVEL_CRITICAL, message_format, file, func, line);
-                break;
-            case LOG_LEVEL_ERROR:
-                ETW_TRACE_LOGGING_WRAPPER("LogError", TRACE_LEVEL_ERROR, message_format, file, func, line);
-                break;
-            case LOG_LEVEL_WARNING:
-                ETW_TRACE_LOGGING_WRAPPER("LogWarning", TRACE_LEVEL_WARNING, message_format, file, func, line);
-                break;
-            case LOG_LEVEL_INFO:
-                ETW_TRACE_LOGGING_WRAPPER("LogInfo", TRACE_LEVEL_INFORMATION, message_format, file, func, line);
-                break;
-            case LOG_LEVEL_VERBOSE:
-                ETW_TRACE_LOGGING_WRAPPER("LogVerbose", TRACE_LEVEL_VERBOSE, message_format, file, func, line);
-                break;
-            }
+            value_pairs = log_context_get_property_value_pairs(log_context);
+            values_count = (uint16_t)log_context_get_property_value_pair_count(log_context);
         }
         else
         {
-            const LOG_CONTEXT_PROPERTY_VALUE_PAIR* value_pairs = log_context_get_property_value_pairs(log_context);
-            uint16_t values_count = (uint16_t)log_context_get_property_value_pair_count(log_context);
+            value_pairs = NULL;
+            values_count = 0;
+        }
 
-            switch (log_level)
-            {
-            default:
-                emit_self_described_event("Unknown", TRACE_LEVEL_NONE, value_pairs, values_count, message_format, file, func, line);
-                break;
-            case LOG_LEVEL_CRITICAL:
-                emit_self_described_event("LogCritical", TRACE_LEVEL_CRITICAL, value_pairs, values_count, message_format, file, func, line);
-                break;
-            case LOG_LEVEL_ERROR:
-                emit_self_described_event("LogError", TRACE_LEVEL_ERROR, value_pairs, values_count, message_format, file, func, line);
-                break;
-            case LOG_LEVEL_WARNING:
-                emit_self_described_event("LogWarning", TRACE_LEVEL_WARNING, value_pairs, values_count, message_format, file, func, line);
-                break;
-            case LOG_LEVEL_INFO:
-                emit_self_described_event("LogInfo", TRACE_LEVEL_INFORMATION, value_pairs, values_count, message_format, file, func, line);
-                break;
-            case LOG_LEVEL_VERBOSE:
-                emit_self_described_event("LogVerbose", TRACE_LEVEL_VERBOSE, value_pairs, values_count, message_format, file, func, line);
-                break;
-            }
+        switch (log_level)
+        {
+        default:
+            internal_emit_self_described_event(event_name_unknown, sizeof(event_name_unknown), TRACE_LEVEL_NONE, value_pairs, values_count, message_format, file, func, line);
+            break;
+        case LOG_LEVEL_CRITICAL:
+            /* Codes_SRS_LOG_SINK_ETW_01_012: [ If `log_level` is `LOG_LEVEL_CRITICAL` the event name shall be `LogCritical`. ]*/
+            internal_emit_self_described_event(event_name_critical, sizeof(event_name_critical), TRACE_LEVEL_CRITICAL, value_pairs, values_count, message_format, file, func, line);
+            break;
+        case LOG_LEVEL_ERROR:
+            internal_emit_self_described_event(event_name_error, sizeof(event_name_critical), TRACE_LEVEL_ERROR, value_pairs, values_count, message_format, file, func, line);
+            break;
+        case LOG_LEVEL_WARNING:
+            internal_emit_self_described_event(event_name_warning, sizeof(event_name_warning), TRACE_LEVEL_WARNING, value_pairs, values_count, message_format, file, func, line);
+            break;
+        case LOG_LEVEL_INFO:
+            internal_emit_self_described_event(event_name_info, sizeof(event_name_info), TRACE_LEVEL_INFORMATION, value_pairs, values_count, message_format, file, func, line);
+            break;
+        case LOG_LEVEL_VERBOSE:
+            internal_emit_self_described_event(event_name_verbose, sizeof(event_name_verbose), TRACE_LEVEL_VERBOSE, value_pairs, values_count, message_format, file, func, line);
+            break;
         }
     }
 }
