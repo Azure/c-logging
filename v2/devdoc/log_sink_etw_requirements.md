@@ -64,7 +64,7 @@ Note this can (and should) be improved to be configurable later.
 
   - **SRS_LOG_SINK_ETW_01_016: [** If `log_level` is `LOG_LEVEL_VERBOSE` the event name shall be `LogVerbose`. **]**
 
-  - Otherwise the event name shall be `Unknown`.
+  - **SRS_LOG_SINK_ETW_01_017: [** Otherwise the event name shall be `Unknown`. **]**
 
 - Logging level:
 

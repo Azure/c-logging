@@ -649,6 +649,12 @@ static void log_sink_etw_log_with_LOG_LEVEL_VERBOSE_succeeds(void)
     test_message_with_level(LOG_LEVEL_VERBOSE, TRACE_LEVEL_VERBOSE, "LogVerbose");
 }
 
+/* Tests_SRS_LOG_SINK_ETW_01_017: [ Otherwise the event name shall be Unknown. ]*/
+static void log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds(void)
+{
+    test_message_with_level((LOG_LEVEL)0xFF, TRACE_LEVEL_NONE, "Unknown");
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
@@ -659,6 +665,7 @@ int main(void)
     log_sink_etw_log_with_LOG_LEVEL_WARNING_succeeds();
     log_sink_etw_log_with_LOG_LEVEL_INFO_succeeds();
     log_sink_etw_log_with_LOG_LEVEL_VERBOSE_succeeds();
+    log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds();
 
     return asserts_failed;
 }
