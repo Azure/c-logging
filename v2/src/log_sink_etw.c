@@ -110,7 +110,8 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         uint8_t _tlgEvent[MAX_SELF_DESCRIBED_EVENT_WITH_METADATA];
 
         // compute event metadata size
-        uint16_t metadata_size = (uint16_t)(event_name_length + 1);
+        // event_name_length includes NULL terminator
+        uint16_t metadata_size = event_name_length;
         metadata_size += sizeof("content") + 1 + sizeof("file") + 1 + sizeof("func") + 1 + sizeof("line") + 1;
         for (uint32_t i = 0; i < property_value_count; i++)
         {
@@ -136,7 +137,7 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         // first one is the event name, followed by metadata for all the fields
         // copy event name 
         uint8_t* pos = &self_described_event->metadata[0];
-        (void)memcpy(pos, event_name, event_name_length + 1); pos += event_name_length + 1;
+        (void)memcpy(pos, event_name, event_name_length); pos += event_name_length;
 
         // copy the field metadata (name and in type)
         (void)memcpy(pos, "content", sizeof("content")); pos += sizeof("content");
@@ -270,15 +271,19 @@ static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context
             internal_emit_self_described_event(event_name_critical, sizeof(event_name_critical), TRACE_LEVEL_CRITICAL, value_pairs, values_count, message_format, file, func, line);
             break;
         case LOG_LEVEL_ERROR:
-            internal_emit_self_described_event(event_name_error, sizeof(event_name_critical), TRACE_LEVEL_ERROR, value_pairs, values_count, message_format, file, func, line);
+            /* Codes_SRS_LOG_SINK_ETW_01_013: [ If `log_level` is `LOG_LEVEL_ERROR` the event name shall be `LogError`. ]*/
+            internal_emit_self_described_event(event_name_error, sizeof(event_name_error), TRACE_LEVEL_ERROR, value_pairs, values_count, message_format, file, func, line);
             break;
         case LOG_LEVEL_WARNING:
+            /* Codes_SRS_LOG_SINK_ETW_01_014: [ If log_level is LOG_LEVEL_WARNING the event name shall be LogWarning. ]*/
             internal_emit_self_described_event(event_name_warning, sizeof(event_name_warning), TRACE_LEVEL_WARNING, value_pairs, values_count, message_format, file, func, line);
             break;
         case LOG_LEVEL_INFO:
+            /* Codes_SRS_LOG_SINK_ETW_01_015: [ If log_level is LOG_LEVEL_INFO the event name shall be LogInfo. ]*/
             internal_emit_self_described_event(event_name_info, sizeof(event_name_info), TRACE_LEVEL_INFORMATION, value_pairs, values_count, message_format, file, func, line);
             break;
         case LOG_LEVEL_VERBOSE:
+            /* Codes_SRS_LOG_SINK_ETW_01_016: [ If log_level is LOG_LEVEL_VERBOSE the event name shall be LogVerbose. ]*/
             internal_emit_self_described_event(event_name_verbose, sizeof(event_name_verbose), TRACE_LEVEL_VERBOSE, value_pairs, values_count, message_format, file, func, line);
             break;
         }

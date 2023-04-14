@@ -56,13 +56,13 @@ Note this can (and should) be improved to be configurable later.
 
   - **SRS_LOG_SINK_ETW_01_012: [** If `log_level` is `LOG_LEVEL_CRITICAL` the event name shall be `LogCritical`. **]**
 
-  - If `log_level` is `LOG_LEVEL_ERROR` the event name shall be `LogError`.
+  - **SRS_LOG_SINK_ETW_01_013: [** If `log_level` is `LOG_LEVEL_ERROR` the event name shall be `LogError`. **]**
 
-  - If `log_level` is `LOG_LEVEL_WARNING` the event name shall be `LogWarning`.
+  - **SRS_LOG_SINK_ETW_01_014: [** If `log_level` is `LOG_LEVEL_WARNING` the event name shall be `LogWarning`. **]**
 
-  - If `log_level` is `LOG_LEVEL_INFO` the event name shall be `LogInfo`.
+  - **SRS_LOG_SINK_ETW_01_015: [** If `log_level` is `LOG_LEVEL_INFO` the event name shall be `LogInfo`. **]**
 
-  - If `log_level` is `LOG_LEVEL_VERBOSE` the event name shall be `LogVerbose`.
+  - **SRS_LOG_SINK_ETW_01_016: [** If `log_level` is `LOG_LEVEL_VERBOSE` the event name shall be `LogVerbose`. **]**
 
   - Otherwise the event name shall be `Unknown`.
 

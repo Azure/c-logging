@@ -398,9 +398,24 @@ errno_t mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvide
         else
         {
             SELF_DESCRIBED_EVENT* expected_self_described_event = expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_self_described_event;
-            SELF_DESCRIBED_EVENT* actual_self_described_event = (SELF_DESCRIBED_EVENT*)pEventMetadata;
+            SELF_DESCRIBED_EVENT* actual_self_described_event = (SELF_DESCRIBED_EVENT*)CONTAINING_RECORD(pEventMetadata, SELF_DESCRIBED_EVENT, _tlgChannel);
             if (expected_self_described_event->_tlgLevel != actual_self_described_event->_tlgLevel)
             {
+                (void)printf("Expected expected_self_described_event->_tlgLevel=%" PRIu8 ", actual=%" PRIu8 "\r\n",
+                    expected_self_described_event->_tlgLevel, actual_self_described_event->_tlgLevel);
+                actual_and_expected_match = false;
+                result = E_FAIL;
+            }
+            if (expected_self_described_event->_tlgEvtMetaSize != actual_self_described_event->_tlgEvtMetaSize)
+            {
+                (void)printf("Expected expected_self_described_event->_tlgEvtMetaSize=%" PRIu16 ", actual=%" PRIu16 "\r\n",
+                    expected_self_described_event->_tlgEvtMetaSize, actual_self_described_event->_tlgEvtMetaSize);
+                actual_and_expected_match = false;
+                result = E_FAIL;
+            }
+            else if (memcmp(expected_self_described_event->metadata, actual_self_described_event->metadata, actual_self_described_event->_tlgEvtMetaSize) != 0)
+            {
+                (void)printf("Event metadata does not match\r\n");
                 actual_and_expected_match = false;
                 result = E_FAIL;
             }
@@ -553,11 +568,10 @@ static void log_sink_etw_log_registers_the_provider_if_not_registered_already(vo
 /* Tests_SRS_LOG_SINK_ETW_01_011: [ If the state is `REGISTERED`, `log_sink_etw_log` shall proceed to log the ETW event. ]*/
 // Note the reason this is already registered is because previous tests have done the registration
 /* Tests_SRS_LOG_SINK_ETW_01_010: [ `log_sink_etw_log` shall emit a self described event that shall have the name of the event as follows: ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_012: [ If `log_level` is `LOG_LEVEL_CRITICAL` the event name shall be `LogCritical`. ]*/
-static void log_sink_etw_log_does_not_register_when_already_registered(void)
+static void test_message_with_level(LOG_LEVEL log_level, uint8_t expected_tlg_level, const char* expected_event_name)
 {
     // arrange
-    setup_enabled_provider(TRACE_LEVEL_CRITICAL);
+    setup_enabled_provider(TRACE_LEVEL_VERBOSE);
 
     setup_mocks();
     setup_InterlockedCompareExchange_call();
@@ -565,18 +579,74 @@ static void log_sink_etw_log_does_not_register_when_already_registered(void)
     setup__tlgCreate1Sz_char(); // file 
     setup__tlgCreate1Sz_char(); // func
     setup_EventDataDescCreate(); // func
-    SELF_DESCRIBED_EVENT expected_event_metadata =
-    {
-        ._tlgLevel = TRACE_LEVEL_CRITICAL
-    };
-    setup__tlgWriteTransfer_EventWriteTransfer(&expected_event_metadata);
+    uint8_t extra_metadata_bytes[256];
+    uint8_t expected_event_bytes[sizeof(SELF_DESCRIBED_EVENT) + sizeof(extra_metadata_bytes)];
+    SELF_DESCRIBED_EVENT* expected_event_metadata = (SELF_DESCRIBED_EVENT*)&expected_event_bytes[0];
+    (void)memset(expected_event_metadata, 0, sizeof(SELF_DESCRIBED_EVENT));
+    expected_event_metadata->_tlgLevel = expected_tlg_level;
+    uint8_t* pos = (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT));
+    // event name
+    (void)memcpy(pos, expected_event_name, strlen(expected_event_name) + 1);
+    pos += strlen(expected_event_name) + 1;
+    // content field
+    (void)memcpy(pos, "content", strlen("content") + 1);
+    pos += strlen("content") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "file", strlen("file") + 1);
+    pos += strlen("file") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "func", strlen("func") + 1);
+    pos += strlen("func") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "line", strlen("line") + 1);
+    pos += strlen("line") + 1;
+    *pos = TlgInINT32;
+    pos++;
+    expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;
+    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata);
 
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
+    log_sink_etw.log_sink_log(log_level, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
+/* Tests_SRS_LOG_SINK_ETW_01_012: [ If `log_level` is `LOG_LEVEL_CRITICAL` the event name shall be `LogCritical`. ]*/
+static void log_sink_etw_log_does_not_register_when_already_registered(void)
+{
+    test_message_with_level(LOG_LEVEL_CRITICAL, TRACE_LEVEL_CRITICAL, "LogCritical");
+}
+
+/* Tests_SRS_LOG_SINK_ETW_01_013: [ If `log_level` is `LOG_LEVEL_ERROR` the event name shall be `LogError`. ]*/
+static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
+{
+    test_message_with_level(LOG_LEVEL_ERROR, TRACE_LEVEL_ERROR, "LogError");
+}
+
+/* Tests_SRS_LOG_SINK_ETW_01_014: [ If log_level is LOG_LEVEL_WARNING the event name shall be LogWarning. ]*/
+static void log_sink_etw_log_with_LOG_LEVEL_WARNING_succeeds(void)
+{
+    test_message_with_level(LOG_LEVEL_WARNING, TRACE_LEVEL_WARNING, "LogWarning");
+}
+
+/* Tests_SRS_LOG_SINK_ETW_01_015: [ If log_level is LOG_LEVEL_INFO the event name shall be LogInfo. ]*/
+static void log_sink_etw_log_with_LOG_LEVEL_INFO_succeeds(void)
+{
+    test_message_with_level(LOG_LEVEL_INFO, TRACE_LEVEL_INFORMATION, "LogInfo");
+}
+
+/* Tests_SRS_LOG_SINK_ETW_01_016: [ If log_level is LOG_LEVEL_VERBOSE the event name shall be LogVerbose. ]*/
+static void log_sink_etw_log_with_LOG_LEVEL_VERBOSE_succeeds(void)
+{
+    test_message_with_level(LOG_LEVEL_VERBOSE, TRACE_LEVEL_VERBOSE, "LogVerbose");
 }
 
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
@@ -585,6 +655,10 @@ int main(void)
     log_sink_etw_log_with_NULL_message_format_returns();
     log_sink_etw_log_registers_the_provider_if_not_registered_already();
     log_sink_etw_log_does_not_register_when_already_registered();
+    log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_WARNING_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_INFO_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_VERBOSE_succeeds();
 
     return asserts_failed;
 }
