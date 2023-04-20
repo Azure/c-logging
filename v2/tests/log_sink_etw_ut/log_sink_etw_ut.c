@@ -620,12 +620,15 @@ static void test_message_with_level(LOG_LEVEL log_level, uint8_t expected_tlg_le
 }
 
 /* Tests_SRS_LOG_SINK_ETW_01_012: [ If `log_level` is `LOG_LEVEL_CRITICAL` the event name shall be `LogCritical`. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_018: [ Logging level: ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_019: [ If log_level is LOG_LEVEL_CRITICAL the ETW logging level shall be TRACE_LEVEL_CRITICAL. ]*/
 static void log_sink_etw_log_does_not_register_when_already_registered(void)
 {
     test_message_with_level(LOG_LEVEL_CRITICAL, TRACE_LEVEL_CRITICAL, "LogCritical");
 }
 
 /* Tests_SRS_LOG_SINK_ETW_01_013: [ If `log_level` is `LOG_LEVEL_ERROR` the event name shall be `LogError`. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_020: [ If log_level is LOG_LEVEL_ERROR the ETW logging level shall be TRACE_LEVEL_ERROR. ]*/
 static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
 {
     test_message_with_level(LOG_LEVEL_ERROR, TRACE_LEVEL_ERROR, "LogError");

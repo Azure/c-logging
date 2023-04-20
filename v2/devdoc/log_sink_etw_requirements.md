@@ -66,11 +66,11 @@ Note this can (and should) be improved to be configurable later.
 
   - **SRS_LOG_SINK_ETW_01_017: [** Otherwise the event name shall be `Unknown`. **]**
 
-- Logging level:
+- **SRS_LOG_SINK_ETW_01_018: [** Logging level: **]**
 
-  - If `log_level` is `LOG_LEVEL_CRITICAL` the ETW logging level shall be `TRACE_LEVEL_CRITICAL`.
+  - **SRS_LOG_SINK_ETW_01_019: [** If `log_level` is `LOG_LEVEL_CRITICAL` the ETW logging level shall be `TRACE_LEVEL_CRITICAL`. **]**
 
-  - If `log_level` is `LOG_LEVEL_ERROR` the ETW logging level shall be `TRACE_LEVEL_ERROR`.
+  - **SRS_LOG_SINK_ETW_01_020: [** If `log_level` is `LOG_LEVEL_ERROR` the ETW logging level shall be `TRACE_LEVEL_ERROR`. **]**
 
   - If `log_level` is `LOG_LEVEL_WARNING` the ETW logging level shall be `TRACE_LEVEL_WARNING`.
 

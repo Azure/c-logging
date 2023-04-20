@@ -127,6 +127,7 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         SELF_DESCRIBED_EVENT* self_described_event = (SELF_DESCRIBED_EVENT*)_tlgEvent;
         self_described_event->_tlgBlobTyp = _TlgBlobEvent4;
         self_described_event->_tlgChannel = 11;
+        /* Codes_SRS_LOG_SINK_ETW_01_018: [ Logging level: ]*/
         self_described_event->_tlgLevel = trace_level;
         self_described_event->_tlgOpcode = 0;
         self_described_event->_tlgKeyword = 0;
@@ -268,10 +269,12 @@ static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context
             break;
         case LOG_LEVEL_CRITICAL:
             /* Codes_SRS_LOG_SINK_ETW_01_012: [ If `log_level` is `LOG_LEVEL_CRITICAL` the event name shall be `LogCritical`. ]*/
+            /* Codes_SRS_LOG_SINK_ETW_01_019: [ If log_level is LOG_LEVEL_CRITICAL the ETW logging level shall be TRACE_LEVEL_CRITICAL. ]*/
             internal_emit_self_described_event(event_name_critical, sizeof(event_name_critical), TRACE_LEVEL_CRITICAL, value_pairs, values_count, message_format, file, func, line);
             break;
         case LOG_LEVEL_ERROR:
             /* Codes_SRS_LOG_SINK_ETW_01_013: [ If `log_level` is `LOG_LEVEL_ERROR` the event name shall be `LogError`. ]*/
+            /* Codes_SRS_LOG_SINK_ETW_01_020: [ If log_level is LOG_LEVEL_ERROR the ETW logging level shall be TRACE_LEVEL_ERROR. ]*/
             internal_emit_self_described_event(event_name_error, sizeof(event_name_error), TRACE_LEVEL_ERROR, value_pairs, values_count, message_format, file, func, line);
             break;
         case LOG_LEVEL_WARNING:
