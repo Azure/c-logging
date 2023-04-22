@@ -114,6 +114,7 @@ typedef struct _tlgWriteTransfer_EventWriteTransfer_CALL_TAG
     bool override_result;
     TLG_STATUS call_result;
     SELF_DESCRIBED_EVENT* expected_self_described_event;
+    uint32_t expected_cData;
 } _tlgWriteTransfer_EventWriteTransfer_CALL;
 
 typedef struct MOCK_CALL_TAG
@@ -413,9 +414,37 @@ errno_t mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvide
                 actual_and_expected_match = false;
                 result = E_FAIL;
             }
+            if (expected_self_described_event->_tlgChannel != actual_self_described_event->_tlgChannel)
+            {
+                (void)printf("Expected expected_self_described_event->_tlgChannel=%" PRIu8 ", actual=%" PRIu8 "\r\n",
+                    expected_self_described_event->_tlgChannel, actual_self_described_event->_tlgChannel);
+                actual_and_expected_match = false;
+                result = E_FAIL;
+            }
+            if (expected_self_described_event->_tlgOpcode != actual_self_described_event->_tlgOpcode)
+            {
+                (void)printf("Expected expected_self_described_event->_tlgOpcode=%" PRIu8 ", actual=%" PRIu8 "\r\n",
+                    expected_self_described_event->_tlgOpcode, actual_self_described_event->_tlgOpcode);
+                actual_and_expected_match = false;
+                result = E_FAIL;
+            }
+            if (expected_self_described_event->_tlgKeyword != actual_self_described_event->_tlgKeyword)
+            {
+                (void)printf("Expected expected_self_described_event->_tlgKeyword=%" PRIu64 ", actual=%" PRIu64"\r\n",
+                    expected_self_described_event->_tlgKeyword, actual_self_described_event->_tlgKeyword);
+                actual_and_expected_match = false;
+                result = E_FAIL;
+            }
             else if (memcmp(expected_self_described_event->metadata, actual_self_described_event->metadata, actual_self_described_event->_tlgEvtMetaSize) != 0)
             {
                 (void)printf("Event metadata does not match\r\n");
+                actual_and_expected_match = false;
+                result = E_FAIL;
+            }
+            else if (cData != expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_cData)
+            {
+                (void)printf("Expected cData=%" PRIu32 ", actual=%" PRIu32"\r\n",
+                    expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_cData, cData);
                 actual_and_expected_match = false;
                 result = E_FAIL;
             }
@@ -509,11 +538,12 @@ static void setup_EventDataDescCreate(void)
     expected_call_count++;
 }
 
-static void setup__tlgWriteTransfer_EventWriteTransfer(void* event_metadata)
+static void setup__tlgWriteTransfer_EventWriteTransfer(void* event_metadata, uint32_t cData)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE__tlgWriteTransfer_EventWriteTransfer;
     expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.override_result = false;
     expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_self_described_event = event_metadata;
+    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_cData = cData;
     expected_call_count++;
 }
 
@@ -568,6 +598,21 @@ static void log_sink_etw_log_registers_the_provider_if_not_registered_already(vo
 /* Tests_SRS_LOG_SINK_ETW_01_011: [ If the state is `REGISTERED`, `log_sink_etw_log` shall proceed to log the ETW event. ]*/
 // Note the reason this is already registered is because previous tests have done the registration
 /* Tests_SRS_LOG_SINK_ETW_01_010: [ `log_sink_etw_log` shall emit a self described event that shall have the name of the event as follows: ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_025: [ If log_context is NULL only the fields content, file, func and line shall be added to the ETW event. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_026: [ log_sink_etw.log_sink_log shall fill a SELF_DESCRIBED_EVENT structure, setting the following fields: ]*/
+    /* Tests_SRS_LOG_SINK_ETW_01_027: [ _tlgBlobTyp shall be set to _TlgBlobEvent4. ]*/
+    /* Tests_SRS_LOG_SINK_ETW_01_028: [ _tlgChannel shall be set to 11. ]*/
+    /* Tests_SRS_LOG_SINK_ETW_01_029: [ _tlgLevel shall be set to the appropriate logging level. ]*/
+    /* Tests_SRS_LOG_SINK_ETW_01_030: [ _tlgOpcode shall be set to 0. ]*/
+    /* Tests_SRS_LOG_SINK_ETW_01_031: [ _tlgKeyword shall be set to 0. ]*/
+    /* Tests_SRS_LOG_SINK_ETW_01_032: [ _tlgEvtMetaSize shall be set to the computed metadata size + 4. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_034: [ log_sink_etw.log_sink_log shall fill the event metadata: ]*/
+    /* Tests_SRS_LOG_SINK_ETW_01_035: [ The string content (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
+    /* Tests_SRS_LOG_SINK_ETW_01_036: [ The string file (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
+    /* Tests_SRS_LOG_SINK_ETW_01_037: [ The string func (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
+    /* Tests_SRS_LOG_SINK_ETW_01_038: [ The string line (as field name, excluding zero terminator), followed by one byte with the value TlgInINT32. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_039: [ log_sink_etw.log_sink_log shall fill an EVENT_DATA_DESCRIPTOR array of size 2 + 1 + 1 + 1 + 1 + property count. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_040: [ log_sink_etw.log_sink_log shall set event data descriptor at index 2 by calling _tlgCreate1Sz_char with the value of the formatted message as obtained by using printf with the messages format message_format and the arguments in .... ]*/
 static void test_message_with_level(LOG_LEVEL log_level, uint8_t expected_tlg_level, const char* expected_event_name)
 {
     // arrange
@@ -584,6 +629,9 @@ static void test_message_with_level(LOG_LEVEL log_level, uint8_t expected_tlg_le
     SELF_DESCRIBED_EVENT* expected_event_metadata = (SELF_DESCRIBED_EVENT*)&expected_event_bytes[0];
     (void)memset(expected_event_metadata, 0, sizeof(SELF_DESCRIBED_EVENT));
     expected_event_metadata->_tlgLevel = expected_tlg_level;
+    expected_event_metadata->_tlgChannel = 11;
+    expected_event_metadata->_tlgOpcode = 0;
+    expected_event_metadata->_tlgKeyword = 0;
     uint8_t* pos = (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT));
     // event name
     (void)memcpy(pos, expected_event_name, strlen(expected_event_name) + 1);
@@ -609,7 +657,7 @@ static void test_message_with_level(LOG_LEVEL log_level, uint8_t expected_tlg_le
     *pos = TlgInINT32;
     pos++;
     expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;
-    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata);
+    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6);
 
     // act
     log_sink_etw.log_sink_log(log_level, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
@@ -635,27 +683,95 @@ static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
 }
 
 /* Tests_SRS_LOG_SINK_ETW_01_014: [ If log_level is LOG_LEVEL_WARNING the event name shall be LogWarning. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_021: [ If log_level is LOG_LEVEL_WARNING the ETW logging level shall be TRACE_LEVEL_WARNING. ]*/
 static void log_sink_etw_log_with_LOG_LEVEL_WARNING_succeeds(void)
 {
     test_message_with_level(LOG_LEVEL_WARNING, TRACE_LEVEL_WARNING, "LogWarning");
 }
 
 /* Tests_SRS_LOG_SINK_ETW_01_015: [ If log_level is LOG_LEVEL_INFO the event name shall be LogInfo. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_022: [ If log_level is LOG_LEVEL_INFO the ETW logging level shall be TRACE_LEVEL_INFO. ]*/
 static void log_sink_etw_log_with_LOG_LEVEL_INFO_succeeds(void)
 {
     test_message_with_level(LOG_LEVEL_INFO, TRACE_LEVEL_INFORMATION, "LogInfo");
 }
 
 /* Tests_SRS_LOG_SINK_ETW_01_016: [ If log_level is LOG_LEVEL_VERBOSE the event name shall be LogVerbose. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_023: [ If log_level is LOG_LEVEL_VERBOSE the ETW logging level shall be TRACE_LEVEL_VERBOSE. ]*/
 static void log_sink_etw_log_with_LOG_LEVEL_VERBOSE_succeeds(void)
 {
     test_message_with_level(LOG_LEVEL_VERBOSE, TRACE_LEVEL_VERBOSE, "LogVerbose");
 }
 
 /* Tests_SRS_LOG_SINK_ETW_01_017: [ Otherwise the event name shall be Unknown. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_024: [ Otherwise the ETW logging level shall be TRACE_LEVEL_NONE. ]*/
 static void log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds(void)
 {
     test_message_with_level((LOG_LEVEL)0xFF, TRACE_LEVEL_NONE, "Unknown");
+}
+
+/* Tests_SRS_LOG_SINK_ETW_01_040: [ log_sink_etw.log_sink_log shall set event data descriptor at index 2 by calling _tlgCreate1Sz_char with the value of the formatted message as obtained by using printf with the messages format message_format and the arguments in .... ]*/
+static void test_formatted_message_with_level(LOG_LEVEL log_level, uint8_t expected_tlg_level, const char* expected_event_name, const char* expected_message, const char* message_format, ...)
+{
+    (void)expected_message;
+    (void)message_format;
+
+    // arrange
+    setup_enabled_provider(TRACE_LEVEL_VERBOSE);
+
+    setup_mocks();
+    setup_InterlockedCompareExchange_call();
+    setup__tlgCreate1Sz_char(); // message
+    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // func
+    setup_EventDataDescCreate(); // func
+    uint8_t extra_metadata_bytes[256];
+    uint8_t expected_event_bytes[sizeof(SELF_DESCRIBED_EVENT) + sizeof(extra_metadata_bytes)];
+    SELF_DESCRIBED_EVENT* expected_event_metadata = (SELF_DESCRIBED_EVENT*)&expected_event_bytes[0];
+    (void)memset(expected_event_metadata, 0, sizeof(SELF_DESCRIBED_EVENT));
+    expected_event_metadata->_tlgLevel = expected_tlg_level;
+    expected_event_metadata->_tlgChannel = 11;
+    expected_event_metadata->_tlgOpcode = 0;
+    expected_event_metadata->_tlgKeyword = 0;
+    uint8_t* pos = (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT));
+    // event name
+    (void)memcpy(pos, expected_event_name, strlen(expected_event_name) + 1);
+    pos += strlen(expected_event_name) + 1;
+    // content field
+    (void)memcpy(pos, "content", strlen("content") + 1);
+    pos += strlen("content") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "file", strlen("file") + 1);
+    pos += strlen("file") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "func", strlen("func") + 1);
+    pos += strlen("func") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "line", strlen("line") + 1);
+    pos += strlen("line") + 1;
+    *pos = TlgInINT32;
+    pos++;
+    expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;
+    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6);
+
+    // act
+    log_sink_etw.log_sink_log(log_level, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
+/* Tests_SRS_LOG_SINK_ETW_01_040: [ log_sink_etw.log_sink_log shall set event data descriptor at index 2 by calling _tlgCreate1Sz_char with the value of the formatted message as obtained by using printf with the messages format message_format and the arguments in .... ]*/
+static void log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds(void)
+{
+    test_formatted_message_with_level(LOG_LEVEL_CRITICAL, TRACE_LEVEL_CRITICAL, "LogCritical", "test_value=42", "test_value=%d", 42);
 }
 
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
@@ -669,6 +785,7 @@ int main(void)
     log_sink_etw_log_with_LOG_LEVEL_INFO_succeeds();
     log_sink_etw_log_with_LOG_LEVEL_VERBOSE_succeeds();
     log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds();
 
     return asserts_failed;
 }

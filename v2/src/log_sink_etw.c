@@ -101,7 +101,6 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
     __pragma(warning(error:4047))
     __pragma(pack(push, 1))
     __pragma(execution_character_set(push, "UTF-8"))
-    enum { _tlgTagConst = (0) };
 
     TraceLoggingHProvider const _tlgProv = (g_my_component_provider);
     if (trace_level < _tlgProv->LevelPlus1 && _tlgKeywordOn(_tlgProv, 0))
@@ -123,16 +122,32 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
             }
         }
 
+        /* Codes_SRS_LOG_SINK_ETW_01_026: [ log_sink_etw.log_sink_log shall fill a SELF_DESCRIBED_EVENT structure, setting the following fields: ]*/
+
         // alias to the event bytes
         SELF_DESCRIBED_EVENT* self_described_event = (SELF_DESCRIBED_EVENT*)_tlgEvent;
+
+        /* Codes_SRS_LOG_SINK_ETW_01_027: [ _tlgBlobTyp shall be set to _TlgBlobEvent4. ]*/
         self_described_event->_tlgBlobTyp = _TlgBlobEvent4;
+
+        /* Codes_SRS_LOG_SINK_ETW_01_028: [ _tlgChannel shall be set to 11. ]*/
         self_described_event->_tlgChannel = 11;
+
         /* Codes_SRS_LOG_SINK_ETW_01_018: [ Logging level: ]*/
+        /* Codes_SRS_LOG_SINK_ETW_01_029: [ _tlgLevel shall be set to the appropriate logging level. ]*/
         self_described_event->_tlgLevel = trace_level;
+
+        /* Codes_SRS_LOG_SINK_ETW_01_030: [ _tlgOpcode shall be set to 0. ]*/
         self_described_event->_tlgOpcode = 0;
+
+        /* Codes_SRS_LOG_SINK_ETW_01_031: [ _tlgKeyword shall be set to 0. ]*/
         self_described_event->_tlgKeyword = 0;
+
+        /* Codes_SRS_LOG_SINK_ETW_01_032: [ _tlgEvtMetaSize shall be set to the computed metadata size + 4. ]*/
         self_described_event->_tlgEvtMetaSize = metadata_size + 4;
-        self_described_event->_tlgEvtTag = 128 | ((0xfe00000 & (UINT32)_tlgTagConst) >> 21) | ((0x01fc000 & (UINT32)_tlgTagConst) >> 6) | ((0x0003fff & (UINT32)_tlgTagConst) << 16) | (~(0x0FFFFFFF | ~(UINT32)_tlgTagConst));
+
+        /* Codes_SRS_LOG_SINK_ETW_01_033: [ _tlgEvtTag shall be set to 128. ]*/
+        self_described_event->_tlgEvtTag = 128;
 
         // at this point we filled all the event information, now we need to provide the metadata bytes
         // first one is the event name, followed by metadata for all the fields
@@ -141,14 +156,25 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         (void)memcpy(pos, event_name, event_name_length); pos += event_name_length;
 
         // copy the field metadata (name and in type)
+
+        /* Codes_SRS_LOG_SINK_ETW_01_034: [ log_sink_etw.log_sink_log shall fill the event metadata: ]*/
+
+        /* Codes_SRS_LOG_SINK_ETW_01_035: [ The string content (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
         (void)memcpy(pos, "content", sizeof("content")); pos += sizeof("content");
         *pos = TlgInANSISTRING;  pos++;
+
+        /* Codes_SRS_LOG_SINK_ETW_01_036: [ The string file (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
         (void)memcpy(pos, "file", sizeof("file")); pos += sizeof("file");
         *pos = TlgInANSISTRING;  pos++;
+
+        /* Codes_SRS_LOG_SINK_ETW_01_037: [ The string func (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
         (void)memcpy(pos, "func", sizeof("func")); pos += sizeof("func");
         *pos = TlgInANSISTRING;  pos++;
+
+        /* Codes_SRS_LOG_SINK_ETW_01_038: [ The string line (as field name, excluding zero terminator), followed by one byte with the value TlgInINT32. ]*/
         (void)memcpy(pos, "line", sizeof("line")); pos += sizeof("line");
         *pos = TlgInINT32;  pos++;
+
         for (uint32_t i = 0; i < property_value_count; i++)
         {
             size_t name_length = strlen(context_property_value_pairs[i].name);
@@ -177,16 +203,20 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         // now we need to fill in the event data descriptors
         // first 2 are actually reserved for the event descriptor and metadata respectively
         // all the rest starting at index 2 are actual data payloads in the event
+
+        /* Codes_SRS_LOG_SINK_ETW_01_039: [ log_sink_etw.log_sink_log shall fill an EVENT_DATA_DESCRIPTOR array of size 2 + 1 + 1 + 1 + 1 + property count. ]*/
         EVENT_DATA_DESCRIPTOR _tlgData[2 + 1 + 1 + 1 + 1 + LOG_MAX_ETW_PROPERTY_VALUE_PAIR_COUNT];
-        UINT32 _tlgIdx = 2;
-        _tlgCreate1Sz_char(&_tlgData[_tlgIdx], (message));
+
+        /* Codes_SRS_LOG_SINK_ETW_01_040: [ log_sink_etw.log_sink_log shall set event data descriptor at index 2 by calling _tlgCreate1Sz_char with the value of the formatted message as obtained by using printf with the messages format message_format and the arguments in .... ]*/
+        uint32_t _tlgIdx = 2;
+        _tlgCreate1Sz_char(&_tlgData[_tlgIdx], message);
         _tlgIdx += 1;
-        _tlgCreate1Sz_char(&_tlgData[_tlgIdx], (file));
+        _tlgCreate1Sz_char(&_tlgData[_tlgIdx], file);
         _tlgIdx += 1;
-        _tlgCreate1Sz_char(&_tlgData[_tlgIdx], (func));
+        _tlgCreate1Sz_char(&_tlgData[_tlgIdx], func);
         _tlgIdx += 1;
-        INT32 const _tlgTemp7 = (line);
-        EventDataDescCreate(&_tlgData[_tlgIdx], &_tlgTemp7, sizeof(INT32));
+        const int32_t _tlgTemp7 = line;
+        EventDataDescCreate(&_tlgData[_tlgIdx], &_tlgTemp7, sizeof(int32_t));
         _tlgIdx += 1;
 
         for (uint32_t i = 0; i < property_value_count; i++)
@@ -196,10 +226,10 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
             default:
                 break;
             case LOG_CONTEXT_PROPERTY_TYPE_int32_t:
-                EventDataDescCreate(&_tlgData[_tlgIdx], context_property_value_pairs[i].value, sizeof(INT32));
+                EventDataDescCreate(&_tlgData[_tlgIdx], context_property_value_pairs[i].value, sizeof(int32_t));
                 break;
             case LOG_CONTEXT_PROPERTY_TYPE_int64_t:
-                EventDataDescCreate(&_tlgData[_tlgIdx], context_property_value_pairs[i].value, sizeof(INT64));
+                EventDataDescCreate(&_tlgData[_tlgIdx], context_property_value_pairs[i].value, sizeof(int64_t));
                 break;
             case LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr:
                 _tlgCreate1Sz_char(&_tlgData[_tlgIdx], context_property_value_pairs[i].value);
@@ -258,6 +288,7 @@ static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context
         }
         else
         {
+            /* Codes_SRS_LOG_SINK_ETW_01_025: [ If log_context is NULL only the fields content, file, func and line shall be added to the ETW event. ]*/
             value_pairs = NULL;
             values_count = 0;
         }
@@ -265,6 +296,8 @@ static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context
         switch (log_level)
         {
         default:
+            /* Codes_SRS_LOG_SINK_ETW_01_017: [ Otherwise the event name shall be Unknown. ]*/
+            /* Codes_SRS_LOG_SINK_ETW_01_024: [ Otherwise the ETW logging level shall be TRACE_LEVEL_NONE. ]*/
             internal_emit_self_described_event(event_name_unknown, sizeof(event_name_unknown), TRACE_LEVEL_NONE, value_pairs, values_count, message_format, file, func, line);
             break;
         case LOG_LEVEL_CRITICAL:
@@ -279,14 +312,17 @@ static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context
             break;
         case LOG_LEVEL_WARNING:
             /* Codes_SRS_LOG_SINK_ETW_01_014: [ If log_level is LOG_LEVEL_WARNING the event name shall be LogWarning. ]*/
+            /* Codes_SRS_LOG_SINK_ETW_01_021: [ If log_level is LOG_LEVEL_WARNING the ETW logging level shall be TRACE_LEVEL_WARNING. ]*/
             internal_emit_self_described_event(event_name_warning, sizeof(event_name_warning), TRACE_LEVEL_WARNING, value_pairs, values_count, message_format, file, func, line);
             break;
         case LOG_LEVEL_INFO:
             /* Codes_SRS_LOG_SINK_ETW_01_015: [ If log_level is LOG_LEVEL_INFO the event name shall be LogInfo. ]*/
+            /* Codes_SRS_LOG_SINK_ETW_01_022: [ If log_level is LOG_LEVEL_INFO the ETW logging level shall be TRACE_LEVEL_INFO. ]*/
             internal_emit_self_described_event(event_name_info, sizeof(event_name_info), TRACE_LEVEL_INFORMATION, value_pairs, values_count, message_format, file, func, line);
             break;
         case LOG_LEVEL_VERBOSE:
             /* Codes_SRS_LOG_SINK_ETW_01_016: [ If log_level is LOG_LEVEL_VERBOSE the event name shall be LogVerbose. ]*/
+            /* Codes_SRS_LOG_SINK_ETW_01_023: [ If log_level is LOG_LEVEL_VERBOSE the ETW logging level shall be TRACE_LEVEL_VERBOSE. ]*/
             internal_emit_self_described_event(event_name_verbose, sizeof(event_name_verbose), TRACE_LEVEL_VERBOSE, value_pairs, values_count, message_format, file, func, line);
             break;
         }

@@ -72,15 +72,15 @@ Note this can (and should) be improved to be configurable later.
 
   - **SRS_LOG_SINK_ETW_01_020: [** If `log_level` is `LOG_LEVEL_ERROR` the ETW logging level shall be `TRACE_LEVEL_ERROR`. **]**
 
-  - If `log_level` is `LOG_LEVEL_WARNING` the ETW logging level shall be `TRACE_LEVEL_WARNING`.
+  - **SRS_LOG_SINK_ETW_01_021: [** If `log_level` is `LOG_LEVEL_WARNING` the ETW logging level shall be `TRACE_LEVEL_WARNING`. **]**
 
-  - If `log_level` is `LOG_LEVEL_INFO` the ETW logging level shall be `TRACE_LEVEL_INFO`.
+  - **SRS_LOG_SINK_ETW_01_022: [** If `log_level` is `LOG_LEVEL_INFO` the ETW logging level shall be `TRACE_LEVEL_INFO`. **]**
 
-  - If `log_level` is `LOG_LEVEL_VERBOSE` the ETW logging level shall be `TRACE_LEVEL_VERBOSE`.
+  - **SRS_LOG_SINK_ETW_01_023: [** If `log_level` is `LOG_LEVEL_VERBOSE` the ETW logging level shall be `TRACE_LEVEL_VERBOSE`. **]**
 
-  - Otherwise the ETW logging level shall be `TRACE_LEVEL_NONE`.
+  - **SRS_LOG_SINK_ETW_01_024: [** Otherwise the ETW logging level shall be `TRACE_LEVEL_NONE`. **]**
 
-- If `log_context` is `NULL` only the fields `content`, `file`, `func` and `line` shall be added to the ETW event.
+- **SRS_LOG_SINK_ETW_01_025: [** If `log_context` is `NULL` only the fields `content`, `file`, `func` and `line` shall be added to the ETW event. **]**
 
 - If `log_context` is not `NULL`:
 
@@ -106,31 +106,31 @@ Note this can (and should) be improved to be configurable later.
 
 - For struct properties one extra byte shall be added for the field count.
 
-`log_sink_etw.log_sink_log` shall fill a `SELF_DESCRIBED_EVENT` structure, setting the following fields:
+**SRS_LOG_SINK_ETW_01_026: [** `log_sink_etw.log_sink_log` shall fill a `SELF_DESCRIBED_EVENT` structure, setting the following fields: **]**
 
-- `_tlgBlobTyp` shall be set to `_TlgBlobEvent4`.
+- **SRS_LOG_SINK_ETW_01_027: [** `_tlgBlobTyp` shall be set to `_TlgBlobEvent4`. **]**
 
-- `_tlgChannel` shall be set to 11.
+- **SRS_LOG_SINK_ETW_01_028: [** `_tlgChannel` shall be set to 11. **]**
 
-- `_tlgLevel` shall be set to the appropriate logging level.
+- **SRS_LOG_SINK_ETW_01_029: [** `_tlgLevel` shall be set to the appropriate logging level. **]**
 
-- `_tlgOpcode` shall be set to 0.
+- **SRS_LOG_SINK_ETW_01_030: [** `_tlgOpcode` shall be set to 0. **]**
 
-- `_tlgKeyword` shall be set to 0.
+- **SRS_LOG_SINK_ETW_01_031: [** `_tlgKeyword` shall be set to 0. **]**
 
-- `_tlgEvtMetaSize` shall be set to the computed metadata size + 4.
+- **SRS_LOG_SINK_ETW_01_032: [** `_tlgEvtMetaSize` shall be set to the computed metadata size + 4. **]**
 
-- `_tlgEvtTag` shall be set to 128.
+- **SRS_LOG_SINK_ETW_01_033: [** `_tlgEvtTag` shall be set to 128. **]**
 
-`log_sink_etw.log_sink_log` shall fill the event metadata:
+**SRS_LOG_SINK_ETW_01_034: [** `log_sink_etw.log_sink_log` shall fill the event metadata: **]**
 
-- The string `content` (as field name, excluding zero terminator), followed by one byte with the value `TlgInANSISTRING`.
+- **SRS_LOG_SINK_ETW_01_035: [** The string `content` (as field name, excluding zero terminator), followed by one byte with the value `TlgInANSISTRING`. **]**
 
-- The string `file` (as field name, excluding zero terminator), followed by one byte with the value `TlgInANSISTRING`.
+- **SRS_LOG_SINK_ETW_01_036: [** The string `file` (as field name, excluding zero terminator), followed by one byte with the value `TlgInANSISTRING`. **]**
 
-- The string `func` (as field name, excluding zero terminator), followed by one byte with the value `TlgInANSISTRING`.
+- **SRS_LOG_SINK_ETW_01_037: [** The string `func` (as field name, excluding zero terminator), followed by one byte with the value `TlgInANSISTRING`. **]**
 
-- The string `line` (as field name, excluding zero terminator), followed by one byte with the value `TlgInINT32`.
+- **SRS_LOG_SINK_ETW_01_038: [** The string `line` (as field name, excluding zero terminator), followed by one byte with the value `TlgInINT32`. **]**
 
 For each property in `log_context` the following shall be added to the event metadata:
 
@@ -162,11 +162,11 @@ For each property in `log_context` the following shall be added to the event met
 
 - If the property is a struct, an extra byte shall be added in the metadata containing the number of fields in the structure.
 
-`log_sink_etw.log_sink_log` shall fill an `EVENT_DATA_DESCRIPTOR` array of size `2 + 1 + 1 + 1 + 1 + property count`.
+**SRS_LOG_SINK_ETW_01_039: [** `log_sink_etw.log_sink_log` shall fill an `EVENT_DATA_DESCRIPTOR` array of size `2 + 1 + 1 + 1 + 1 + property count`. **]**
 
-Note: 2 entries are for the event descriptor and metadata respectively, 4 entries for the well common fields (content, file, func, line) and the rest are 1 for each of the properties.
+Note: 2 entries are for the event descriptor and metadata respectively, 4 entries for the common fields (content, file, func, line) and the rest are 1 for each of the properties.
 
-`log_sink_etw.log_sink_log` shall set event data descriptor at index 2 by calling `_tlgCreate1Sz_char` with the value of the formatted message as obtained by using `printf` with the messages format `message_format` and the arguments in `...`.
+**SRS_LOG_SINK_ETW_01_040: [** `log_sink_etw.log_sink_log` shall set event data descriptor at index 2 by calling `_tlgCreate1Sz_char` with the value of the formatted message as obtained by using `printf` with the messages format `message_format` and the arguments in `...`. **]**
 
 `log_sink_etw.log_sink_log` shall set event data descriptor at index 3 by calling `_tlgCreate1Sz_char` with `file`.
 
