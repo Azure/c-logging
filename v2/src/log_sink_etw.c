@@ -110,8 +110,20 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
 
         // compute event metadata size
         // event_name_length includes NULL terminator
+        /* Codes_SRS_LOG_SINK_ETW_01_042: [ log_sink_etw.log_sink_log shall compute the metadata size for the self described event metadata as follows: ]*/
+        /* Codes_SRS_LOG_SINK_ETW_01_043: [ Length of the event name (determined at compile time, excluding zero terminator) + 1. ]*/
         uint16_t metadata_size = event_name_length;
-        metadata_size += sizeof("content") + 1 + sizeof("file") + 1 + sizeof("func") + 1 + sizeof("line") + 1;
+
+        metadata_size += 
+            /* Codes_SRS_LOG_SINK_ETW_01_044: [ Length of the content field name (determined at compile time, excluding zero terminator) + 1. ]*/
+            sizeof("content") + 1 +
+            /* Codes_SRS_LOG_SINK_ETW_01_045: [ Length of the file field name (determined at compile time, excluding zero terminator) + 1. ]*/
+            sizeof("file") + 1 +
+            /* Codes_SRS_LOG_SINK_ETW_01_046: [ Length of the func field name (determined at compile time, excluding zero terminator) + 1. ]*/
+            sizeof("func") + 1 +
+            /* Codes_SRS_LOG_SINK_ETW_01_047: [ Length of the line field name (determined at compile time, excluding zero terminator) + 1. ]*/
+            sizeof("line") + 1;
+
         for (uint32_t i = 0; i < property_value_count; i++)
         {
             size_t name_length = strlen(context_property_value_pairs[i].name);
@@ -242,6 +254,7 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         }
 
         // ... AND drumrolls, emit the event
+        /* Codes_SRS_LOG_SINK_ETW_01_041: [ log_sink_etw.log_sink_log shall emit the event by calling _tlgWriteTransfer_EventWriteTransfer passing the provider, channel, number of event data descriptors and the data descriptor array. ]*/
         _tlgWriteTransfer_EventWriteTransfer(_tlgProv, &self_described_event->_tlgChannel, ((void*)0), ((void*)0), _tlgIdx, _tlgData);
     }
     __pragma(execution_character_set(pop))
