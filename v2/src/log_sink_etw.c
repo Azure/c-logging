@@ -271,12 +271,12 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         TraceLoggingString(func, "func"), \
         TraceLoggingInt32(line, "line")) \
 
-static char event_name_critical[] = "LogCritical";
-static char event_name_error[] = "LogError";
-static char event_name_warning[] = "LogWarning";
-static char event_name_info[] = "LogInfo";
-static char event_name_verbose[] = "LogVerbose";
-static char event_name_unknown[] = "Unknown";
+static const char event_name_critical[] = "LogCritical";
+static const char event_name_error[] = "LogError";
+static const char event_name_warning[] = "LogWarning";
+static const char event_name_info[] = "LogInfo";
+static const char event_name_verbose[] = "LogVerbose";
+static const char event_name_unknown[] = "Unknown";
 
 static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...)
 {

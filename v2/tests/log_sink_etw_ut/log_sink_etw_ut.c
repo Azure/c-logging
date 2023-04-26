@@ -764,6 +764,15 @@ static void test_formatted_message_with_level(LOG_LEVEL log_level, uint8_t expec
     *pos = TlgInINT32;
     pos++;
     expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;
+
+    // construct event data descriptor array
+    EVENT_DATA_DESCRIPTOR expected_event_data_descriptors[6] =
+    {
+        { 0 },
+        { 0 },
+        { .Size = strlen(expected_event_name),.Ptr = expected_event_name }
+    };
+
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6);
 
     // act
