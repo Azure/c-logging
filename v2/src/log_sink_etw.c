@@ -94,7 +94,7 @@ __pragma(pack(pop))
 
 // This function was written with a little bit of reverse engineering of TraceLogging and guidance from 
 // the TraceLogging.h header about the format of the self described events
-static void internal_emit_self_described_event(const char* event_name, uint16_t event_name_length, uint8_t trace_level, const LOG_CONTEXT_PROPERTY_VALUE_PAIR* context_property_value_pairs, uint32_t property_value_count, const char* message, const char* file, const char* func, int line)
+static void internal_emit_self_described_event(const char* event_name, uint16_t event_name_length, uint8_t trace_level, const LOG_CONTEXT_PROPERTY_VALUE_PAIR* context_property_value_pairs, uint32_t property_value_count, const char* message, const char* file, const char* func, int line, va_list args)
 {
     __pragma(warning(push))
     __pragma(warning(disable:4127 4132 6001))
@@ -212,6 +212,10 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
             pos++;
         }
 
+        char* formatted_message = (char*)pos;
+        int formatted_message_length = vsnprintf(formatted_message, sizeof(_tlgEvent) - (formatted_message - (char*)self_described_event), message, args);
+        (void)formatted_message_length;
+
         // now we need to fill in the event data descriptors
         // first 2 are actually reserved for the event descriptor and metadata respectively
         // all the rest starting at index 2 are actual data payloads in the event
@@ -221,7 +225,7 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
 
         /* Codes_SRS_LOG_SINK_ETW_01_040: [ log_sink_etw.log_sink_log shall set event data descriptor at index 2 by calling _tlgCreate1Sz_char with the value of the formatted message as obtained by using printf with the messages format message_format and the arguments in .... ]*/
         uint32_t _tlgIdx = 2;
-        _tlgCreate1Sz_char(&_tlgData[_tlgIdx], message);
+        _tlgCreate1Sz_char(&_tlgData[_tlgIdx], formatted_message);
         _tlgIdx += 1;
         _tlgCreate1Sz_char(&_tlgData[_tlgIdx], file);
         _tlgIdx += 1;
@@ -306,39 +310,44 @@ static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context
             values_count = 0;
         }
 
+        va_list args;
+        va_start(args, message_format);
+
         switch (log_level)
         {
         default:
             /* Codes_SRS_LOG_SINK_ETW_01_017: [ Otherwise the event name shall be Unknown. ]*/
             /* Codes_SRS_LOG_SINK_ETW_01_024: [ Otherwise the ETW logging level shall be TRACE_LEVEL_NONE. ]*/
-            internal_emit_self_described_event(event_name_unknown, sizeof(event_name_unknown), TRACE_LEVEL_NONE, value_pairs, values_count, message_format, file, func, line);
+            internal_emit_self_described_event(event_name_unknown, sizeof(event_name_unknown), TRACE_LEVEL_NONE, value_pairs, values_count, message_format, file, func, line, args);
             break;
         case LOG_LEVEL_CRITICAL:
             /* Codes_SRS_LOG_SINK_ETW_01_012: [ If `log_level` is `LOG_LEVEL_CRITICAL` the event name shall be `LogCritical`. ]*/
             /* Codes_SRS_LOG_SINK_ETW_01_019: [ If log_level is LOG_LEVEL_CRITICAL the ETW logging level shall be TRACE_LEVEL_CRITICAL. ]*/
-            internal_emit_self_described_event(event_name_critical, sizeof(event_name_critical), TRACE_LEVEL_CRITICAL, value_pairs, values_count, message_format, file, func, line);
+            internal_emit_self_described_event(event_name_critical, sizeof(event_name_critical), TRACE_LEVEL_CRITICAL, value_pairs, values_count, message_format, file, func, line, args);
             break;
         case LOG_LEVEL_ERROR:
             /* Codes_SRS_LOG_SINK_ETW_01_013: [ If `log_level` is `LOG_LEVEL_ERROR` the event name shall be `LogError`. ]*/
             /* Codes_SRS_LOG_SINK_ETW_01_020: [ If log_level is LOG_LEVEL_ERROR the ETW logging level shall be TRACE_LEVEL_ERROR. ]*/
-            internal_emit_self_described_event(event_name_error, sizeof(event_name_error), TRACE_LEVEL_ERROR, value_pairs, values_count, message_format, file, func, line);
+            internal_emit_self_described_event(event_name_error, sizeof(event_name_error), TRACE_LEVEL_ERROR, value_pairs, values_count, message_format, file, func, line, args);
             break;
         case LOG_LEVEL_WARNING:
             /* Codes_SRS_LOG_SINK_ETW_01_014: [ If log_level is LOG_LEVEL_WARNING the event name shall be LogWarning. ]*/
             /* Codes_SRS_LOG_SINK_ETW_01_021: [ If log_level is LOG_LEVEL_WARNING the ETW logging level shall be TRACE_LEVEL_WARNING. ]*/
-            internal_emit_self_described_event(event_name_warning, sizeof(event_name_warning), TRACE_LEVEL_WARNING, value_pairs, values_count, message_format, file, func, line);
+            internal_emit_self_described_event(event_name_warning, sizeof(event_name_warning), TRACE_LEVEL_WARNING, value_pairs, values_count, message_format, file, func, line, args);
             break;
         case LOG_LEVEL_INFO:
             /* Codes_SRS_LOG_SINK_ETW_01_015: [ If log_level is LOG_LEVEL_INFO the event name shall be LogInfo. ]*/
             /* Codes_SRS_LOG_SINK_ETW_01_022: [ If log_level is LOG_LEVEL_INFO the ETW logging level shall be TRACE_LEVEL_INFO. ]*/
-            internal_emit_self_described_event(event_name_info, sizeof(event_name_info), TRACE_LEVEL_INFORMATION, value_pairs, values_count, message_format, file, func, line);
+            internal_emit_self_described_event(event_name_info, sizeof(event_name_info), TRACE_LEVEL_INFORMATION, value_pairs, values_count, message_format, file, func, line, args);
             break;
         case LOG_LEVEL_VERBOSE:
             /* Codes_SRS_LOG_SINK_ETW_01_016: [ If log_level is LOG_LEVEL_VERBOSE the event name shall be LogVerbose. ]*/
             /* Codes_SRS_LOG_SINK_ETW_01_023: [ If log_level is LOG_LEVEL_VERBOSE the ETW logging level shall be TRACE_LEVEL_VERBOSE. ]*/
-            internal_emit_self_described_event(event_name_verbose, sizeof(event_name_verbose), TRACE_LEVEL_VERBOSE, value_pairs, values_count, message_format, file, func, line);
+            internal_emit_self_described_event(event_name_verbose, sizeof(event_name_verbose), TRACE_LEVEL_VERBOSE, value_pairs, values_count, message_format, file, func, line, args);
             break;
         }
+
+        va_end(args);
     }
 }
 

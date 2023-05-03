@@ -115,6 +115,7 @@ typedef struct _tlgWriteTransfer_EventWriteTransfer_CALL_TAG
     TLG_STATUS call_result;
     SELF_DESCRIBED_EVENT* expected_self_described_event;
     uint32_t expected_cData;
+    const EVENT_DATA_DESCRIPTOR* expected_pData;
 } _tlgWriteTransfer_EventWriteTransfer_CALL;
 
 typedef struct MOCK_CALL_TAG
@@ -132,6 +133,35 @@ typedef struct MOCK_CALL_TAG
         _tlgWriteTransfer_EventWriteTransfer_CALL _tlgWriteTransfer_EventWriteTransfer_call;
     } u;
 } MOCK_CALL;
+
+static char* stringify_bytes(const unsigned char* bytes, size_t byte_count)
+{
+    size_t i;
+    size_t pos = 0;
+    size_t stringified_length = 3 + (byte_count * 4);
+    char* result;
+
+    if (byte_count > 0)
+    {
+        stringified_length += (byte_count - 1);
+    }
+
+    result = malloc(stringified_length);
+    if (result != NULL)
+    {
+        result[pos++] = '[';
+
+        for (i = 0; i < byte_count; i++)
+        {
+            int sprintf_result = sprintf(&result[pos], "0x%02X%s", bytes[i], (i < byte_count - 1) ? "," : "");
+            pos += sprintf_result;
+        }
+        result[pos++] = ']';
+        result[pos] = '\0';
+    }
+
+    return result;
+}
 
 static MOCK_CALL expected_calls[MAX_MOCK_CALL_COUNT];
 static size_t expected_call_count;
@@ -435,26 +465,45 @@ errno_t mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvide
                 actual_and_expected_match = false;
                 result = E_FAIL;
             }
-            else if (memcmp(expected_self_described_event->metadata, actual_self_described_event->metadata, actual_self_described_event->_tlgEvtMetaSize) != 0)
+            else if (memcmp(expected_self_described_event->metadata, actual_self_described_event->metadata, actual_self_described_event->_tlgEvtMetaSize - 4) != 0)
             {
-                (void)printf("Event metadata does not match\r\n");
+                char* expected_bytes_as_string = stringify_bytes(expected_self_described_event->metadata, actual_self_described_event->_tlgEvtMetaSize);
+                char* actual_bytes_as_string = stringify_bytes(actual_self_described_event->metadata, actual_self_described_event->_tlgEvtMetaSize);
+                (void)printf("Event metadata does not match:\r\n Expected:%s\r\n Actual  :%s\r\n", expected_bytes_as_string, actual_bytes_as_string);
+                free(expected_bytes_as_string);
+                free(actual_bytes_as_string);
                 actual_and_expected_match = false;
                 result = E_FAIL;
             }
             else if (cData != expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_cData)
             {
-                (void)printf("Expected cData=%" PRIu32 ", actual=%" PRIu32"\r\n",
+                (void)printf("Expected cData=%" PRIu32 ", actual=%" PRIu32 "\r\n",
                     expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_cData, cData);
                 actual_and_expected_match = false;
                 result = E_FAIL;
             }
             else
             {
+                // only compare starting at the index 2
+                for (uint32_t i = 2; i < cData; i++)
+                {
+                    if (pData[i].Size != expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_pData[i].Size)
+                    {
+                        (void)printf("Expected pData[%" PRIu32 "].Size=%" PRIu32 ", actual=%" PRIu32 "\r\n",
+                            i, expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_pData[i].Size, pData[i].Size);
+                        break;
+                    }
+                    if (memcmp((void*)pData[i].Ptr, (void*)expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_pData[i].Ptr, pData[i].Size) != 0)
+                    {
+                        (void)printf("Event descriptor memory at index %" PRIu32 " does not match\r\n",
+                            i);
+                        break;
+                    }
+                }
+
                 (void)hProvider;
                 (void)pActivityId;
                 (void)pRelatedActivityId;
-                (void)cData;
-                (void)pData;
                 result = S_OK;
             }
         }
@@ -538,12 +587,13 @@ static void setup_EventDataDescCreate(void)
     expected_call_count++;
 }
 
-static void setup__tlgWriteTransfer_EventWriteTransfer(void* event_metadata, uint32_t cData)
+static void setup__tlgWriteTransfer_EventWriteTransfer(void* event_metadata, uint32_t cData, const EVENT_DATA_DESCRIPTOR* pData)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE__tlgWriteTransfer_EventWriteTransfer;
     expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.override_result = false;
     expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_self_described_event = event_metadata;
     expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_cData = cData;
+    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_pData = pData;
     expected_call_count++;
 }
 
@@ -663,10 +713,24 @@ static void test_message_with_level(LOG_LEVEL log_level, uint8_t expected_tlg_le
     *pos = TlgInINT32;
     pos++;
     expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;
-    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6);
+
+    int captured_line = __LINE__;
+
+    // construct event data descriptor array
+    EVENT_DATA_DESCRIPTOR expected_event_data_descriptors[6] =
+    {
+        { 0 },
+        { 0 },
+        {.Size = (ULONG)strlen("test") + 1, .Ptr = (ULONGLONG)"test" },
+        {.Size = (ULONG)strlen(__FILE__) + 1, .Ptr = (ULONGLONG)__FILE__ },
+        {.Size = (ULONG)strlen(__FUNCTION__) + 1, .Ptr = (ULONGLONG)__FUNCTION__ },
+        {.Size = sizeof(int32_t), .Ptr = (ULONGLONG) & captured_line}
+    };
+
+    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log_sink_log(log_level, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
+    log_sink_etw.log_sink_log(log_level, NULL, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -717,76 +781,78 @@ static void log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds(void)
 }
 
 /* Tests_SRS_LOG_SINK_ETW_01_040: [ log_sink_etw.log_sink_log shall set event data descriptor at index 2 by calling _tlgCreate1Sz_char with the value of the formatted message as obtained by using printf with the messages format message_format and the arguments in .... ]*/
-static void test_formatted_message_with_level(LOG_LEVEL log_level, uint8_t expected_tlg_level, const char* expected_event_name, const char* expected_message, const char* message_format, ...)
-{
-    (void)expected_message;
-    (void)message_format;
-
-    // arrange
-    setup_enabled_provider(TRACE_LEVEL_VERBOSE);
-
-    setup_mocks();
-    setup_InterlockedCompareExchange_call();
-    setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
-    setup__tlgCreate1Sz_char(); // func
-    setup_EventDataDescCreate(); // func
-    uint8_t extra_metadata_bytes[256];
-    uint8_t expected_event_bytes[sizeof(SELF_DESCRIBED_EVENT) + sizeof(extra_metadata_bytes)];
-    SELF_DESCRIBED_EVENT* expected_event_metadata = (SELF_DESCRIBED_EVENT*)&expected_event_bytes[0];
-    (void)memset(expected_event_metadata, 0, sizeof(SELF_DESCRIBED_EVENT));
-    expected_event_metadata->_tlgLevel = expected_tlg_level;
-    expected_event_metadata->_tlgChannel = 11;
-    expected_event_metadata->_tlgOpcode = 0;
-    expected_event_metadata->_tlgKeyword = 0;
-    uint8_t* pos = (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT));
-    // event name
-    (void)memcpy(pos, expected_event_name, strlen(expected_event_name) + 1);
-    pos += strlen(expected_event_name) + 1;
-    // content field
-    (void)memcpy(pos, "content", strlen("content") + 1);
-    pos += strlen("content") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "file", strlen("file") + 1);
-    pos += strlen("file") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "func", strlen("func") + 1);
-    pos += strlen("func") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "line", strlen("line") + 1);
-    pos += strlen("line") + 1;
-    *pos = TlgInINT32;
-    pos++;
-    expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;
-
-    // construct event data descriptor array
-    EVENT_DATA_DESCRIPTOR expected_event_data_descriptors[6] =
-    {
-        { 0 },
-        { 0 },
-        { .Size = strlen(expected_event_name),.Ptr = expected_event_name }
-    };
-
-    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6);
-
-    // act
-    log_sink_etw.log_sink_log(log_level, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
-
-    // assert
-    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(actual_and_expected_match);
+#define TEST_FORMATTED_MESSAGE_WITH_LEVEL(log_level, expected_tlg_level, expected_event_name, expected_message, message_format, ...) \
+{                                                                                                                                    \
+    /* arrange */                                                                                                                    \
+    setup_enabled_provider(TRACE_LEVEL_VERBOSE);                                                                                     \
+                                                                                                                                     \
+    setup_mocks();                                                                                                                   \
+    setup_InterlockedCompareExchange_call();                                                                                         \
+    setup__tlgCreate1Sz_char(); /* message */                                                                                        \
+    setup__tlgCreate1Sz_char(); /* file */                                                                                           \
+    setup__tlgCreate1Sz_char(); /* func */                                                                                           \
+    setup_EventDataDescCreate(); /* func */                                                                                          \
+    uint8_t extra_metadata_bytes[256];                                                                                               \
+    uint8_t expected_event_bytes[sizeof(SELF_DESCRIBED_EVENT) + sizeof(extra_metadata_bytes)];                                       \
+    SELF_DESCRIBED_EVENT* expected_event_metadata = (SELF_DESCRIBED_EVENT*)&expected_event_bytes[0];                                 \
+    (void)memset(expected_event_metadata, 0, sizeof(SELF_DESCRIBED_EVENT));                                                          \
+    expected_event_metadata->_tlgLevel = expected_tlg_level;                                                                         \
+    expected_event_metadata->_tlgChannel = 11;                                                                                       \
+    expected_event_metadata->_tlgOpcode = 0;                                                                                         \
+    expected_event_metadata->_tlgKeyword = 0;                                                                                        \
+    uint8_t* pos = (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT));                                                            \
+    /* event name */                                                                                                                 \
+    (void)memcpy(pos, expected_event_name, strlen(expected_event_name) + 1);                                                         \
+    pos += strlen(expected_event_name) + 1;                                                                                          \
+    /* content field */                                                                                                              \
+    (void)memcpy(pos, "content", strlen("content") + 1);                                                                             \
+    pos += strlen("content") + 1;                                                                                                    \
+    *pos = TlgInANSISTRING;                                                                                                          \
+    pos++;                                                                                                                           \
+    /* content field */                                                                                                              \
+    (void)memcpy(pos, "file", strlen("file") + 1);                                                                                   \
+    pos += strlen("file") + 1;                                                                                                       \
+    *pos = TlgInANSISTRING;                                                                                                          \
+    pos++;                                                                                                                           \
+    /* content field */                                                                                                              \
+    (void)memcpy(pos, "func", strlen("func") + 1);                                                                                   \
+    pos += strlen("func") + 1;                                                                                                       \
+    *pos = TlgInANSISTRING;                                                                                                          \
+    pos++;                                                                                                                           \
+    /* content field */                                                                                                              \
+    (void)memcpy(pos, "line", strlen("line") + 1);                                                                                   \
+    pos += strlen("line") + 1;                                                                                                       \
+    *pos = TlgInINT32;                                                                                                               \
+    pos++;                                                                                                                           \
+    expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;          \
+                                                                                                                                     \
+    int captured_line = __LINE__;                                                                                                    \
+                                                                                                                                     \
+    /* construct event data descriptor array */                                                                                      \
+    EVENT_DATA_DESCRIPTOR expected_event_data_descriptors[6] =                                                                       \
+    {                                                                                                                                \
+        { 0 },                                                                                                                       \
+        { 0 },                                                                                                                       \
+        { .Size = (ULONG)strlen(expected_message) + 1, .Ptr = (ULONGLONG)expected_message},                                          \
+        {.Size = (ULONG)strlen(__FILE__) + 1, .Ptr = (ULONGLONG)__FILE__ },                                                          \
+        {.Size = (ULONG)strlen(__FUNCTION__) + 1, .Ptr = (ULONGLONG)__FUNCTION__ },                                                  \
+        {.Size = sizeof(int32_t), .Ptr = (ULONGLONG)&captured_line}                                                                  \
+    };                                                                                                                               \
+                                                                                                                                     \
+    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);                         \
+                                                                                                                                     \
+    /* act */                                                                                                                        \
+    log_sink_etw.log_sink_log(log_level, NULL, __FILE__, __FUNCTION__, captured_line, message_format, __VA_ARGS__);                  \
+                                                                                                                                     \
+    /* assert */                                                                                                                     \
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);                                                                      \
+    POOR_MANS_ASSERT(actual_and_expected_match);                                                                                     \
 }
 
 /* Tests_SRS_LOG_SINK_ETW_01_040: [ log_sink_etw.log_sink_log shall set event data descriptor at index 2 by calling _tlgCreate1Sz_char with the value of the formatted message as obtained by using printf with the messages format message_format and the arguments in .... ]*/
 static void log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds(void)
 {
-    test_formatted_message_with_level(LOG_LEVEL_CRITICAL, TRACE_LEVEL_CRITICAL, "LogCritical", "test_value=42", "test_value=%d", 42);
+    TEST_FORMATTED_MESSAGE_WITH_LEVEL(LOG_LEVEL_CRITICAL, TRACE_LEVEL_CRITICAL, "LogCritical", "test_value=42", "test_value=%d", 42);
 }
 
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
