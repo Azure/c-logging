@@ -158,7 +158,7 @@ Note this can (and should) be improved to be configurable later.
 
   - **SRS_LOG_SINK_ETW_01_056: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_struct`, a byte with the value `_TlgInSTRUCT | _TlgInChain` shall be added in the metadata. **]**
 
-  - If the property type is any other value, no property data shall be added to the event.
+  - **SRS_LOG_SINK_ETW_01_081: [** If the property type is any other value, no property data shall be added to the event. **]**
 
 - **SRS_LOG_SINK_ETW_01_057: [** If the property is a struct, an extra byte shall be added in the metadata containing the number of fields in the structure. **]**
 

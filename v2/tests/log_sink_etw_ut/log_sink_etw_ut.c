@@ -40,7 +40,8 @@ static size_t asserts_failed = 0;
     MOCK_CALL_TYPE__get_pgmptr, \
     MOCK_CALL_TYPE__tlgCreate1Sz_char, \
     MOCK_CALL_TYPE_EventDataDescCreate, \
-    MOCK_CALL_TYPE__tlgWriteTransfer_EventWriteTransfer
+    MOCK_CALL_TYPE__tlgWriteTransfer_EventWriteTransfer, \
+    MOCK_CALL_TYPE_log_context_property_if_get_type
 
 MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
 
@@ -118,6 +119,12 @@ typedef struct _tlgWriteTransfer_EventWriteTransfer_CALL_TAG
     const EVENT_DATA_DESCRIPTOR* expected_pData;
 } _tlgWriteTransfer_EventWriteTransfer_CALL;
 
+typedef struct log_context_property_if_get_type_CALL_TAG
+{
+    bool override_result;
+    LOG_CONTEXT_PROPERTY_TYPE call_result;
+} log_context_property_if_get_type_CALL;
+
 typedef struct MOCK_CALL_TAG
 {
     MOCK_CALL_TYPE mock_call_type;
@@ -131,6 +138,7 @@ typedef struct MOCK_CALL_TAG
         TraceLoggingRegister_EventRegister_EventSetInformation_CALL TraceLoggingRegister_EventRegister_EventSetInformation_call;
         _get_pgmptr_CALL _get_pgmptr_call;
         _tlgWriteTransfer_EventWriteTransfer_CALL _tlgWriteTransfer_EventWriteTransfer_call;
+        log_context_property_if_get_type_CALL log_context_property_if_get_type_call;
     } u;
 } MOCK_CALL;
 
@@ -514,6 +522,33 @@ errno_t mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvide
     return result;
 }
 
+LOG_CONTEXT_PROPERTY_TYPE mock_log_context_property_if_get_type(void)
+{
+    LOG_CONTEXT_PROPERTY_TYPE result;
+
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_log_context_property_if_get_type))
+    {
+        actual_and_expected_match = false;
+        result = (LOG_CONTEXT_PROPERTY_TYPE)0xFF;
+    }
+    else
+    {
+        if (expected_calls[actual_call_count].u.log_context_property_if_get_type_call.override_result)
+        {
+            result = expected_calls[actual_call_count].u.log_context_property_if_get_type_call.call_result;
+        }
+        else
+        {
+            result = (LOG_CONTEXT_PROPERTY_TYPE)0xFF;
+        }
+
+        actual_call_count++;
+    }
+
+    return result;
+}
+
 #define POOR_MANS_ASSERT(cond) \
     if (!(cond)) \
     { \
@@ -594,6 +629,13 @@ static void setup__tlgWriteTransfer_EventWriteTransfer(void* event_metadata, uin
     expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_self_described_event = event_metadata;
     expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_cData = cData;
     expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_pData = pData;
+    expected_call_count++;
+}
+
+static void setup_log_context_property_if_get_type(void)
+{
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_log_context_property_if_get_type;
+    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.override_result = false;
     expected_call_count++;
 }
 
@@ -1264,6 +1306,102 @@ static void log_sink_etw_log_with_context_with_one_uint8_t_property_succeeds(voi
     LOG_CONTEXT_DESTROY(log_context);
 }
 
+/* Tests_SRS_LOG_SINK_ETW_01_081: [ If the property type is any other value, no property data shall be added to the event. ]*/
+static void when_unknown_property_type_is_encountered_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event(void)
+{
+    // arrange
+    LOG_CONTEXT_HANDLE log_context;
+
+    LOG_CONTEXT_CREATE(log_context, NULL,
+        LOG_CONTEXT_PROPERTY(uint8_t, gigi, 42)
+    );
+
+    setup_enabled_provider(TRACE_LEVEL_VERBOSE);
+
+    setup_mocks();
+    setup_InterlockedCompareExchange_call();
+    setup_log_context_get_property_value_pairs_call();
+    setup_log_context_get_property_value_pair_count_call();
+    setup_log_context_property_if_get_type(); // one mocked call to get_type
+    setup__tlgCreate1Sz_char(); // message
+    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // func
+    setup_EventDataDescCreate(); // line
+    uint8_t extra_metadata_bytes[256];
+    uint8_t expected_event_bytes[sizeof(SELF_DESCRIBED_EVENT) + sizeof(extra_metadata_bytes)];
+    SELF_DESCRIBED_EVENT* expected_event_metadata = (SELF_DESCRIBED_EVENT*)&expected_event_bytes[0];
+    (void)memset(expected_event_metadata, 0, sizeof(SELF_DESCRIBED_EVENT));
+    expected_event_metadata->_tlgLevel = TRACE_LEVEL_VERBOSE;
+    expected_event_metadata->_tlgChannel = 11;
+    expected_event_metadata->_tlgOpcode = 0;
+    expected_event_metadata->_tlgKeyword = 0;
+    uint8_t* pos = (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT));
+    // event name
+    (void)memcpy(pos, "LogVerbose", strlen("LogVerbose") + 1);
+    pos += strlen("LogVerbose") + 1;
+    // content field
+    (void)memcpy(pos, "content", strlen("content") + 1);
+    pos += strlen("content") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "file", strlen("file") + 1);
+    pos += strlen("file") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "func", strlen("func") + 1);
+    pos += strlen("func") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "line", strlen("line") + 1);
+    pos += strlen("line") + 1;
+    *pos = TlgInINT32;
+    pos++;
+
+    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* log_context_property_value_pairs = log_context_get_property_value_pairs(log_context);
+    LOG_CONTEXT_PROPERTY_VALUE_PAIR* mocked_property_value_pairs = malloc(sizeof(LOG_CONTEXT_PROPERTY_VALUE_PAIR) * 2);
+    POOR_MANS_ASSERT(mocked_property_value_pairs != NULL);
+
+    LOG_CONTEXT_PROPERTY_TYPE_IF mocked_property_type_if;
+    mocked_property_type_if.get_type = mock_log_context_property_if_get_type;
+
+    (void)memcpy(mocked_property_value_pairs, log_context_property_value_pairs, sizeof(LOG_CONTEXT_PROPERTY_VALUE_PAIR) * 2);
+
+    // hard injecting a mock here :-)
+    mocked_property_value_pairs[1].type = &mocked_property_type_if;
+
+    expected_calls[1].u.log_context_get_property_value_pairs_call.override_result = true;
+    expected_calls[1].u.log_context_get_property_value_pairs_call.call_result = mocked_property_value_pairs;
+
+    expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;
+
+    int captured_line = __LINE__;
+
+    // construct event data descriptor array
+    EVENT_DATA_DESCRIPTOR expected_event_data_descriptors[7] =
+    {
+        { 0 },
+        { 0 },
+        {.Size = (ULONG)strlen("test") + 1, .Ptr = (ULONGLONG)"test" },
+        {.Size = (ULONG)strlen(__FILE__) + 1, .Ptr = (ULONGLONG)__FILE__ },
+        {.Size = (ULONG)strlen(__FUNCTION__) + 1, .Ptr = (ULONGLONG)__FUNCTION__ },
+        {.Size = sizeof(int32_t), .Ptr = (ULONGLONG)&captured_line}
+    };
+
+    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);
+
+    // act
+    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "test");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    LOG_CONTEXT_DESTROY(log_context);
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
@@ -1286,7 +1424,8 @@ int main(void)
     //log_sink_etw_log_with_context_with_one_uint32_t_property_succeeds();
     //log_sink_etw_log_with_context_with_one_int16_t_property_succeeds();
     //log_sink_etw_log_with_context_with_one_uint16_t_property_succeeds();
-    log_sink_etw_log_with_context_with_one_int8_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_int8_t_property_succeeds();
+    when_unknown_property_type_is_encountered_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
 
     return asserts_failed;
 }
