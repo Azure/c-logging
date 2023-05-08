@@ -1264,6 +1264,238 @@ static void log_sink_etw_log_with_context_with_one_uint8_t_property_succeeds(voi
     LOG_CONTEXT_DESTROY(log_context);
 }
 
+static void test_message_with_context_with_multiple_properties(LOG_LEVEL log_level, uint8_t expected_tlg_level, const char* expected_event_name, LOG_CONTEXT_HANDLE log_context, const char* expected_context_name, uint8_t property_count)
+{
+    // arrange
+    setup_enabled_provider(TRACE_LEVEL_VERBOSE);
+
+    setup_mocks();
+    setup_InterlockedCompareExchange_call();
+    setup_log_context_get_property_value_pairs_call();
+    setup_log_context_get_property_value_pair_count_call();
+    setup__tlgCreate1Sz_char(); // message
+    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // func
+    setup_EventDataDescCreate(); // line
+    uint8_t extra_metadata_bytes[256];
+    uint8_t expected_event_bytes[sizeof(SELF_DESCRIBED_EVENT) + sizeof(extra_metadata_bytes)];
+    SELF_DESCRIBED_EVENT* expected_event_metadata = (SELF_DESCRIBED_EVENT*)&expected_event_bytes[0];
+    (void)memset(expected_event_metadata, 0, sizeof(SELF_DESCRIBED_EVENT));
+    expected_event_metadata->_tlgLevel = expected_tlg_level;
+    expected_event_metadata->_tlgChannel = 11;
+    expected_event_metadata->_tlgOpcode = 0;
+    expected_event_metadata->_tlgKeyword = 0;
+    uint8_t* pos = (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT));
+    // event name
+    (void)memcpy(pos, expected_event_name, strlen(expected_event_name) + 1);
+    pos += strlen(expected_event_name) + 1;
+    // content field
+    (void)memcpy(pos, "content", strlen("content") + 1);
+    pos += strlen("content") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "file", strlen("file") + 1);
+    pos += strlen("file") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "func", strlen("func") + 1);
+    pos += strlen("func") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "line", strlen("line") + 1);
+    pos += strlen("line") + 1;
+    *pos = TlgInINT32;
+    pos++;
+
+    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* log_context_property_value_pairs = log_context_get_property_value_pairs(log_context);
+
+    // content field
+    (void)memcpy(pos, expected_context_name, strlen(expected_context_name) + 1);
+    pos += strlen(expected_context_name) + 1;
+    *pos = _TlgInSTRUCT | _TlgInChain;
+    pos++;
+    *pos = property_count;
+    pos++;
+
+    for (uint32_t i = 0; i < property_count; i++)
+    {
+        (void)memcpy(pos, log_context_property_value_pairs[i + 1].name, strlen(log_context_property_value_pairs[i + 1].name) + 1);
+        pos += strlen(log_context_property_value_pairs[i + 1].name) + 1;
+        switch (log_context_property_value_pairs[i + 1].type->get_type())
+        {
+        default:
+            break;
+        case LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr:
+        {
+            setup__tlgCreate1Sz_char();
+            *pos = TlgInANSISTRING;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_int64_t:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInINT64;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_uint64_t:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInUINT64;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_int32_t:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInINT32;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_uint32_t:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInUINT32;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_int16_t:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInINT16;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_uint16_t:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInUINT16;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_int8_t:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInINT8;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_uint8_t:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInUINT8;
+            break;
+        }
+        }
+        pos++;
+    }
+
+    expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;
+
+    int captured_line = __LINE__;
+
+    // construct event data descriptor array
+    EVENT_DATA_DESCRIPTOR* expected_event_data_descriptors = malloc(sizeof(EVENT_DATA_DESCRIPTOR) * (6 + property_count));
+    POOR_MANS_ASSERT(expected_event_data_descriptors != NULL);
+    (void)memset(expected_event_data_descriptors, 0, sizeof(EVENT_DATA_DESCRIPTOR) * (6 + property_count));
+    expected_event_data_descriptors[2].Size = (ULONG)strlen("test") + 1;
+    expected_event_data_descriptors[2].Ptr = (ULONGLONG)"test";
+    expected_event_data_descriptors[3].Size = (ULONG)strlen(__FILE__) + 1;
+    expected_event_data_descriptors[3].Ptr = (ULONGLONG)__FILE__;
+    expected_event_data_descriptors[4].Size = (ULONG)strlen(__FUNCTION__) + 1;
+    expected_event_data_descriptors[4].Ptr = (ULONGLONG)__FUNCTION__;
+    expected_event_data_descriptors[5].Size = sizeof(int32_t);
+    expected_event_data_descriptors[5].Ptr = (ULONGLONG)&captured_line;
+
+    for (uint32_t i = 0; i < property_count; i++)
+    {
+        ULONG expected_property_size;
+        switch (log_context_property_value_pairs[i + 1].type->get_type())
+        {
+        default:
+            expected_property_size = 0;
+            break;
+
+        case LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr:
+        {
+            expected_property_size = (ULONG)(strlen(log_context_property_value_pairs[i + 1].value) + 1);
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_int64_t:
+        {
+            expected_property_size = sizeof(int64_t);
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_uint64_t:
+        {
+            expected_property_size = sizeof(uint64_t);
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_int32_t:
+        {
+            expected_property_size = sizeof(int32_t);
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_uint32_t:
+        {
+            expected_property_size = sizeof(uint32_t);
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_int16_t:
+        {
+            expected_property_size = sizeof(int16_t);
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_uint16_t:
+        {
+            expected_property_size = sizeof(uint16_t);
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_int8_t:
+        {
+            expected_property_size = sizeof(int8_t);
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_uint8_t:
+        {
+            expected_property_size = sizeof(uint8_t);
+            break;
+        }
+        }
+        expected_event_data_descriptors[6 + i].Size = expected_property_size;
+        expected_event_data_descriptors[6 + i].Ptr = (ULONGLONG)log_context_property_value_pairs[i + 1].value;
+
+    }
+
+    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6 + property_count, expected_event_data_descriptors);
+
+    // act
+    log_sink_etw.log_sink_log(log_level, log_context, __FILE__, __FUNCTION__, captured_line, "test");
+
+    free(expected_event_data_descriptors);
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
+static void log_sink_etw_log_with_context_with_all_property_types_succeeds(void)
+{
+    LOG_CONTEXT_HANDLE log_context;
+
+    LOG_CONTEXT_CREATE(log_context, NULL,
+        LOG_CONTEXT_STRING_PROPERTY(prop1, "haha"),
+        LOG_CONTEXT_PROPERTY(int64_t, prop2, 42),
+        LOG_CONTEXT_PROPERTY(uint64_t, prop3, 43),
+        LOG_CONTEXT_PROPERTY(int32_t, prop4, 44),
+        LOG_CONTEXT_PROPERTY(uint32_t, prop5, 45),
+        LOG_CONTEXT_PROPERTY(int16_t, prop6, 46),
+        LOG_CONTEXT_PROPERTY(uint16_t, prop7, 47),
+        LOG_CONTEXT_PROPERTY(int8_t, prop8, 48),
+        LOG_CONTEXT_PROPERTY(uint8_t, prop9, 49)
+        );
+
+    test_message_with_context_with_multiple_properties(LOG_LEVEL_VERBOSE, TRACE_LEVEL_VERBOSE, "LogVerbose", log_context, "", 9);
+
+    LOG_CONTEXT_DESTROY(log_context);
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
@@ -1286,7 +1518,9 @@ int main(void)
     //log_sink_etw_log_with_context_with_one_uint32_t_property_succeeds();
     //log_sink_etw_log_with_context_with_one_int16_t_property_succeeds();
     //log_sink_etw_log_with_context_with_one_uint16_t_property_succeeds();
-    log_sink_etw_log_with_context_with_one_int8_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_int8_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_uint8_t_property_succeeds();
+    log_sink_etw_log_with_context_with_all_property_types_succeeds();
 
     return asserts_failed;
 }

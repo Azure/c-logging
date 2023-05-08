@@ -50,7 +50,7 @@ If the state is `REGISTERING` `log_sink_etw_log` shall wait until the state is n
 
 `log_sink_etw_log` shall use as provider GUID `DAD29F36-0A48-4DEF-9D50-8EF9036B92B4`.
 
-Note this can (and should) be improved to be configurable later.
+Note this can (and should) be improved to be configurable in a subsequent task.
 
 **SRS_LOG_SINK_ETW_01_010: [** `log_sink_etw_log` shall emit a self described event that shall have the name of the event as follows: **]**
 
