@@ -82,13 +82,13 @@ Note this can (and should) be improved to be configurable later.
 
 - **SRS_LOG_SINK_ETW_01_025: [** If `log_context` is `NULL` only the fields `content`, `file`, `func` and `line` shall be added to the ETW event. **]**
 
-- If `log_context` is not `NULL`:
+- **SRS_LOG_SINK_ETW_01_048: [** If `log_context` is not `NULL`: **]**
 
-`log_sink_etw.log_sink_log` shall call `log_context_get_property_value_pair_count` to obtain the count of properties that are to be added to the ETW event.
+  - **SRS_LOG_SINK_ETW_01_049: [** `log_sink_etw.log_sink_log` shall call `log_context_get_property_value_pair_count` to obtain the count of properties that are to be added to the ETW event. **]**
 
-`log_sink_etw.log_sink_log` shall call `log_context_get_property_value_pairs` to obtain the properties that are to be added to the ETW event.
+  - **SRS_LOG_SINK_ETW_01_050: [** `log_sink_etw.log_sink_log` shall call `log_context_get_property_value_pairs` to obtain the properties that are to be added to the ETW event. **]**
 
-`log_sink_etw.log_sink_log` shall limit the number of properties that are emitted in the ETW event to 64.
+  - `log_sink_etw.log_sink_log` shall limit the number of properties that are emitted in the ETW event to 64.
 
 **SRS_LOG_SINK_ETW_01_042: [** `log_sink_etw.log_sink_log` shall compute the metadata size for the self described event metadata as follows: **]**
 
@@ -102,9 +102,9 @@ Note this can (and should) be improved to be configurable later.
 
 - **SRS_LOG_SINK_ETW_01_047: [** Length of the `line` field name (determined at compile time, excluding zero terminator) + 1. **]**
 
-- For each property in `log_context`, the length of the property name + 1 and one extra byte for the type of the field.
+- **SRS_LOG_SINK_ETW_01_051: [** For each property in `log_context`, the length of the property name + 1 and one extra byte for the type of the field. **]**
 
-- For struct properties one extra byte shall be added for the field count.
+- **SRS_LOG_SINK_ETW_01_052: [** For struct properties one extra byte shall be added for the field count. **]**
 
 **SRS_LOG_SINK_ETW_01_026: [** `log_sink_etw.log_sink_log` shall fill a `SELF_DESCRIBED_EVENT` structure, setting the following fields: **]**
 
@@ -132,35 +132,35 @@ Note this can (and should) be improved to be configurable later.
 
 - **SRS_LOG_SINK_ETW_01_038: [** The string `line` (as field name, excluding zero terminator), followed by one byte with the value `TlgInINT32`. **]**
 
-For each property in `log_context` the following shall be added to the event metadata:
+**SRS_LOG_SINK_ETW_01_053: [** For each property in `log_context` the following shall be added to the event metadata: **]**
 
-- A string with the property name (excluding zero terminator)
+- **SRS_LOG_SINK_ETW_01_054: [** A string with the property name (including zero terminator) **]**
 
-- A byte with the type of property, as follows:
+- **SRS_LOG_SINK_ETW_01_055: [** A byte with the type of property, as follows: **]**
 
-  - If the property type is `LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr`, a byte with the value `TlgInANSISTRING` shall be added in the metadata.
+  - **SRS_LOG_SINK_ETW_01_063: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr`, a byte with the value `TlgInANSISTRING` shall be added in the metadata. **]**
 
-  - If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int64_t`, a byte with the value `TlgInINT64` shall be added in the metadata.
+  - **SRS_LOG_SINK_ETW_01_064: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int64_t`, a byte with the value `TlgInINT64` shall be added in the metadata. **]**
 
-  - If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint64_t`, a byte with the value `TlgInUINT64` shall be added in the metadata.
+  - **SRS_LOG_SINK_ETW_01_065: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint64_t`, a byte with the value `TlgInUINT64` shall be added in the metadata. **]**
 
-  - If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int32_t`, a byte with the value `TlgInINT32` shall be added in the metadata.
+  - **SRS_LOG_SINK_ETW_01_069: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int32_t`, a byte with the value `TlgInINT32` shall be added in the metadata. **]**
 
-  - If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint32_t`, a byte with the value `TlgInUINT32` shall be added in the metadata.
+  - **SRS_LOG_SINK_ETW_01_071: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint32_t`, a byte with the value `TlgInUINT32` shall be added in the metadata. **]**
 
-  - If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int16_t`, a byte with the value `TlgInINT16` shall be added in the metadata.
+  - **SRS_LOG_SINK_ETW_01_073: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int16_t`, a byte with the value `TlgInINT16` shall be added in the metadata. **]**
 
-  - If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint16_t`, a byte with the value `TlgInUINT16` shall be added in the metadata.
+  - **SRS_LOG_SINK_ETW_01_075: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint16_t`, a byte with the value `TlgInUINT16` shall be added in the metadata. **]**
 
-  - If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int8_t`, a byte with the value `TlgInINT8` shall be added in the metadata.
+  - **SRS_LOG_SINK_ETW_01_077: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int8_t`, a byte with the value `TlgInINT8` shall be added in the metadata. **]**
 
-  - If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint8_t`, a byte with the value `TlgInUINT8` shall be added in the metadata.
+  - **SRS_LOG_SINK_ETW_01_079: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint8_t`, a byte with the value `TlgInUINT8` shall be added in the metadata. **]**
 
-  - If the property type is `LOG_CONTEXT_PROPERTY_TYPE_struct`, a byte with the value `_TlgInSTRUCT | _TlgInChain` shall be added in the metadata.
+  - **SRS_LOG_SINK_ETW_01_056: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_struct`, a byte with the value `_TlgInSTRUCT | _TlgInChain` shall be added in the metadata. **]**
 
   - If the property type is any other value, no property data shall be added to the event.
 
-- If the property is a struct, an extra byte shall be added in the metadata containing the number of fields in the structure.
+- **SRS_LOG_SINK_ETW_01_057: [** If the property is a struct, an extra byte shall be added in the metadata containing the number of fields in the structure. **]**
 
 **SRS_LOG_SINK_ETW_01_039: [** `log_sink_etw.log_sink_log` shall fill an `EVENT_DATA_DESCRIPTOR` array of size `2 + 1 + 1 + 1 + 1 + property count`. **]**
 
@@ -168,31 +168,33 @@ Note: 2 entries are for the event descriptor and metadata respectively, 4 entrie
 
 **SRS_LOG_SINK_ETW_01_040: [** `log_sink_etw.log_sink_log` shall set event data descriptor at index 2 by calling `_tlgCreate1Sz_char` with the value of the formatted message as obtained by using `printf` with the messages format `message_format` and the arguments in `...`. **]**
 
-`log_sink_etw.log_sink_log` shall set event data descriptor at index 3 by calling `_tlgCreate1Sz_char` with `file`.
+**SRS_LOG_SINK_ETW_01_058: [** `log_sink_etw.log_sink_log` shall set event data descriptor at index 3 by calling `_tlgCreate1Sz_char` with `file`. **]**
 
-`log_sink_etw.log_sink_log` shall set event data descriptor at index 4 by calling `_tlgCreate1Sz_char` with `func`.
+**SRS_LOG_SINK_ETW_01_059: [** `log_sink_etw.log_sink_log` shall set event data descriptor at index 4 by calling `_tlgCreate1Sz_char` with `func`. **]**
 
-`log_sink_etw.log_sink_log` shall set event data descriptor at index 5 by calling `EventDataDescCreate` with `line`.
+**SRS_LOG_SINK_ETW_01_060: [** `log_sink_etw.log_sink_log` shall set event data descriptor at index 5 by calling `EventDataDescCreate` with `line`. **]**
 
-For each property in `log_context`:
+**SRS_LOG_SINK_ETW_01_061: [** For each property in `log_context`: **]**
 
-- If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int64_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`.
+- **SRS_LOG_SINK_ETW_01_067: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr`, the event data descriptor shall be filled with the value of the property by calling `_tlgCreate1Sz_char`. **]**
 
-- If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint64_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`.
+- **SRS_LOG_SINK_ETW_01_066: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int64_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`. **]**
 
-- If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int32_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`.
+- **SRS_LOG_SINK_ETW_01_068: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint64_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`. **]**
 
-- If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint32_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`.
+- **SRS_LOG_SINK_ETW_01_070: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int32_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`. **]**
 
-- If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int16_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`.
+- **SRS_LOG_SINK_ETW_01_072: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint32_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`. **]**
 
-- If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint16_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`.
+- **SRS_LOG_SINK_ETW_01_074: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int16_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`. **]**
 
-- If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int8_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`.
+- **SRS_LOG_SINK_ETW_01_076: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint16_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`. **]**
 
-- If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint8_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`.
+- **SRS_LOG_SINK_ETW_01_078: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int8_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`. **]**
 
-- If the property type is `LOG_CONTEXT_PROPERTY_TYPE_struct`, no event data descriptor shall be used.
+- **SRS_LOG_SINK_ETW_01_080: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint8_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`. **]**
+
+- **SRS_LOG_SINK_ETW_01_062: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_struct`, no event data descriptor shall be used. **]**
 
 **SRS_LOG_SINK_ETW_01_041: [** `log_sink_etw.log_sink_log` shall emit the event by calling `_tlgWriteTransfer_EventWriteTransfer` passing the provider, channel, number of event data descriptors and the data descriptor array. **]**
 
