@@ -48,7 +48,7 @@ If the state is `REGISTERING` `log_sink_etw_log` shall wait until the state is n
 
 **SRS_LOG_SINK_ETW_01_009: [** Checking and changing the variable that maintains whether `TraceLoggingRegister` was called shall be done using `InterlockedCompareExchange` and `InterlockedExchange`. **]**
 
-`log_sink_etw_log` shall use as provider GUID `DAD29F36-0A48-4DEF-9D50-8EF9036B92B4`.
+**SRS_LOG_SINK_ETW_01_084: [** `log_sink_etw_log` shall use as provider GUID `DAD29F36-0A48-4DEF-9D50-8EF9036B92B4`. **]**
 
 Note this can (and should) be improved to be configurable in a subsequent task.
 

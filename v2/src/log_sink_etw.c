@@ -18,6 +18,7 @@
 
 #define LOG_MAX_ETW_PROPERTY_VALUE_PAIR_COUNT 64
 
+/* Codes_SRS_LOG_SINK_ETW_01_084: [ log_sink_etw_log shall use as provider GUID DAD29F36-0A48-4DEF-9D50-8EF9036B92B4. ]*/
 TRACELOGGING_DEFINE_PROVIDER(
     g_my_component_provider,
     "block_storage_2",

@@ -107,6 +107,7 @@ typedef struct TraceLoggingRegister_EventRegister_EventSetInformation_CALL_TAG
     bool override_result;
     TLG_STATUS call_result;
     uint8_t enable_provider_level;
+    const char* expected_provider_id_as_string;
 } TraceLoggingRegister_EventRegister_EventSetInformation_CALL;
 
 typedef struct _get_pgmptr_CALL_TAG
@@ -358,10 +359,25 @@ TLG_STATUS mock_TraceLoggingRegister_EventRegister_EventSetInformation(const str
         {
             // save the provider globally
             test_provider = hProvider;
+            GUID provider_guid = TraceLoggingProviderId(hProvider);
+            char provider_guid_string[128];
 
-            result = TraceLoggingRegister_EventRegister_EventSetInformation(hProvider);
+            (void)sprintf(provider_guid_string, "%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X", provider_guid.Data1, provider_guid.Data2, provider_guid.Data3, provider_guid.Data4[0], provider_guid.Data4[1], provider_guid.Data4[2], provider_guid.Data4[3], provider_guid.Data4[4], provider_guid.Data4[5], provider_guid.Data4[6], provider_guid.Data4[7]);
 
-            ((struct _tlgProvider_t*)test_provider)->LevelPlus1 = expected_calls[actual_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.enable_provider_level + 1;
+            if (strcmp(provider_guid_string, expected_calls[actual_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.expected_provider_id_as_string) != 0)
+            {
+                (void)printf("Expected provider id to be %s, actual = %s",
+                    expected_calls[actual_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.expected_provider_id_as_string, provider_guid_string);
+                actual_and_expected_match = false;
+
+                result = E_FAIL;
+            }
+            else
+            {
+                result = TraceLoggingRegister_EventRegister_EventSetInformation(hProvider);
+
+                ((struct _tlgProvider_t*)test_provider)->LevelPlus1 = expected_calls[actual_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.enable_provider_level + 1;
+            }
         }
 
         actual_call_count++;
@@ -618,11 +634,12 @@ static void setup_log_context_get_property_value_pairs_call(void)
     expected_call_count++;
 }
 
-static void setup_TraceLoggingRegister_EventRegister_EventSetInformation_call(uint8_t enable_provider_level)
+static void setup_TraceLoggingRegister_EventRegister_EventSetInformation_call(const char* expected_provider_id_as_string, uint8_t enable_provider_level)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_TraceLoggingRegister_EventRegister_EventSetInformation;
     expected_calls[expected_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.override_result = false;
     expected_calls[expected_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.enable_provider_level = enable_provider_level;
+    expected_calls[expected_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.expected_provider_id_as_string = expected_provider_id_as_string;
     expected_call_count++;
 }
 
@@ -701,12 +718,13 @@ static void log_sink_etw_log_with_NULL_message_format_returns(void)
 /* Tests_SRS_LOG_SINK_ETW_01_009: [ Checking and changing the variable that maintains whether TraceLoggingRegister was called shall be done using InterlockedCompareExchange and InterlockedExchange. ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_010: [ log_sink_etw_log shall emit a self described event that shall have the name of the event as follows: ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_012: [ If log_level is LOG_LEVEL_CRITICAL the event name shall be LogCritical. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_084: [ log_sink_etw_log shall use as provider GUID DAD29F36-0A48-4DEF-9D50-8EF9036B92B4. ]*/
 static void log_sink_etw_log_registers_the_provider_if_not_registered_already(void)
 {
     // arrange
     setup_mocks();
     setup_InterlockedCompareExchange_call();
-    setup_TraceLoggingRegister_EventRegister_EventSetInformation_call(TRACE_LEVEL_INFORMATION);
+    setup_TraceLoggingRegister_EventRegister_EventSetInformation_call("DAD29F36-0A48-4DEF-9D50-8EF9036B92B4", TRACE_LEVEL_INFORMATION);
     setup_InterlockedExchange_call();
 
     // self test event
@@ -2176,30 +2194,30 @@ static void when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_wi
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
-    //log_sink_etw_log_with_NULL_message_format_returns();
+    log_sink_etw_log_with_NULL_message_format_returns();
     log_sink_etw_log_registers_the_provider_if_not_registered_already();
-    //log_sink_etw_log_does_not_register_when_already_registered();
-    //log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
-    //log_sink_etw_log_with_LOG_LEVEL_WARNING_succeeds();
-    //log_sink_etw_log_with_LOG_LEVEL_INFO_succeeds();
-    //log_sink_etw_log_with_LOG_LEVEL_VERBOSE_succeeds();
-    //log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds();
-    //log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds();
-    //log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds_2();
-    //
-    //log_sink_etw_log_with_context_with_no_properties_succeeds();
-    //log_sink_etw_log_with_context_with_one_ascii_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_int64_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_uint64_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_int32_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_uint32_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_int16_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_uint16_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_int8_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_uint8_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_all_property_types_succeeds();
-    //when_unknown_property_type_is_encountered_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
-    //when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
+    log_sink_etw_log_does_not_register_when_already_registered();
+    log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_WARNING_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_INFO_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_VERBOSE_succeeds();
+    log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds_2();
+    
+    log_sink_etw_log_with_context_with_no_properties_succeeds();
+    log_sink_etw_log_with_context_with_one_ascii_property_succeeds();
+    log_sink_etw_log_with_context_with_one_int64_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_uint64_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_int32_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_uint32_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_int16_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_uint16_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_int8_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_uint8_t_property_succeeds();
+    log_sink_etw_log_with_context_with_all_property_types_succeeds();
+    when_unknown_property_type_is_encountered_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
+    when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
     when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_with_context_succeeds_and_emits_fields_for_each_property();
 
     return asserts_failed;
