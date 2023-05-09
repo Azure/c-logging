@@ -79,6 +79,7 @@ static void internal_log_sink_etw_lazy_register_provider(void)
     }
 }
 
+// want these aligned to 1 byte (copy/pasted from Tracelogging code)
 __pragma(pack(push, 1))
 typedef struct SELF_DESCRIBED_EVENT_TAG
 {
@@ -99,11 +100,7 @@ __pragma(pack(pop))
 // the TraceLogging.h header about the format of the self described events
 static void internal_emit_self_described_event(const char* event_name, uint16_t event_name_length, uint8_t trace_level, const LOG_CONTEXT_PROPERTY_VALUE_PAIR* context_property_value_pairs, uint32_t property_value_count, const char* message, const char* file, const char* func, int32_t line, va_list args)
 {
-    __pragma(warning(push))
-    __pragma(warning(disable:4127 4132 6001))
-    __pragma(warning(error:4047))
     __pragma(pack(push, 1))
-    __pragma(execution_character_set(push, "UTF-8"))
 
     TraceLoggingHProvider const _tlgProv = (g_my_component_provider);
     if (trace_level < _tlgProv->LevelPlus1 && _tlgKeywordOn(_tlgProv, 0))
@@ -385,9 +382,7 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         /* Codes_SRS_LOG_SINK_ETW_01_041: [ log_sink_etw.log_sink_log shall emit the event by calling _tlgWriteTransfer_EventWriteTransfer passing the provider, channel, number of event data descriptors and the data descriptor array. ]*/
         _tlgWriteTransfer_EventWriteTransfer(_tlgProv, &self_described_event->_tlgChannel, ((void*)0), ((void*)0), _tlgIdx, _tlgData);
     }
-    __pragma(execution_character_set(pop))
     __pragma(pack(pop))
-    __pragma(warning(pop))
 }
 
 #define ETW_TRACE_LOGGING_WRAPPER(event_name, trace_level, message, file, func, line) \
