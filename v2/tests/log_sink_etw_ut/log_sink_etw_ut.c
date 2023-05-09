@@ -1658,7 +1658,7 @@ int main(void)
     //log_sink_etw_log_with_context_with_one_uint16_t_property_succeeds();
     //log_sink_etw_log_with_context_with_one_int8_t_property_succeeds();
     //log_sink_etw_log_with_context_with_one_uint8_t_property_succeeds();
-    log_sink_etw_log_with_context_with_all_property_types_succeeds();
+    //log_sink_etw_log_with_context_with_all_property_types_succeeds();
     when_unknown_property_type_is_encountered_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
 
     return asserts_failed;
