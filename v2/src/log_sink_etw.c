@@ -60,11 +60,12 @@ static void internal_log_sink_etw_lazy_register_provider(void)
                 char* executable_full_path_name;
                 if (_get_pgmptr(&executable_full_path_name) != 0)
                 {
-                    executable_full_path_name = NULL;
+                    /* Codes_SRS_LOG_SINK_ETW_01_083: [ If _get_pgmptr fails, the executable shall be printed as UNKNOWN. ]*/
+                    executable_full_path_name = "UNKNOWN";
                 }
 
                 /* Codes_SRS_LOG_SINK_ETW_01_008: [ `log_sink_etw_log` shall emit a `LOG_LEVEL_INFO` event as a self test , printing the fact that the provider was registered and from which executable (as obtained by calling `_get_pgmptr`). ]*/
-                //log_sink_etw_log(LOG_LEVEL_INFO, NULL, __FILE__, __FUNCTION__, __LINE__, "ETW provider was registered succesfully (self test). Executable file full path name = %s", MU_P_OR_NULL(executable_full_path_name));
+                log_sink_etw_log(LOG_LEVEL_INFO, NULL, __FILE__, __FUNCTION__, __LINE__, "ETW provider was registered succesfully (self test). Executable file full path name = %s", MU_P_OR_NULL(executable_full_path_name));
 
                 break;
             }
