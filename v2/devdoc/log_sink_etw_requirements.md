@@ -88,7 +88,7 @@ Note this can (and should) be improved to be configurable in a subsequent task.
 
   - **SRS_LOG_SINK_ETW_01_050: [** `log_sink_etw.log_sink_log` shall call `log_context_get_property_value_pairs` to obtain the properties that are to be added to the ETW event. **]**
 
-  - `log_sink_etw.log_sink_log` shall limit the number of properties that are emitted in the ETW event to 64.
+  - **SRS_LOG_SINK_ETW_01_082: [** If more than 64 properties are given in `log_context`, `log_sink_etw.log_sink_log` shall not add any properties to the event. **]**
 
 **SRS_LOG_SINK_ETW_01_042: [** `log_sink_etw.log_sink_log` shall compute the metadata size for the self described event metadata as follows: **]**
 

@@ -115,6 +115,7 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         /* Codes_SRS_LOG_SINK_ETW_01_042: [ log_sink_etw.log_sink_log shall compute the metadata size for the self described event metadata as follows: ]*/
         /* Codes_SRS_LOG_SINK_ETW_01_043: [ Length of the event name (determined at compile time, excluding zero terminator) + 1. ]*/
         uint16_t metadata_size = event_name_length;
+        uint32_t i;
 
         metadata_size += 
             /* Codes_SRS_LOG_SINK_ETW_01_044: [ Length of the content field name (determined at compile time, excluding zero terminator) + 1. ]*/
@@ -126,50 +127,57 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
             /* Codes_SRS_LOG_SINK_ETW_01_047: [ Length of the line field name (determined at compile time, excluding zero terminator) + 1. ]*/
             sizeof("line") + 1;
 
-        uint16_t metadata_size_with_properties = metadata_size;
-        uint32_t i;
-
-        for (i = 0; i < property_value_count; i++)
+        if (property_value_count <= LOG_MAX_ETW_PROPERTY_VALUE_PAIR_COUNT)
         {
-            switch (context_property_value_pairs[i].type->get_type())
+            uint16_t metadata_size_with_properties = metadata_size;
+
+            for (i = 0; i < property_value_count; i++)
             {
-            default:
-                /* Codes_SRS_LOG_SINK_ETW_01_081: [ If the property type is any other value, no property data shall be added to the event. ]*/
-                add_properties = false;
-                break;
+                switch (context_property_value_pairs[i].type->get_type())
+                {
+                default:
+                    /* Codes_SRS_LOG_SINK_ETW_01_081: [ If the property type is any other value, no property data shall be added to the event. ]*/
+                    add_properties = false;
+                    break;
 
-            case LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr:
-            case LOG_CONTEXT_PROPERTY_TYPE_int64_t:
-            case LOG_CONTEXT_PROPERTY_TYPE_uint64_t:
-            case LOG_CONTEXT_PROPERTY_TYPE_int32_t:
-            case LOG_CONTEXT_PROPERTY_TYPE_uint32_t:
-            case LOG_CONTEXT_PROPERTY_TYPE_int16_t:
-            case LOG_CONTEXT_PROPERTY_TYPE_uint16_t:
-            case LOG_CONTEXT_PROPERTY_TYPE_int8_t:
-            case LOG_CONTEXT_PROPERTY_TYPE_uint8_t:
-                break;
+                case LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr:
+                case LOG_CONTEXT_PROPERTY_TYPE_int64_t:
+                case LOG_CONTEXT_PROPERTY_TYPE_uint64_t:
+                case LOG_CONTEXT_PROPERTY_TYPE_int32_t:
+                case LOG_CONTEXT_PROPERTY_TYPE_uint32_t:
+                case LOG_CONTEXT_PROPERTY_TYPE_int16_t:
+                case LOG_CONTEXT_PROPERTY_TYPE_uint16_t:
+                case LOG_CONTEXT_PROPERTY_TYPE_int8_t:
+                case LOG_CONTEXT_PROPERTY_TYPE_uint8_t:
+                    break;
 
-            case LOG_CONTEXT_PROPERTY_TYPE_struct:
-                /* Codes_SRS_LOG_SINK_ETW_01_052: [ For struct properties one extra byte shall be added for the field count. ]*/
-                metadata_size_with_properties++;
-                break;
+                case LOG_CONTEXT_PROPERTY_TYPE_struct:
+                    /* Codes_SRS_LOG_SINK_ETW_01_052: [ For struct properties one extra byte shall be added for the field count. ]*/
+                    metadata_size_with_properties++;
+                    break;
+                }
+
+                if (!add_properties)
+                {
+                    break;
+                }
+                else
+                {
+                    /* Codes_SRS_LOG_SINK_ETW_01_051: [ For each property in log_context, the length of the property name + 1 and one extra byte for the type of the field. ]*/
+                    size_t name_length = strlen(context_property_value_pairs[i].name);
+                    metadata_size_with_properties += (uint16_t)name_length + 1 + 1;
+                }
             }
 
-            if (!add_properties)
+            if (add_properties)
             {
-                break;
-            }
-            else
-            {
-                /* Codes_SRS_LOG_SINK_ETW_01_051: [ For each property in log_context, the length of the property name + 1 and one extra byte for the type of the field. ]*/
-                size_t name_length = strlen(context_property_value_pairs[i].name);
-                metadata_size_with_properties += (uint16_t)name_length + 1 + 1;
+                metadata_size = metadata_size_with_properties;
             }
         }
-
-        if (add_properties)
+        else
         {
-            metadata_size = metadata_size_with_properties;
+            /* Codes_SRS_LOG_SINK_ETW_01_082: [ If more than 64 properties are given in log_context, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
+            add_properties = false;
         }
 
         /* Codes_SRS_LOG_SINK_ETW_01_026: [ log_sink_etw.log_sink_log shall fill a SELF_DESCRIBED_EVENT structure, setting the following fields: ]*/
