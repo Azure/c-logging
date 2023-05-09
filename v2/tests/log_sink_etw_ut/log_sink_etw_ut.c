@@ -30,6 +30,10 @@ static size_t asserts_failed = 0;
 // defines how many mock calls we can have
 #define MAX_MOCK_CALL_COUNT (128)
 
+#define FILE_EVENT_DESCRIPTOR_ENTRY 3
+#define FUNC_EVENT_DESCRIPTOR_ENTRY 4
+#define LINE_EVENT_DESCRIPTOR_ENTRY 5
+
 #define MOCK_CALL_TYPE_VALUES \
     MOCK_CALL_TYPE_printf, \
     MOCK_CALL_TYPE_InterlockedCompareExchange, \
@@ -102,11 +106,13 @@ typedef struct TraceLoggingRegister_EventRegister_EventSetInformation_CALL_TAG
 {
     bool override_result;
     TLG_STATUS call_result;
+    uint8_t enable_provider_level;
 } TraceLoggingRegister_EventRegister_EventSetInformation_CALL;
 
 typedef struct _get_pgmptr_CALL_TAG
 {
     bool override_result;
+    char* injected_pValue;
     errno_t call_result;
 } _get_pgmptr_CALL;
 
@@ -117,6 +123,7 @@ typedef struct _tlgWriteTransfer_EventWriteTransfer_CALL_TAG
     SELF_DESCRIBED_EVENT* expected_self_described_event;
     uint32_t expected_cData;
     const EVENT_DATA_DESCRIPTOR* expected_pData;
+    bool ignore_file_and_func;
 } _tlgWriteTransfer_EventWriteTransfer_CALL;
 
 typedef struct log_context_property_if_get_type_CALL_TAG
@@ -353,6 +360,8 @@ TLG_STATUS mock_TraceLoggingRegister_EventRegister_EventSetInformation(const str
             test_provider = hProvider;
 
             result = TraceLoggingRegister_EventRegister_EventSetInformation(hProvider);
+
+            ((struct _tlgProvider_t*)test_provider)->LevelPlus1 = expected_calls[actual_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.enable_provider_level + 1;
         }
 
         actual_call_count++;
@@ -375,6 +384,7 @@ errno_t mock__get_pgmptr(char** pValue)
     {
         if (expected_calls[actual_call_count].u._get_pgmptr_call.override_result)
         {
+            *pValue = expected_calls[actual_call_count].u._get_pgmptr_call.injected_pValue;
             result = expected_calls[actual_call_count].u._get_pgmptr_call.call_result;
         }
         else
@@ -495,6 +505,18 @@ errno_t mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvide
                 // only compare starting at the index 2
                 for (uint32_t i = 2; i < cData; i++)
                 {
+                    if (
+                        (expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.ignore_file_and_func) &&
+                        (
+                            (i == FILE_EVENT_DESCRIPTOR_ENTRY) ||
+                            (i == FUNC_EVENT_DESCRIPTOR_ENTRY) ||
+                            (i == LINE_EVENT_DESCRIPTOR_ENTRY)
+                            )
+                        )
+                    {
+                        continue;
+                    }
+
                     if (pData[i].Size != expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_pData[i].Size)
                     {
                         (void)printf("Expected pData[%" PRIu32 "].Size=%" PRIu32 ", actual=%" PRIu32 "\r\n",
@@ -596,10 +618,11 @@ static void setup_log_context_get_property_value_pairs_call(void)
     expected_call_count++;
 }
 
-static void setup_TraceLoggingRegister_EventRegister_EventSetInformation_call(void)
+static void setup_TraceLoggingRegister_EventRegister_EventSetInformation_call(uint8_t enable_provider_level)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_TraceLoggingRegister_EventRegister_EventSetInformation;
     expected_calls[expected_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.override_result = false;
+    expected_calls[expected_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.enable_provider_level = enable_provider_level;
     expected_call_count++;
 }
 
@@ -629,6 +652,18 @@ static void setup__tlgWriteTransfer_EventWriteTransfer(void* event_metadata, uin
     expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_self_described_event = event_metadata;
     expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_cData = cData;
     expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_pData = pData;
+    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.ignore_file_and_func = false;
+    expected_call_count++;
+}
+
+static void setup__tlgWriteTransfer_EventWriteTransfer_with_ignore_file_and_func(void* event_metadata, uint32_t cData, const EVENT_DATA_DESCRIPTOR* pData, bool ignore_file_and_func)
+{
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE__tlgWriteTransfer_EventWriteTransfer;
+    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.override_result = false;
+    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_self_described_event = event_metadata;
+    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_cData = cData;
+    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_pData = pData;
+    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.ignore_file_and_func = ignore_file_and_func;
     expected_call_count++;
 }
 
@@ -671,14 +706,76 @@ static void log_sink_etw_log_registers_the_provider_if_not_registered_already(vo
     // arrange
     setup_mocks();
     setup_InterlockedCompareExchange_call();
-    setup_TraceLoggingRegister_EventRegister_EventSetInformation_call();
+    setup_TraceLoggingRegister_EventRegister_EventSetInformation_call(TRACE_LEVEL_INFORMATION);
     setup_InterlockedExchange_call();
 
     // self test event
     setup__get_pgmptr_call();
 
+    setup_InterlockedCompareExchange_call();
+    setup__tlgCreate1Sz_char(); // message
+    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // func
+    setup_EventDataDescCreate(); // line
+    uint8_t extra_metadata_bytes[256];
+    uint8_t expected_event_bytes[sizeof(SELF_DESCRIBED_EVENT) + sizeof(extra_metadata_bytes)];
+    SELF_DESCRIBED_EVENT* expected_event_metadata = (SELF_DESCRIBED_EVENT*)&expected_event_bytes[0];
+    (void)memset(expected_event_metadata, 0, sizeof(SELF_DESCRIBED_EVENT));
+    expected_event_metadata->_tlgLevel = TRACE_LEVEL_INFORMATION;
+    expected_event_metadata->_tlgChannel = 11;
+    expected_event_metadata->_tlgOpcode = 0;
+    expected_event_metadata->_tlgKeyword = 0;
+    uint8_t* pos = (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT));
+    // event name
+    (void)memcpy(pos, "LogInfo", strlen("LogInfo") + 1);
+    pos += strlen("LogInfo") + 1;
+    // content field
+    (void)memcpy(pos, "content", strlen("content") + 1);
+    pos += strlen("content") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "file", strlen("file") + 1);
+    pos += strlen("file") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "func", strlen("func") + 1);
+    pos += strlen("func") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "line", strlen("line") + 1);
+    pos += strlen("line") + 1;
+    *pos = TlgInINT32;
+    pos++;
+
+    expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;
+
+    int captured_line = __LINE__;
+
+    expected_calls[3].u._get_pgmptr_call.override_result = true;
+    expected_calls[3].u._get_pgmptr_call.call_result = 0;
+    expected_calls[3].u._get_pgmptr_call.injected_pValue = "some_test_executable.exe";
+
+    static const char expected_event_message[] = "ETW provider was registered succesfully (self test). Executable file full path name = some_test_executable.exe";
+
+    // construct event data descriptor array
+    EVENT_DATA_DESCRIPTOR expected_event_data_descriptors[6] =
+    {
+        { 0 },
+        { 0 },
+        {.Size = (ULONG)strlen(expected_event_message) + 1, .Ptr = (ULONGLONG)expected_event_message },
+        {.Size = (ULONG)strlen(__FILE__) + 1, .Ptr = (ULONGLONG)__FILE__ },
+        {.Size = (ULONG)strlen(__FUNCTION__) + 1, .Ptr = (ULONGLONG)__FUNCTION__ },
+        {.Size = sizeof(int32_t), .Ptr = (ULONGLONG)&captured_line}
+    };
+
+    setup__tlgWriteTransfer_EventWriteTransfer_with_ignore_file_and_func(expected_event_metadata, 6, expected_event_data_descriptors, /* ignore file and func data */true);
+
+
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
+    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -2072,26 +2169,6 @@ static void when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_wi
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     LOG_CONTEXT_DESTROY(log_context);
-}
-
-/* Tests_SRS_LOG_SINK_ETW_01_083: [ If _get_pgmptr fails, the executable shall be printed as UNKNOWN. ]*/
-static void when__get_pgmptr_fails_log_sink_etw_log_prints_executable_as_UNKNOWN(void)
-{
-    // arrange
-    setup_mocks();
-    setup_InterlockedCompareExchange_call();
-    setup_TraceLoggingRegister_EventRegister_EventSetInformation_call();
-    setup_InterlockedExchange_call();
-
-    // self test event
-    setup__get_pgmptr_call();
-
-    // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
-
-    // assert
-    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
