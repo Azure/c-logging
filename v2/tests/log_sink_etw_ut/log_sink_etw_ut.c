@@ -2074,6 +2074,26 @@ static void when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_wi
     LOG_CONTEXT_DESTROY(log_context);
 }
 
+/* Tests_SRS_LOG_SINK_ETW_01_083: [ If _get_pgmptr fails, the executable shall be printed as UNKNOWN. ]*/
+static void when__get_pgmptr_fails_log_sink_etw_log_prints_executable_as_UNKNOWN(void)
+{
+    // arrange
+    setup_mocks();
+    setup_InterlockedCompareExchange_call();
+    setup_TraceLoggingRegister_EventRegister_EventSetInformation_call();
+    setup_InterlockedExchange_call();
+
+    // self test event
+    setup__get_pgmptr_call();
+
+    // act
+    log_sink_etw.log_sink_log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {

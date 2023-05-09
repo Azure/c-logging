@@ -40,7 +40,7 @@ typedef void (*LOG_SINK_LOG_FUNC)(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_co
 
 Note: `_get_pgmptr` is documented [here](https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/get-pgmptr?view=msvc-170).
 
-If `_get_pgmptr` fails, the executable shall be printed as `UNKNOWN`.
+**SRS_LOG_SINK_ETW_01_083: [** If `_get_pgmptr` fails, the executable shall be printed as `UNKNOWN`. **]**
 
 If the state is `REGISTERING` `log_sink_etw_log` shall wait until the state is not REGISTERING (1).
 
@@ -105,6 +105,8 @@ Note this can (and should) be improved to be configurable in a subsequent task.
 - **SRS_LOG_SINK_ETW_01_051: [** For each property in `log_context`, the length of the property name + 1 and one extra byte for the type of the field. **]**
 
 - **SRS_LOG_SINK_ETW_01_052: [** For struct properties one extra byte shall be added for the field count. **]**
+
+If the size of the metadata exceeds 
 
 **SRS_LOG_SINK_ETW_01_026: [** `log_sink_etw.log_sink_log` shall fill a `SELF_DESCRIBED_EVENT` structure, setting the following fields: **]**
 
