@@ -106,7 +106,7 @@ Note this can (and should) be improved to be configurable in a subsequent task.
 
 - **SRS_LOG_SINK_ETW_01_052: [** For struct properties one extra byte shall be added for the field count. **]**
 
-If the size of the metadata exceeds 
+**SRS_LOG_SINK_ETW_01_085: [** If the size of the metadata and the formatted message exceeds 4096 bytes, `log_sink_etw.log_sink_log` shall not add any properties to the event. **]**
 
 **SRS_LOG_SINK_ETW_01_026: [** `log_sink_etw.log_sink_log` shall fill a `SELF_DESCRIBED_EVENT` structure, setting the following fields: **]**
 

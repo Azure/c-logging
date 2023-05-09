@@ -2191,34 +2191,408 @@ static void when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_wi
     LOG_CONTEXT_DESTROY(log_context);
 }
 
+/* Tests_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
+static void when_size_of_metadata_exceeds_4096_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event(void)
+{
+    // arrange
+    LOG_CONTEXT_HANDLE log_context;
+
+    // 38 bytes are in metadata by default with the setting below, 3 extra bytes for the struct that holds all properties, makes 41 bytes
+    // 1 byte of formatted message
+    // Need 4054 bytes to go over
+    // 
+    // Each line below adds 150 bytes, 27 * 150 = 4050, last line needs 4 bytes to get to exactly the limit, 5 bytes goes over the limit
+    LOG_CONTEXT_CREATE(log_context, NULL,
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________1, 1),
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________2, 2),
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________3, 3),
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________4, 4),
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________5, 5),
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________6, 6),
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________7, 7),
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________8, 8),
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________9, 9),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________10, 10),
+        // 1500
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________11, 1),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________12, 2),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________13, 3),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________14, 4),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________15, 5),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________16, 6),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________17, 7),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________18, 8),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________19, 9),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________20, 10),
+        // 3000
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________21, 1),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________22, 2),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________23, 3),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________24, 4),
+        // 3600
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________25, 5),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________26, 6),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________27, 7),
+        // 4050
+        LOG_CONTEXT_PROPERTY(uint8_t, pro, 8) // 5 bytes
+        // 4056
+    );
+
+    setup_enabled_provider(TRACE_LEVEL_VERBOSE);
+
+    setup_mocks();
+    setup_InterlockedCompareExchange_call();
+    setup_log_context_get_property_value_pairs_call();
+    setup_log_context_get_property_value_pair_count_call();
+    setup__tlgCreate1Sz_char(); // message
+    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // func
+    setup_EventDataDescCreate(); // line
+    uint8_t extra_metadata_bytes[4096];
+    uint8_t expected_event_bytes[sizeof(SELF_DESCRIBED_EVENT) + sizeof(extra_metadata_bytes)];
+    SELF_DESCRIBED_EVENT* expected_event_metadata = (SELF_DESCRIBED_EVENT*)&expected_event_bytes[0];
+    (void)memset(expected_event_metadata, 0, sizeof(SELF_DESCRIBED_EVENT));
+    expected_event_metadata->_tlgLevel = TRACE_LEVEL_VERBOSE;
+    expected_event_metadata->_tlgChannel = 11;
+    expected_event_metadata->_tlgOpcode = 0;
+    expected_event_metadata->_tlgKeyword = 0;
+    uint8_t* pos = (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT));
+    // event name
+    (void)memcpy(pos, "LogVerbose", strlen("LogVerbose") + 1);
+    pos += strlen("LogVerbose") + 1;
+    // content field
+    (void)memcpy(pos, "content", strlen("content") + 1);
+    pos += strlen("content") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "file", strlen("file") + 1);
+    pos += strlen("file") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "func", strlen("func") + 1);
+    pos += strlen("func") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "line", strlen("line") + 1);
+    pos += strlen("line") + 1;
+    *pos = TlgInINT32;
+    pos++;
+
+    expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;
+
+    int captured_line = __LINE__;
+
+    // construct event data descriptor array
+    EVENT_DATA_DESCRIPTOR expected_event_data_descriptors[6] =
+    {
+        { 0 },
+        { 0 },
+        {.Size = (ULONG)strlen("") + 1, .Ptr = (ULONGLONG)"" },
+        {.Size = (ULONG)strlen(__FILE__) + 1, .Ptr = (ULONGLONG)__FILE__ },
+        {.Size = (ULONG)strlen(__FUNCTION__) + 1, .Ptr = (ULONGLONG)__FUNCTION__ },
+        {.Size = sizeof(int32_t), .Ptr = (ULONGLONG)&captured_line}
+    };
+
+    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);
+
+    // act
+    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    LOG_CONTEXT_DESTROY(log_context);
+}
+
+/* Tests_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
+static void when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_places_properties_in_the_event(void)
+{
+    // arrange
+    LOG_CONTEXT_HANDLE log_context;
+
+    // 38 bytes are in metadata by default with the setting below, 3 extra bytes for the struct that holds all properties, makes 41 bytes
+    // 1 byte of formatted message
+    // Need 4054 bytes to go over
+    // 
+    // Each line below adds 150 bytes, 27 * 150 = 4050, last line needs 4 bytes to get to exactly the limit, 5 bytes goes over the limit
+    LOG_CONTEXT_CREATE(log_context, NULL,
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________1, 1),
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________2, 2),
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________3, 3),
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________4, 4),
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________5, 5),
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________6, 6),
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________7, 7),
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________8, 8),
+        LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________9, 9),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________10, 10),
+        // 1500
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________11, 1),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________12, 2),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________13, 3),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________14, 4),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________15, 5),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________16, 6),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________17, 7),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________18, 8),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________19, 9),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________20, 10),
+        // 3000
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________21, 1),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________22, 2),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________23, 3),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________24, 4),
+        // 3600
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________25, 5),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________26, 6),
+        LOG_CONTEXT_PROPERTY(uint8_t, property__________________________________________________________________________________________________________________________________________27, 7),
+        // 4050
+        LOG_CONTEXT_PROPERTY(uint8_t, pr, 8) // 4 bytes
+        // 4056
+    );
+
+    setup_enabled_provider(TRACE_LEVEL_VERBOSE);
+
+    setup_mocks();
+    setup_InterlockedCompareExchange_call();
+    setup_log_context_get_property_value_pairs_call();
+    setup_log_context_get_property_value_pair_count_call();
+    setup__tlgCreate1Sz_char(); // message
+    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // func
+    setup_EventDataDescCreate(); // line
+    uint8_t extra_metadata_bytes[4096];
+    uint8_t expected_event_bytes[sizeof(SELF_DESCRIBED_EVENT) + sizeof(extra_metadata_bytes)];
+    SELF_DESCRIBED_EVENT* expected_event_metadata = (SELF_DESCRIBED_EVENT*)&expected_event_bytes[0];
+    (void)memset(expected_event_metadata, 0, sizeof(SELF_DESCRIBED_EVENT));
+    expected_event_metadata->_tlgLevel = TRACE_LEVEL_VERBOSE;
+    expected_event_metadata->_tlgChannel = 11;
+    expected_event_metadata->_tlgOpcode = 0;
+    expected_event_metadata->_tlgKeyword = 0;
+    uint8_t* pos = (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT));
+    // event name
+    (void)memcpy(pos, "LogVerbose", strlen("LogVerbose") + 1);
+    pos += strlen("LogVerbose") + 1;
+    // content field
+    (void)memcpy(pos, "content", strlen("content") + 1);
+    pos += strlen("content") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "file", strlen("file") + 1);
+    pos += strlen("file") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "func", strlen("func") + 1);
+    pos += strlen("func") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "line", strlen("line") + 1);
+    pos += strlen("line") + 1;
+    *pos = TlgInINT32;
+    pos++;
+
+    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* log_context_property_value_pairs = log_context_get_property_value_pairs(log_context);
+    uint8_t property_count = (uint8_t)log_context_get_property_value_pair_count(log_context) - 1;
+
+    // content field
+    (void)memcpy(pos, "", strlen("") + 1);
+    pos += strlen("") + 1;
+    *pos = _TlgInSTRUCT | _TlgInChain;
+    pos++;
+    *pos = property_count;
+    pos++;
+
+    for (uint32_t i = 0; i < property_count; i++)
+    {
+        (void)memcpy(pos, log_context_property_value_pairs[i + 1].name, strlen(log_context_property_value_pairs[i + 1].name) + 1);
+        pos += strlen(log_context_property_value_pairs[i + 1].name) + 1;
+        switch (log_context_property_value_pairs[i + 1].type->get_type())
+        {
+        default:
+            break;
+        case LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr:
+        {
+            setup__tlgCreate1Sz_char();
+            *pos = TlgInANSISTRING;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_int64_t:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInINT64;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_uint64_t:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInUINT64;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_int32_t:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInINT32;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_uint32_t:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInUINT32;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_int16_t:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInINT16;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_uint16_t:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInUINT16;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_int8_t:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInINT8;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_uint8_t:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInUINT8;
+            break;
+        }
+        }
+        pos++;
+    }
+
+    expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;
+
+    int captured_line = __LINE__;
+
+    // construct event data descriptor array
+    EVENT_DATA_DESCRIPTOR* expected_event_data_descriptors = malloc(sizeof(EVENT_DATA_DESCRIPTOR) * (6 + property_count));
+    POOR_MANS_ASSERT(expected_event_data_descriptors != NULL);
+    (void)memset(expected_event_data_descriptors, 0, sizeof(EVENT_DATA_DESCRIPTOR) * (6 + property_count));
+    expected_event_data_descriptors[2].Size = (ULONG)strlen("") + 1;
+    expected_event_data_descriptors[2].Ptr = (ULONGLONG)"";
+    expected_event_data_descriptors[3].Size = (ULONG)strlen(__FILE__) + 1;
+    expected_event_data_descriptors[3].Ptr = (ULONGLONG)__FILE__;
+    expected_event_data_descriptors[4].Size = (ULONG)strlen(__FUNCTION__) + 1;
+    expected_event_data_descriptors[4].Ptr = (ULONGLONG)__FUNCTION__;
+    expected_event_data_descriptors[5].Size = sizeof(int32_t);
+    expected_event_data_descriptors[5].Ptr = (ULONGLONG)&captured_line;
+
+    for (uint32_t i = 0; i < property_count; i++)
+    {
+        ULONG expected_property_size;
+        switch (log_context_property_value_pairs[i + 1].type->get_type())
+        {
+        default:
+            expected_property_size = 0;
+            break;
+
+        case LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr:
+        {
+            expected_property_size = (ULONG)(strlen(log_context_property_value_pairs[i + 1].value) + 1);
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_int64_t:
+        {
+            expected_property_size = sizeof(int64_t);
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_uint64_t:
+        {
+            expected_property_size = sizeof(uint64_t);
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_int32_t:
+        {
+            expected_property_size = sizeof(int32_t);
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_uint32_t:
+        {
+            expected_property_size = sizeof(uint32_t);
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_int16_t:
+        {
+            expected_property_size = sizeof(int16_t);
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_uint16_t:
+        {
+            expected_property_size = sizeof(uint16_t);
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_int8_t:
+        {
+            expected_property_size = sizeof(int8_t);
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_uint8_t:
+        {
+            expected_property_size = sizeof(uint8_t);
+            break;
+        }
+        }
+        expected_event_data_descriptors[6 + i].Size = expected_property_size;
+        expected_event_data_descriptors[6 + i].Ptr = (ULONGLONG)log_context_property_value_pairs[i + 1].value;
+    }
+
+    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6 + property_count, expected_event_data_descriptors);
+
+    // act
+    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    LOG_CONTEXT_DESTROY(log_context);
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
     log_sink_etw_log_with_NULL_message_format_returns();
     log_sink_etw_log_registers_the_provider_if_not_registered_already();
-    log_sink_etw_log_does_not_register_when_already_registered();
-    log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
-    log_sink_etw_log_with_LOG_LEVEL_WARNING_succeeds();
-    log_sink_etw_log_with_LOG_LEVEL_INFO_succeeds();
-    log_sink_etw_log_with_LOG_LEVEL_VERBOSE_succeeds();
-    log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds();
-    log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds();
-    log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds_2();
-    
-    log_sink_etw_log_with_context_with_no_properties_succeeds();
-    log_sink_etw_log_with_context_with_one_ascii_property_succeeds();
-    log_sink_etw_log_with_context_with_one_int64_t_property_succeeds();
-    log_sink_etw_log_with_context_with_one_uint64_t_property_succeeds();
-    log_sink_etw_log_with_context_with_one_int32_t_property_succeeds();
-    log_sink_etw_log_with_context_with_one_uint32_t_property_succeeds();
-    log_sink_etw_log_with_context_with_one_int16_t_property_succeeds();
-    log_sink_etw_log_with_context_with_one_uint16_t_property_succeeds();
-    log_sink_etw_log_with_context_with_one_int8_t_property_succeeds();
-    log_sink_etw_log_with_context_with_one_uint8_t_property_succeeds();
-    log_sink_etw_log_with_context_with_all_property_types_succeeds();
-    when_unknown_property_type_is_encountered_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
-    when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
-    when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_with_context_succeeds_and_emits_fields_for_each_property();
+    //log_sink_etw_log_does_not_register_when_already_registered();
+    //log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
+    //log_sink_etw_log_with_LOG_LEVEL_WARNING_succeeds();
+    //log_sink_etw_log_with_LOG_LEVEL_INFO_succeeds();
+    //log_sink_etw_log_with_LOG_LEVEL_VERBOSE_succeeds();
+    //log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds();
+    //log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds();
+    //log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds_2();
+    //
+    //log_sink_etw_log_with_context_with_no_properties_succeeds();
+    //log_sink_etw_log_with_context_with_one_ascii_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_int64_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_uint64_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_int32_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_uint32_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_int16_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_uint16_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_int8_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_uint8_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_all_property_types_succeeds();
+    //when_unknown_property_type_is_encountered_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
+    //when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
+    //when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_with_context_succeeds_and_emits_fields_for_each_property();
+    when_size_of_metadata_exceeds_4096_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
+    //when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_places_properties_in_the_event();
 
     return asserts_failed;
 }

@@ -126,10 +126,10 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
             /* Codes_SRS_LOG_SINK_ETW_01_047: [ Length of the line field name (determined at compile time, excluding zero terminator) + 1. ]*/
             sizeof("line") + 1;
 
+        uint16_t metadata_size_without_properties = metadata_size;
+
         if (property_value_count <= LOG_MAX_ETW_PROPERTY_VALUE_PAIR_COUNT)
         {
-            uint16_t metadata_size_with_properties = metadata_size;
-
             for (i = 0; i < property_value_count; i++)
             {
                 switch (context_property_value_pairs[i].type->get_type())
@@ -152,7 +152,7 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
 
                 case LOG_CONTEXT_PROPERTY_TYPE_struct:
                     /* Codes_SRS_LOG_SINK_ETW_01_052: [ For struct properties one extra byte shall be added for the field count. ]*/
-                    metadata_size_with_properties++;
+                    metadata_size++;
                     break;
                 }
 
@@ -164,13 +164,18 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
                 {
                     /* Codes_SRS_LOG_SINK_ETW_01_051: [ For each property in log_context, the length of the property name + 1 and one extra byte for the type of the field. ]*/
                     size_t name_length = strlen(context_property_value_pairs[i].name);
-                    metadata_size_with_properties += (uint16_t)name_length + 1 + 1;
+                    /* Codes_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
+                    metadata_size += (uint16_t)name_length + 1 + 1;
+                    if (metadata_size > 4096)
+                    {
+                        add_properties = false;
+                        break;
+                    }
+                    else
+                    {
+                        // continue
+                    }
                 }
-            }
-
-            if (add_properties)
-            {
-                metadata_size = metadata_size_with_properties;
             }
         }
         else
@@ -183,6 +188,39 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
 
         // alias to the event bytes
         SELF_DESCRIBED_EVENT* self_described_event = (SELF_DESCRIBED_EVENT*)_tlgEvent;
+
+        if (!add_properties)
+        {
+            metadata_size = metadata_size_without_properties;
+        }
+
+        char* formatted_message = (char*)&self_described_event->metadata[metadata_size];
+        size_t available_bytes = sizeof(_tlgEvent) - (formatted_message - (char*)self_described_event);
+
+        int formatted_message_length = vsnprintf(formatted_message, available_bytes, message, args);
+        if (formatted_message_length >= available_bytes)
+        {
+            if (add_properties)
+            {
+                // did not fit, print again without properties and limit it
+                /* Codes_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
+                add_properties = false;
+                metadata_size = metadata_size_without_properties;
+
+                formatted_message = (char*)&self_described_event->metadata[metadata_size];
+                available_bytes = sizeof(_tlgEvent) - (formatted_message - (char*)self_described_event);
+                formatted_message_length = vsnprintf(formatted_message, available_bytes, message, args);
+                if (formatted_message_length >= available_bytes)
+                {
+                    formatted_message[available_bytes - 1] = '\0';
+                }
+            }
+            else
+            {
+                // did not fit, needs to be limited
+                formatted_message[available_bytes - 1] = '\0';
+            }
+        }
 
         /* Codes_SRS_LOG_SINK_ETW_01_027: [ _tlgBlobTyp shall be set to _TlgBlobEvent4. ]*/
         self_described_event->_tlgBlobTyp = _TlgBlobEvent4;
@@ -296,10 +334,6 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
                 pos++;
             }
         }
-
-        char* formatted_message = (char*)pos;
-        int formatted_message_length = vsnprintf(formatted_message, sizeof(_tlgEvent) - (formatted_message - (char*)self_described_event), message, args);
-        (void)formatted_message_length;
 
         // now we need to fill in the event data descriptors
         // first 2 are actually reserved for the event descriptor and metadata respectively
