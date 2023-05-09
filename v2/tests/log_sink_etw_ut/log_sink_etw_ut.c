@@ -791,6 +791,7 @@ static void log_sink_etw_log_registers_the_provider_if_not_registered_already(vo
 /* Tests_SRS_LOG_SINK_ETW_01_042: [ log_sink_etw.log_sink_log shall compute the metadata size for the self described event metadata as follows: ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_043: [ Length of the event name (determined at compile time, excluding zero terminator) + 1. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_044: [ Length of the content field name (determined at compile time, excluding zero terminator) + 1. ]*/
+    /* Tests_SRS_LOG_SINK_ETW_01_045: [ Length of the file field name (determined at compile time, excluding zero terminator) + 1. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_046: [ Length of the func field name (determined at compile time, excluding zero terminator) + 1. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_047: [ Length of the line field name (determined at compile time, excluding zero terminator) + 1. ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_026: [ log_sink_etw.log_sink_log shall fill a SELF_DESCRIBED_EVENT structure, setting the following fields: ]*/
@@ -800,6 +801,7 @@ static void log_sink_etw_log_registers_the_provider_if_not_registered_already(vo
     /* Tests_SRS_LOG_SINK_ETW_01_030: [ _tlgOpcode shall be set to 0. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_031: [ _tlgKeyword shall be set to 0. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_032: [ _tlgEvtMetaSize shall be set to the computed metadata size + 4. ]*/
+    /* Tests_SRS_LOG_SINK_ETW_01_033: [ _tlgEvtTag shall be set to 128. ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_034: [ log_sink_etw.log_sink_log shall fill the event metadata: ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_035: [ The string content (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_036: [ The string file (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
