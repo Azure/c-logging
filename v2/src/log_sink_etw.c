@@ -25,7 +25,7 @@ TRACELOGGING_DEFINE_PROVIDER(
     (0xDAD29F36, 0x0A48, 0x4DEF, 0x9D, 0x50, 0x8E, 0xF9, 0x03, 0x6B, 0x92, 0xB4));
 /*DAD29F36-0A48-4DEF-9D50-8EF9036B92B4*/
 
-/* Codes_SRS_LOG_SINK_ETW_01_002: [ `log_sink_etw_log` shall maintain the state of whether `TraceLoggingRegister` was called in a variable accessed via `InterlockedXXX` APIs, which shall have 3 possible values: `NOT_REGISTERED` (1), `REGISTERING` (2), `REGISTERED`(3). ]*/
+/* Codes_SRS_LOG_SINK_ETW_01_002: [ log_sink_etw_log shall maintain the state of whether TraceLoggingRegister was called in a variable accessed via InterlockedXXX APIs, which shall have 3 possible values: NOT_REGISTERED (1), REGISTERING (2), REGISTERED(3). ]*/
 #define PROVIDER_STATE_VALUES \
     PROVIDER_STATE_NOT_REGISTERED, \
     PROVIDER_STATE_REGISTERING, \
@@ -41,22 +41,23 @@ static void internal_log_sink_etw_lazy_register_provider(void)
 {
     LONG state;
 
-    /* Codes_SRS_LOG_SINK_ETW_01_003: [ `log_sink_etw_log` shall perform the below actions until the provider is registered or an error is encountered: ]*/
-    /* Codes_SRS_LOG_SINK_ETW_01_004: [ If the state is `NOT_REGISTERED`: ]*/
-    /* Codes_SRS_LOG_SINK_ETW_01_005: [ `log_sink_etw_log` shall switch the state to `REGISTERING`. ]*/
-    /* Codes_SRS_LOG_SINK_ETW_01_009: [ Checking and changing the variable that maintains whether `TraceLoggingRegister` was called shall be done using `InterlockedCompareExchange` and `InterlockedExchange`. ]*/
-    /* Codes_SRS_LOG_SINK_ETW_01_011: [ If the state is `REGISTERED`, `log_sink_etw_log` shall proceed to log the ETW event. ]*/
+    /* Codes_SRS_LOG_SINK_ETW_01_003: [ log_sink_etw_log shall perform the below actions until the provider is registered or an error is encountered: ]*/
+    /* Codes_SRS_LOG_SINK_ETW_01_004: [ If the state is NOT_REGISTERED (1): ]*/
+    /* Codes_SRS_LOG_SINK_ETW_01_005: [ log_sink_etw_log shall switch the state to REGISTERING (2). ]*/
+    /* Codes_SRS_LOG_SINK_ETW_01_009: [ Checking and changing the variable that maintains whether TraceLoggingRegister was called shall be done using InterlockedCompareExchange and InterlockedExchange. ]*/
+    /* Codes_SRS_LOG_SINK_ETW_01_011: [ If the state is REGISTERED (3), log_sink_etw_log shall proceed to log the ETW event. ]*/
+    /* Codes_SRS_LOG_SINK_ETW_01_087: [ If the state is REGISTERING (2) log_sink_etw_log shall wait until the state is not REGISTERING (2). ]*/
     while ((state = InterlockedCompareExchange(&etw_provider_state, PROVIDER_STATE_REGISTERING, PROVIDER_STATE_NOT_REGISTERED)) != PROVIDER_STATE_REGISTERED)
     {
         if (state == PROVIDER_STATE_NOT_REGISTERED)
         {
-            /* Codes_SRS_LOG_SINK_ETW_01_006: [ `log_sink_etw_log` shall register the ETW TraceLogging provider by calling `TraceLoggingRegister` (`TraceLoggingRegister_EventRegister_EventSetInformation`). ]*/
+            /* Codes_SRS_LOG_SINK_ETW_01_006: [ log_sink_etw_log shall register the ETW TraceLogging provider by calling TraceLoggingRegister (TraceLoggingRegister_EventRegister_EventSetInformation). ]*/
             TLG_STATUS register_result = TraceLoggingRegister(g_my_component_provider);
             if (SUCCEEDED(register_result))
             {
-                /* Codes_SRS_LOG_SINK_ETW_01_007: [ `log_sink_etw_log` shall switch the state to `REGISTERED`. ]*/
+                /* Codes_SRS_LOG_SINK_ETW_01_007: [ log_sink_etw_log shall switch the state to REGISTERED. ]*/
                 (void)InterlockedExchange(&etw_provider_state, PROVIDER_STATE_REGISTERED);
-                /* Codes_SRS_LOG_SINK_ETW_01_008: [ `log_sink_etw_log` shall `printf` the fact that the provider was registered and from which executable (as obtained by calling `_pgmptr`). ]*/
+                /* Codes_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw_log shall printf the fact that the provider was registered and from which executable (as obtained by calling _pgmptr). ]*/
 
                 char* executable_full_path_name;
                 if (_get_pgmptr(&executable_full_path_name) != 0)
@@ -65,7 +66,7 @@ static void internal_log_sink_etw_lazy_register_provider(void)
                     executable_full_path_name = "UNKNOWN";
                 }
 
-                /* Codes_SRS_LOG_SINK_ETW_01_008: [ `log_sink_etw_log` shall emit a `LOG_LEVEL_INFO` event as a self test , printing the fact that the provider was registered and from which executable (as obtained by calling `_get_pgmptr`). ]*/
+                /* Codes_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw_log shall emit a LOG_LEVEL_INFO event as a self test , printing the fact that the provider was registered and from which executable (as obtained by calling _get_pgmptr). ]*/
                 log_sink_etw_log(LOG_LEVEL_INFO, NULL, __FILE__, __FUNCTION__, __LINE__, "ETW provider was registered succesfully (self test). Executable file full path name = %s", MU_P_OR_NULL(executable_full_path_name));
 
                 break;
@@ -454,7 +455,7 @@ static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context
 {
     if (message_format == NULL)
     {
-        /* Codes_SRS_LOG_SINK_ETW_01_001: [ If `message_format` is `NULL`, `log_sink_etw.log_sink_log` shall return. ]*/
+        /* Codes_SRS_LOG_SINK_ETW_01_001: [ If message_format is NULL, log_sink_etw.log_sink_log shall return. ]*/
         (void)printf("Invalid arguments: LOG_LEVEL log_level=%" PRI_MU_ENUM ", LOG_CONTEXT_HANDLE log_context=%p, const char* file=%s, const char* func=%s, int line=%d, const char* message_format=%s\r\n",
             MU_ENUM_VALUE(LOG_LEVEL, log_level), log_context, file, func, line, message_format);
     }
@@ -465,7 +466,7 @@ static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context
 
         internal_log_sink_etw_lazy_register_provider();
 
-        /* Codes_SRS_LOG_SINK_ETW_01_010: [ `log_sink_etw_log` shall emit a self described event that shall have the name of the event as follows: ]*/
+        /* Codes_SRS_LOG_SINK_ETW_01_010: [ log_sink_etw_log shall emit a self described event that shall have the name of the event as follows: ]*/
 
         if (log_context != NULL)
         {
@@ -494,12 +495,12 @@ static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context
             internal_emit_self_described_event(event_name_unknown, sizeof(event_name_unknown), TRACE_LEVEL_NONE, value_pairs, values_count, message_format, file, func, line, args);
             break;
         case LOG_LEVEL_CRITICAL:
-            /* Codes_SRS_LOG_SINK_ETW_01_012: [ If `log_level` is `LOG_LEVEL_CRITICAL` the event name shall be `LogCritical`. ]*/
+            /* Codes_SRS_LOG_SINK_ETW_01_012: [ If log_level is LOG_LEVEL_CRITICAL the event name shall be LogCritical. ]*/
             /* Codes_SRS_LOG_SINK_ETW_01_019: [ If log_level is LOG_LEVEL_CRITICAL the ETW logging level shall be TRACE_LEVEL_CRITICAL. ]*/
             internal_emit_self_described_event(event_name_critical, sizeof(event_name_critical), TRACE_LEVEL_CRITICAL, value_pairs, values_count, message_format, file, func, line, args);
             break;
         case LOG_LEVEL_ERROR:
-            /* Codes_SRS_LOG_SINK_ETW_01_013: [ If `log_level` is `LOG_LEVEL_ERROR` the event name shall be `LogError`. ]*/
+            /* Codes_SRS_LOG_SINK_ETW_01_013: [ If log_level is LOG_LEVEL_ERROR the event name shall be LogError. ]*/
             /* Codes_SRS_LOG_SINK_ETW_01_020: [ If log_level is LOG_LEVEL_ERROR the ETW logging level shall be TRACE_LEVEL_ERROR. ]*/
             internal_emit_self_described_event(event_name_error, sizeof(event_name_error), TRACE_LEVEL_ERROR, value_pairs, values_count, message_format, file, func, line, args);
             break;

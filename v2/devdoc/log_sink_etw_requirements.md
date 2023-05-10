@@ -28,13 +28,13 @@ typedef void (*LOG_SINK_LOG_FUNC)(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_co
 
 **SRS_LOG_SINK_ETW_01_003: [** `log_sink_etw_log` shall perform the below actions until the provider is registered or an error is encountered: **]**
 
-**SRS_LOG_SINK_ETW_01_004: [** If the state is `NOT_REGISTERED`: **]**
+**SRS_LOG_SINK_ETW_01_004: [** If the state is `NOT_REGISTERED` (1): **]**
 
-- **SRS_LOG_SINK_ETW_01_005: [** `log_sink_etw_log` shall switch the state to `REGISTERING`. **]**
+- **SRS_LOG_SINK_ETW_01_005: [** `log_sink_etw_log` shall switch the state to `REGISTERING` (2). **]**
 
 - **SRS_LOG_SINK_ETW_01_006: [** `log_sink_etw_log` shall register the ETW TraceLogging provider by calling `TraceLoggingRegister` (`TraceLoggingRegister_EventRegister_EventSetInformation`). **]**
 
-- **SRS_LOG_SINK_ETW_01_007: [** `log_sink_etw_log` shall switch the state to `REGISTERED`. **]**
+- **SRS_LOG_SINK_ETW_01_007: [** `log_sink_etw_log` shall switch the state to `REGISTERED` (3). **]**
 
 - **SRS_LOG_SINK_ETW_01_008: [** `log_sink_etw_log` shall emit a `LOG_LEVEL_INFO` event as a self test , printing the fact that the provider was registered and from which executable (as obtained by calling `_get_pgmptr`). **]**
 
@@ -42,9 +42,9 @@ Note: `_get_pgmptr` is documented [here](https://learn.microsoft.com/en-us/cpp/c
 
 **SRS_LOG_SINK_ETW_01_083: [** If `_get_pgmptr` fails, the executable shall be printed as `UNKNOWN`. **]**
 
-If the state is `REGISTERING` `log_sink_etw_log` shall wait until the state is not REGISTERING (1).
+**SRS_LOG_SINK_ETW_01_087: [** If the state is `REGISTERING` (2), `log_sink_etw_log` shall wait until the state is not `REGISTERING` (2). **]**
 
-**SRS_LOG_SINK_ETW_01_011: [** If the state is `REGISTERED`, `log_sink_etw_log` shall proceed to log the ETW event. **]**
+**SRS_LOG_SINK_ETW_01_011: [** If the state is `REGISTERED` (3), `log_sink_etw_log` shall proceed to log the ETW event. **]**
 
 **SRS_LOG_SINK_ETW_01_009: [** Checking and changing the variable that maintains whether `TraceLoggingRegister` was called shall be done using `InterlockedCompareExchange` and `InterlockedExchange`. **]**
 
