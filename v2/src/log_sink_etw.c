@@ -276,7 +276,7 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         }
         else
         {
-            if (formatted_message_length >= available_bytes)
+            if ((size_t)formatted_message_length >= available_bytes)
             {
                 if (add_properties)
                 {
