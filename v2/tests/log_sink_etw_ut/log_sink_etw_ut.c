@@ -45,7 +45,8 @@ static size_t asserts_failed = 0;
     MOCK_CALL_TYPE__tlgCreate1Sz_char, \
     MOCK_CALL_TYPE_EventDataDescCreate, \
     MOCK_CALL_TYPE__tlgWriteTransfer_EventWriteTransfer, \
-    MOCK_CALL_TYPE_log_context_property_if_get_type
+    MOCK_CALL_TYPE_log_context_property_if_get_type, \
+    MOCK_CALL_TYPE_vsnprintf
 
 MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
 
@@ -133,6 +134,13 @@ typedef struct log_context_property_if_get_type_CALL_TAG
     LOG_CONTEXT_PROPERTY_TYPE call_result;
 } log_context_property_if_get_type_CALL;
 
+typedef struct vsnprintf_CALL_TAG
+{
+    bool override_result;
+    int call_result;
+    char captured_output[MAX_PRINTF_CAPTURED_OUPUT_SIZE];
+} vsnprintf_CALL;
+
 typedef struct MOCK_CALL_TAG
 {
     MOCK_CALL_TYPE mock_call_type;
@@ -147,6 +155,7 @@ typedef struct MOCK_CALL_TAG
         _get_pgmptr_CALL _get_pgmptr_call;
         _tlgWriteTransfer_EventWriteTransfer_CALL _tlgWriteTransfer_EventWriteTransfer_call;
         log_context_property_if_get_type_CALL log_context_property_if_get_type_call;
+        vsnprintf_CALL vsnprintf_call;
     } u;
 } MOCK_CALL;
 
@@ -587,6 +596,37 @@ LOG_CONTEXT_PROPERTY_TYPE mock_log_context_property_if_get_type(void)
     return result;
 }
 
+int mock_vsnprintf(char* restrict s, size_t n, const char* restrict format, va_list args)
+{
+    int result;
+
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_vsnprintf))
+    {
+        actual_and_expected_match = false;
+        result = -1;
+    }
+    else
+    {
+        if (expected_calls[actual_call_count].u.printf_call.override_result)
+        {
+            result = expected_calls[actual_call_count].u.printf_call.call_result;
+        }
+        else
+        {
+            // also capture the result in a variable for comparisons in tests
+            (void)vsnprintf(expected_calls[actual_call_count].u.printf_call.captured_output, sizeof(expected_calls[actual_call_count].u.printf_call.captured_output),
+                format, args);
+
+            result = vsnprintf(s, n, format, args);
+        }
+
+        actual_call_count++;
+    }
+
+    return result;
+}
+
 #define POOR_MANS_ASSERT(cond) \
     if (!(cond)) \
     { \
@@ -691,6 +731,13 @@ static void setup_log_context_property_if_get_type(void)
     expected_call_count++;
 }
 
+static void setup_vsnprintf_call(void)
+{
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_vsnprintf;
+    expected_calls[expected_call_count].u.vsnprintf_call.override_result = false;
+    expected_call_count++;
+}
+
 /* log_sink_etw.log_sink_log */
 
 /* Tests_SRS_LOG_SINK_ETW_01_001: [ If message_format is NULL, log_sink_etw.log_sink_log shall return. ]*/
@@ -731,6 +778,7 @@ static void log_sink_etw_log_registers_the_provider_if_not_registered_already(vo
     setup__get_pgmptr_call();
 
     setup_InterlockedCompareExchange_call();
+    setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
     setup__tlgCreate1Sz_char(); // file 
     setup__tlgCreate1Sz_char(); // func
@@ -835,6 +883,7 @@ static void test_message_with_level(LOG_LEVEL log_level, uint8_t expected_tlg_le
 
     setup_mocks();
     setup_InterlockedCompareExchange_call();
+    setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
     setup__tlgCreate1Sz_char(); // file 
     setup__tlgCreate1Sz_char(); // func
@@ -950,6 +999,7 @@ static void log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds(void)
                                                                                                                                      \
     setup_mocks();                                                                                                                   \
     setup_InterlockedCompareExchange_call();                                                                                         \
+    setup_vsnprintf_call(); /* formatting message */                                                                                 \
     setup__tlgCreate1Sz_char(); /* message */                                                                                        \
     setup__tlgCreate1Sz_char(); /* file */                                                                                           \
     setup__tlgCreate1Sz_char(); /* func */                                                                                           \
@@ -1032,6 +1082,7 @@ static void test_message_with_context(LOG_LEVEL log_level, uint8_t expected_tlg_
     setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
+    setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
     setup__tlgCreate1Sz_char(); // file 
     setup__tlgCreate1Sz_char(); // func
@@ -1134,6 +1185,7 @@ static void test_message_with_context_with_one_property(LOG_LEVEL log_level, uin
     setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
+    setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
     setup__tlgCreate1Sz_char(); // file 
     setup__tlgCreate1Sz_char(); // func
@@ -1432,6 +1484,7 @@ static void test_message_with_context_with_multiple_properties(LOG_LEVEL log_lev
     setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
+    setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
     setup__tlgCreate1Sz_char(); // file 
     setup__tlgCreate1Sz_char(); // func
@@ -1689,6 +1742,7 @@ static void when_unknown_property_type_is_encountered_log_sink_etw_log_with_cont
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
     setup_log_context_property_if_get_type(); // one mocked call to get_type
+    setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
     setup__tlgCreate1Sz_char(); // file 
     setup__tlgCreate1Sz_char(); // func
@@ -1847,6 +1901,7 @@ static void when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_
     setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
+    setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
     setup__tlgCreate1Sz_char(); // file 
     setup__tlgCreate1Sz_char(); // func
@@ -1989,6 +2044,7 @@ static void when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_wi
     setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
+    setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
     setup__tlgCreate1Sz_char(); // file 
     setup__tlgCreate1Sz_char(); // func
@@ -2243,6 +2299,7 @@ static void when_size_of_metadata_exceeds_4096_log_sink_etw_log_with_context_doe
     setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
+    setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
     setup__tlgCreate1Sz_char(); // file 
     setup__tlgCreate1Sz_char(); // func
@@ -2360,6 +2417,8 @@ static void when_size_of_metadata_and_formatted_messages_exceeds_4096_log_sink_e
     setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
+    setup_vsnprintf_call(); // formatting message
+    setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
     setup__tlgCreate1Sz_char(); // file 
     setup__tlgCreate1Sz_char(); // func
@@ -2477,6 +2536,7 @@ static void when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_
     setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
+    setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
     setup__tlgCreate1Sz_char(); // file 
     setup__tlgCreate1Sz_char(); // func
@@ -2685,6 +2745,37 @@ static void when_vsnprintf_fails_an_error_is_printed(void)
     // arrange
     LOG_CONTEXT_HANDLE log_context;
 
+    LOG_CONTEXT_CREATE(log_context, NULL,
+        LOG_CONTEXT_PROPERTY(uint8_t, prop1, 1)
+    );
+
+    setup_enabled_provider(TRACE_LEVEL_VERBOSE);
+
+    setup_mocks();
+    setup_InterlockedCompareExchange_call();
+    setup_log_context_get_property_value_pairs_call();
+    setup_log_context_get_property_value_pair_count_call();
+    setup_vsnprintf_call(); // formatting message
+    expected_calls[3].u.vsnprintf_call.override_result = true;
+    expected_calls[3].u.vsnprintf_call.call_result = -1;
+    setup_printf_call(); // spew error
+
+    // act
+    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, __LINE__, "");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    LOG_CONTEXT_DESTROY(log_context);
+}
+
+/* Tests_SRS_LOG_SINK_ETW_01_086: [ If any error occurs log_sink_etw.log_sink_log shall print Error emitting ETW event and return. ]*/
+static void when_size_of_metadata_and_formatted_messages_exceeds_4096_and_2nd_vsnprintf_fails_an_error_is_printed(void)
+{
+    // arrange
+    LOG_CONTEXT_HANDLE log_context;
+
     // 38 bytes are in metadata by default with the setting below, 3 extra bytes for the struct that holds all properties, makes 41 bytes
     // 1 byte of formatted message
     // Need 4054 bytes to go over
@@ -2732,62 +2823,14 @@ static void when_vsnprintf_fails_an_error_is_printed(void)
     setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
-    setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
-    setup__tlgCreate1Sz_char(); // func
-    setup_EventDataDescCreate(); // line
-    uint8_t extra_metadata_bytes[4096];
-    uint8_t expected_event_bytes[sizeof(SELF_DESCRIBED_EVENT) + sizeof(extra_metadata_bytes)];
-    SELF_DESCRIBED_EVENT* expected_event_metadata = (SELF_DESCRIBED_EVENT*)&expected_event_bytes[0];
-    (void)memset(expected_event_metadata, 0, sizeof(SELF_DESCRIBED_EVENT));
-    expected_event_metadata->_tlgLevel = TRACE_LEVEL_VERBOSE;
-    expected_event_metadata->_tlgChannel = 11;
-    expected_event_metadata->_tlgOpcode = 0;
-    expected_event_metadata->_tlgKeyword = 0;
-    uint8_t* pos = (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT));
-    // event name
-    (void)memcpy(pos, "LogVerbose", strlen("LogVerbose") + 1);
-    pos += strlen("LogVerbose") + 1;
-    // content field
-    (void)memcpy(pos, "content", strlen("content") + 1);
-    pos += strlen("content") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "file", strlen("file") + 1);
-    pos += strlen("file") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "func", strlen("func") + 1);
-    pos += strlen("func") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "line", strlen("line") + 1);
-    pos += strlen("line") + 1;
-    *pos = TlgInINT32;
-    pos++;
-
-    expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;
-
-    int captured_line = __LINE__;
-
-    // construct event data descriptor array
-    EVENT_DATA_DESCRIPTOR expected_event_data_descriptors[6] =
-    {
-        { 0 },
-        { 0 },
-        {.Size = (ULONG)strlen("") + 1, .Ptr = (ULONGLONG)"" },
-        {.Size = (ULONG)strlen(__FILE__) + 1, .Ptr = (ULONGLONG)__FILE__ },
-        {.Size = (ULONG)strlen(__FUNCTION__) + 1, .Ptr = (ULONGLONG)__FUNCTION__ },
-        {.Size = sizeof(int32_t), .Ptr = (ULONGLONG)&captured_line}
-    };
-
-    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);
+    setup_vsnprintf_call(); // formatting message
+    setup_vsnprintf_call(); // formatting message 2nd attempt
+    expected_calls[4].u.vsnprintf_call.override_result = true;
+    expected_calls[4].u.vsnprintf_call.call_result = -1;
+    setup_printf_call();
 
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "");
+    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, __LINE__, "");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -2801,33 +2844,34 @@ int main(void)
 {
     log_sink_etw_log_with_NULL_message_format_returns();
     log_sink_etw_log_registers_the_provider_if_not_registered_already();
-    //log_sink_etw_log_does_not_register_when_already_registered();
-    //log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
-    //log_sink_etw_log_with_LOG_LEVEL_WARNING_succeeds();
-    //log_sink_etw_log_with_LOG_LEVEL_INFO_succeeds();
-    //log_sink_etw_log_with_LOG_LEVEL_VERBOSE_succeeds();
-    //log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds();
-    //log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds();
-    //log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds_2();
-    //
-    //log_sink_etw_log_with_context_with_no_properties_succeeds();
-    //log_sink_etw_log_with_context_with_one_ascii_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_int64_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_uint64_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_int32_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_uint32_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_int16_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_uint16_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_int8_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_uint8_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_all_property_types_succeeds();
-    //when_unknown_property_type_is_encountered_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
-    //when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
-    //when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_with_context_succeeds_and_emits_fields_for_each_property();
-    //when_size_of_metadata_exceeds_4096_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
-    //when_size_of_metadata_and_formatted_messages_exceeds_4096_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
-    //when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_places_properties_in_the_event();
+    log_sink_etw_log_does_not_register_when_already_registered();
+    log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_WARNING_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_INFO_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_VERBOSE_succeeds();
+    log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds_2();
+    
+    log_sink_etw_log_with_context_with_no_properties_succeeds();
+    log_sink_etw_log_with_context_with_one_ascii_property_succeeds();
+    log_sink_etw_log_with_context_with_one_int64_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_uint64_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_int32_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_uint32_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_int16_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_uint16_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_int8_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_uint8_t_property_succeeds();
+    log_sink_etw_log_with_context_with_all_property_types_succeeds();
+    when_unknown_property_type_is_encountered_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
+    when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
+    when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_with_context_succeeds_and_emits_fields_for_each_property();
+    when_size_of_metadata_exceeds_4096_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
+    when_size_of_metadata_and_formatted_messages_exceeds_4096_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
+    when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_places_properties_in_the_event();
     when_vsnprintf_fails_an_error_is_printed();
+    when_size_of_metadata_and_formatted_messages_exceeds_4096_and_2nd_vsnprintf_fails_an_error_is_printed();
 
     return asserts_failed;
 }

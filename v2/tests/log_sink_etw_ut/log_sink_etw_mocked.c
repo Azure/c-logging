@@ -36,6 +36,6 @@ errno_t mock__get_pgmptr(char** pValue);
 void mock__tlgCreate1Sz_char(PEVENT_DATA_DESCRIPTOR pDesc, char const* psz);
 void mock_EventDataDescCreate(PEVENT_DATA_DESCRIPTOR EventDataDescriptor, const VOID* DataPtr, ULONG DataSize);
 TLG_STATUS mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvider, void const* pEventMetadata, LPCGUID pActivityId, LPCGUID pRelatedActivityId, UINT32 cData, EVENT_DATA_DESCRIPTOR* pData);
-int mock_vsnprintf(char* const _Buffer, size_t const _BufferCount, char const* const _Format, va_list _ArgList);
+int mock_vsnprintf(char* restrict s, size_t n, const char* restrict format, va_list arg);
 
 #include "log_sink_etw.c"
