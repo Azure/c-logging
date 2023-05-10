@@ -2921,6 +2921,134 @@ static void when_size_of_metadata_and_formatted_messages_exceeds_4096_and_2nd_vs
     LOG_CONTEXT_DESTROY(log_context);
 }
 
+/* Tests_SRS_LOG_SINK_ETW_01_079: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_uint8_t, a byte with the value TlgInUINT8 shall be added in the metadata. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_080: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_uint8_t, the event data descriptor shall be filled with the value of the property by calling EventDataDescCreate. ]*/
+static void when_a_parent_context_is_used_all_properties_are_emitted(void)
+{
+    // arrange
+    LOG_CONTEXT_HANDLE log_context_1;
+    LOG_CONTEXT_HANDLE log_context_2;
+
+    LOG_CONTEXT_CREATE(log_context_1, NULL,
+        LOG_CONTEXT_PROPERTY(uint8_t, prop1, 42)
+    );
+
+    LOG_CONTEXT_CREATE(log_context_2, log_context_1,
+        LOG_CONTEXT_PROPERTY(uint8_t, prop2, 43)
+    );
+
+    setup_enabled_provider(TRACE_LEVEL_VERBOSE);
+
+    setup_mocks();
+    setup_InterlockedCompareExchange_call();
+    setup_log_context_get_property_value_pairs_call();
+    setup_log_context_get_property_value_pair_count_call();
+    setup_vsnprintf_call(); // formatting message
+    setup__tlgCreate1Sz_char(); // message
+    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // func
+    setup_EventDataDescCreate(); // line
+    setup_EventDataDescCreate(); // prop1
+    setup_EventDataDescCreate(); // prop2
+    uint8_t extra_metadata_bytes[8192];
+    uint8_t expected_event_bytes[sizeof(SELF_DESCRIBED_EVENT) + sizeof(extra_metadata_bytes)];
+    SELF_DESCRIBED_EVENT* expected_event_metadata = (SELF_DESCRIBED_EVENT*)&expected_event_bytes[0];
+    (void)memset(expected_event_metadata, 0, sizeof(SELF_DESCRIBED_EVENT));
+    expected_event_metadata->_tlgLevel = TRACE_LEVEL_VERBOSE;
+    expected_event_metadata->_tlgChannel = 11;
+    expected_event_metadata->_tlgOpcode = 0;
+    expected_event_metadata->_tlgKeyword = 0;
+    uint8_t* pos = (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT));
+    // event name
+    (void)memcpy(pos, "LogVerbose", strlen("LogVerbose") + 1);
+    pos += strlen("LogVerbose") + 1;
+    // content field
+    (void)memcpy(pos, "content", strlen("content") + 1);
+    pos += strlen("content") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "file", strlen("file") + 1);
+    pos += strlen("file") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "func", strlen("func") + 1);
+    pos += strlen("func") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "line", strlen("line") + 1);
+    pos += strlen("line") + 1;
+    *pos = TlgInINT32;
+    pos++;
+
+    // content field for log_context_2
+    (void)memcpy(pos, "", strlen("") + 1);
+    pos += strlen("") + 1;
+    *pos = _TlgInSTRUCT | _TlgInChain;
+    pos++;
+    *pos = 3;
+    pos++;
+
+    // content field for log_context_1
+    (void)memcpy(pos, "", strlen("") + 1);
+    pos += strlen("") + 1;
+    *pos = _TlgInSTRUCT | _TlgInChain;
+    pos++;
+    *pos = 1;
+    pos++;
+
+    // prop1
+    (void)memcpy(pos, "prop1", strlen("prop1") + 1);
+    pos += strlen("prop1") + 1;
+    *pos = TlgInUINT8;
+    pos++;
+
+    // prop2
+    (void)memcpy(pos, "prop2", strlen("prop2") + 1);
+    pos += strlen("prop2") + 1;
+    *pos = TlgInUINT8;
+    pos++;
+
+    expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;
+
+    int captured_line = __LINE__;
+
+    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* log_context_property_value_pairs = log_context_get_property_value_pairs(log_context_2);
+
+    // construct event data descriptor array
+    EVENT_DATA_DESCRIPTOR* expected_event_data_descriptors = malloc(sizeof(EVENT_DATA_DESCRIPTOR) * 8);
+    POOR_MANS_ASSERT(expected_event_data_descriptors != NULL);
+    (void)memset(expected_event_data_descriptors, 0, sizeof(EVENT_DATA_DESCRIPTOR) * 8);
+    expected_event_data_descriptors[2].Size = (ULONG)strlen("test") + 1;
+    expected_event_data_descriptors[2].Ptr = (ULONGLONG)"test";
+    expected_event_data_descriptors[3].Size = (ULONG)strlen(__FILE__) + 1;
+    expected_event_data_descriptors[3].Ptr = (ULONGLONG)__FILE__;
+    expected_event_data_descriptors[4].Size = (ULONG)strlen(__FUNCTION__) + 1;
+    expected_event_data_descriptors[4].Ptr = (ULONGLONG)__FUNCTION__;
+    expected_event_data_descriptors[5].Size = sizeof(int32_t);
+    expected_event_data_descriptors[5].Ptr = (ULONGLONG)&captured_line;
+    expected_event_data_descriptors[6].Size = sizeof(uint8_t);
+    expected_event_data_descriptors[6].Ptr = (ULONGLONG)log_context_property_value_pairs[2].value;
+    expected_event_data_descriptors[7].Size = sizeof(uint8_t);
+    expected_event_data_descriptors[7].Ptr = (ULONGLONG)log_context_property_value_pairs[3].value;
+
+    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 8, expected_event_data_descriptors);
+
+    // act
+    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, log_context_2, __FILE__, __FUNCTION__, captured_line, "test");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    LOG_CONTEXT_DESTROY(log_context_1);
+    LOG_CONTEXT_DESTROY(log_context_2);
+
+    free(expected_event_data_descriptors);
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
@@ -2955,6 +3083,7 @@ int main(void)
     when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_places_properties_in_the_event();
     when_vsnprintf_fails_an_error_is_printed();
     when_size_of_metadata_and_formatted_messages_exceeds_4096_and_2nd_vsnprintf_fails_an_error_is_printed();
+    when_a_parent_context_is_used_all_properties_are_emitted();
 
     return asserts_failed;
 }
