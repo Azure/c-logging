@@ -24,6 +24,7 @@
 #define _tlgCreate1Sz_char mock__tlgCreate1Sz_char
 #define EventDataDescCreate mock_EventDataDescCreate
 #define _tlgWriteTransfer_EventWriteTransfer mock__tlgWriteTransfer_EventWriteTransfer
+#define vsnprintf mock_vsnprintf
 
 int mock_printf(const char* format, ...);
 LONG mock_InterlockedCompareExchange(LONG volatile* Destination, LONG ExChange, LONG Comperand);
@@ -35,5 +36,6 @@ errno_t mock__get_pgmptr(char** pValue);
 void mock__tlgCreate1Sz_char(PEVENT_DATA_DESCRIPTOR pDesc, char const* psz);
 void mock_EventDataDescCreate(PEVENT_DATA_DESCRIPTOR EventDataDescriptor, const VOID* DataPtr, ULONG DataSize);
 TLG_STATUS mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvider, void const* pEventMetadata, LPCGUID pActivityId, LPCGUID pRelatedActivityId, UINT32 cData, EVENT_DATA_DESCRIPTOR* pData);
+int mock_vsnprintf(char* const _Buffer, size_t const _BufferCount, char const* const _Format, va_list _ArgList);
 
 #include "log_sink_etw.c"

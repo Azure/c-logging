@@ -200,4 +200,4 @@ Note: 2 entries are for the event descriptor and metadata respectively, 4 entrie
 
 **SRS_LOG_SINK_ETW_01_041: [** `log_sink_etw.log_sink_log` shall emit the event by calling `_tlgWriteTransfer_EventWriteTransfer` passing the provider, channel, number of event data descriptors and the data descriptor array. **]**
 
-If any error occurs `log_sink_etw.log_sink_log` shall print `Error emitting ETW event` and return.
+**SRS_LOG_SINK_ETW_01_086: [** If any error occurs `log_sink_etw.log_sink_log` shall print `Error emitting ETW event` and return. **]**
