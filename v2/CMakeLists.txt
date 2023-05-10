@@ -43,7 +43,7 @@ set(c_logging_v2_c_files
     ${c_logging_v2_c_files}
     ./src/log_sink_etw.c
     )
-else()
+endif()
 
 FILE(GLOB c_logging_v2_md_files "devdoc/*.md")
 SOURCE_GROUP(devdoc FILES ${c_logging_v2_md_files})
