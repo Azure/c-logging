@@ -101,8 +101,6 @@ __pragma(pack(pop))
 // the TraceLogging.h header about the format of the self described events
 static void internal_emit_self_described_event(const char* event_name, uint16_t event_name_length, uint8_t trace_level, const LOG_CONTEXT_PROPERTY_VALUE_PAIR* context_property_value_pairs, uint32_t property_value_count, const char* message, const char* file, const char* func, int32_t line, va_list args)
 {
-    __pragma(pack(push, 1))
-
     TraceLoggingHProvider const _tlgProv = (g_my_component_provider);
     if (trace_level < _tlgProv->LevelPlus1 && _tlgKeywordOn(_tlgProv, 0))
     {
@@ -129,10 +127,58 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
 
         uint16_t metadata_size_without_properties = metadata_size;
 
+        // alias to the event bytes
+        SELF_DESCRIBED_EVENT* self_described_event = (SELF_DESCRIBED_EVENT*)_tlgEvent;
+
+        uint8_t* pos = &self_described_event->metadata[0];
+
+        // at this point we filled all the event information, now we need to provide the metadata bytes
+        // first one is the event name, followed by metadata for all the fields
+        // copy event name 
+        (void)memcpy(pos, event_name, event_name_length); pos += event_name_length;
+
+        // copy the field metadata (name and in type)
+
+        /* Codes_SRS_LOG_SINK_ETW_01_034: [ log_sink_etw.log_sink_log shall fill the event metadata: ]*/
+
+        /* Codes_SRS_LOG_SINK_ETW_01_035: [ The string content (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
+        (void)memcpy(pos, "content", sizeof("content")); pos += sizeof("content");
+        *pos = TlgInANSISTRING;  pos++;
+
+        /* Codes_SRS_LOG_SINK_ETW_01_036: [ The string file (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
+        (void)memcpy(pos, "file", sizeof("file")); pos += sizeof("file");
+        *pos = TlgInANSISTRING;  pos++;
+
+        /* Codes_SRS_LOG_SINK_ETW_01_037: [ The string func (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
+        (void)memcpy(pos, "func", sizeof("func")); pos += sizeof("func");
+        *pos = TlgInANSISTRING;  pos++;
+
+        /* Codes_SRS_LOG_SINK_ETW_01_038: [ The string line (as field name, excluding zero terminator), followed by one byte with the value TlgInINT32. ]*/
+        (void)memcpy(pos, "line", sizeof("line")); pos += sizeof("line");
+        *pos = TlgInINT32;  pos++;
+
         if (property_value_count <= LOG_MAX_ETW_PROPERTY_VALUE_PAIR_COUNT)
         {
+            /* Codes_SRS_LOG_SINK_ETW_01_053: [ For each property in log_context the following shall be added to the event metadata: ]*/
             for (i = 0; i < property_value_count; i++)
             {
+                /* Codes_SRS_LOG_SINK_ETW_01_051: [ For each property in log_context, the length of the property name + 1 and one extra byte for the type of the field. ]*/
+                size_t name_length = strlen(context_property_value_pairs[i].name);
+                /* Codes_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
+                metadata_size += (uint16_t)name_length + 1 + 1;
+                if (metadata_size > 4096)
+                {
+                    add_properties = false;
+                    break;
+                }
+                else
+                {
+                    /* Codes_SRS_LOG_SINK_ETW_01_054: [ A string with the property name (including zero terminator) ]*/
+                    (void)memcpy(pos, context_property_value_pairs[i].name, name_length + 1);
+                    pos += name_length + 1;
+                }
+
+                /* Codes_SRS_LOG_SINK_ETW_01_055: [ A byte with the type of property, as follows: ]*/
                 switch (context_property_value_pairs[i].type->get_type())
                 {
                 default:
@@ -141,19 +187,51 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
                     break;
 
                 case LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr:
+                    /* Codes_SRS_LOG_SINK_ETW_01_063: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr, a byte with the value TlgInANSISTRING shall be added in the metadata. ]*/
+                    *pos = TlgInANSISTRING;
+                    break;
                 case LOG_CONTEXT_PROPERTY_TYPE_int64_t:
+                    /* Codes_SRS_LOG_SINK_ETW_01_064: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_int64_t, a byte with the value TlgInINT64 shall be added in the metadata. ]*/
+                    *pos = TlgInINT64;
+                    break;
                 case LOG_CONTEXT_PROPERTY_TYPE_uint64_t:
+                    /* Codes_SRS_LOG_SINK_ETW_01_065: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_uint64_t, a byte with the value TlgInUINT64 shall be added in the metadata. ]*/
+                    *pos = TlgInUINT64;
+                    break;
                 case LOG_CONTEXT_PROPERTY_TYPE_int32_t:
+                    /* Codes_SRS_LOG_SINK_ETW_01_069: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_int32_t, a byte with the value TlgInINT32 shall be added in the metadata. ]*/
+                    *pos = TlgInINT32;
+                    break;
                 case LOG_CONTEXT_PROPERTY_TYPE_uint32_t:
+                    /* Codes_SRS_LOG_SINK_ETW_01_071: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_uint32_t, a byte with the value TlgInUINT32 shall be added in the metadata. ]*/
+                    *pos = TlgInUINT32;
+                    break;
                 case LOG_CONTEXT_PROPERTY_TYPE_int16_t:
+                    /* Codes_SRS_LOG_SINK_ETW_01_073: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_int16_t, a byte with the value TlgInINT16 shall be added in the metadata. ]*/
+                    *pos = TlgInINT16;
+                    break;
                 case LOG_CONTEXT_PROPERTY_TYPE_uint16_t:
+                    /* Codes_SRS_LOG_SINK_ETW_01_075: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_uint16_t, a byte with the value TlgInUINT16 shall be added in the metadata. ]*/
+                    *pos = TlgInUINT16;
+                    break;
                 case LOG_CONTEXT_PROPERTY_TYPE_int8_t:
+                    /* Codes_SRS_LOG_SINK_ETW_01_077: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_int8_t, a byte with the value TlgInINT8 shall be added in the metadata. ]*/
+                    *pos = TlgInINT8;
+                    break;
                 case LOG_CONTEXT_PROPERTY_TYPE_uint8_t:
+                    /* Codes_SRS_LOG_SINK_ETW_01_079: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_uint8_t, a byte with the value TlgInUINT8 shall be added in the metadata. ]*/
+                    *pos = TlgInUINT8;
                     break;
 
                 case LOG_CONTEXT_PROPERTY_TYPE_struct:
                     /* Codes_SRS_LOG_SINK_ETW_01_052: [ For struct properties one extra byte shall be added for the field count. ]*/
                     metadata_size++;
+                    /* Codes_SRS_LOG_SINK_ETW_01_056: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_struct, a byte with the value _TlgInSTRUCT | _TlgInChain shall be added in the metadata. ]*/
+                    *pos = _TlgInSTRUCT | _TlgInChain;
+                    pos++;
+
+                    /* Codes_SRS_LOG_SINK_ETW_01_057: [ If the property is a struct, an extra byte shall be added in the metadata containing the number of fields in the structure. ]*/
+                    *pos = *((uint8_t*)context_property_value_pairs[i].value);
                     break;
                 }
 
@@ -163,19 +241,7 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
                 }
                 else
                 {
-                    /* Codes_SRS_LOG_SINK_ETW_01_051: [ For each property in log_context, the length of the property name + 1 and one extra byte for the type of the field. ]*/
-                    size_t name_length = strlen(context_property_value_pairs[i].name);
-                    /* Codes_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
-                    metadata_size += (uint16_t)name_length + 1 + 1;
-                    if (metadata_size > 4096)
-                    {
-                        add_properties = false;
-                        break;
-                    }
-                    else
-                    {
-                        // continue
-                    }
+                    pos++;
                 }
             }
         }
@@ -186,9 +252,6 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         }
 
         /* Codes_SRS_LOG_SINK_ETW_01_026: [ log_sink_etw.log_sink_log shall fill a SELF_DESCRIBED_EVENT structure, setting the following fields: ]*/
-
-        // alias to the event bytes
-        SELF_DESCRIBED_EVENT* self_described_event = (SELF_DESCRIBED_EVENT*)_tlgEvent;
 
         if (!add_properties)
         {
@@ -257,97 +320,6 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
 
                 /* Codes_SRS_LOG_SINK_ETW_01_033: [ _tlgEvtTag shall be set to 128. ]*/
                 self_described_event->_tlgEvtTag = 128;
-
-                // at this point we filled all the event information, now we need to provide the metadata bytes
-                // first one is the event name, followed by metadata for all the fields
-                // copy event name 
-                uint8_t* pos = &self_described_event->metadata[0];
-                (void)memcpy(pos, event_name, event_name_length); pos += event_name_length;
-
-                // copy the field metadata (name and in type)
-
-                /* Codes_SRS_LOG_SINK_ETW_01_034: [ log_sink_etw.log_sink_log shall fill the event metadata: ]*/
-
-                /* Codes_SRS_LOG_SINK_ETW_01_035: [ The string content (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
-                (void)memcpy(pos, "content", sizeof("content")); pos += sizeof("content");
-                *pos = TlgInANSISTRING;  pos++;
-
-                /* Codes_SRS_LOG_SINK_ETW_01_036: [ The string file (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
-                (void)memcpy(pos, "file", sizeof("file")); pos += sizeof("file");
-                *pos = TlgInANSISTRING;  pos++;
-
-                /* Codes_SRS_LOG_SINK_ETW_01_037: [ The string func (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
-                (void)memcpy(pos, "func", sizeof("func")); pos += sizeof("func");
-                *pos = TlgInANSISTRING;  pos++;
-
-                /* Codes_SRS_LOG_SINK_ETW_01_038: [ The string line (as field name, excluding zero terminator), followed by one byte with the value TlgInINT32. ]*/
-                (void)memcpy(pos, "line", sizeof("line")); pos += sizeof("line");
-                *pos = TlgInINT32;  pos++;
-
-                if (add_properties)
-                {
-                    /* Codes_SRS_LOG_SINK_ETW_01_053: [ For each property in log_context the following shall be added to the event metadata: ]*/
-                    for (i = 0; i < property_value_count; i++)
-                    {
-                        /* Codes_SRS_LOG_SINK_ETW_01_054: [ A string with the property name (including zero terminator) ]*/
-                        size_t name_length = strlen(context_property_value_pairs[i].name);
-                        (void)memcpy(pos, context_property_value_pairs[i].name, name_length + 1);
-                        pos += name_length + 1;
-
-                        /* Codes_SRS_LOG_SINK_ETW_01_055: [ A byte with the type of property, as follows: ]*/
-                        switch (context_property_value_pairs[i].type->get_type())
-                        {
-                        default:
-                            break;
-                        case LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr:
-                            /* Codes_SRS_LOG_SINK_ETW_01_063: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr, a byte with the value TlgInANSISTRING shall be added in the metadata. ]*/
-                            *pos = TlgInANSISTRING;
-                            break;
-                        case LOG_CONTEXT_PROPERTY_TYPE_int64_t:
-                            /* Codes_SRS_LOG_SINK_ETW_01_064: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_int64_t, a byte with the value TlgInINT64 shall be added in the metadata. ]*/
-                            *pos = TlgInINT64;
-                            break;
-                        case LOG_CONTEXT_PROPERTY_TYPE_uint64_t:
-                            /* Codes_SRS_LOG_SINK_ETW_01_065: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_uint64_t, a byte with the value TlgInUINT64 shall be added in the metadata. ]*/
-                            *pos = TlgInUINT64;
-                            break;
-                        case LOG_CONTEXT_PROPERTY_TYPE_int32_t:
-                            /* Codes_SRS_LOG_SINK_ETW_01_069: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_int32_t, a byte with the value TlgInINT32 shall be added in the metadata. ]*/
-                            *pos = TlgInINT32;
-                            break;
-                        case LOG_CONTEXT_PROPERTY_TYPE_uint32_t:
-                            /* Codes_SRS_LOG_SINK_ETW_01_071: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_uint32_t, a byte with the value TlgInUINT32 shall be added in the metadata. ]*/
-                            *pos = TlgInUINT32;
-                            break;
-                        case LOG_CONTEXT_PROPERTY_TYPE_int16_t:
-                            /* Codes_SRS_LOG_SINK_ETW_01_073: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_int16_t, a byte with the value TlgInINT16 shall be added in the metadata. ]*/
-                            *pos = TlgInINT16;
-                            break;
-                        case LOG_CONTEXT_PROPERTY_TYPE_uint16_t:
-                            /* Codes_SRS_LOG_SINK_ETW_01_075: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_uint16_t, a byte with the value TlgInUINT16 shall be added in the metadata. ]*/
-                            *pos = TlgInUINT16;
-                            break;
-                        case LOG_CONTEXT_PROPERTY_TYPE_int8_t:
-                            /* Codes_SRS_LOG_SINK_ETW_01_077: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_int8_t, a byte with the value TlgInINT8 shall be added in the metadata. ]*/
-                            *pos = TlgInINT8;
-                            break;
-                        case LOG_CONTEXT_PROPERTY_TYPE_uint8_t:
-                            /* Codes_SRS_LOG_SINK_ETW_01_079: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_uint8_t, a byte with the value TlgInUINT8 shall be added in the metadata. ]*/
-                            *pos = TlgInUINT8;
-                            break;
-                        case LOG_CONTEXT_PROPERTY_TYPE_struct:
-                            /* Codes_SRS_LOG_SINK_ETW_01_056: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_struct, a byte with the value _TlgInSTRUCT | _TlgInChain shall be added in the metadata. ]*/
-                            *pos = _TlgInSTRUCT | _TlgInChain;
-                            pos++;
-
-                            /* Codes_SRS_LOG_SINK_ETW_01_057: [ If the property is a struct, an extra byte shall be added in the metadata containing the number of fields in the structure. ]*/
-                            // TODO: getting the struct field count should be done with a function call rather than reading it directly
-                            *pos = *((uint8_t*)context_property_value_pairs[i].value);
-                            break;
-                        }
-                        pos++;
-                    }
-                }
 
                 // now we need to fill in the event data descriptors
                 // first 2 are actually reserved for the event descriptor and metadata respectively
@@ -432,7 +404,6 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
             }
         }
     }
-    __pragma(pack(pop))
 }
 
 #define ETW_TRACE_LOGGING_WRAPPER(event_name, trace_level, message, file, func, line) \
