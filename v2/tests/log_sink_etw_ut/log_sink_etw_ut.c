@@ -1902,6 +1902,8 @@ static void when_unknown_property_type_is_encountered_log_sink_etw_log_with_cont
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     LOG_CONTEXT_DESTROY(log_context);
+
+    free(mocked_property_value_pairs);
 }
 
 /* Tests_SRS_LOG_SINK_ETW_01_082: [ If more than 64 properties are given in log_context, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
@@ -2327,6 +2329,8 @@ static void when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_wi
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     LOG_CONTEXT_DESTROY(log_context);
+
+    free(expected_event_data_descriptors);
 }
 
 /* Tests_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
@@ -2819,6 +2823,8 @@ static void when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     LOG_CONTEXT_DESTROY(log_context);
+
+    free(expected_event_data_descriptors);
 }
 
 /* Tests_SRS_LOG_SINK_ETW_01_086: [ If any error occurs log_sink_etw.log_sink_log shall print Error emitting ETW event and return. ]*/
