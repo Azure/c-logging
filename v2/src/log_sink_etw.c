@@ -95,14 +95,16 @@ typedef struct SELF_DESCRIBED_EVENT_TAG
 } SELF_DESCRIBED_EVENT;
 __pragma(pack(pop))
 
-#define MAX_SELF_DESCRIBED_EVENT_WITH_METADATA (sizeof(SELF_DESCRIBED_EVENT) + 4096)
+#define MAX_METADATA_SIZE 4096
+
+#define MAX_SELF_DESCRIBED_EVENT_WITH_METADATA (sizeof(SELF_DESCRIBED_EVENT) + MAX_METADATA_SIZE)
 
 // This function was written with a little bit of reverse engineering of TraceLogging and guidance from 
 // the TraceLogging.h header about the format of the self described events
 static void internal_emit_self_described_event(const char* event_name, uint16_t event_name_length, uint8_t trace_level, const LOG_CONTEXT_PROPERTY_VALUE_PAIR* context_property_value_pairs, uint32_t property_value_count, const char* message, const char* file, const char* func, int32_t line, va_list args)
 {
-    TraceLoggingHProvider const _tlgProv = (g_my_component_provider);
-    if (trace_level < _tlgProv->LevelPlus1 && _tlgKeywordOn(_tlgProv, 0))
+    TraceLoggingHProvider const _tlgProv = g_my_component_provider;
+    if (trace_level < _tlgProv->LevelPlus1)
     {
         // have a stack allocated buffer where we construct the event metadata and
         uint8_t _tlgEvent[MAX_SELF_DESCRIBED_EVENT_WITH_METADATA];
@@ -112,20 +114,7 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         // event_name_length includes NULL terminator
         /* Codes_SRS_LOG_SINK_ETW_01_042: [ log_sink_etw.log_sink_log shall compute the metadata size for the self described event metadata as follows: ]*/
         /* Codes_SRS_LOG_SINK_ETW_01_043: [ Length of the event name (determined at compile time, excluding zero terminator) + 1. ]*/
-        uint16_t metadata_size = event_name_length;
         uint32_t i;
-
-        metadata_size += 
-            /* Codes_SRS_LOG_SINK_ETW_01_044: [ Length of the content field name (determined at compile time, excluding zero terminator) + 1. ]*/
-            sizeof("content") + 1 +
-            /* Codes_SRS_LOG_SINK_ETW_01_045: [ Length of the file field name (determined at compile time, excluding zero terminator) + 1. ]*/
-            sizeof("file") + 1 +
-            /* Codes_SRS_LOG_SINK_ETW_01_046: [ Length of the func field name (determined at compile time, excluding zero terminator) + 1. ]*/
-            sizeof("func") + 1 +
-            /* Codes_SRS_LOG_SINK_ETW_01_047: [ Length of the line field name (determined at compile time, excluding zero terminator) + 1. ]*/
-            sizeof("line") + 1;
-
-        uint16_t metadata_size_without_properties = metadata_size;
 
         // alias to the event bytes
         SELF_DESCRIBED_EVENT* self_described_event = (SELF_DESCRIBED_EVENT*)_tlgEvent;
@@ -142,20 +131,26 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         /* Codes_SRS_LOG_SINK_ETW_01_034: [ log_sink_etw.log_sink_log shall fill the event metadata: ]*/
 
         /* Codes_SRS_LOG_SINK_ETW_01_035: [ The string content (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
+        /* Codes_SRS_LOG_SINK_ETW_01_044: [ Length of the content field name (determined at compile time, excluding zero terminator) + 1. ]*/
         (void)memcpy(pos, "content", sizeof("content")); pos += sizeof("content");
         *pos = TlgInANSISTRING;  pos++;
 
         /* Codes_SRS_LOG_SINK_ETW_01_036: [ The string file (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
+        /* Codes_SRS_LOG_SINK_ETW_01_045: [ Length of the file field name (determined at compile time, excluding zero terminator) + 1. ]*/
         (void)memcpy(pos, "file", sizeof("file")); pos += sizeof("file");
         *pos = TlgInANSISTRING;  pos++;
 
         /* Codes_SRS_LOG_SINK_ETW_01_037: [ The string func (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
+        /* Codes_SRS_LOG_SINK_ETW_01_046: [ Length of the func field name (determined at compile time, excluding zero terminator) + 1. ]*/
         (void)memcpy(pos, "func", sizeof("func")); pos += sizeof("func");
         *pos = TlgInANSISTRING;  pos++;
 
         /* Codes_SRS_LOG_SINK_ETW_01_038: [ The string line (as field name, excluding zero terminator), followed by one byte with the value TlgInINT32. ]*/
+        /* Codes_SRS_LOG_SINK_ETW_01_047: [ Length of the line field name (determined at compile time, excluding zero terminator) + 1. ]*/
         (void)memcpy(pos, "line", sizeof("line")); pos += sizeof("line");
         *pos = TlgInINT32;  pos++;
+
+        uint16_t metadata_size_without_properties = (uint16_t)(pos - &self_described_event->metadata[0]);
 
         if (property_value_count <= LOG_MAX_ETW_PROPERTY_VALUE_PAIR_COUNT)
         {
@@ -165,8 +160,7 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
                 /* Codes_SRS_LOG_SINK_ETW_01_051: [ For each property in log_context, the length of the property name + 1 and one extra byte for the type of the field. ]*/
                 size_t name_length = strlen(context_property_value_pairs[i].name);
                 /* Codes_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
-                metadata_size += (uint16_t)name_length + 1 + 1;
-                if (metadata_size > 4096)
+                if ((uint16_t)(&self_described_event->metadata[MAX_METADATA_SIZE] - pos) < name_length + 1 + 1)
                 {
                     add_properties = false;
                     break;
@@ -225,13 +219,19 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
 
                 case LOG_CONTEXT_PROPERTY_TYPE_struct:
                     /* Codes_SRS_LOG_SINK_ETW_01_052: [ For struct properties one extra byte shall be added for the field count. ]*/
-                    metadata_size++;
                     /* Codes_SRS_LOG_SINK_ETW_01_056: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_struct, a byte with the value _TlgInSTRUCT | _TlgInChain shall be added in the metadata. ]*/
                     *pos = _TlgInSTRUCT | _TlgInChain;
                     pos++;
 
-                    /* Codes_SRS_LOG_SINK_ETW_01_057: [ If the property is a struct, an extra byte shall be added in the metadata containing the number of fields in the structure. ]*/
-                    *pos = *((uint8_t*)context_property_value_pairs[i].value);
+                    if (pos == &self_described_event->metadata[MAX_METADATA_SIZE])
+                    {
+                        add_properties = false;
+                    }
+                    else
+                    {
+                        /* Codes_SRS_LOG_SINK_ETW_01_057: [ If the property is a struct, an extra byte shall be added in the metadata containing the number of fields in the structure. ]*/
+                        *pos = *((uint8_t*)context_property_value_pairs[i].value);
+                    }
                     break;
                 }
 
@@ -252,13 +252,19 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         }
 
         /* Codes_SRS_LOG_SINK_ETW_01_026: [ log_sink_etw.log_sink_log shall fill a SELF_DESCRIBED_EVENT structure, setting the following fields: ]*/
+        uint16_t metadata_size;
 
         if (!add_properties)
         {
             metadata_size = metadata_size_without_properties;
+            pos = &self_described_event->metadata[metadata_size_without_properties];
+        }
+        else
+        {
+            metadata_size = (uint16_t)(pos - &self_described_event->metadata[0]);
         }
 
-        char* formatted_message = (char*)&self_described_event->metadata[metadata_size];
+        char* formatted_message = (char*)pos;
         size_t available_bytes = sizeof(_tlgEvent) - (formatted_message - (char*)self_described_event);
 
         int formatted_message_length = vsnprintf(formatted_message, available_bytes, message, args);
@@ -278,7 +284,7 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
                     add_properties = false;
                     metadata_size = metadata_size_without_properties;
 
-                    formatted_message = (char*)&self_described_event->metadata[metadata_size];
+                    formatted_message = (char*)&self_described_event->metadata[metadata_size_without_properties];
                     available_bytes = sizeof(_tlgEvent) - (formatted_message - (char*)self_described_event);
                     formatted_message_length = vsnprintf(formatted_message, available_bytes, message, args);
                     if (formatted_message_length < 0)
