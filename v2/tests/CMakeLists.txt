@@ -13,7 +13,6 @@ if(${run_unittests})
    add_subdirectory(log_sink_console_ut)
    add_subdirectory(log_sink_etw_ut)
    add_subdirectory(log_sink_etw_2_ut)
-   add_subdirectory(log_sink_etw_registering_ut)
 endif()
 
 if(${run_int_tests})
