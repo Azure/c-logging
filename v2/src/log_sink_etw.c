@@ -16,7 +16,12 @@
 #include "c_logging/log_sink_if.h"
 #include "c_logging/log_sink_etw.h"
 
+// max number of properties we want to have in the event
 #define LOG_MAX_ETW_PROPERTY_VALUE_PAIR_COUNT 64
+
+// max metadata size
+#define MAX_METADATA_SIZE 4096
+#define MAX_SELF_DESCRIBED_EVENT_WITH_METADATA (sizeof(SELF_DESCRIBED_EVENT) + MAX_METADATA_SIZE)
 
 /* Codes_SRS_LOG_SINK_ETW_01_084: [ log_sink_etw_log shall use as provider GUID DAD29F36-0A48-4DEF-9D50-8EF9036B92B4. ]*/
 TRACELOGGING_DEFINE_PROVIDER(
@@ -94,10 +99,6 @@ typedef struct SELF_DESCRIBED_EVENT_TAG
     uint8_t metadata[];
 } SELF_DESCRIBED_EVENT;
 __pragma(pack(pop))
-
-#define MAX_METADATA_SIZE 4096
-
-#define MAX_SELF_DESCRIBED_EVENT_WITH_METADATA (sizeof(SELF_DESCRIBED_EVENT) + MAX_METADATA_SIZE)
 
 // This function was written with a little bit of reverse engineering of TraceLogging and guidance from 
 // the TraceLogging.h header about the format of the self described events
@@ -411,15 +412,6 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         }
     }
 }
-
-#define ETW_TRACE_LOGGING_WRAPPER(event_name, trace_level, message, file, func, line) \
-    TraceLoggingWrite(g_my_component_provider, \
-        event_name, \
-        TraceLoggingLevel(trace_level), \
-        TraceLoggingString(message, "content"), \
-        TraceLoggingString(file, "file"), \
-        TraceLoggingString(func, "func"), \
-        TraceLoggingInt32(line, "line")) \
 
 static const char event_name_critical[] = "LogCritical";
 static const char event_name_error[] = "LogError";

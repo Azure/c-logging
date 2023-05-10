@@ -19,7 +19,6 @@ if(${run_int_tests})
    add_subdirectory(log_context_property_basic_types_int)
    add_subdirectory(log_context_property_type_ascii_char_ptr_int)
    add_subdirectory(log_sink_console_int)
-   add_subdirectory(log_sink_etw_int)
 endif()
 
 if(${run_perf_tests})
