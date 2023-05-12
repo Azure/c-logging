@@ -755,6 +755,7 @@ static void log_sink_etw_log_with_NULL_message_format_returns(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
+/* Tests_SRS_LOG_SINK_ETW_01_088: [ If TraceLoggingRegister fails, the state shall be switched to NOT_REGISTERED (1). ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_002: [ log_sink_etw_log shall maintain the state of whether TraceLoggingRegister was called in a variable accessed via InterlockedXXX APIs, which shall have 3 possible values: NOT_REGISTERED (1), REGISTERING (2), REGISTERED(3). ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_003: [ log_sink_etw_log shall perform the below actions until the provider is registered or an error is encountered: ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_004: [ If the state is NOT_REGISTERED (1): ]*/
@@ -770,6 +771,14 @@ static void log_sink_etw_log_registers_the_provider_if_not_registered_already(vo
 {
     // arrange
     setup_mocks();
+
+    setup_InterlockedCompareExchange_call();
+    setup_TraceLoggingRegister_EventRegister_EventSetInformation_call("DAD29F36-0A48-4DEF-9D50-8EF9036B92B4", TRACE_LEVEL_INFORMATION);
+    expected_calls[1].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.override_result = true;
+    expected_calls[1].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.call_result = E_FAIL;
+    setup_printf_call();
+    setup_InterlockedExchange_call();
+
     setup_InterlockedCompareExchange_call();
     setup_TraceLoggingRegister_EventRegister_EventSetInformation_call("DAD29F36-0A48-4DEF-9D50-8EF9036B92B4", TRACE_LEVEL_INFORMATION);
     setup_InterlockedExchange_call();
@@ -820,9 +829,9 @@ static void log_sink_etw_log_registers_the_provider_if_not_registered_already(vo
 
     int captured_line = __LINE__;
 
-    expected_calls[3].u._get_pgmptr_call.override_result = true;
-    expected_calls[3].u._get_pgmptr_call.call_result = 0;
-    expected_calls[3].u._get_pgmptr_call.injected_pValue = "some_test_executable.exe";
+    expected_calls[7].u._get_pgmptr_call.override_result = true;
+    expected_calls[7].u._get_pgmptr_call.call_result = 0;
+    expected_calls[7].u._get_pgmptr_call.injected_pValue = "some_test_executable.exe";
 
     static const char expected_event_message[] = "ETW provider was registered succesfully (self test). Executable file full path name = some_test_executable.exe";
 

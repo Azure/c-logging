@@ -28,7 +28,7 @@
 
 /* Codes_SRS_LOG_SINK_ETW_01_084: [ log_sink_etw_log shall use as provider GUID DAD29F36-0A48-4DEF-9D50-8EF9036B92B4. ]*/
 TRACELOGGING_DEFINE_PROVIDER(
-    g_my_component_provider,
+    log_sink_etw_provider,
     "block_storage_2",
     (0xDAD29F36, 0x0A48, 0x4DEF, 0x9D, 0x50, 0x8E, 0xF9, 0x03, 0x6B, 0x92, 0xB4));
 /*DAD29F36-0A48-4DEF-9D50-8EF9036B92B4*/
@@ -60,7 +60,7 @@ static void internal_log_sink_etw_lazy_register_provider(void)
         if (state == PROVIDER_STATE_NOT_REGISTERED)
         {
             /* Codes_SRS_LOG_SINK_ETW_01_006: [ log_sink_etw_log shall register the ETW TraceLogging provider by calling TraceLoggingRegister (TraceLoggingRegister_EventRegister_EventSetInformation). ]*/
-            TLG_STATUS register_result = TraceLoggingRegister(g_my_component_provider);
+            TLG_STATUS register_result = TraceLoggingRegister(log_sink_etw_provider);
             if (SUCCEEDED(register_result))
             {
                 /* Codes_SRS_LOG_SINK_ETW_01_007: [ log_sink_etw_log shall switch the state to REGISTERED. ]*/
@@ -81,7 +81,8 @@ static void internal_log_sink_etw_lazy_register_provider(void)
             }
             else
             {
-                (void)printf("ETW provider was NOT registered.\r\n");
+                /* Codes_SRS_LOG_SINK_ETW_01_088: [ If TraceLoggingRegister fails, the state shall be switched to NOT_REGISTERED (1). ]*/
+                (void)printf("ETW provider was NOT registered (register_result=0x%08x).\r\n", register_result);
                 (void)InterlockedExchange(&etw_provider_state, PROVIDER_STATE_NOT_REGISTERED);
             }
         }
@@ -107,7 +108,7 @@ __pragma(pack(pop))
 // the TraceLogging.h header about the format of the self described events
 static void internal_emit_self_described_event(const char* event_name, uint16_t event_name_length, uint8_t trace_level, const LOG_CONTEXT_PROPERTY_VALUE_PAIR* context_property_value_pairs, uint32_t property_value_count, const char* message, const char* file, const char* func, int32_t line, va_list args)
 {
-    TraceLoggingHProvider const _tlgProv = g_my_component_provider;
+    TraceLoggingHProvider const _tlgProv = log_sink_etw_provider;
     if (trace_level < _tlgProv->LevelPlus1)
     {
         // have a stack allocated buffer where we construct the event metadata and

@@ -48,6 +48,8 @@ Note: `_get_pgmptr` is documented [here](https://learn.microsoft.com/en-us/cpp/c
 
 **SRS_LOG_SINK_ETW_01_009: [** Checking and changing the variable that maintains whether `TraceLoggingRegister` was called shall be done using `InterlockedCompareExchange` and `InterlockedExchange`. **]**
 
+**SRS_LOG_SINK_ETW_01_088: [** If `TraceLoggingRegister` fails, the state shall be switched to `NOT_REGISTERED` (1). **]**
+
 **SRS_LOG_SINK_ETW_01_084: [** `log_sink_etw_log` shall use as provider GUID `DAD29F36-0A48-4DEF-9D50-8EF9036B92B4`. **]**
 
 Note this can (and should) be improved to be configurable in a subsequent task.
