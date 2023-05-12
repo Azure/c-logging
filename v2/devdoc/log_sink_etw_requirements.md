@@ -92,8 +92,8 @@ Note this can (and should) be improved to be configurable in a subsequent task.
 
 **SRS_LOG_SINK_ETW_01_042: [** `log_sink_etw.log_sink_log` shall compute the metadata size for the self described event metadata as follows: **]**
 
-- **SRS_LOG_SINK_ETW_01_043: [** Length of the event name (determined at compile time, excluding zero terminator) + 1.
- **]**
+- **SRS_LOG_SINK_ETW_01_043: [** Length of the event name (determined at compile time, excluding zero terminator) + 1. **]**
+
 - **SRS_LOG_SINK_ETW_01_044: [** Length of the `content` field name (determined at compile time, excluding zero terminator) + 1. **]**
 
 - **SRS_LOG_SINK_ETW_01_045: [** Length of the `file` field name (determined at compile time, excluding zero terminator) + 1. **]**
@@ -111,6 +111,8 @@ Note this can (and should) be improved to be configurable in a subsequent task.
 **SRS_LOG_SINK_ETW_01_026: [** `log_sink_etw.log_sink_log` shall fill a `SELF_DESCRIBED_EVENT` structure, setting the following fields: **]**
 
 - **SRS_LOG_SINK_ETW_01_027: [** `_tlgBlobTyp` shall be set to `_TlgBlobEvent4`. **]**
+
+Note: `_tlgBlobTyp` represents the metadata blob type in the binary form described in TraceLogging.h. It is internal to TraceLogging, and we take a dependency on it because we want to carve our own events.
 
 - **SRS_LOG_SINK_ETW_01_028: [** `_tlgChannel` shall be set to 11. **]**
 
