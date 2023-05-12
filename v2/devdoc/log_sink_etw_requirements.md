@@ -94,15 +94,15 @@ Note this can (and should) be improved to be configurable in a subsequent task.
 
 **SRS_LOG_SINK_ETW_01_042: [** `log_sink_etw.log_sink_log` shall compute the metadata size for the self described event metadata as follows: **]**
 
-- **SRS_LOG_SINK_ETW_01_043: [** Length of the event name (determined at compile time, excluding zero terminator) + 1. **]**
+- **SRS_LOG_SINK_ETW_01_043: [** Size of the event name. **]**
 
-- **SRS_LOG_SINK_ETW_01_044: [** Length of the `content` field name (determined at compile time, excluding zero terminator) + 1. **]**
+- **SRS_LOG_SINK_ETW_01_044: [** Size of the `content` field name. **]**
 
-- **SRS_LOG_SINK_ETW_01_045: [** Length of the `file` field name (determined at compile time, excluding zero terminator) + 1. **]**
+- **SRS_LOG_SINK_ETW_01_045: [** Size of the `file` field name. **]**
 
-- **SRS_LOG_SINK_ETW_01_046: [** Length of the `func` field name (determined at compile time, excluding zero terminator) + 1. **]**
+- **SRS_LOG_SINK_ETW_01_046: [** Size of the `func` field name. **]**
 
-- **SRS_LOG_SINK_ETW_01_047: [** Length of the `line` field name (determined at compile time, excluding zero terminator) + 1. **]**
+- **SRS_LOG_SINK_ETW_01_047: [** Size of the `line` field name. **]**
 
 - **SRS_LOG_SINK_ETW_01_051: [** For each property in `log_context`, the length of the property name + 1 and one extra byte for the type of the field. **]**
 

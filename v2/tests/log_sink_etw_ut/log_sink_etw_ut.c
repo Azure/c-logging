@@ -798,7 +798,6 @@ static void log_sink_etw_log_registers_the_provider_if_not_registered_already(vo
     // self test event
     setup__get_pgmptr_call();
 
-    setup_InterlockedCompareExchange_call();
     setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
     setup__tlgCreate1Sz_char(); // file 
@@ -958,11 +957,11 @@ static void log_sink_log_retries_until_state_is_not_registering(void)
 /* Tests_SRS_LOG_SINK_ETW_01_010: [ log_sink_etw_log shall emit a self described event that shall have the name of the event as follows: ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_025: [ If log_context is NULL only the fields content, file, func and line shall be added to the ETW event. ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_042: [ log_sink_etw.log_sink_log shall compute the metadata size for the self described event metadata as follows: ]*/
-    /* Tests_SRS_LOG_SINK_ETW_01_043: [ Length of the event name (determined at compile time, excluding zero terminator) + 1. ]*/
-    /* Tests_SRS_LOG_SINK_ETW_01_044: [ Length of the content field name (determined at compile time, excluding zero terminator) + 1. ]*/
-    /* Tests_SRS_LOG_SINK_ETW_01_045: [ Length of the file field name (determined at compile time, excluding zero terminator) + 1. ]*/
-    /* Tests_SRS_LOG_SINK_ETW_01_046: [ Length of the func field name (determined at compile time, excluding zero terminator) + 1. ]*/
-    /* Tests_SRS_LOG_SINK_ETW_01_047: [ Length of the line field name (determined at compile time, excluding zero terminator) + 1. ]*/
+    /* Tests_SRS_LOG_SINK_ETW_01_043: [ Size of the event name. ]*/
+    /* Tests_SRS_LOG_SINK_ETW_01_044: [ Size of the content field name. ]*/
+    /* Tests_SRS_LOG_SINK_ETW_01_045: [ Size of the file field name. ]*/
+    /* Tests_SRS_LOG_SINK_ETW_01_046: [ Size of the func field name. ]*/
+    /* Tests_SRS_LOG_SINK_ETW_01_047: [ Size of the line field name. ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_026: [ log_sink_etw.log_sink_log shall fill a SELF_DESCRIBED_EVENT structure, setting the following fields: ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_027: [ _tlgBlobTyp shall be set to _TlgBlobEvent4. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_028: [ _tlgChannel shall be set to 11. ]*/
@@ -1845,6 +1844,7 @@ static void when_unknown_property_type_is_encountered_log_sink_etw_log_with_cont
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
     setup_log_context_property_if_get_type(); // one mocked call to get_type
+    setup_printf_call(); // printf error
     setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
     setup__tlgCreate1Sz_char(); // file 
@@ -2406,6 +2406,7 @@ static void when_size_of_metadata_exceeds_4096_log_sink_etw_log_with_context_doe
     setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
+    setup_printf_call(); // printf error
     setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
     setup__tlgCreate1Sz_char(); // file 
