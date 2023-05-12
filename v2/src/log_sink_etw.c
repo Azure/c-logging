@@ -16,6 +16,7 @@
 #include "c_logging/logger.h"
 #include "c_logging/log_sink_if.h"
 #include "c_logging/log_sink_etw.h"
+#include "c_logging/log_context_property_type.h"
 
 // max number of properties we want to have in the event
 #define LOG_MAX_ETW_PROPERTY_VALUE_PAIR_COUNT 64
@@ -125,7 +126,7 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         // event_name_length includes NULL terminator
         /* Codes_SRS_LOG_SINK_ETW_01_042: [ log_sink_etw.log_sink_log shall compute the metadata size for the self described event metadata as follows: ]*/
         /* Codes_SRS_LOG_SINK_ETW_01_043: [ Length of the event name (determined at compile time, excluding zero terminator) + 1. ]*/
-        uint32_t i;
+        uint16_t i;
 
         // alias to the event bytes
         uint8_t* pos = &_tlgEvent.metadata[0];
@@ -171,7 +172,9 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
                 /* Codes_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
                 if ((uint16_t)(&_tlgEvent.metadata[MAX_METADATA_SIZE] - pos) < name_length + 1 + 1)
                 {
-                    add_properties = false;
+                    (void)printf("Property %" PRIu16 "/%" PRIu16 " does not fit for ETW event, file=%s, func=%s, line=%" PRId32 ".\r\n",
+                        i, property_value_count, file, func, line);
+                        add_properties = false;
                     break;
                 }
                 else
@@ -181,11 +184,15 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
                     pos += name_length + 1;
                 }
 
+                LOG_CONTEXT_PROPERTY_TYPE property_type = context_property_value_pairs[i].type->get_type();
+
                 /* Codes_SRS_LOG_SINK_ETW_01_055: [ A byte with the type of property, as follows: ]*/
-                switch (context_property_value_pairs[i].type->get_type())
+                switch (property_type)
                 {
                 default:
                     /* Codes_SRS_LOG_SINK_ETW_01_081: [ If the property type is any other value, no property data shall be added to the event. ]*/
+                    (void)printf("Invalid property type: %" PRI_MU_ENUM " for property %" PRIu16 "/%" PRIu16 " does not fit for ETW event, file=%s, func=%s, line=%" PRId32 ".\r\n",
+                        MU_ENUM_VALUE(LOG_CONTEXT_PROPERTY_TYPE, property_type), i, property_value_count, file, func, line);
                     add_properties = false;
                     break;
 
@@ -234,6 +241,8 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
 
                     if (pos == &_tlgEvent.metadata[MAX_METADATA_SIZE])
                     {
+                        (void)printf("Property %" PRIu16 "/%" PRIu16 " does not fit for ETW event, file=%s, func=%s, line=%" PRId32 ".\r\n",
+                            i, property_value_count, file, func, line);
                         add_properties = false;
                     }
                     else

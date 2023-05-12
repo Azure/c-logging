@@ -15,6 +15,7 @@
 
 #include "macro_utils/macro_utils.h"
 
+#include "c_logging/log_context_property_type.h"
 #include "c_logging/log_context_property_basic_types.h"
 #include "c_logging/log_context_property_type_ascii_char_ptr.h"
 #include "c_logging/log_context_property_value_pair.h"
@@ -44,6 +45,8 @@ static size_t asserts_failed = 0;
     MOCK_CALL_TYPE_log_context_property_if_get_type
 
 MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
+
+MU_DEFINE_ENUM_STRINGS(LOG_CONTEXT_PROPERTY_TYPE, LOG_CONTEXT_PROPERTY_TYPE_VALUES)
 
 // very poor mans mocks :-(
 
