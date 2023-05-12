@@ -156,7 +156,7 @@ typedef struct MOCK_CALL_TAG
         _tlgWriteTransfer_EventWriteTransfer_CALL _tlgWriteTransfer_EventWriteTransfer_call;
         log_context_property_if_get_type_CALL log_context_property_if_get_type_call;
         vsnprintf_CALL vsnprintf_call;
-    } u;
+    };
 } MOCK_CALL;
 
 static char* stringify_bytes(const unsigned char* bytes, size_t byte_count)
@@ -212,19 +212,20 @@ int mock_printf(const char* format, ...)
     }
     else
     {
-        if (expected_calls[actual_call_count].u.printf_call.override_result)
+        if (expected_calls[actual_call_count].printf_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.printf_call.call_result;
+            result = expected_calls[actual_call_count].printf_call.call_result;
         }
         else
         {
             va_list args;
             va_start(args, format);
             // also capture the result in a variable for comparisons in tests
-            (void)vsnprintf(expected_calls[actual_call_count].u.printf_call.captured_output, sizeof(expected_calls[actual_call_count].u.printf_call.captured_output),
+            (void)vsnprintf(expected_calls[actual_call_count].printf_call.captured_output, sizeof(expected_calls[actual_call_count].printf_call.captured_output),
                 format, args);
             va_end(args);
 
+            // call "real" function (or the best equivalent we have)
             va_start(args, format);
             result = vprintf(format, args);
             va_end(args);
@@ -248,12 +249,13 @@ LONG mock_InterlockedCompareExchange(LONG volatile* Destination, LONG ExChange, 
     }
     else
     {
-        if (expected_calls[actual_call_count].u.printf_call.override_result)
+        if (expected_calls[actual_call_count].printf_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.InterlockedCompareExchange_call.call_result;
+            result = expected_calls[actual_call_count].InterlockedCompareExchange_call.call_result;
         }
         else
         {
+            // call "real" function
             result = InterlockedCompareExchange(Destination, ExChange, Comperand);
         }
 
@@ -275,12 +277,13 @@ LONG mock_InterlockedExchange(LONG volatile* Target, LONG Value)
     }
     else
     {
-        if (expected_calls[actual_call_count].u.printf_call.override_result)
+        if (expected_calls[actual_call_count].printf_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.InterlockedExchange_call.call_result;
+            result = expected_calls[actual_call_count].InterlockedExchange_call.call_result;
         }
         else
         {
+            // call "real" function
             result = InterlockedExchange(Target, Value);
         }
 
@@ -302,14 +305,15 @@ uint32_t mock_log_context_get_property_value_pair_count(LOG_CONTEXT_HANDLE log_c
     }
     else
     {
-        if (expected_calls[actual_call_count].u.log_context_get_property_value_pair_count_call.override_result)
+        if (expected_calls[actual_call_count].log_context_get_property_value_pair_count_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.log_context_get_property_value_pair_count_call.call_result;
+            result = expected_calls[actual_call_count].log_context_get_property_value_pair_count_call.call_result;
         }
         else
         {
-            expected_calls[actual_call_count].u.log_context_get_property_value_pair_count_call.captured_log_context = log_context;
+            expected_calls[actual_call_count].log_context_get_property_value_pair_count_call.captured_log_context = log_context;
 
+            // call "real" function
             result = log_context_get_property_value_pair_count(log_context);
         }
 
@@ -331,14 +335,15 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* mock_log_context_get_property_value_pairs
     }
     else
     {
-        if (expected_calls[actual_call_count].u.log_context_get_property_value_pairs_call.override_result)
+        if (expected_calls[actual_call_count].log_context_get_property_value_pairs_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.log_context_get_property_value_pairs_call.call_result;
+            result = expected_calls[actual_call_count].log_context_get_property_value_pairs_call.call_result;
         }
         else
         {
-            expected_calls[actual_call_count].u.log_context_get_property_value_pairs_call.captured_log_context = log_context;
+            expected_calls[actual_call_count].log_context_get_property_value_pairs_call.captured_log_context = log_context;
 
+            // call "real" function
             result = log_context_get_property_value_pairs(log_context);
         }
 
@@ -360,9 +365,9 @@ TLG_STATUS mock_TraceLoggingRegister_EventRegister_EventSetInformation(const str
     }
     else
     {
-        if (expected_calls[actual_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.override_result)
+        if (expected_calls[actual_call_count].TraceLoggingRegister_EventRegister_EventSetInformation_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.call_result;
+            result = expected_calls[actual_call_count].TraceLoggingRegister_EventRegister_EventSetInformation_call.call_result;
         }
         else
         {
@@ -373,19 +378,20 @@ TLG_STATUS mock_TraceLoggingRegister_EventRegister_EventSetInformation(const str
 
             (void)sprintf(provider_guid_string, "%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X", provider_guid.Data1, provider_guid.Data2, provider_guid.Data3, provider_guid.Data4[0], provider_guid.Data4[1], provider_guid.Data4[2], provider_guid.Data4[3], provider_guid.Data4[4], provider_guid.Data4[5], provider_guid.Data4[6], provider_guid.Data4[7]);
 
-            if (strcmp(provider_guid_string, expected_calls[actual_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.expected_provider_id_as_string) != 0)
+            if (strcmp(provider_guid_string, expected_calls[actual_call_count].TraceLoggingRegister_EventRegister_EventSetInformation_call.expected_provider_id_as_string) != 0)
             {
                 (void)printf("Expected provider id to be %s, actual = %s",
-                    expected_calls[actual_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.expected_provider_id_as_string, provider_guid_string);
+                    expected_calls[actual_call_count].TraceLoggingRegister_EventRegister_EventSetInformation_call.expected_provider_id_as_string, provider_guid_string);
                 actual_and_expected_match = false;
 
                 result = E_FAIL;
             }
             else
             {
+                // call "real" function
                 result = TraceLoggingRegister_EventRegister_EventSetInformation(hProvider);
 
-                ((struct _tlgProvider_t*)test_provider)->LevelPlus1 = expected_calls[actual_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.enable_provider_level + 1;
+                ((struct _tlgProvider_t*)test_provider)->LevelPlus1 = expected_calls[actual_call_count].TraceLoggingRegister_EventRegister_EventSetInformation_call.enable_provider_level + 1;
             }
         }
 
@@ -407,13 +413,14 @@ errno_t mock__get_pgmptr(char** pValue)
     }
     else
     {
-        if (expected_calls[actual_call_count].u._get_pgmptr_call.override_result)
+        if (expected_calls[actual_call_count]._get_pgmptr_call.override_result)
         {
-            *pValue = expected_calls[actual_call_count].u._get_pgmptr_call.injected_pValue;
-            result = expected_calls[actual_call_count].u._get_pgmptr_call.call_result;
+            *pValue = expected_calls[actual_call_count]._get_pgmptr_call.injected_pValue;
+            result = expected_calls[actual_call_count]._get_pgmptr_call.call_result;
         }
         else
         {
+            // call "real" function
             result = _get_pgmptr(pValue);
         }
 
@@ -432,6 +439,7 @@ void mock__tlgCreate1Sz_char(PEVENT_DATA_DESCRIPTOR pDesc, char const* psz)
     }
     else
     {
+        // call "real" function
         _tlgCreate1Sz_char(pDesc, psz);
 
         actual_call_count++;
@@ -447,6 +455,7 @@ void mock_EventDataDescCreate(PEVENT_DATA_DESCRIPTOR EventDataDescriptor, const 
     }
     else
     {
+        // call "real" function
         EventDataDescCreate(EventDataDescriptor, DataPtr, DataSize);
 
         actual_call_count++;
@@ -465,13 +474,13 @@ errno_t mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvide
     }
     else
     {
-        if (expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.override_result)
+        if (expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.override_result)
         {
-            result = expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.call_result;
+            result = expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.call_result;
         }
         else
         {
-            SELF_DESCRIBED_EVENT* expected_self_described_event = expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_self_described_event;
+            SELF_DESCRIBED_EVENT* expected_self_described_event = expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_self_described_event;
             SELF_DESCRIBED_EVENT* actual_self_described_event = (SELF_DESCRIBED_EVENT*)CONTAINING_RECORD(pEventMetadata, SELF_DESCRIBED_EVENT, _tlgChannel);
             if (expected_self_described_event->_tlgLevel != actual_self_described_event->_tlgLevel)
             {
@@ -518,10 +527,10 @@ errno_t mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvide
                 actual_and_expected_match = false;
                 result = E_FAIL;
             }
-            else if (cData != expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_cData)
+            else if (cData != expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_cData)
             {
                 (void)printf("Expected cData=%" PRIu32 ", actual=%" PRIu32 "\r\n",
-                    expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_cData, cData);
+                    expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_cData, cData);
                 actual_and_expected_match = false;
                 result = E_FAIL;
             }
@@ -531,7 +540,7 @@ errno_t mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvide
                 for (uint32_t i = 2; i < cData; i++)
                 {
                     if (
-                        (expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.ignore_file_and_func) &&
+                        (expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.ignore_file_and_func) &&
                         (
                             (i == FILE_EVENT_DESCRIPTOR_ENTRY) ||
                             (i == FUNC_EVENT_DESCRIPTOR_ENTRY) ||
@@ -542,13 +551,13 @@ errno_t mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvide
                         continue;
                     }
 
-                    if (pData[i].Size != expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_pData[i].Size)
+                    if (pData[i].Size != expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_pData[i].Size)
                     {
                         (void)printf("Expected pData[%" PRIu32 "].Size=%" PRIu32 ", actual=%" PRIu32 "\r\n",
-                            i, expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_pData[i].Size, pData[i].Size);
+                            i, expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_pData[i].Size, pData[i].Size);
                         break;
                     }
-                    if (memcmp((void*)(uintptr_t)pData[i].Ptr, (void*)(uintptr_t)expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_pData[i].Ptr, pData[i].Size) != 0)
+                    if (memcmp((void*)(uintptr_t)pData[i].Ptr, (void*)(uintptr_t)expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_pData[i].Ptr, pData[i].Size) != 0)
                     {
                         (void)printf("Event descriptor memory at index %" PRIu32 " does not match\r\n",
                             i);
@@ -581,9 +590,9 @@ LOG_CONTEXT_PROPERTY_TYPE mock_log_context_property_if_get_type(void)
     }
     else
     {
-        if (expected_calls[actual_call_count].u.log_context_property_if_get_type_call.override_result)
+        if (expected_calls[actual_call_count].log_context_property_if_get_type_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.log_context_property_if_get_type_call.call_result;
+            result = expected_calls[actual_call_count].log_context_property_if_get_type_call.call_result;
         }
         else
         {
@@ -608,16 +617,17 @@ int mock_vsnprintf(char* restrict s, size_t n, const char* restrict format, va_l
     }
     else
     {
-        if (expected_calls[actual_call_count].u.printf_call.override_result)
+        if (expected_calls[actual_call_count].printf_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.printf_call.call_result;
+            result = expected_calls[actual_call_count].printf_call.call_result;
         }
         else
         {
             // also capture the result in a variable for comparisons in tests
-            (void)vsnprintf(expected_calls[actual_call_count].u.printf_call.captured_output, sizeof(expected_calls[actual_call_count].u.printf_call.captured_output),
+            (void)vsnprintf(expected_calls[actual_call_count].printf_call.captured_output, sizeof(expected_calls[actual_call_count].printf_call.captured_output),
                 format, args);
 
+            // call "real" function
             result = vsnprintf(s, n, format, args);
         }
 
@@ -642,51 +652,51 @@ static void setup_enabled_provider(UINT32 level)
 static void setup_printf_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_printf;
-    expected_calls[expected_call_count].u.printf_call.override_result = false;
+    expected_calls[expected_call_count].printf_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_InterlockedCompareExchange_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_InterlockedCompareExchange;
-    expected_calls[expected_call_count].u.InterlockedCompareExchange_call.override_result = false;
+    expected_calls[expected_call_count].InterlockedCompareExchange_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_InterlockedExchange_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_InterlockedExchange;
-    expected_calls[expected_call_count].u.InterlockedExchange_call.override_result = false;
+    expected_calls[expected_call_count].InterlockedExchange_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_log_context_get_property_value_pair_count_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_log_context_get_property_value_pair_count;
-    expected_calls[expected_call_count].u.log_context_get_property_value_pair_count_call.override_result = false;
+    expected_calls[expected_call_count].log_context_get_property_value_pair_count_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_log_context_get_property_value_pairs_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_log_context_get_property_value_pairs;
-    expected_calls[expected_call_count].u.log_context_get_property_value_pairs_call.override_result = false;
+    expected_calls[expected_call_count].log_context_get_property_value_pairs_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_TraceLoggingRegister_EventRegister_EventSetInformation_call(const char* expected_provider_id_as_string, uint8_t enable_provider_level)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_TraceLoggingRegister_EventRegister_EventSetInformation;
-    expected_calls[expected_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.override_result = false;
-    expected_calls[expected_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.enable_provider_level = enable_provider_level;
-    expected_calls[expected_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.expected_provider_id_as_string = expected_provider_id_as_string;
+    expected_calls[expected_call_count].TraceLoggingRegister_EventRegister_EventSetInformation_call.override_result = false;
+    expected_calls[expected_call_count].TraceLoggingRegister_EventRegister_EventSetInformation_call.enable_provider_level = enable_provider_level;
+    expected_calls[expected_call_count].TraceLoggingRegister_EventRegister_EventSetInformation_call.expected_provider_id_as_string = expected_provider_id_as_string;
     expected_call_count++;
 }
 
 static void setup__get_pgmptr_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE__get_pgmptr;
-    expected_calls[expected_call_count].u._get_pgmptr_call.override_result = false;
+    expected_calls[expected_call_count]._get_pgmptr_call.override_result = false;
     expected_call_count++;
 }
 
@@ -705,36 +715,36 @@ static void setup_EventDataDescCreate(void)
 static void setup__tlgWriteTransfer_EventWriteTransfer(void* event_metadata, uint32_t cData, const EVENT_DATA_DESCRIPTOR* pData)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE__tlgWriteTransfer_EventWriteTransfer;
-    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.override_result = false;
-    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_self_described_event = event_metadata;
-    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_cData = cData;
-    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_pData = pData;
-    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.ignore_file_and_func = false;
+    expected_calls[expected_call_count]._tlgWriteTransfer_EventWriteTransfer_call.override_result = false;
+    expected_calls[expected_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_self_described_event = event_metadata;
+    expected_calls[expected_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_cData = cData;
+    expected_calls[expected_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_pData = pData;
+    expected_calls[expected_call_count]._tlgWriteTransfer_EventWriteTransfer_call.ignore_file_and_func = false;
     expected_call_count++;
 }
 
 static void setup__tlgWriteTransfer_EventWriteTransfer_with_ignore_file_and_func(void* event_metadata, uint32_t cData, const EVENT_DATA_DESCRIPTOR* pData, bool ignore_file_and_func)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE__tlgWriteTransfer_EventWriteTransfer;
-    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.override_result = false;
-    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_self_described_event = event_metadata;
-    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_cData = cData;
-    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_pData = pData;
-    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.ignore_file_and_func = ignore_file_and_func;
+    expected_calls[expected_call_count]._tlgWriteTransfer_EventWriteTransfer_call.override_result = false;
+    expected_calls[expected_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_self_described_event = event_metadata;
+    expected_calls[expected_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_cData = cData;
+    expected_calls[expected_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_pData = pData;
+    expected_calls[expected_call_count]._tlgWriteTransfer_EventWriteTransfer_call.ignore_file_and_func = ignore_file_and_func;
     expected_call_count++;
 }
 
 static void setup_log_context_property_if_get_type(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_log_context_property_if_get_type;
-    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.override_result = false;
+    expected_calls[expected_call_count]._tlgWriteTransfer_EventWriteTransfer_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_vsnprintf_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_vsnprintf;
-    expected_calls[expected_call_count].u.vsnprintf_call.override_result = false;
+    expected_calls[expected_call_count].vsnprintf_call.override_result = false;
     expected_call_count++;
 }
 
@@ -774,8 +784,8 @@ static void log_sink_etw_log_registers_the_provider_if_not_registered_already(vo
 
     setup_InterlockedCompareExchange_call();
     setup_TraceLoggingRegister_EventRegister_EventSetInformation_call("DAD29F36-0A48-4DEF-9D50-8EF9036B92B4", TRACE_LEVEL_INFORMATION);
-    expected_calls[1].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.override_result = true;
-    expected_calls[1].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.call_result = E_FAIL;
+    expected_calls[1].TraceLoggingRegister_EventRegister_EventSetInformation_call.override_result = true;
+    expected_calls[1].TraceLoggingRegister_EventRegister_EventSetInformation_call.call_result = E_FAIL;
     setup_printf_call();
     setup_InterlockedExchange_call();
 
@@ -829,9 +839,9 @@ static void log_sink_etw_log_registers_the_provider_if_not_registered_already(vo
 
     int captured_line = __LINE__;
 
-    expected_calls[7].u._get_pgmptr_call.override_result = true;
-    expected_calls[7].u._get_pgmptr_call.call_result = 0;
-    expected_calls[7].u._get_pgmptr_call.injected_pValue = "some_test_executable.exe";
+    expected_calls[7]._get_pgmptr_call.override_result = true;
+    expected_calls[7]._get_pgmptr_call.call_result = 0;
+    expected_calls[7]._get_pgmptr_call.injected_pValue = "some_test_executable.exe";
 
     static const char expected_event_message[] = "ETW provider was registered succesfully (self test). Executable file full path name = some_test_executable.exe";
 
@@ -863,17 +873,17 @@ static void log_sink_log_retries_until_state_is_not_registering(void)
     // arrange
     setup_mocks();
     setup_InterlockedCompareExchange_call();
-    expected_calls[0].u.InterlockedCompareExchange_call.override_result = true;
-    expected_calls[0].u.InterlockedCompareExchange_call.call_result = 2;
+    expected_calls[0].InterlockedCompareExchange_call.override_result = true;
+    expected_calls[0].InterlockedCompareExchange_call.call_result = 2;
     setup_InterlockedCompareExchange_call();
-    expected_calls[1].u.InterlockedCompareExchange_call.override_result = true;
-    expected_calls[1].u.InterlockedCompareExchange_call.call_result = 2;
+    expected_calls[1].InterlockedCompareExchange_call.override_result = true;
+    expected_calls[1].InterlockedCompareExchange_call.call_result = 2;
     setup_InterlockedCompareExchange_call();
-    expected_calls[2].u.InterlockedCompareExchange_call.override_result = true;
-    expected_calls[2].u.InterlockedCompareExchange_call.call_result = 2;
+    expected_calls[2].InterlockedCompareExchange_call.override_result = true;
+    expected_calls[2].InterlockedCompareExchange_call.call_result = 2;
     setup_InterlockedCompareExchange_call();
-    expected_calls[3].u.InterlockedCompareExchange_call.override_result = true;
-    expected_calls[3].u.InterlockedCompareExchange_call.call_result = 3;
+    expected_calls[3].InterlockedCompareExchange_call.override_result = true;
+    expected_calls[3].InterlockedCompareExchange_call.call_result = 3;
 
     // the actual event
     setup_vsnprintf_call(); // message formatting
@@ -1883,8 +1893,8 @@ static void when_unknown_property_type_is_encountered_log_sink_etw_log_with_cont
     // hard injecting a mock here :-)
     mocked_property_value_pairs[1].type = &mocked_property_type_if;
 
-    expected_calls[1].u.log_context_get_property_value_pairs_call.override_result = true;
-    expected_calls[1].u.log_context_get_property_value_pairs_call.call_result = mocked_property_value_pairs;
+    expected_calls[1].log_context_get_property_value_pairs_call.override_result = true;
+    expected_calls[1].log_context_get_property_value_pairs_call.call_result = mocked_property_value_pairs;
 
     expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;
 
@@ -2853,8 +2863,8 @@ static void when_vsnprintf_fails_an_error_is_printed(void)
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
-    expected_calls[3].u.vsnprintf_call.override_result = true;
-    expected_calls[3].u.vsnprintf_call.call_result = -1;
+    expected_calls[3].vsnprintf_call.override_result = true;
+    expected_calls[3].vsnprintf_call.call_result = -1;
     setup_printf_call(); // spew error
 
     // act
@@ -2922,8 +2932,8 @@ static void when_size_of_metadata_and_formatted_messages_exceeds_4096_and_2nd_vs
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
     setup_vsnprintf_call(); // formatting message 2nd attempt
-    expected_calls[4].u.vsnprintf_call.override_result = true;
-    expected_calls[4].u.vsnprintf_call.call_result = -1;
+    expected_calls[4].vsnprintf_call.override_result = true;
+    expected_calls[4].vsnprintf_call.call_result = -1;
     setup_printf_call();
 
     // act

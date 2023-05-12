@@ -144,7 +144,7 @@ typedef struct MOCK_CALL_TAG
         _get_pgmptr_CALL _get_pgmptr_call;
         _tlgWriteTransfer_EventWriteTransfer_CALL _tlgWriteTransfer_EventWriteTransfer_call;
         log_context_property_if_get_type_CALL log_context_property_if_get_type_call;
-    } u;
+    };
 } MOCK_CALL;
 
 static char* stringify_bytes(const unsigned char* bytes, size_t byte_count)
@@ -200,16 +200,16 @@ int mock_printf(const char* format, ...)
     }
     else
     {
-        if (expected_calls[actual_call_count].u.printf_call.override_result)
+        if (expected_calls[actual_call_count].printf_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.printf_call.call_result;
+            result = expected_calls[actual_call_count].printf_call.call_result;
         }
         else
         {
             va_list args;
             va_start(args, format);
             // also capture the result in a variable for comparisons in tests
-            (void)vsnprintf(expected_calls[actual_call_count].u.printf_call.captured_output, sizeof(expected_calls[actual_call_count].u.printf_call.captured_output),
+            (void)vsnprintf(expected_calls[actual_call_count].printf_call.captured_output, sizeof(expected_calls[actual_call_count].printf_call.captured_output),
                 format, args);
             va_end(args);
 
@@ -236,9 +236,9 @@ LONG mock_InterlockedCompareExchange(LONG volatile* Destination, LONG ExChange, 
     }
     else
     {
-        if (expected_calls[actual_call_count].u.printf_call.override_result)
+        if (expected_calls[actual_call_count].printf_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.InterlockedCompareExchange_call.call_result;
+            result = expected_calls[actual_call_count].InterlockedCompareExchange_call.call_result;
         }
         else
         {
@@ -263,9 +263,9 @@ LONG mock_InterlockedExchange(LONG volatile* Target, LONG Value)
     }
     else
     {
-        if (expected_calls[actual_call_count].u.printf_call.override_result)
+        if (expected_calls[actual_call_count].printf_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.InterlockedExchange_call.call_result;
+            result = expected_calls[actual_call_count].InterlockedExchange_call.call_result;
         }
         else
         {
@@ -290,13 +290,13 @@ uint32_t mock_log_context_get_property_value_pair_count(LOG_CONTEXT_HANDLE log_c
     }
     else
     {
-        if (expected_calls[actual_call_count].u.log_context_get_property_value_pair_count_call.override_result)
+        if (expected_calls[actual_call_count].log_context_get_property_value_pair_count_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.log_context_get_property_value_pair_count_call.call_result;
+            result = expected_calls[actual_call_count].log_context_get_property_value_pair_count_call.call_result;
         }
         else
         {
-            expected_calls[actual_call_count].u.log_context_get_property_value_pair_count_call.captured_log_context = log_context;
+            expected_calls[actual_call_count].log_context_get_property_value_pair_count_call.captured_log_context = log_context;
 
             result = log_context_get_property_value_pair_count(log_context);
         }
@@ -319,13 +319,13 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* mock_log_context_get_property_value_pairs
     }
     else
     {
-        if (expected_calls[actual_call_count].u.log_context_get_property_value_pairs_call.override_result)
+        if (expected_calls[actual_call_count].log_context_get_property_value_pairs_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.log_context_get_property_value_pairs_call.call_result;
+            result = expected_calls[actual_call_count].log_context_get_property_value_pairs_call.call_result;
         }
         else
         {
-            expected_calls[actual_call_count].u.log_context_get_property_value_pairs_call.captured_log_context = log_context;
+            expected_calls[actual_call_count].log_context_get_property_value_pairs_call.captured_log_context = log_context;
 
             result = log_context_get_property_value_pairs(log_context);
         }
@@ -348,9 +348,9 @@ TLG_STATUS mock_TraceLoggingRegister_EventRegister_EventSetInformation(const str
     }
     else
     {
-        if (expected_calls[actual_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.override_result)
+        if (expected_calls[actual_call_count].TraceLoggingRegister_EventRegister_EventSetInformation_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.call_result;
+            result = expected_calls[actual_call_count].TraceLoggingRegister_EventRegister_EventSetInformation_call.call_result;
         }
         else
         {
@@ -381,9 +381,9 @@ errno_t mock__get_pgmptr(char** pValue)
     }
     else
     {
-        if (expected_calls[actual_call_count].u._get_pgmptr_call.override_result)
+        if (expected_calls[actual_call_count]._get_pgmptr_call.override_result)
         {
-            result = expected_calls[actual_call_count].u._get_pgmptr_call.call_result;
+            result = expected_calls[actual_call_count]._get_pgmptr_call.call_result;
         }
         else
         {
@@ -438,13 +438,13 @@ errno_t mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvide
     }
     else
     {
-        if (expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.override_result)
+        if (expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.override_result)
         {
-            result = expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.call_result;
+            result = expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.call_result;
         }
         else
         {
-            SELF_DESCRIBED_EVENT* expected_self_described_event = expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_self_described_event;
+            SELF_DESCRIBED_EVENT* expected_self_described_event = expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_self_described_event;
             SELF_DESCRIBED_EVENT* actual_self_described_event = (SELF_DESCRIBED_EVENT*)CONTAINING_RECORD(pEventMetadata, SELF_DESCRIBED_EVENT, _tlgChannel);
             if (expected_self_described_event->_tlgLevel != actual_self_described_event->_tlgLevel)
             {
@@ -491,10 +491,10 @@ errno_t mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvide
                 actual_and_expected_match = false;
                 result = E_FAIL;
             }
-            else if (cData != expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_cData)
+            else if (cData != expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_cData)
             {
                 (void)printf("Expected cData=%" PRIu32 ", actual=%" PRIu32 "\r\n",
-                    expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_cData, cData);
+                    expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_cData, cData);
                 actual_and_expected_match = false;
                 result = E_FAIL;
             }
@@ -504,7 +504,7 @@ errno_t mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvide
                 for (uint32_t i = 2; i < cData; i++)
                 {
                     if (
-                        (expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.ignore_file_and_func) &&
+                        (expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.ignore_file_and_func) &&
                         (
                             (i == FILE_EVENT_DESCRIPTOR_ENTRY) ||
                             (i == FUNC_EVENT_DESCRIPTOR_ENTRY) ||
@@ -515,13 +515,13 @@ errno_t mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvide
                         continue;
                     }
 
-                    if (pData[i].Size != expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_pData[i].Size)
+                    if (pData[i].Size != expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_pData[i].Size)
                     {
                         (void)printf("Expected pData[%" PRIu32 "].Size=%" PRIu32 ", actual=%" PRIu32 "\r\n",
-                            i, expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_pData[i].Size, pData[i].Size);
+                            i, expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_pData[i].Size, pData[i].Size);
                         break;
                     }
-                    if (memcmp((void*)(uintptr_t)pData[i].Ptr, (void*)(uintptr_t)expected_calls[actual_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_pData[i].Ptr, pData[i].Size) != 0)
+                    if (memcmp((void*)(uintptr_t)pData[i].Ptr, (void*)(uintptr_t)expected_calls[actual_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_pData[i].Ptr, pData[i].Size) != 0)
                     {
                         (void)printf("Event descriptor memory at index %" PRIu32 " does not match\r\n",
                             i);
@@ -554,9 +554,9 @@ LOG_CONTEXT_PROPERTY_TYPE mock_log_context_property_if_get_type(void)
     }
     else
     {
-        if (expected_calls[actual_call_count].u.log_context_property_if_get_type_call.override_result)
+        if (expected_calls[actual_call_count].log_context_property_if_get_type_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.log_context_property_if_get_type_call.call_result;
+            result = expected_calls[actual_call_count].log_context_property_if_get_type_call.call_result;
         }
         else
         {
@@ -579,49 +579,49 @@ LOG_CONTEXT_PROPERTY_TYPE mock_log_context_property_if_get_type(void)
 static void setup_printf_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_printf;
-    expected_calls[expected_call_count].u.printf_call.override_result = false;
+    expected_calls[expected_call_count].printf_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_InterlockedCompareExchange_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_InterlockedCompareExchange;
-    expected_calls[expected_call_count].u.InterlockedCompareExchange_call.override_result = false;
+    expected_calls[expected_call_count].InterlockedCompareExchange_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_InterlockedExchange_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_InterlockedExchange;
-    expected_calls[expected_call_count].u.InterlockedExchange_call.override_result = false;
+    expected_calls[expected_call_count].InterlockedExchange_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_log_context_get_property_value_pair_count_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_log_context_get_property_value_pair_count;
-    expected_calls[expected_call_count].u.log_context_get_property_value_pair_count_call.override_result = false;
+    expected_calls[expected_call_count].log_context_get_property_value_pair_count_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_log_context_get_property_value_pairs_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_log_context_get_property_value_pairs;
-    expected_calls[expected_call_count].u.log_context_get_property_value_pairs_call.override_result = false;
+    expected_calls[expected_call_count].log_context_get_property_value_pairs_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_TraceLoggingRegister_EventRegister_EventSetInformation_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_TraceLoggingRegister_EventRegister_EventSetInformation;
-    expected_calls[expected_call_count].u.TraceLoggingRegister_EventRegister_EventSetInformation_call.override_result = false;
+    expected_calls[expected_call_count].TraceLoggingRegister_EventRegister_EventSetInformation_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup__get_pgmptr_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE__get_pgmptr;
-    expected_calls[expected_call_count].u._get_pgmptr_call.override_result = false;
+    expected_calls[expected_call_count]._get_pgmptr_call.override_result = false;
     expected_call_count++;
 }
 
@@ -640,18 +640,18 @@ static void setup_EventDataDescCreate(void)
 static void setup__tlgWriteTransfer_EventWriteTransfer(void* event_metadata, uint32_t cData, const EVENT_DATA_DESCRIPTOR* pData, bool ignore_file_and_func)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE__tlgWriteTransfer_EventWriteTransfer;
-    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.override_result = false;
-    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_self_described_event = event_metadata;
-    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_cData = cData;
-    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.expected_pData = pData;
-    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.ignore_file_and_func = ignore_file_and_func;
+    expected_calls[expected_call_count]._tlgWriteTransfer_EventWriteTransfer_call.override_result = false;
+    expected_calls[expected_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_self_described_event = event_metadata;
+    expected_calls[expected_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_cData = cData;
+    expected_calls[expected_call_count]._tlgWriteTransfer_EventWriteTransfer_call.expected_pData = pData;
+    expected_calls[expected_call_count]._tlgWriteTransfer_EventWriteTransfer_call.ignore_file_and_func = ignore_file_and_func;
     expected_call_count++;
 }
 
 static void setup_log_context_property_if_get_type(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_log_context_property_if_get_type;
-    expected_calls[expected_call_count].u._tlgWriteTransfer_EventWriteTransfer_call.override_result = false;
+    expected_calls[expected_call_count]._tlgWriteTransfer_EventWriteTransfer_call.override_result = false;
     expected_call_count++;
 }
 
@@ -781,8 +781,8 @@ static void when__get_pgmptr_fails_log_sink_etw_log_prints_executable_as_UNKNOWN
 
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata_2, 6, expected_event_data_descriptors_2, false);
 
-    expected_calls[3].u._get_pgmptr_call.override_result = true;
-    expected_calls[3].u._get_pgmptr_call.call_result = 1;
+    expected_calls[3]._get_pgmptr_call.override_result = true;
+    expected_calls[3]._get_pgmptr_call.call_result = 1;
 
     // act
     log_sink_etw.log_sink_log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, captured_line, "test");

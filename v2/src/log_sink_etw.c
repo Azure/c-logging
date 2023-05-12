@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <inttypes.h>
 
 #include "windows.h"
 
@@ -21,7 +22,6 @@
 
 // max metadata size
 #define MAX_METADATA_SIZE 4096
-#define MAX_SELF_DESCRIBED_EVENT_WITH_METADATA (sizeof(SELF_DESCRIBED_EVENT) + MAX_METADATA_SIZE)
 
 // ID Work Item Type Title State Assigned To Effort Remaining Work Original Estimate Value Area Iteration Path Tags
 // 17751591 Task Have configurable provider To Do           One\Custom\AzureMessaging\Gallium\GaM2
@@ -67,15 +67,21 @@ static void internal_log_sink_etw_lazy_register_provider(void)
                 (void)InterlockedExchange(&etw_provider_state, PROVIDER_STATE_REGISTERED);
                 /* Codes_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw_log shall printf the fact that the provider was registered and from which executable (as obtained by calling _pgmptr). ]*/
 
-                char* executable_full_path_name;
-                if (_get_pgmptr(&executable_full_path_name) != 0)
+                char* temp_executable_full_path_name;
+                const char* executable_full_path_name;
+
+                if (_get_pgmptr(&temp_executable_full_path_name) != 0)
                 {
                     /* Codes_SRS_LOG_SINK_ETW_01_083: [ If _get_pgmptr fails, the executable shall be printed as UNKNOWN. ]*/
                     executable_full_path_name = "UNKNOWN";
                 }
+                else
+                {
+                    executable_full_path_name = temp_executable_full_path_name;
+                }
 
                 /* Codes_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw_log shall emit a LOG_LEVEL_INFO event as a self test , printing the fact that the provider was registered and from which executable (as obtained by calling _get_pgmptr). ]*/
-                log_sink_etw_log(LOG_LEVEL_INFO, NULL, __FILE__, __FUNCTION__, __LINE__, "ETW provider was registered succesfully (self test). Executable file full path name = %s", MU_P_OR_NULL(executable_full_path_name));
+                log_sink_etw_log(LOG_LEVEL_INFO, NULL, __FILE__, __FUNCTION__, __LINE__, "ETW provider was registered succesfully (self test). Executable file full path name = %s", executable_full_path_name);
 
                 break;
             }
@@ -100,19 +106,19 @@ typedef struct SELF_DESCRIBED_EVENT_TAG
     uint64_t _tlgKeyword;
     uint16_t _tlgEvtMetaSize;
     uint16_t _tlgEvtTag;
-    uint8_t metadata[];
+    uint8_t metadata[MAX_METADATA_SIZE];
 } SELF_DESCRIBED_EVENT;
 __pragma(pack(pop))
 
 // This function was written with a little bit of reverse engineering of TraceLogging and guidance from 
 // the TraceLogging.h header about the format of the self described events
-static void internal_emit_self_described_event(const char* event_name, uint16_t event_name_length, uint8_t trace_level, const LOG_CONTEXT_PROPERTY_VALUE_PAIR* context_property_value_pairs, uint32_t property_value_count, const char* message, const char* file, const char* func, int32_t line, va_list args)
+static void internal_emit_self_described_event(const char* event_name, uint16_t event_name_length, uint8_t trace_level, const LOG_CONTEXT_PROPERTY_VALUE_PAIR* context_property_value_pairs, uint16_t property_value_count, const char* message, const char* file, const char* func, int32_t line, va_list args)
 {
     TraceLoggingHProvider const _tlgProv = log_sink_etw_provider;
     if (trace_level < _tlgProv->LevelPlus1)
     {
         // have a stack allocated buffer where we construct the event metadata and
-        uint8_t _tlgEvent[MAX_SELF_DESCRIBED_EVENT_WITH_METADATA];
+        SELF_DESCRIBED_EVENT _tlgEvent;
         bool add_properties = true;
 
         // compute event metadata size
@@ -122,11 +128,9 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         uint32_t i;
 
         // alias to the event bytes
-        SELF_DESCRIBED_EVENT* self_described_event = (SELF_DESCRIBED_EVENT*)_tlgEvent;
+        uint8_t* pos = &_tlgEvent.metadata[0];
 
-        uint8_t* pos = &self_described_event->metadata[0];
-
-        // at this point we filled all the event information, now we need to provide the metadata bytes
+        // fill metadata bytes
         // first one is the event name, followed by metadata for all the fields
         // copy event name 
         (void)memcpy(pos, event_name, event_name_length); pos += event_name_length;
@@ -155,7 +159,7 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         (void)memcpy(pos, "line", sizeof("line")); pos += sizeof("line");
         *pos = TlgInINT32;  pos++;
 
-        uint16_t metadata_size_without_properties = (uint16_t)(pos - &self_described_event->metadata[0]);
+        uint16_t metadata_size_without_properties = (uint16_t)(pos - &_tlgEvent.metadata[0]);
 
         if (property_value_count <= LOG_MAX_ETW_PROPERTY_VALUE_PAIR_COUNT)
         {
@@ -165,7 +169,7 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
                 /* Codes_SRS_LOG_SINK_ETW_01_051: [ For each property in log_context, the length of the property name + 1 and one extra byte for the type of the field. ]*/
                 size_t name_length = strlen(context_property_value_pairs[i].name);
                 /* Codes_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
-                if ((uint16_t)(&self_described_event->metadata[MAX_METADATA_SIZE] - pos) < name_length + 1 + 1)
+                if ((uint16_t)(&_tlgEvent.metadata[MAX_METADATA_SIZE] - pos) < name_length + 1 + 1)
                 {
                     add_properties = false;
                     break;
@@ -228,7 +232,7 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
                     *pos = _TlgInSTRUCT | _TlgInChain;
                     pos++;
 
-                    if (pos == &self_described_event->metadata[MAX_METADATA_SIZE])
+                    if (pos == &_tlgEvent.metadata[MAX_METADATA_SIZE])
                     {
                         add_properties = false;
                     }
@@ -262,21 +266,25 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
         if (!add_properties)
         {
             metadata_size = metadata_size_without_properties;
-            pos = &self_described_event->metadata[metadata_size_without_properties];
+            pos = &_tlgEvent.metadata[metadata_size_without_properties];
         }
         else
         {
-            metadata_size = (uint16_t)(pos - &self_described_event->metadata[0]);
+            metadata_size = (uint16_t)(pos - &_tlgEvent.metadata[0]);
         }
 
         char* formatted_message = (char*)pos;
-        size_t available_bytes = sizeof(_tlgEvent) - (formatted_message - (char*)self_described_event);
+        size_t available_bytes = (char*)&_tlgEvent.metadata[MAX_METADATA_SIZE] - formatted_message;
+
+        va_list saved_args;
+        va_copy(saved_args, args);
 
         int formatted_message_length = vsnprintf(formatted_message, available_bytes, message, args);
         if (formatted_message_length < 0)
         {
             /* Codes_SRS_LOG_SINK_ETW_01_086: [ If any error occurs log_sink_etw.log_sink_log shall print Error emitting ETW event and return. ]*/
-            (void)printf("Error emitting ETW event.\r\n");
+            (void)printf("Error emitting ETW event with %" PRIu16 " properties, file=%s, func=%s, line=%" PRId32 ".\r\n",
+                property_value_count, file, func, line);
         }
         else
         {
@@ -289,13 +297,14 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
                     add_properties = false;
                     metadata_size = metadata_size_without_properties;
 
-                    formatted_message = (char*)&self_described_event->metadata[metadata_size_without_properties];
-                    available_bytes = sizeof(_tlgEvent) - (formatted_message - (char*)self_described_event);
-                    formatted_message_length = vsnprintf(formatted_message, available_bytes, message, args);
+                    formatted_message = (char*)&_tlgEvent.metadata[metadata_size_without_properties];
+                    available_bytes = (char*)&_tlgEvent.metadata[MAX_METADATA_SIZE] - formatted_message;
+                    formatted_message_length = vsnprintf(formatted_message, available_bytes, message, saved_args);
                     if (formatted_message_length < 0)
                     {
                         /* Codes_SRS_LOG_SINK_ETW_01_086: [ If any error occurs log_sink_etw.log_sink_log shall print Error emitting ETW event and return. ]*/
-                        (void)printf("Error emitting ETW event.\r\n");
+                        (void)printf("Error emitting ETW event with %" PRIu16 " properties, file=%s, func=%s, line=%" PRId32 ".\r\n",
+                            property_value_count, file, func, line);
                     }
                     else
                     {
@@ -311,26 +320,26 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
             if (formatted_message_length >= 0)
             {
                 /* Codes_SRS_LOG_SINK_ETW_01_027: [ _tlgBlobTyp shall be set to _TlgBlobEvent4. ]*/
-                self_described_event->_tlgBlobTyp = _TlgBlobEvent4;
+                _tlgEvent._tlgBlobTyp = _TlgBlobEvent4;
 
                 /* Codes_SRS_LOG_SINK_ETW_01_028: [ _tlgChannel shall be set to 11. ]*/
-                self_described_event->_tlgChannel = 11;
+                _tlgEvent._tlgChannel = 11;
 
                 /* Codes_SRS_LOG_SINK_ETW_01_018: [ Logging level: ]*/
                 /* Codes_SRS_LOG_SINK_ETW_01_029: [ _tlgLevel shall be set to the appropriate logging level. ]*/
-                self_described_event->_tlgLevel = trace_level;
+                _tlgEvent._tlgLevel = trace_level;
 
                 /* Codes_SRS_LOG_SINK_ETW_01_030: [ _tlgOpcode shall be set to 0. ]*/
-                self_described_event->_tlgOpcode = 0;
+                _tlgEvent._tlgOpcode = 0;
 
                 /* Codes_SRS_LOG_SINK_ETW_01_031: [ _tlgKeyword shall be set to 0. ]*/
-                self_described_event->_tlgKeyword = 0;
+                _tlgEvent._tlgKeyword = 0;
 
                 /* Codes_SRS_LOG_SINK_ETW_01_032: [ _tlgEvtMetaSize shall be set to the computed metadata size + 4. ]*/
-                self_described_event->_tlgEvtMetaSize = metadata_size + 4;
+                _tlgEvent._tlgEvtMetaSize = metadata_size + 4;
 
                 /* Codes_SRS_LOG_SINK_ETW_01_033: [ _tlgEvtTag shall be set to 128. ]*/
-                self_described_event->_tlgEvtTag = 128;
+                _tlgEvent._tlgEvtTag = 128;
 
                 // now we need to fill in the event data descriptors
                 // first 2 are actually reserved for the event descriptor and metadata respectively
@@ -411,9 +420,11 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
 
                 // ... AND drumrolls, emit the event
                 /* Codes_SRS_LOG_SINK_ETW_01_041: [ log_sink_etw.log_sink_log shall emit the event by calling _tlgWriteTransfer_EventWriteTransfer passing the provider, channel, number of event data descriptors and the data descriptor array. ]*/
-                _tlgWriteTransfer_EventWriteTransfer(_tlgProv, &self_described_event->_tlgChannel, ((void*)0), ((void*)0), _tlgIdx, _tlgData);
+                _tlgWriteTransfer_EventWriteTransfer(_tlgProv, &_tlgEvent._tlgChannel, NULL, NULL, _tlgIdx, _tlgData);
             }
         }
+
+        va_end(saved_args);
     }
 }
 
