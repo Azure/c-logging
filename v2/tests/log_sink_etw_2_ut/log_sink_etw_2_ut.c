@@ -672,7 +672,6 @@ static void when__get_pgmptr_fails_log_sink_etw_log_prints_executable_as_UNKNOWN
     // self test event
     setup__get_pgmptr_call();
 
-    setup_InterlockedCompareExchange_call();
     setup__tlgCreate1Sz_char(); // message
     setup__tlgCreate1Sz_char(); // file 
     setup__tlgCreate1Sz_char(); // func
