@@ -7,7 +7,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include "windows.h"
 #include "TraceLoggingProvider.h"
