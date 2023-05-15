@@ -8,16 +8,6 @@ if(${log_abort_on_error})
     add_definitions(-DLOG_ABORT_ON_ERROR)
 endif() #(${log_abort_on_error})
 
-set(c_logging_v2_c_files
-    ./src/logger.c
-    ./src/log_context.c
-    ./src/log_context_property_basic_types.c
-    ./src/log_context_property_type_ascii_char_ptr.c
-    ./src/log_context_property_type_struct.c
-    ./src/log_internal_error.c
-    ./src/log_sink_console.c
-    )
-
 set(c_logging_v2_h_files
     ./inc/c_logging/logger.h
     ./inc/c_logging/log_context.h
@@ -32,6 +22,28 @@ set(c_logging_v2_h_files
     ./inc/c_logging/log_sink_if.h
     ./inc/c_logging/log_sink_console.h
     )
+
+set(c_logging_v2_c_files
+    ./src/logger.c
+    ./src/log_context.c
+    ./src/log_context_property_basic_types.c
+    ./src/log_context_property_type_ascii_char_ptr.c
+    ./src/log_context_property_type_struct.c
+    ./src/log_internal_error.c
+    ./src/log_sink_console.c
+    )
+
+if(WIN32)
+set(c_logging_v2_h_files
+    ${c_logging_v2_h_files}
+    ./inc/c_logging/log_sink_etw.h
+    )
+
+set(c_logging_v2_c_files
+    ${c_logging_v2_c_files}
+    ./src/log_sink_etw.c
+    )
+endif()
 
 FILE(GLOB c_logging_v2_md_files "devdoc/*.md")
 SOURCE_GROUP(devdoc FILES ${c_logging_v2_md_files})
