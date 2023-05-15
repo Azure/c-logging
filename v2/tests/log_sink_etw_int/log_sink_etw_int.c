@@ -49,6 +49,14 @@ static void WINAPI EventRecordCallback(
     (void)pEventRecord;
 }
 
+ULONG NTAPI EtpEtwBufferCallback(
+    _In_ PEVENT_TRACE_LOGFILEW Buffer
+)
+{
+    (void)Buffer;
+    return TRUE;
+}
+
 static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
 {
     // arrange
@@ -66,13 +74,15 @@ static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
 
     start_event_trace_property_data.props.Wnode.BufferSize = sizeof(start_event_trace_property_data);
     start_event_trace_property_data.props.Wnode.Flags = WNODE_FLAG_TRACED_GUID;
-    start_event_trace_property_data.props.LogFileMode = EVENT_TRACE_FILE_MODE_NONE /*| EVENT_TRACE_REAL_TIME_MODE*/;
-    start_event_trace_property_data.props.MinimumBuffers = 1;
+    start_event_trace_property_data.props.LogFileMode = EVENT_TRACE_REAL_TIME_MODE;
+    start_event_trace_property_data.props.MinimumBuffers = 4;
+    start_event_trace_property_data.props.MaximumBuffers = 4;
     start_event_trace_property_data.props.BufferSize = 64 * 1024;
+    start_event_trace_property_data.props.FlushTimer = 1;
     start_event_trace_property_data.props.LogFileNameOffset = offsetof(EVENT_TRACE_PROPERTY_DATA, log_file_name);
     start_event_trace_property_data.props.LoggerNameOffset = offsetof(EVENT_TRACE_PROPERTY_DATA, logger_name);
 
-    (void)wcscpy(start_event_trace_property_data.log_file_name, L"d:\\x.etl");
+    //(void)wcscpy(start_event_trace_property_data.log_file_name, L"d:\\x.etl");
 
     POOR_MANS_ASSERT(StartTraceW(&trace_session_handle, trace_session_name, &start_event_trace_property_data.props) == ERROR_SUCCESS);
 
@@ -89,35 +99,36 @@ static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
 
     POOR_MANS_ASSERT(enable_trace_result == ERROR_SUCCESS);
 
-    //EVENT_TRACE_LOGFILEW log_file = { 0 };
-    //
-    //log_file.ProcessTraceMode = PROCESS_TRACE_MODE_EVENT_RECORD | PROCESS_TRACE_MODE_REAL_TIME;
-    //log_file.EventRecordCallback = &EventRecordCallback;
-    //log_file.LogFileMode = EVENT_TRACE_REAL_TIME_MODE;
-    //log_file.LoggerName = &start_event_trace_property_data.logger_name[0];
-    //log_file.Context = NULL;
-    //
-    //TRACEHANDLE trace = OpenTraceW(&log_file);
-    //POOR_MANS_ASSERT(trace != INVALID_PROCESSTRACE_HANDLE);
-    //if (trace == INVALID_PROCESSTRACE_HANDLE)
-    //{
-    //    (void)printf("OpenTraceA failed, LE=%lu", GetLastError());
-    //}
+    EVENT_TRACE_LOGFILEW log_file = { 0 };
+    
+    log_file.ProcessTraceMode = PROCESS_TRACE_MODE_EVENT_RECORD | PROCESS_TRACE_MODE_REAL_TIME;
+    log_file.EventRecordCallback = EventRecordCallback;
+    log_file.BufferCallback = EtpEtwBufferCallback;
+    log_file.LogFileMode = EVENT_TRACE_REAL_TIME_MODE;
+    log_file.LoggerName = &start_event_trace_property_data.logger_name[0];
+    log_file.Context = NULL;
+    
+    TRACEHANDLE trace = OpenTraceW(&log_file);
+    POOR_MANS_ASSERT(trace != INVALID_PROCESSTRACE_HANDLE);
+    if (trace == INVALID_PROCESSTRACE_HANDLE)
+    {
+        (void)printf("OpenTraceA failed, LE=%lu\r\n", GetLastError());
+    }
 
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_ERROR, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
+    //log_sink_etw.log_sink_log(LOG_LEVEL_ERROR, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
 
-    //ULONG process_trace_result = ProcessTrace(&trace, 1, NULL, NULL);
-    //POOR_MANS_ASSERT(process_trace_result == ERROR_SUCCESS);
-    //if (process_trace_result != ERROR_SUCCESS)
-    //{
-    //    (void)printf("ProcessTrace failed, process_trace_result=%lu", process_trace_result);
-    //}
+    ULONG process_trace_result = ProcessTrace(&trace, 1, NULL, NULL);
+    POOR_MANS_ASSERT(process_trace_result == ERROR_SUCCESS);
+    if (process_trace_result != ERROR_SUCCESS)
+    {
+        (void)printf("ProcessTrace failed, process_trace_result=%lu\r\n", process_trace_result);
+    }
 
     // assert
 
     // cleanup
-    //(void)CloseTrace(trace);
+    (void)CloseTrace(trace);
 
     EVENT_TRACE_PROPERTY_DATA stop_event_trace_property_data = { 0 };
 
