@@ -38,8 +38,8 @@ MU_DEFINE_ENUM_STRINGS(LOG_CONTEXT_PROPERTY_TYPE, LOG_CONTEXT_PROPERTY_TYPE_VALU
 typedef struct EVENT_TRACE_PROPERTY_DATA_TAG
 {
     EVENT_TRACE_PROPERTIES props;
-    WCHAR logger_name[128];
-    WCHAR log_file_name[1024];
+    char logger_name[128];
+    char log_file_name[1024];
 } EVENT_TRACE_PROPERTY_DATA;
 
 static void WINAPI EventRecordCallback(
@@ -49,14 +49,6 @@ static void WINAPI EventRecordCallback(
     (void)pEventRecord;
 }
 
-ULONG NTAPI EtpEtwBufferCallback(
-    _In_ PEVENT_TRACE_LOGFILEW Buffer
-)
-{
-    (void)Buffer;
-    return TRUE;
-}
-
 static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
 {
     // arrange
@@ -64,17 +56,17 @@ static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
     TRACEHANDLE trace_session_handle;
     UUID uuid;
     POOR_MANS_ASSERT(UuidCreate(&uuid) == RPC_S_OK);
-    wchar_t trace_session_name[128];
-    int session_name_length = _swprintf(trace_session_name, L"%S-%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X",
+    char trace_session_name[128];
+    int session_name_length = sprintf(trace_session_name, "%s-%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X",
         __FUNCTION__, uuid.Data1, uuid.Data2, uuid.Data3, uuid.Data4[0], uuid.Data4[1], uuid.Data4[2], uuid.Data4[3], uuid.Data4[4], uuid.Data4[5], uuid.Data4[6], uuid.Data4[7]);
     POOR_MANS_ASSERT(session_name_length > 0);
-    (void)printf("Starting trace session %ls\r\n", trace_session_name);
+    (void)printf("Starting trace session %s\r\n", trace_session_name);
 
     EVENT_TRACE_PROPERTY_DATA start_event_trace_property_data = { 0 };
 
     start_event_trace_property_data.props.Wnode.BufferSize = sizeof(start_event_trace_property_data);
     start_event_trace_property_data.props.Wnode.Flags = WNODE_FLAG_TRACED_GUID;
-    start_event_trace_property_data.props.LogFileMode = EVENT_TRACE_REAL_TIME_MODE;
+    start_event_trace_property_data.props.LogFileMode = EVENT_TRACE_FILE_MODE_SEQUENTIAL;
     start_event_trace_property_data.props.MinimumBuffers = 4;
     start_event_trace_property_data.props.MaximumBuffers = 4;
     start_event_trace_property_data.props.BufferSize = 64 * 1024;
@@ -82,9 +74,9 @@ static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
     start_event_trace_property_data.props.LogFileNameOffset = offsetof(EVENT_TRACE_PROPERTY_DATA, log_file_name);
     start_event_trace_property_data.props.LoggerNameOffset = offsetof(EVENT_TRACE_PROPERTY_DATA, logger_name);
 
-    //(void)wcscpy(start_event_trace_property_data.log_file_name, L"d:\\x.etl");
+    (void)strcpy(start_event_trace_property_data.log_file_name, "d:\\x.etl");
 
-    POOR_MANS_ASSERT(StartTraceW(&trace_session_handle, trace_session_name, &start_event_trace_property_data.props) == ERROR_SUCCESS);
+    POOR_MANS_ASSERT(StartTraceA(&trace_session_handle, trace_session_name, &start_event_trace_property_data.props) == ERROR_SUCCESS);
 
     ULONG enable_trace_result = EnableTraceEx2(
         trace_session_handle,
@@ -99,33 +91,32 @@ static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
 
     POOR_MANS_ASSERT(enable_trace_result == ERROR_SUCCESS);
 
-    EVENT_TRACE_LOGFILEW log_file = { 0 };
-    
-    log_file.ProcessTraceMode = PROCESS_TRACE_MODE_EVENT_RECORD | PROCESS_TRACE_MODE_REAL_TIME;
+    // act
+    log_sink_etw.log_sink_log(LOG_LEVEL_ERROR, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
+
+    // assert
+    EVENT_TRACE_LOGFILEA log_file = { 0 };
+
+    log_file.ProcessTraceMode = PROCESS_TRACE_MODE_EVENT_RECORD;
     log_file.EventRecordCallback = EventRecordCallback;
-    log_file.BufferCallback = EtpEtwBufferCallback;
-    log_file.LogFileMode = EVENT_TRACE_REAL_TIME_MODE;
-    log_file.LoggerName = &start_event_trace_property_data.logger_name[0];
+    log_file.LogFileMode = EVENT_TRACE_FILE_MODE_SEQUENTIAL;
+    log_file.LogFileName = &start_event_trace_property_data.log_file_name[0];
     log_file.Context = NULL;
-    
-    TRACEHANDLE trace = OpenTraceW(&log_file);
+
+    TRACEHANDLE trace = OpenTraceA(&log_file);
     POOR_MANS_ASSERT(trace != INVALID_PROCESSTRACE_HANDLE);
     if (trace == INVALID_PROCESSTRACE_HANDLE)
     {
         (void)printf("OpenTraceA failed, LE=%lu\r\n", GetLastError());
     }
 
-    // act
-    //log_sink_etw.log_sink_log(LOG_LEVEL_ERROR, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
-
+    // open the trace and process all events
     ULONG process_trace_result = ProcessTrace(&trace, 1, NULL, NULL);
     POOR_MANS_ASSERT(process_trace_result == ERROR_SUCCESS);
     if (process_trace_result != ERROR_SUCCESS)
     {
         (void)printf("ProcessTrace failed, process_trace_result=%lu\r\n", process_trace_result);
     }
-
-    // assert
 
     // cleanup
     (void)CloseTrace(trace);
@@ -137,7 +128,7 @@ static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
     stop_event_trace_property_data.props.LogFileNameOffset = offsetof(EVENT_TRACE_PROPERTY_DATA, log_file_name);
     stop_event_trace_property_data.props.LoggerNameOffset = offsetof(EVENT_TRACE_PROPERTY_DATA, logger_name);
 
-    (void)printf("Stopping trace session %ls\r\n", trace_session_name);
+    (void)printf("Stopping trace session %s\r\n", trace_session_name);
     POOR_MANS_ASSERT(StopTraceW(trace_session_handle, NULL, &stop_event_trace_property_data.props) == ERROR_SUCCESS);
 }
 
