@@ -42,16 +42,106 @@ typedef struct EVENT_TRACE_PROPERTY_DATA_TAG
     char log_file_name[1024];
 } EVENT_TRACE_PROPERTY_DATA;
 
-static void WINAPI EventRecordCallback(
-    _In_ EVENT_RECORD* pEventRecord)
+#define MAX_EVENT_NAME_LENGTH 512
+#define MAX_CONTENT_LENGTH 4096
+#define MAX_FILE_LENGTH 512
+#define MAX_FUNC_LENGTH 512
+
+// This is a more human(e) representation for our tests
+typedef struct PARSED_EVENT_TAG
 {
-    (void)printf("xxx");
-    (void)pEventRecord;
+    char event_name[MAX_EVENT_NAME_LENGTH];
+    char content[MAX_CONTENT_LENGTH];
+    char file[MAX_FILE_LENGTH];
+    char func[MAX_FUNC_LENGTH];
+    int line;
+} PARSED_EVENT;
+
+#define MAX_EVENTS 128
+
+static uint32_t parsed_event_count;
+static PARSED_EVENT parsed_events[MAX_EVENTS];
+
+static void get_event_name(EVENT_HEADER_EXTENDED_DATA_ITEM* extended_data_items, unsigned short count, const char** event_name)
+{
+    for (unsigned short i = 0; i < count; i++)
+    {
+        if (extended_data_items[i].ExtType == EVENT_HEADER_EXT_TYPE_EVENT_SCHEMA_TL)
+        {
+            // This one has the event name
+            // Not really documented, but the Windows source code seems to indicate I can just skip over a few bytes that hold a length and version
+            *event_name = (const char*)extended_data_items[i].DataPtr + 4;
+            break;
+        }
+    }
 }
+
+static ULONG event_trace_buffer_callback(PEVENT_TRACE_LOGFILEA log_file)
+{
+    (void)log_file;
+
+    return TRUE;
+}
+
+static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
+{
+    if (IsEqualGUID(&pEventRecord->EventHeader.ProviderId, &provider_guid))
+    {
+        (void)memset(&parsed_events[parsed_event_count], 0, sizeof(PARSED_EVENT));
+
+        EVENT_HEADER_EXTENDED_DATA_ITEM* extended_data_items = pEventRecord->ExtendedData;
+
+        for (unsigned short i = 0; i < pEventRecord->ExtendedDataCount; i++)
+        {
+            if (extended_data_items[i].ExtType == EVENT_HEADER_EXT_TYPE_EVENT_SCHEMA_TL)
+            {
+                // This one has the event name
+                // Not really documented, but the Windows source code seems to indicate I can just skip over a few bytes that hold a length and version
+                const char* event_name = (const char*)extended_data_items[i].DataPtr + 4;
+
+                if (event_name != NULL)
+                {
+                    (void)strcpy(parsed_events[parsed_event_count].event_name, event_name);
+                }
+
+                break;
+            }
+        }
+       
+        POOR_MANS_ASSERT(pEventRecord->UserData != NULL);
+        const char* current_user_data_field = pEventRecord->UserData;
+        if (current_user_data_field != NULL)
+        {
+            (void)strcpy(parsed_events[parsed_event_count].content, current_user_data_field);
+            current_user_data_field += strlen(current_user_data_field) + 1;
+        }
+
+        if (current_user_data_field != NULL)
+        {
+            (void)strcpy(parsed_events[parsed_event_count].file, current_user_data_field);
+            current_user_data_field += strlen(current_user_data_field) + 1;
+        }
+
+        if (current_user_data_field != NULL)
+        {
+            (void)strcpy(parsed_events[parsed_event_count].func, current_user_data_field);
+            current_user_data_field += strlen(current_user_data_field) + 1;
+        }
+
+        parsed_events[parsed_event_count].line = *(int32_t*)current_user_data_field;
+        current_user_data_field++;
+
+        parsed_event_count++;
+    }
+}
+
+static char test_path[MAX_PATH];
 
 static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
 {
     // arrange
+    parsed_event_count = 0;
+
     // setup the etw consumer
     TRACEHANDLE trace_session_handle;
     UUID uuid;
@@ -74,53 +164,25 @@ static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
     start_event_trace_property_data.props.LogFileNameOffset = offsetof(EVENT_TRACE_PROPERTY_DATA, log_file_name);
     start_event_trace_property_data.props.LoggerNameOffset = offsetof(EVENT_TRACE_PROPERTY_DATA, logger_name);
 
-    (void)strcpy(start_event_trace_property_data.log_file_name, "d:\\x.etl");
+    // fill in a file to use
+    int snprintf_result = snprintf(start_event_trace_property_data.log_file_name, sizeof(start_event_trace_property_data.log_file_name), "%s\\%s.etl",
+        test_path, trace_session_name);
+    POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < sizeof(start_event_trace_property_data.log_file_name)));
 
     POOR_MANS_ASSERT(StartTraceA(&trace_session_handle, trace_session_name, &start_event_trace_property_data.props) == ERROR_SUCCESS);
 
-    ULONG enable_trace_result = EnableTraceEx2(
-        trace_session_handle,
-        (LPCGUID)&provider_guid,
-        EVENT_CONTROL_CODE_ENABLE_PROVIDER,
-        TRACE_LEVEL_INFORMATION,
-        0,
-        0,
-        0,
-        NULL
+    // enable our desired provider
+    ULONG enable_trace_result = EnableTraceEx2(trace_session_handle, (LPCGUID)&provider_guid, EVENT_CONTROL_CODE_ENABLE_PROVIDER,
+        TRACE_LEVEL_INFORMATION, 0, 0, 0, NULL
     );
-
     POOR_MANS_ASSERT(enable_trace_result == ERROR_SUCCESS);
 
+    int captured_line = __LINE__;
+
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_ERROR, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
+    log_sink_etw.log_sink_log(LOG_LEVEL_ERROR, NULL, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
-    EVENT_TRACE_LOGFILEA log_file = { 0 };
-
-    log_file.ProcessTraceMode = PROCESS_TRACE_MODE_EVENT_RECORD;
-    log_file.EventRecordCallback = EventRecordCallback;
-    log_file.LogFileMode = EVENT_TRACE_FILE_MODE_SEQUENTIAL;
-    log_file.LogFileName = &start_event_trace_property_data.log_file_name[0];
-    log_file.Context = NULL;
-
-    TRACEHANDLE trace = OpenTraceA(&log_file);
-    POOR_MANS_ASSERT(trace != INVALID_PROCESSTRACE_HANDLE);
-    if (trace == INVALID_PROCESSTRACE_HANDLE)
-    {
-        (void)printf("OpenTraceA failed, LE=%lu\r\n", GetLastError());
-    }
-
-    // open the trace and process all events
-    ULONG process_trace_result = ProcessTrace(&trace, 1, NULL, NULL);
-    POOR_MANS_ASSERT(process_trace_result == ERROR_SUCCESS);
-    if (process_trace_result != ERROR_SUCCESS)
-    {
-        (void)printf("ProcessTrace failed, process_trace_result=%lu\r\n", process_trace_result);
-    }
-
-    // cleanup
-    (void)CloseTrace(trace);
-
     EVENT_TRACE_PROPERTY_DATA stop_event_trace_property_data = { 0 };
 
     stop_event_trace_property_data.props.Wnode.BufferSize = sizeof(stop_event_trace_property_data);
@@ -129,14 +191,67 @@ static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
     stop_event_trace_property_data.props.LoggerNameOffset = offsetof(EVENT_TRACE_PROPERTY_DATA, logger_name);
 
     (void)printf("Stopping trace session %s\r\n", trace_session_name);
-    POOR_MANS_ASSERT(StopTraceW(trace_session_handle, NULL, &stop_event_trace_property_data.props) == ERROR_SUCCESS);
+    POOR_MANS_ASSERT(StopTraceA(trace_session_handle, NULL, &stop_event_trace_property_data.props) == ERROR_SUCCESS);
+
+    EVENT_TRACE_LOGFILEA log_file = { 0 };
+
+    log_file.ProcessTraceMode = PROCESS_TRACE_MODE_EVENT_RECORD;
+    log_file.EventRecordCallback = event_trace_record_callback;
+    log_file.BufferCallback = event_trace_buffer_callback;
+    log_file.LogFileName = &start_event_trace_property_data.log_file_name[0];
+    log_file.Context = NULL;
+
+    TRACEHANDLE trace = OpenTraceA(&log_file);
+    POOR_MANS_ASSERT(trace != INVALID_PROCESSTRACE_HANDLE);
+
+    // open the trace and process all events
+    ULONG process_trace_result = ProcessTrace(&trace, 1, NULL, NULL);
+    POOR_MANS_ASSERT(process_trace_result == ERROR_SUCCESS);
+
+    // cleanup
+    (void)CloseTrace(trace);
+
+    // 2 events expected: one self and one for the actual event
+    POOR_MANS_ASSERT(parsed_event_count == 2);
+    // self test event
+    POOR_MANS_ASSERT(strcmp(parsed_events[0].event_name, "LogInfo") == 0);
+    POOR_MANS_ASSERT(strlen(parsed_events[0].content) > 0);
+    POOR_MANS_ASSERT(strlen(parsed_events[0].file) > 0);
+    POOR_MANS_ASSERT(strlen(parsed_events[0].func) > 0);
+    POOR_MANS_ASSERT(parsed_events[0].line != 0);
+
+    // error event
+    POOR_MANS_ASSERT(strcmp(parsed_events[1].event_name, "LogError") == 0);
+    POOR_MANS_ASSERT(strcmp(parsed_events[1].content, "test") == 0);
+    POOR_MANS_ASSERT(strcmp(parsed_events[1].file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(parsed_events[1].func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(parsed_events[1].line == captured_line);
+
+    // delete the trace file if created
+    // allocate enough
+    char delete_command[MAX_PATH + 4];
+    snprintf_result = sprintf(delete_command, "del %s", start_event_trace_property_data.log_file_name);
+    POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < sizeof(delete_command)));
+    (void)system(delete_command);
 }
 
 /* very "poor man's" way of testing, as no test harness available */
 int main(void)
 {
-    log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
+    int result;
 
-    return asserts_failed;
+    if (GetTempPathA(sizeof(test_path), test_path) == 0)
+    {
+        (void)printf("GetTempPathA failed, last error = %lu\r\n", GetLastError());
+        result = MU_FAILURE;
+    }
+    else
+    {
+        log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
+
+        result = (int)asserts_failed;
+    }
+
+    return result;
 }
 
