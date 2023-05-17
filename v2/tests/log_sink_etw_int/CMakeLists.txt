@@ -6,6 +6,6 @@ add_executable(log_sink_etw_int
 )
 
 include_directories(../../src)
-target_link_libraries(log_sink_etw_int c_logging_v2 rpcrt4)
+target_link_libraries(log_sink_etw_int c_logging_v2 rpcrt4 synchronization)
 add_test(NAME log_sink_etw_int COMMAND log_sink_etw_int)
 set_target_properties(log_sink_etw_int PROPERTIES FOLDER "tests/c_logging_v2")

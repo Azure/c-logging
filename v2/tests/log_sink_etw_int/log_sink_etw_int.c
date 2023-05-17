@@ -39,7 +39,6 @@ typedef struct EVENT_TRACE_PROPERTY_DATA_TAG
 {
     EVENT_TRACE_PROPERTIES props;
     char logger_name[128];
-    char log_file_name[1024];
 } EVENT_TRACE_PROPERTY_DATA;
 
 #define MAX_EVENT_NAME_LENGTH 512
@@ -84,8 +83,12 @@ typedef struct PARSED_EVENT_TAG
 
 #define MAX_EVENTS 128
 
-static uint32_t parsed_event_count;
+static volatile LONG parsed_event_count;
 static PARSED_EVENT parsed_events[MAX_EVENTS];
+static HANDLE process_thread_handle;
+static TRACEHANDLE trace;
+static char logger_name[128];
+static char trace_session_name[128];
 
 // This callback is needed
 // Without this callback events are not properly processed
@@ -102,7 +105,8 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
     {
         const uint8_t* metadata = NULL;
 
-        (void)memset(&parsed_events[parsed_event_count], 0, sizeof(PARSED_EVENT));
+        LONG current_parsed_event_count = InterlockedAdd(&parsed_event_count, 0);
+        (void)memset(&parsed_events[current_parsed_event_count], 0, sizeof(PARSED_EVENT));
 
         EVENT_HEADER_EXTENDED_DATA_ITEM* extended_data_items = pEventRecord->ExtendedData;
 
@@ -116,8 +120,8 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
 
                 if (event_name != NULL)
                 {
-                    (void)strncpy(parsed_events[parsed_event_count].event_name, event_name, sizeof(parsed_events[parsed_event_count].event_name));
-                    parsed_events[parsed_event_count].event_name[sizeof(parsed_events[parsed_event_count].event_name) - 1] = '\0';
+                    (void)strncpy(parsed_events[current_parsed_event_count].event_name, event_name, sizeof(parsed_events[current_parsed_event_count].event_name));
+                    parsed_events[current_parsed_event_count].event_name[sizeof(parsed_events[current_parsed_event_count].event_name) - 1] = '\0';
                     metadata = (const uint8_t*)(event_name + strlen(event_name) + 1);
                 }
 
@@ -130,8 +134,8 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
         const char* current_user_data_field = pEventRecord->UserData;
         if (current_user_data_field != NULL)
         {
-            (void)strncpy(parsed_events[parsed_event_count].content, current_user_data_field, sizeof(parsed_events[parsed_event_count].content));
-            parsed_events[parsed_event_count].content[sizeof(parsed_events[parsed_event_count].content) - 1] = '\0';
+            (void)strncpy(parsed_events[current_parsed_event_count].content, current_user_data_field, sizeof(parsed_events[current_parsed_event_count].content));
+            parsed_events[current_parsed_event_count].content[sizeof(parsed_events[current_parsed_event_count].content) - 1] = '\0';
             current_user_data_field += strlen(current_user_data_field) + 1;
         }
         POOR_MANS_ASSERT(strcmp((const char*)metadata, "content") == 0);
@@ -139,8 +143,8 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
 
         if (current_user_data_field != NULL)
         {
-            (void)strncpy(parsed_events[parsed_event_count].file, current_user_data_field, sizeof(parsed_events[parsed_event_count].file));
-            parsed_events[parsed_event_count].file[sizeof(parsed_events[parsed_event_count].file) - 1] = '\0';
+            (void)strncpy(parsed_events[current_parsed_event_count].file, current_user_data_field, sizeof(parsed_events[current_parsed_event_count].file));
+            parsed_events[current_parsed_event_count].file[sizeof(parsed_events[current_parsed_event_count].file) - 1] = '\0';
             current_user_data_field += strlen(current_user_data_field) + 1;
         }
         POOR_MANS_ASSERT(strcmp((const char*)metadata, "file") == 0);
@@ -148,14 +152,14 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
 
         if (current_user_data_field != NULL)
         {
-            (void)strncpy(parsed_events[parsed_event_count].func, current_user_data_field, sizeof(parsed_events[parsed_event_count].func));
-            parsed_events[parsed_event_count].func[sizeof(parsed_events[parsed_event_count].func) - 1] = '\0';
+            (void)strncpy(parsed_events[current_parsed_event_count].func, current_user_data_field, sizeof(parsed_events[current_parsed_event_count].func));
+            parsed_events[current_parsed_event_count].func[sizeof(parsed_events[current_parsed_event_count].func) - 1] = '\0';
             current_user_data_field += strlen(current_user_data_field) + 1;
         }
         POOR_MANS_ASSERT(strcmp((const char*)metadata, "func") == 0);
         metadata += sizeof("func") + 1;
 
-        parsed_events[parsed_event_count].line = *(int32_t*)current_user_data_field;
+        parsed_events[current_parsed_event_count].line = *(int32_t*)current_user_data_field;
         current_user_data_field+= sizeof(int32_t);
 
         POOR_MANS_ASSERT(strcmp((const char*)metadata, "line") == 0);
@@ -167,56 +171,56 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
         while (current_user_data_field - (const char*)pEventRecord->UserData < pEventRecord->UserDataLength)
         {
             // get name and type from metadata
-            (void)strncpy(parsed_events[parsed_event_count].properties[property_index].property_name, (const char*)metadata, sizeof(parsed_events[parsed_event_count].properties[property_index].property_name));
-            parsed_events[parsed_event_count].properties[property_index].property_name[sizeof(parsed_events[parsed_event_count].properties[property_index].property_name) - 1] = '\0';
-            metadata += strlen(parsed_events[parsed_event_count].properties[property_index].property_name) + 1;
-            parsed_events[parsed_event_count].properties[property_index].property_type = *metadata;
+            (void)strncpy(parsed_events[current_parsed_event_count].properties[property_index].property_name, (const char*)metadata, sizeof(parsed_events[current_parsed_event_count].properties[property_index].property_name));
+            parsed_events[current_parsed_event_count].properties[property_index].property_name[sizeof(parsed_events[current_parsed_event_count].properties[property_index].property_name) - 1] = '\0';
+            metadata += strlen(parsed_events[current_parsed_event_count].properties[property_index].property_name) + 1;
+            parsed_events[current_parsed_event_count].properties[property_index].property_type = *metadata;
             metadata++;
 
-            switch (parsed_events[parsed_event_count].properties[property_index].property_type)
+            switch (parsed_events[current_parsed_event_count].properties[property_index].property_type)
             {
             default:
                 POOR_MANS_ASSERT(0);
                 break;
             case _TlgInSTRUCT | _TlgInChain:
-                parsed_events[parsed_event_count].properties[property_index].struct_field_count = *(uint8_t*)metadata;
+                parsed_events[current_parsed_event_count].properties[property_index].struct_field_count = *(uint8_t*)metadata;
                 metadata++;
                 break;
             case TlgInANSISTRING:
-                (void)strncpy(parsed_events[parsed_event_count].properties[property_index].ascii_char_ptr_value, current_user_data_field, sizeof(parsed_events[parsed_event_count].properties[property_index].ascii_char_ptr_value));
-                parsed_events[parsed_event_count].properties[property_index].ascii_char_ptr_value[sizeof(parsed_events[parsed_event_count].properties[property_index].ascii_char_ptr_value) - 1] = '\0';
+                (void)strncpy(parsed_events[current_parsed_event_count].properties[property_index].ascii_char_ptr_value, current_user_data_field, sizeof(parsed_events[current_parsed_event_count].properties[property_index].ascii_char_ptr_value));
+                parsed_events[current_parsed_event_count].properties[property_index].ascii_char_ptr_value[sizeof(parsed_events[current_parsed_event_count].properties[property_index].ascii_char_ptr_value) - 1] = '\0';
                 current_user_data_field += strlen(current_user_data_field) + 1;
                 break;
             case TlgInUINT8:
-                parsed_events[parsed_event_count].properties[property_index].uint8_t_value = *(uint8_t*)current_user_data_field;
+                parsed_events[current_parsed_event_count].properties[property_index].uint8_t_value = *(uint8_t*)current_user_data_field;
                 current_user_data_field += sizeof(uint8_t);
                 break;
             case TlgInINT8:
-                parsed_events[parsed_event_count].properties[property_index].int8_t_value = *(int8_t*)current_user_data_field;
+                parsed_events[current_parsed_event_count].properties[property_index].int8_t_value = *(int8_t*)current_user_data_field;
                 current_user_data_field += sizeof(int8_t);
                 break;
             case TlgInUINT16:
-                parsed_events[parsed_event_count].properties[property_index].uint16_t_value = *(uint16_t*)current_user_data_field;
+                parsed_events[current_parsed_event_count].properties[property_index].uint16_t_value = *(uint16_t*)current_user_data_field;
                 current_user_data_field += sizeof(uint16_t);
                 break;
             case TlgInINT16:
-                parsed_events[parsed_event_count].properties[property_index].int16_t_value = *(int16_t*)current_user_data_field;
+                parsed_events[current_parsed_event_count].properties[property_index].int16_t_value = *(int16_t*)current_user_data_field;
                 current_user_data_field += sizeof(int16_t);
                 break;
             case TlgInUINT32:
-                parsed_events[parsed_event_count].properties[property_index].uint32_t_value = *(uint32_t*)current_user_data_field;
+                parsed_events[current_parsed_event_count].properties[property_index].uint32_t_value = *(uint32_t*)current_user_data_field;
                 current_user_data_field += sizeof(uint32_t);
                 break;
             case TlgInINT32:
-                parsed_events[parsed_event_count].properties[property_index].int32_t_value = *(int32_t*)current_user_data_field;
+                parsed_events[current_parsed_event_count].properties[property_index].int32_t_value = *(int32_t*)current_user_data_field;
                 current_user_data_field += sizeof(int32_t);
                 break;
             case TlgInUINT64:
-                parsed_events[parsed_event_count].properties[property_index].uint64_t_value = *(uint64_t*)current_user_data_field;
+                parsed_events[current_parsed_event_count].properties[property_index].uint64_t_value = *(uint64_t*)current_user_data_field;
                 current_user_data_field += sizeof(uint64_t);
                 break;
             case TlgInINT64:
-                parsed_events[parsed_event_count].properties[property_index].int64_t_value = *(int64_t*)current_user_data_field;
+                parsed_events[current_parsed_event_count].properties[property_index].int64_t_value = *(int64_t*)current_user_data_field;
                 current_user_data_field += sizeof(int64_t);
                 break;
             }
@@ -224,29 +228,25 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
             property_index++;
         }
 
-        parsed_events[parsed_event_count].property_count = property_index;
+        parsed_events[current_parsed_event_count].property_count = property_index;
 
-        parsed_event_count++;
+        (void)InterlockedIncrement(&parsed_event_count);
+        WakeByAddressAll((void*)&parsed_event_count);
     }
 }
 
 static char test_path[MAX_PATH];
 
-static void generate_trace_session_and_file_name(char* trace_session_name, size_t trace_session_name_buffer_size, char* log_file_name, size_t log_file_name_buffer_size)
+static void generate_trace_session_and_file_name(void)
 {
     UUID uuid;
     POOR_MANS_ASSERT(UuidCreate(&uuid) == RPC_S_OK);
-    int snprintf_result = snprintf(trace_session_name, trace_session_name_buffer_size, "%s-%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X",
+    int snprintf_result = snprintf(trace_session_name, sizeof(trace_session_name), "%s-%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X",
         __FUNCTION__, uuid.Data1, uuid.Data2, uuid.Data3, uuid.Data4[0], uuid.Data4[1], uuid.Data4[2], uuid.Data4[3], uuid.Data4[4], uuid.Data4[5], uuid.Data4[6], uuid.Data4[7]);
-    POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < trace_session_name_buffer_size));
-
-    // fill in a file to use
-    snprintf_result = snprintf(log_file_name, log_file_name_buffer_size, "%s\\%s.etl",
-        test_path, trace_session_name);
-    POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < log_file_name_buffer_size));
+    POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < sizeof(trace_session_name)));
 }
 
-static TRACEHANDLE start_trace(const char* trace_session_name, const char* log_file_name, uint8_t trace_level)
+static TRACEHANDLE start_trace(uint8_t trace_level)
 {
     // setup the etw consumer
     TRACEHANDLE trace_session_handle;
@@ -257,17 +257,17 @@ static TRACEHANDLE start_trace(const char* trace_session_name, const char* log_f
 
     start_event_trace_property_data.props.Wnode.BufferSize = sizeof(start_event_trace_property_data);
     start_event_trace_property_data.props.Wnode.Flags = WNODE_FLAG_TRACED_GUID;
-    start_event_trace_property_data.props.LogFileMode = EVENT_TRACE_FILE_MODE_SEQUENTIAL;
+    start_event_trace_property_data.props.LogFileMode = EVENT_TRACE_REAL_TIME_MODE;
     start_event_trace_property_data.props.MinimumBuffers = 4;
     start_event_trace_property_data.props.MaximumBuffers = 4;
     start_event_trace_property_data.props.BufferSize = 64 * 1024;
     start_event_trace_property_data.props.FlushTimer = 1;
-    start_event_trace_property_data.props.LogFileNameOffset = offsetof(EVENT_TRACE_PROPERTY_DATA, log_file_name);
+    start_event_trace_property_data.props.LogFileNameOffset = 0;
     start_event_trace_property_data.props.LoggerNameOffset = offsetof(EVENT_TRACE_PROPERTY_DATA, logger_name);
 
-    (void)strcpy(start_event_trace_property_data.log_file_name, log_file_name);
-
     POOR_MANS_ASSERT(StartTraceA(&trace_session_handle, trace_session_name, &start_event_trace_property_data.props) == ERROR_SUCCESS);
+
+    (void)strcpy(logger_name, start_event_trace_property_data.logger_name);
 
     // enable our desired provider
     ULONG enable_trace_result = EnableTraceEx2(trace_session_handle, (LPCGUID)&provider_guid, EVENT_CONTROL_CODE_ENABLE_PROVIDER,
@@ -278,64 +278,94 @@ static TRACEHANDLE start_trace(const char* trace_session_name, const char* log_f
     return trace_session_handle;
 }
 
-static void stop_trace(TRACEHANDLE trace_session_handle, const char* trace_session_name)
+static void stop_trace(TRACEHANDLE trace_session_handle)
 {
     EVENT_TRACE_PROPERTY_DATA stop_event_trace_property_data = { 0 };
 
     stop_event_trace_property_data.props.Wnode.BufferSize = sizeof(stop_event_trace_property_data);
     stop_event_trace_property_data.props.Wnode.Flags = WNODE_FLAG_TRACED_GUID;
-    stop_event_trace_property_data.props.LogFileNameOffset = offsetof(EVENT_TRACE_PROPERTY_DATA, log_file_name);
     stop_event_trace_property_data.props.LoggerNameOffset = offsetof(EVENT_TRACE_PROPERTY_DATA, logger_name);
+    stop_event_trace_property_data.props.LogFileNameOffset = 0;
 
     (void)printf("Stopping trace session %s\r\n", trace_session_name);
     POOR_MANS_ASSERT(StopTraceA(trace_session_handle, NULL, &stop_event_trace_property_data.props) == ERROR_SUCCESS);
 }
 
-static void parse_events(const char* log_file_name)
+DWORD WINAPI process_trace_thread_func(void* arg)
 {
-    EVENT_TRACE_LOGFILEA log_file = { 0 };
-
-    parsed_event_count = 0;
-
-    log_file.ProcessTraceMode = PROCESS_TRACE_MODE_EVENT_RECORD;
-    log_file.EventRecordCallback = event_trace_record_callback;
-    log_file.BufferCallback = event_trace_buffer_callback;
-    log_file.LogFileName = (char*)log_file_name;
-    log_file.Context = NULL;
-
-    TRACEHANDLE trace = OpenTraceA(&log_file);
-    POOR_MANS_ASSERT(trace != INVALID_PROCESSTRACE_HANDLE);
+    (void)arg;
 
     // open the trace and process all events
     ULONG process_trace_result = ProcessTrace(&trace, 1, NULL, NULL);
     POOR_MANS_ASSERT(process_trace_result == ERROR_SUCCESS);
 
-    // cleanup
+    return 0;
+}
+
+static void start_parse_events(void)
+{
+    EVENT_TRACE_LOGFILEA log_file = { 0 };
+
+    parsed_event_count = 0;
+
+    log_file.ProcessTraceMode = PROCESS_TRACE_MODE_REAL_TIME | PROCESS_TRACE_MODE_EVENT_RECORD;
+    log_file.EventRecordCallback = event_trace_record_callback;
+    log_file.BufferCallback = event_trace_buffer_callback;
+    log_file.LoggerName = logger_name;
+    log_file.Context = NULL;
+
+    trace = OpenTraceA(&log_file);
+    POOR_MANS_ASSERT(trace != INVALID_PROCESSTRACE_HANDLE);
+
+    DWORD thread_id;
+    process_thread_handle = CreateThread(NULL, 0, process_trace_thread_func, NULL, 0, &thread_id);
+    POOR_MANS_ASSERT(process_thread_handle != NULL);
+}
+
+static void stop_parse_events(void)
+{
+    WaitForSingleObject(process_thread_handle, INFINITE);
+
+    (void)CloseHandle(process_thread_handle);
     (void)CloseTrace(trace);
+}
+
+static void wait_for_event_count(int32_t expected_event_count)
+{
+    do
+    {
+        int32_t current_parsed_event_count = InterlockedAdd(&parsed_event_count, 0);
+        if (current_parsed_event_count == expected_event_count)
+        {
+            break;
+        }
+
+        (void)WaitOnAddress(&parsed_event_count, &current_parsed_event_count, sizeof(int32_t), INFINITE);
+    } while (1);
 }
 
 static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
 {
     // arrange
-    char trace_session_name[128];
-    char log_file_name[MAX_PATH];
+    generate_trace_session_and_file_name();
 
-    generate_trace_session_and_file_name(trace_session_name, sizeof(trace_session_name), log_file_name, sizeof(log_file_name));
-
-    TRACEHANDLE trace_session_handle = start_trace(trace_session_name, log_file_name, TRACE_LEVEL_VERBOSE);
+    TRACEHANDLE trace_session_handle = start_trace(TRACE_LEVEL_VERBOSE);
 
     int captured_line = __LINE__;
+
+    start_parse_events();
 
     // act
     log_sink_etw.log_sink_log(LOG_LEVEL_ERROR, NULL, __FILE__, __FUNCTION__, captured_line, "test");
 
-    stop_trace(trace_session_handle, trace_session_name);
-
     // assert
-    parse_events(log_file_name);
 
     // 2 events expected: one self and one for the actual event
-    POOR_MANS_ASSERT(parsed_event_count == 2);
+    wait_for_event_count(2);
+
+    stop_trace(trace_session_handle);
+    stop_parse_events();
+
     // self test event
     POOR_MANS_ASSERT(strcmp(parsed_events[0].event_name, "LogInfo") == 0);
     POOR_MANS_ASSERT(strlen(parsed_events[0].content) > 0);
@@ -349,24 +379,14 @@ static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
     POOR_MANS_ASSERT(strcmp(parsed_events[1].file, __FILE__) == 0);
     POOR_MANS_ASSERT(strcmp(parsed_events[1].func, __FUNCTION__) == 0);
     POOR_MANS_ASSERT(parsed_events[1].line == captured_line);
-
-    // delete the trace file if created
-    // allocate enough
-    char delete_command[MAX_PATH + 4];
-    int snprintf_result = sprintf(delete_command, "del %s", log_file_name);
-    POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < sizeof(delete_command)));
-    (void)system(delete_command);
 }
 
 static void log_sink_etw_log_all_levels_when_all_levels_enabled_succeeds(void)
 {
     // arrange
-    char trace_session_name[128];
-    char log_file_name[MAX_PATH];
+    generate_trace_session_and_file_name();
 
-    generate_trace_session_and_file_name(trace_session_name, sizeof(trace_session_name), log_file_name, sizeof(log_file_name));
-
-    TRACEHANDLE trace_session_handle = start_trace(trace_session_name, log_file_name, TRACE_LEVEL_VERBOSE);
+    TRACEHANDLE trace_session_handle = start_trace(TRACE_LEVEL_VERBOSE);
 
     int captured_line = __LINE__;
 
@@ -377,13 +397,15 @@ static void log_sink_etw_log_all_levels_when_all_levels_enabled_succeeds(void)
     log_sink_etw.log_sink_log(LOG_LEVEL_INFO, NULL, __FILE__, __FUNCTION__, captured_line + 3, "test_info");
     log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, captured_line + 4, "test_verbose");
 
-    // assert
-    stop_trace(trace_session_handle, trace_session_name);
+    start_parse_events();
 
-    parse_events(log_file_name);
+    // assert
 
     // 5 events expected: all actual events
-    POOR_MANS_ASSERT(parsed_event_count == 5);
+    wait_for_event_count(5);
+
+    stop_trace(trace_session_handle);
+    stop_parse_events();
 
     // critical event
     POOR_MANS_ASSERT(strcmp(parsed_events[0].event_name, "LogCritical") == 0);
@@ -419,14 +441,9 @@ static void log_sink_etw_log_all_levels_when_all_levels_enabled_succeeds(void)
     POOR_MANS_ASSERT(strcmp(parsed_events[4].file, __FILE__) == 0);
     POOR_MANS_ASSERT(strcmp(parsed_events[4].func, __FUNCTION__) == 0);
     POOR_MANS_ASSERT(parsed_events[4].line == captured_line + 4);
-
-    // delete the trace file if created
-    // allocate enough
-    char delete_command[MAX_PATH + 4];
-    int snprintf_result = sprintf(delete_command, "del %s", log_file_name);
-    POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < sizeof(delete_command)));
-    (void)system(delete_command);
 }
+
+#define TEST_WAITTIME_NO_EVENT 30000 // ms
 
 static void log_sink_etw_log_each_individual_level(void)
 {
@@ -435,25 +452,31 @@ static void log_sink_etw_log_each_individual_level(void)
     {
         for (LOG_LEVEL trace_level = TRACE_LEVEL_CRITICAL; trace_level <= TRACE_LEVEL_VERBOSE; trace_level++)
         {
-            char trace_session_name[128];
-            char log_file_name[MAX_PATH];
+            generate_trace_session_and_file_name();
 
-            generate_trace_session_and_file_name(trace_session_name, sizeof(trace_session_name), log_file_name, sizeof(log_file_name));
-
-            TRACEHANDLE trace_session_handle = start_trace(trace_session_name, log_file_name, trace_level);
+            TRACEHANDLE trace_session_handle = start_trace(trace_level);
 
             int captured_line = __LINE__;
+            uint8_t expected_event_count = (trace_level - TRACE_LEVEL_CRITICAL) >= (event_log_level - LOG_LEVEL_CRITICAL) ? 1 : 0;
+
+            start_parse_events();
 
             // act
-
             log_sink_etw.log_sink_log(event_log_level, NULL, __FILE__, __FUNCTION__, captured_line, "test_event");
 
             // assert
-            stop_trace(trace_session_handle, trace_session_name);
+            wait_for_event_count(expected_event_count);
 
-            parse_events(log_file_name);
+            // if we are not expecting an event, wait for some time just to make sure no event is seen
+            if (expected_event_count == 0)
+            {
+                (void)printf("Waiting for %.02f to make sure no events are published ...", (double)TEST_WAITTIME_NO_EVENT / 1000);
+                Sleep(TEST_WAITTIME_NO_EVENT);
+            }
 
-            uint8_t expected_event_count = (trace_level - TRACE_LEVEL_CRITICAL) >= (event_log_level - LOG_LEVEL_CRITICAL) ? 1 : 0;
+            stop_trace(trace_session_handle);
+            stop_parse_events();
+
             POOR_MANS_ASSERT(parsed_event_count == expected_event_count);
 
             if (expected_event_count > 0)
@@ -488,13 +511,6 @@ static void log_sink_etw_log_each_individual_level(void)
                 POOR_MANS_ASSERT(strcmp(parsed_events[0].func, __FUNCTION__) == 0);
                 POOR_MANS_ASSERT(parsed_events[0].line == captured_line);
             }
-
-            // delete the trace file if created
-            // allocate enough
-            char delete_command[MAX_PATH + 4];
-            int snprintf_result = sprintf(delete_command, "del %s", log_file_name);
-            POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < sizeof(delete_command)));
-            (void)system(delete_command);
         }
     }
 }
@@ -502,12 +518,9 @@ static void log_sink_etw_log_each_individual_level(void)
 static void log_sink_etw_log_with_context_with_properties(void)
 {
     // arrange
-    char trace_session_name[128];
-    char log_file_name[MAX_PATH];
+    generate_trace_session_and_file_name();
 
-    generate_trace_session_and_file_name(trace_session_name, sizeof(trace_session_name), log_file_name, sizeof(log_file_name));
-
-    TRACEHANDLE trace_session_handle = start_trace(trace_session_name, log_file_name, TRACE_LEVEL_VERBOSE);
+    TRACEHANDLE trace_session_handle = start_trace(TRACE_LEVEL_VERBOSE);
 
     int captured_line = __LINE__;
 
@@ -524,16 +537,18 @@ static void log_sink_etw_log_with_context_with_properties(void)
         LOG_CONTEXT_PROPERTY(uint64_t, prop8, 49)
     );
 
+    start_parse_events();
+
     // act
     log_sink_etw.log_sink_log(LOG_LEVEL_CRITICAL, log_context, __FILE__, __FUNCTION__, captured_line, "test_with_context");
 
     // assert
-    stop_trace(trace_session_handle, trace_session_name);
-
-    parse_events(log_file_name);
 
     // 1 event expected which has att the properties
-    POOR_MANS_ASSERT(parsed_event_count == 1);
+    wait_for_event_count(1);
+ 
+    stop_trace(trace_session_handle);
+    stop_parse_events();
 
     POOR_MANS_ASSERT(strcmp(parsed_events[0].event_name, "LogCritical") == 0);
     POOR_MANS_ASSERT(strcmp(parsed_events[0].content, "test_with_context") == 0);
@@ -574,25 +589,15 @@ static void log_sink_etw_log_with_context_with_properties(void)
     POOR_MANS_ASSERT(parsed_events[0].properties[9].uint64_t_value == 49);
     POOR_MANS_ASSERT(strcmp(parsed_events[0].properties[9].property_name, "prop8") == 0);
 
-    // delete the trace file if created
-    // allocate enough
-    char delete_command[MAX_PATH + 4];
-    int snprintf_result = sprintf(delete_command, "del %s", log_file_name);
-    POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < sizeof(delete_command)));
-    (void)system(delete_command);
-
     LOG_CONTEXT_DESTROY(log_context);
 }
 
 static void log_sink_etw_log_with_context_with_nested_structs(void)
 {
     // arrange
-    char trace_session_name[128];
-    char log_file_name[MAX_PATH];
+    generate_trace_session_and_file_name();
 
-    generate_trace_session_and_file_name(trace_session_name, sizeof(trace_session_name), log_file_name, sizeof(log_file_name));
-
-    TRACEHANDLE trace_session_handle = start_trace(trace_session_name, log_file_name, TRACE_LEVEL_VERBOSE);
+    TRACEHANDLE trace_session_handle = start_trace(TRACE_LEVEL_VERBOSE);
 
     int captured_line = __LINE__;
 
@@ -606,16 +611,17 @@ static void log_sink_etw_log_with_context_with_nested_structs(void)
         LOG_CONTEXT_PROPERTY(uint8_t, prop2, 43)
     );
 
+    start_parse_events();
+
     // act
     log_sink_etw.log_sink_log(LOG_LEVEL_CRITICAL, log_context_2, __FILE__, __FUNCTION__, captured_line, "test_with_nested");
 
     // assert
-    stop_trace(trace_session_handle, trace_session_name);
-
-    parse_events(log_file_name);
-
     // 1 event expected which has att the properties
-    POOR_MANS_ASSERT(parsed_event_count == 1);
+    wait_for_event_count(1);
+
+    stop_trace(trace_session_handle);
+    stop_parse_events();
 
     POOR_MANS_ASSERT(strcmp(parsed_events[0].event_name, "LogCritical") == 0);
     POOR_MANS_ASSERT(strcmp(parsed_events[0].content, "test_with_nested") == 0);
@@ -641,13 +647,6 @@ static void log_sink_etw_log_with_context_with_nested_structs(void)
     POOR_MANS_ASSERT(parsed_events[0].properties[3].property_type == TlgInUINT8);
     POOR_MANS_ASSERT(parsed_events[0].properties[3].uint8_t_value == 43);
     POOR_MANS_ASSERT(strcmp(parsed_events[0].properties[3].property_name, "prop2") == 0);
-
-    // delete the trace file if created
-    // allocate enough
-    char delete_command[MAX_PATH + 4];
-    int snprintf_result = sprintf(delete_command, "del %s", log_file_name);
-    POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < sizeof(delete_command)));
-    (void)system(delete_command);
 
     LOG_CONTEXT_DESTROY(log_context_2);
     LOG_CONTEXT_DESTROY(log_context_1);
