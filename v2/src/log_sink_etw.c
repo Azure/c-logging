@@ -8,6 +8,8 @@
 
 #include "windows.h"
 
+// this is needed for debug builds to not fire asserts about the segment used for the event metadata
+#undef TLG_RAISEASSERTIONFAILURE
 #define TLG_RAISEASSERTIONFAILURE() (void)0
 
 #include "TraceLoggingProvider.h"
