@@ -116,7 +116,7 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
             {
                 // This one has the event name
                 // Not really documented, but the Windows source code seems to indicate I can just skip over a few bytes that hold a length and version
-                const char* event_name = (const char*)extended_data_items[i].DataPtr + 4;
+                const char* event_name = (const char*)(uintptr_t)(extended_data_items[i].DataPtr + 4);
 
                 if (event_name != NULL)
                 {
