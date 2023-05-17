@@ -237,7 +237,7 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
 
 static char test_path[MAX_PATH];
 
-static void generate_trace_session_and_file_name(void)
+static void generate_trace_session(void)
 {
     UUID uuid;
     POOR_MANS_ASSERT(UuidCreate(&uuid) == RPC_S_OK);
@@ -347,7 +347,7 @@ static void wait_for_event_count(int32_t expected_event_count)
 static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
 {
     // arrange
-    generate_trace_session_and_file_name();
+    generate_trace_session();
 
     TRACEHANDLE trace_session_handle = start_trace(TRACE_LEVEL_VERBOSE);
 
@@ -384,7 +384,7 @@ static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
 static void log_sink_etw_log_all_levels_when_all_levels_enabled_succeeds(void)
 {
     // arrange
-    generate_trace_session_and_file_name();
+    generate_trace_session();
 
     TRACEHANDLE trace_session_handle = start_trace(TRACE_LEVEL_VERBOSE);
 
@@ -452,7 +452,7 @@ static void log_sink_etw_log_each_individual_level(void)
     {
         for (LOG_LEVEL trace_level = TRACE_LEVEL_CRITICAL; trace_level <= TRACE_LEVEL_VERBOSE; trace_level++)
         {
-            generate_trace_session_and_file_name();
+            generate_trace_session();
 
             TRACEHANDLE trace_session_handle = start_trace(trace_level);
 
@@ -518,7 +518,7 @@ static void log_sink_etw_log_each_individual_level(void)
 static void log_sink_etw_log_with_context_with_properties(void)
 {
     // arrange
-    generate_trace_session_and_file_name();
+    generate_trace_session();
 
     TRACEHANDLE trace_session_handle = start_trace(TRACE_LEVEL_VERBOSE);
 
@@ -595,7 +595,7 @@ static void log_sink_etw_log_with_context_with_properties(void)
 static void log_sink_etw_log_with_context_with_nested_structs(void)
 {
     // arrange
-    generate_trace_session_and_file_name();
+    generate_trace_session();
 
     TRACEHANDLE trace_session_handle = start_trace(TRACE_LEVEL_VERBOSE);
 
