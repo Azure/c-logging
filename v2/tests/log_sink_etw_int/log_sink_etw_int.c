@@ -87,20 +87,8 @@ typedef struct PARSED_EVENT_TAG
 static uint32_t parsed_event_count;
 static PARSED_EVENT parsed_events[MAX_EVENTS];
 
-static void get_event_name(EVENT_HEADER_EXTENDED_DATA_ITEM* extended_data_items, unsigned short count, const char** event_name)
-{
-    for (unsigned short i = 0; i < count; i++)
-    {
-        if (extended_data_items[i].ExtType == EVENT_HEADER_EXT_TYPE_EVENT_SCHEMA_TL)
-        {
-            // This one has the event name
-            // Not really documented, but the Windows source code seems to indicate I can just skip over a few bytes that hold a length and version
-            *event_name = (const char*)extended_data_items[i].DataPtr + 4;
-            break;
-        }
-    }
-}
-
+// This callback is needed
+// Without this callback events are not properly processed
 static ULONG event_trace_buffer_callback(PEVENT_TRACE_LOGFILEA log_file)
 {
     (void)log_file;
