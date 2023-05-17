@@ -92,7 +92,7 @@ static char trace_session_name[128];
 
 // This callback is needed
 // Without this callback events are not properly processed
-static ULONG event_trace_buffer_callback(PEVENT_TRACE_LOGFILEA log_file)
+static ULONG WINAPI event_trace_buffer_callback(PEVENT_TRACE_LOGFILEA log_file)
 {
     (void)log_file;
 
