@@ -116,7 +116,8 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
 
                 if (event_name != NULL)
                 {
-                    (void)strcpy(parsed_events[parsed_event_count].event_name, event_name);
+                    (void)strncpy(parsed_events[parsed_event_count].event_name, event_name, sizeof(parsed_events[parsed_event_count].event_name));
+                    parsed_events[parsed_event_count].event_name[sizeof(parsed_events[parsed_event_count].event_name) - 1] = '\0';
                     metadata = (const uint8_t*)(event_name + strlen(event_name) + 1);
                 }
 
