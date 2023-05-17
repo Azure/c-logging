@@ -8,6 +8,8 @@
 
 #include "windows.h"
 
+#define TLG_RAISEASSERTIONFAILURE() (void)0
+
 #include "TraceLoggingProvider.h"
 #include "evntrace.h"
 

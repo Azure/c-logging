@@ -287,6 +287,9 @@ static void stop_trace(TRACEHANDLE trace_session_handle, const char* trace_sessi
     stop_event_trace_property_data.props.LogFileNameOffset = offsetof(EVENT_TRACE_PROPERTY_DATA, log_file_name);
     stop_event_trace_property_data.props.LoggerNameOffset = offsetof(EVENT_TRACE_PROPERTY_DATA, logger_name);
 
+    // give the trace some time to have a chance to get the events
+    Sleep(5000);
+
     (void)printf("Stopping trace session %s\r\n", trace_session_name);
     POOR_MANS_ASSERT(StopTraceA(trace_session_handle, NULL, &stop_event_trace_property_data.props) == ERROR_SUCCESS);
 }
