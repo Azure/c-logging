@@ -302,6 +302,9 @@ DWORD WINAPI process_trace_thread_func(void* arg)
     return 0;
 }
 
+#define TEST_PARSE_START_DELAY 5000 // ms
+#define TEST_WAITTIME_NO_EVENT 20000 // ms
+
 static void start_parse_events(void)
 {
     EVENT_TRACE_LOGFILEA log_file = { 0 };
@@ -320,6 +323,9 @@ static void start_parse_events(void)
     DWORD thread_id;
     process_thread_handle = CreateThread(NULL, 0, process_trace_thread_func, NULL, 0, &thread_id);
     POOR_MANS_ASSERT(process_thread_handle != NULL);
+
+    // Give the thread some time to start
+    Sleep(TEST_PARSE_START_DELAY);
 }
 
 static void stop_parse_events(void)
@@ -390,14 +396,14 @@ static void log_sink_etw_log_all_levels_when_all_levels_enabled_succeeds(void)
 
     int captured_line = __LINE__;
 
+    start_parse_events();
+
     // act
     log_sink_etw.log_sink_log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, captured_line, "test_critical");
     log_sink_etw.log_sink_log(LOG_LEVEL_ERROR, NULL, __FILE__, __FUNCTION__, captured_line + 1, "test_error");
     log_sink_etw.log_sink_log(LOG_LEVEL_WARNING, NULL, __FILE__, __FUNCTION__, captured_line + 2, "test_warning");
     log_sink_etw.log_sink_log(LOG_LEVEL_INFO, NULL, __FILE__, __FUNCTION__, captured_line + 3, "test_info");
     log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, captured_line + 4, "test_verbose");
-
-    start_parse_events();
 
     // assert
 
@@ -442,8 +448,6 @@ static void log_sink_etw_log_all_levels_when_all_levels_enabled_succeeds(void)
     POOR_MANS_ASSERT(strcmp(parsed_events[4].func, __FUNCTION__) == 0);
     POOR_MANS_ASSERT(parsed_events[4].line == captured_line + 4);
 }
-
-#define TEST_WAITTIME_NO_EVENT 30000 // ms
 
 static void log_sink_etw_log_each_individual_level(void)
 {
