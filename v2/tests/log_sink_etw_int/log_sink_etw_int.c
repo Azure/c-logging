@@ -33,6 +33,7 @@ MU_DEFINE_ENUM_STRINGS(LOG_CONTEXT_PROPERTY_TYPE, LOG_CONTEXT_PROPERTY_TYPE_VALU
     { \
         (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
         asserts_failed++; \
+        abort(); \
     } \
 
 typedef struct EVENT_TRACE_PROPERTY_DATA_TAG
