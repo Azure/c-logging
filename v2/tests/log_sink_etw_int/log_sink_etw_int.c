@@ -82,6 +82,7 @@ typedef struct PARSED_EVENT_TAG
 #define MAX_EVENTS 128
 
 static volatile LONG parsed_event_count;
+static volatile LONG parsed_event_index;
 static PARSED_EVENT parsed_events[MAX_EVENTS];
 static HANDLE process_thread_handle;
 static TRACEHANDLE trace;
@@ -97,14 +98,24 @@ static ULONG WINAPI event_trace_buffer_callback(PEVENT_TRACE_LOGFILEA log_file)
     return TRUE;
 }
 
+static void copy_string(char* destination, size_t destination_size, const char* source, size_t source_length)
+{
+    if (source_length >= destination_size)
+    {
+        source_length = destination_size - 1;
+    }
+    (void)memcpy(destination, source, source_length);
+    destination[source_length] = '\0';
+}
+
 static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
 {
     if (IsEqualGUID(&pEventRecord->EventHeader.ProviderId, &provider_guid))
     {
         const uint8_t* metadata = NULL;
 
-        LONG current_parsed_event_count = InterlockedAdd(&parsed_event_count, 0);
-        (void)memset(&parsed_events[current_parsed_event_count], 0, sizeof(PARSED_EVENT));
+        LONG current_index = InterlockedIncrement(&parsed_event_index);
+        (void)memset(&parsed_events[current_index], 0, sizeof(PARSED_EVENT));
 
         EVENT_HEADER_EXTENDED_DATA_ITEM* extended_data_items = pEventRecord->ExtendedData;
 
@@ -118,9 +129,9 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
 
                 if (event_name != NULL)
                 {
-                    (void)strncpy(parsed_events[current_parsed_event_count].event_name, event_name, sizeof(parsed_events[current_parsed_event_count].event_name));
-                    parsed_events[current_parsed_event_count].event_name[sizeof(parsed_events[current_parsed_event_count].event_name) - 1] = '\0';
-                    metadata = (const uint8_t*)(event_name + strlen(event_name) + 1);
+                    size_t event_name_length = strlen(event_name);
+                    copy_string(parsed_events[current_index].event_name, sizeof(parsed_events[current_index].event_name), event_name, event_name_length);
+                    metadata = (const uint8_t*)(event_name + event_name_length + 1);
                 }
 
                 break;
@@ -132,32 +143,32 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
         const char* current_user_data_field = pEventRecord->UserData;
         if (current_user_data_field != NULL)
         {
-            (void)strncpy(parsed_events[current_parsed_event_count].content, current_user_data_field, sizeof(parsed_events[current_parsed_event_count].content));
-            parsed_events[current_parsed_event_count].content[sizeof(parsed_events[current_parsed_event_count].content) - 1] = '\0';
-            current_user_data_field += strlen(current_user_data_field) + 1;
+            size_t content_length = strlen(current_user_data_field);
+            copy_string(parsed_events[current_index].content, sizeof(parsed_events[current_index].content), current_user_data_field, content_length);
+            current_user_data_field += content_length + 1;
         }
         POOR_MANS_ASSERT(strcmp((const char*)metadata, "content") == 0);
         metadata += sizeof("content") + 1;
 
         if (current_user_data_field != NULL)
         {
-            (void)strncpy(parsed_events[current_parsed_event_count].file, current_user_data_field, sizeof(parsed_events[current_parsed_event_count].file));
-            parsed_events[current_parsed_event_count].file[sizeof(parsed_events[current_parsed_event_count].file) - 1] = '\0';
-            current_user_data_field += strlen(current_user_data_field) + 1;
+            size_t file_length = strlen(current_user_data_field);
+            copy_string(parsed_events[current_index].file, sizeof(parsed_events[current_index].file), current_user_data_field, file_length);
+            current_user_data_field += file_length + 1;
         }
         POOR_MANS_ASSERT(strcmp((const char*)metadata, "file") == 0);
         metadata += sizeof("file") + 1;
 
         if (current_user_data_field != NULL)
         {
-            (void)strncpy(parsed_events[current_parsed_event_count].func, current_user_data_field, sizeof(parsed_events[current_parsed_event_count].func));
-            parsed_events[current_parsed_event_count].func[sizeof(parsed_events[current_parsed_event_count].func) - 1] = '\0';
-            current_user_data_field += strlen(current_user_data_field) + 1;
+            size_t func_length = strlen(current_user_data_field);
+            copy_string(parsed_events[current_index].func, sizeof(parsed_events[current_index].func), current_user_data_field, func_length);
+            current_user_data_field += func_length + 1;
         }
         POOR_MANS_ASSERT(strcmp((const char*)metadata, "func") == 0);
         metadata += sizeof("func") + 1;
 
-        parsed_events[current_parsed_event_count].line = *(int32_t*)current_user_data_field;
+        parsed_events[current_index].line = *(int32_t*)current_user_data_field;
         current_user_data_field+= sizeof(int32_t);
 
         POOR_MANS_ASSERT(strcmp((const char*)metadata, "line") == 0);
@@ -169,56 +180,59 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
         while (current_user_data_field - (const char*)pEventRecord->UserData < pEventRecord->UserDataLength)
         {
             // get name and type from metadata
-            (void)strncpy(parsed_events[current_parsed_event_count].properties[property_index].property_name, (const char*)metadata, sizeof(parsed_events[current_parsed_event_count].properties[property_index].property_name));
-            parsed_events[current_parsed_event_count].properties[property_index].property_name[sizeof(parsed_events[current_parsed_event_count].properties[property_index].property_name) - 1] = '\0';
-            metadata += strlen(parsed_events[current_parsed_event_count].properties[property_index].property_name) + 1;
-            parsed_events[current_parsed_event_count].properties[property_index].property_type = *metadata;
+            size_t property_name_length = strlen((const char*)metadata);
+            copy_string(parsed_events[current_index].properties[property_index].property_name, sizeof(parsed_events[current_index].properties[property_index].property_name), (const char*)metadata, property_name_length);
+            metadata += property_name_length + 1;
+
+            parsed_events[current_index].properties[property_index].property_type = *metadata;
             metadata++;
 
-            switch (parsed_events[current_parsed_event_count].properties[property_index].property_type)
+            switch (parsed_events[current_index].properties[property_index].property_type)
             {
             default:
                 POOR_MANS_ASSERT(0);
                 break;
             case _TlgInSTRUCT | _TlgInChain:
-                parsed_events[current_parsed_event_count].properties[property_index].struct_field_count = *(uint8_t*)metadata;
+                parsed_events[current_index].properties[property_index].struct_field_count = *(uint8_t*)metadata;
                 metadata++;
                 break;
             case TlgInANSISTRING:
-                (void)strncpy(parsed_events[current_parsed_event_count].properties[property_index].ascii_char_ptr_value, current_user_data_field, sizeof(parsed_events[current_parsed_event_count].properties[property_index].ascii_char_ptr_value));
-                parsed_events[current_parsed_event_count].properties[property_index].ascii_char_ptr_value[sizeof(parsed_events[current_parsed_event_count].properties[property_index].ascii_char_ptr_value) - 1] = '\0';
-                current_user_data_field += strlen(current_user_data_field) + 1;
+            {
+                size_t property_string_value_length = strlen(current_user_data_field);
+                copy_string(parsed_events[current_index].properties[property_index].ascii_char_ptr_value, sizeof(parsed_events[current_index].properties[property_index].ascii_char_ptr_value), current_user_data_field, property_string_value_length);
+                current_user_data_field += property_string_value_length + 1;
                 break;
+            }
             case TlgInUINT8:
-                parsed_events[current_parsed_event_count].properties[property_index].uint8_t_value = *(uint8_t*)current_user_data_field;
+                parsed_events[current_index].properties[property_index].uint8_t_value = *(uint8_t*)current_user_data_field;
                 current_user_data_field += sizeof(uint8_t);
                 break;
             case TlgInINT8:
-                parsed_events[current_parsed_event_count].properties[property_index].int8_t_value = *(int8_t*)current_user_data_field;
+                parsed_events[current_index].properties[property_index].int8_t_value = *(int8_t*)current_user_data_field;
                 current_user_data_field += sizeof(int8_t);
                 break;
             case TlgInUINT16:
-                parsed_events[current_parsed_event_count].properties[property_index].uint16_t_value = *(uint16_t*)current_user_data_field;
+                parsed_events[current_index].properties[property_index].uint16_t_value = *(uint16_t*)current_user_data_field;
                 current_user_data_field += sizeof(uint16_t);
                 break;
             case TlgInINT16:
-                parsed_events[current_parsed_event_count].properties[property_index].int16_t_value = *(int16_t*)current_user_data_field;
+                parsed_events[current_index].properties[property_index].int16_t_value = *(int16_t*)current_user_data_field;
                 current_user_data_field += sizeof(int16_t);
                 break;
             case TlgInUINT32:
-                parsed_events[current_parsed_event_count].properties[property_index].uint32_t_value = *(uint32_t*)current_user_data_field;
+                parsed_events[current_index].properties[property_index].uint32_t_value = *(uint32_t*)current_user_data_field;
                 current_user_data_field += sizeof(uint32_t);
                 break;
             case TlgInINT32:
-                parsed_events[current_parsed_event_count].properties[property_index].int32_t_value = *(int32_t*)current_user_data_field;
+                parsed_events[current_index].properties[property_index].int32_t_value = *(int32_t*)current_user_data_field;
                 current_user_data_field += sizeof(int32_t);
                 break;
             case TlgInUINT64:
-                parsed_events[current_parsed_event_count].properties[property_index].uint64_t_value = *(uint64_t*)current_user_data_field;
+                parsed_events[current_index].properties[property_index].uint64_t_value = *(uint64_t*)current_user_data_field;
                 current_user_data_field += sizeof(uint64_t);
                 break;
             case TlgInINT64:
-                parsed_events[current_parsed_event_count].properties[property_index].int64_t_value = *(int64_t*)current_user_data_field;
+                parsed_events[current_index].properties[property_index].int64_t_value = *(int64_t*)current_user_data_field;
                 current_user_data_field += sizeof(int64_t);
                 break;
             }
@@ -226,7 +240,7 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
             property_index++;
         }
 
-        parsed_events[current_parsed_event_count].property_count = property_index;
+        parsed_events[current_index].property_count = property_index;
 
         (void)InterlockedIncrement(&parsed_event_count);
         WakeByAddressAll((void*)&parsed_event_count);
@@ -307,7 +321,8 @@ static void start_parse_events(void)
 {
     EVENT_TRACE_LOGFILEA log_file = { 0 };
 
-    parsed_event_count = 0;
+    (void)InterlockedExchange(&parsed_event_index, -1);
+    (void)InterlockedExchange(&parsed_event_count, 0);
 
     log_file.ProcessTraceMode = PROCESS_TRACE_MODE_REAL_TIME | PROCESS_TRACE_MODE_EVENT_RECORD;
     log_file.EventRecordCallback = event_trace_record_callback;
@@ -338,13 +353,13 @@ static void wait_for_event_count(int32_t expected_event_count)
 {
     do
     {
-        int32_t current_parsed_event_count = InterlockedAdd(&parsed_event_count, 0);
-        if (current_parsed_event_count == expected_event_count)
+        int32_t current_index = InterlockedAdd(&parsed_event_count, 0);
+        if (current_index == expected_event_count)
         {
             break;
         }
 
-        (void)WaitOnAddress(&parsed_event_count, &current_parsed_event_count, sizeof(int32_t), INFINITE);
+        (void)WaitOnAddress(&parsed_event_count, &current_index, sizeof(int32_t), INFINITE);
     } while (1);
 }
 

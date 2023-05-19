@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include <stdlib.h>
+#include <stdlib.h> // IWYU pragma: keep
 
 #include "macro_utils/macro_utils.h"
 
