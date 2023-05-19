@@ -18,8 +18,6 @@
 #include "c_logging/log_context_property_type_if.h"
 #include "c_logging/log_context.h"
 
-static size_t asserts_failed = 0;
-
 // defines how many mock calls we can have
 #define MAX_MOCK_CALL_COUNT (128)
 
@@ -127,7 +125,7 @@ void mock_log_internal_error_report(void)
     if (!(cond)) \
     { \
         (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
-        asserts_failed++; \
+        abort(); \
     } \
 
 static void setup_malloc_call(void)
@@ -1898,5 +1896,5 @@ int main(void)
     creating_a_context_with_LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT_properties_reports_error();
     creating_a_context_with_too_much_data_reports_error();
 
-    return asserts_failed;
+    return 0;
 }

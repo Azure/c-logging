@@ -3,19 +3,18 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <inttypes.h>
 
 #include "c_logging/log_context_property_type.h"
 #include "c_logging/log_context_property_type_if.h"
 #include "c_logging/log_context_property_type_struct.h"
 
-static size_t asserts_failed = 0;
-
 #define POOR_MANS_ASSERT(cond) \
     if (!(cond)) \
     { \
         (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
-        asserts_failed++; \
+        abort(); \
     } \
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(struct).to_string */
@@ -240,5 +239,5 @@ int main(void)
 
     struct_get_init_data_size_returns_1();
 
-    return asserts_failed;
+    return 0;
 }

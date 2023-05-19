@@ -3,19 +3,18 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "c_logging/log_context_property_type.h"
 #include "c_logging/log_context_property_type_if.h"
 
 #include "c_logging/log_context_property_type_ascii_char_ptr.h"
 
-static size_t asserts_failed = 0;
-
 #define POOR_MANS_ASSERT(cond) \
     if (!(cond)) \
     { \
         (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
-        asserts_failed++; \
+        abort(); \
     } \
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string */
@@ -251,5 +250,5 @@ int main(void)
     ascii_char_ptr_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds();
     ascii_char_ptr_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_with_multiple_args_succeeds();
 
-    return asserts_failed;
+    return 0;
 }

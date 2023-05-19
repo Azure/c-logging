@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdlib.h>
 #include <inttypes.h>
 
 #include "macro_utils/macro_utils.h"
@@ -12,8 +13,6 @@
 #include "c_logging/log_context_property_type.h"
 #include "c_logging/log_context_property_type_if.h"
 #include "c_logging/log_context_property_basic_types.h"
-
-static size_t asserts_failed = 0;
 
 // defines how many mock calls we can have
 #define MAX_MOCK_CALL_COUNT (128)
@@ -99,7 +98,7 @@ static void setup_expected_snprintf_call(void)
     if (!(cond)) \
     { \
         (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
-        asserts_failed++; \
+        abort(); \
     } \
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int64_t).to_string */
@@ -2799,5 +2798,5 @@ int main(void)
 
     MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint8_t), _succeeds)();
 
-    return asserts_failed;
+    return 0;
 }

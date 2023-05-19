@@ -3,14 +3,10 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-#if defined _MSC_VER
 #include <stdlib.h>
-#endif
 
 #include "macro_utils/macro_utils.h"
 #include "c_logging/log_internal_error.h"
-
-static size_t asserts_failed = 0;
 
 // defines how many mock calls we can have
 #define MAX_MOCK_CALL_COUNT (128)
@@ -106,7 +102,7 @@ static void setup__set_abort_behavior(unsigned int _Flags, unsigned int _Mask)
     if (!(cond)) \
     { \
         (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
-        asserts_failed++; \
+        abort(); \
     } \
 
 /* LOG_CONTEXT_CREATE */
@@ -135,5 +131,5 @@ int main(void)
 {
     log_internal_error_report_aborts();
 
-    return asserts_failed;
+    return 0;
 }

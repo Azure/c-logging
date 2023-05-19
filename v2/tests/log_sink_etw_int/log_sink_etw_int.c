@@ -22,8 +22,6 @@
 
 #include "c_logging/log_sink_etw.h"
 
-static size_t asserts_failed = 0;
-
 static GUID provider_guid = { 0xDAD29F36, 0x0A48, 0x4DEF, { 0x9D, 0x50, 0x8E, 0xF9, 0x03, 0x6B, 0x92, 0xB4 } };
 
 MU_DEFINE_ENUM_STRINGS(LOG_CONTEXT_PROPERTY_TYPE, LOG_CONTEXT_PROPERTY_TYPE_VALUES)
@@ -32,7 +30,6 @@ MU_DEFINE_ENUM_STRINGS(LOG_CONTEXT_PROPERTY_TYPE, LOG_CONTEXT_PROPERTY_TYPE_VALU
     if (!(cond)) \
     { \
         (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
-        asserts_failed++; \
         abort(); \
     } \
 
@@ -675,7 +672,7 @@ int main(void)
         log_sink_etw_log_with_context_with_properties();
         log_sink_etw_log_with_context_with_nested_structs();
 
-        result = (int)asserts_failed;
+        result = 0;
     }
 
     return result;

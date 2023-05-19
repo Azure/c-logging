@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
 
@@ -11,15 +12,13 @@
 #include "c_logging/log_context_property_type_if.h"
 #include "c_logging/log_context_property_basic_types.h"
 
-static size_t asserts_failed = 0;
-
 #define TEST_BUFFER_SIZE 1024
 
 #define POOR_MANS_ASSERT(cond) \
     if (!(cond)) \
     { \
         (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
-        asserts_failed++; \
+        abort(); \
     } \
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(int64_t).to_string */
@@ -1936,5 +1935,5 @@ int main(void)
 
     MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(uint8_t), _succeeds)();
 
-    return asserts_failed;
+    return 0;
 }

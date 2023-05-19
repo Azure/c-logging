@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "macro_utils/macro_utils.h"
 
@@ -12,8 +13,6 @@
 #include "c_logging/log_context_property_type_if.h"
 
 #include "c_logging/log_context_property_type_ascii_char_ptr.h"
-
-static size_t asserts_failed = 0;
 
 // defines how many mock calls we can have
 #define MAX_MOCK_CALL_COUNT (128)
@@ -187,7 +186,7 @@ static void setup_expected_vsnprintf_call(void)
     if (!(cond)) \
     { \
         (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
-        asserts_failed++; \
+        abort(); \
     } \
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string */
@@ -562,5 +561,5 @@ int main(void)
     ascii_char_ptr_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds();
     ascii_char_ptr_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_with_multiple_args_succeeds();
 
-    return asserts_failed;
+    return 0;
 }
