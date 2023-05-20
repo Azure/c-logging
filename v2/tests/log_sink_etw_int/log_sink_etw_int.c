@@ -287,14 +287,12 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
     }
 }
 
-static char test_path[MAX_PATH];
-
-static void generate_trace_session(void)
+static void generate_trace_session(const char* function_name)
 {
     UUID uuid;
     POOR_MANS_ASSERT(UuidCreate(&uuid) == RPC_S_OK);
     int snprintf_result = snprintf(trace_session_name, sizeof(trace_session_name), "%s-%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X",
-        __FUNCTION__, uuid.Data1, uuid.Data2, uuid.Data3, uuid.Data4[0], uuid.Data4[1], uuid.Data4[2], uuid.Data4[3], uuid.Data4[4], uuid.Data4[5], uuid.Data4[6], uuid.Data4[7]);
+        function_name, uuid.Data1, uuid.Data2, uuid.Data3, uuid.Data4[0], uuid.Data4[1], uuid.Data4[2], uuid.Data4[3], uuid.Data4[4], uuid.Data4[5], uuid.Data4[6], uuid.Data4[7]);
     POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < sizeof(trace_session_name)));
 }
 
@@ -319,7 +317,9 @@ static TRACEHANDLE start_trace(uint8_t trace_level)
 
     POOR_MANS_ASSERT(StartTraceA(&trace_session_handle, trace_session_name, &start_event_trace_property_data.props) == ERROR_SUCCESS);
 
-    (void)strcpy(logger_name, start_event_trace_property_data.logger_name);
+    size_t logger_name_length = strlen(start_event_trace_property_data.logger_name);
+    POOR_MANS_ASSERT(logger_name_length < sizeof(logger_name));
+    (void)memcpy(logger_name, start_event_trace_property_data.logger_name, logger_name_length + 1);
 
     // enable our desired provider
     ULONG enable_trace_result = EnableTraceEx2(trace_session_handle, (LPCGUID)&provider_guid, EVENT_CONTROL_CODE_ENABLE_PROVIDER,
@@ -343,7 +343,7 @@ static void stop_trace(TRACEHANDLE trace_session_handle)
     POOR_MANS_ASSERT(StopTraceA(trace_session_handle, NULL, &stop_event_trace_property_data.props) == ERROR_SUCCESS);
 }
 
-DWORD WINAPI process_trace_thread_func(void* arg)
+static DWORD WINAPI process_trace_thread_func(void* arg)
 {
     (void)arg;
 
@@ -383,7 +383,7 @@ static void start_parse_events(void)
 
 static void stop_parse_events(void)
 {
-    WaitForSingleObject(process_thread_handle, INFINITE);
+    POOR_MANS_ASSERT(WaitForSingleObject(process_thread_handle, INFINITE) == WAIT_OBJECT_0);
 
     (void)CloseHandle(process_thread_handle);
     (void)CloseTrace(trace);
@@ -403,10 +403,12 @@ static void wait_for_event_count(int32_t expected_event_count)
     } while (1);
 }
 
+// This test is a bit special because it is the first event and thus the time the provider gets registered.
+// So instead of expecting 1 event we'll be expecting a self test event and the actual logging event.
 static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
 {
     // arrange
-    generate_trace_session();
+    generate_trace_session(__FUNCTION__);
 
     TRACEHANDLE trace_session_handle = start_trace(TRACE_LEVEL_VERBOSE);
 
@@ -443,7 +445,7 @@ static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
 static void log_sink_etw_log_all_levels_when_all_levels_enabled_succeeds(void)
 {
     // arrange
-    generate_trace_session();
+    generate_trace_session(__FUNCTION__);
 
     TRACEHANDLE trace_session_handle = start_trace(TRACE_LEVEL_VERBOSE);
 
@@ -509,7 +511,7 @@ static void log_sink_etw_log_each_individual_level(void)
     {
         for (LOG_LEVEL trace_level = TRACE_LEVEL_CRITICAL; trace_level <= TRACE_LEVEL_VERBOSE; trace_level++)
         {
-            generate_trace_session();
+            generate_trace_session(__FUNCTION__);
 
             TRACEHANDLE trace_session_handle = start_trace(trace_level);
 
@@ -527,7 +529,7 @@ static void log_sink_etw_log_each_individual_level(void)
             // if we are not expecting an event, wait for some time just to make sure no event is seen
             if (expected_event_count == 0)
             {
-                (void)printf("Waiting for %.02f to make sure no events are published ...", (double)TEST_WAITTIME_NO_EVENT / 1000);
+                (void)printf("Waiting for %.02f seconds to make sure no events are published ...", (double)TEST_WAITTIME_NO_EVENT / 1000);
                 Sleep(TEST_WAITTIME_NO_EVENT);
             }
 
@@ -575,7 +577,7 @@ static void log_sink_etw_log_each_individual_level(void)
 static void log_sink_etw_log_with_context_with_properties(void)
 {
     // arrange
-    generate_trace_session();
+    generate_trace_session(__FUNCTION__);
 
     TRACEHANDLE trace_session_handle = start_trace(TRACE_LEVEL_VERBOSE);
 
@@ -584,14 +586,14 @@ static void log_sink_etw_log_with_context_with_properties(void)
     LOG_CONTEXT_HANDLE log_context;
     LOG_CONTEXT_CREATE(log_context, NULL,
         LOG_CONTEXT_STRING_PROPERTY(gigi, "duru"),
-        LOG_CONTEXT_PROPERTY(int8_t, prop1, 42),
-        LOG_CONTEXT_PROPERTY(uint8_t, prop2, 43),
-        LOG_CONTEXT_PROPERTY(int16_t, prop3, 44),
-        LOG_CONTEXT_PROPERTY(uint16_t, prop4, 45),
-        LOG_CONTEXT_PROPERTY(int32_t, prop5, 46),
-        LOG_CONTEXT_PROPERTY(uint32_t, prop6, 47),
-        LOG_CONTEXT_PROPERTY(int64_t, prop7, 48),
-        LOG_CONTEXT_PROPERTY(uint64_t, prop8, 49)
+        LOG_CONTEXT_PROPERTY(int8_t, prop1, 0x10),
+        LOG_CONTEXT_PROPERTY(uint8_t, prop2, 0x20),
+        LOG_CONTEXT_PROPERTY(int16_t, prop3, 0x3031),
+        LOG_CONTEXT_PROPERTY(uint16_t, prop4, 0x4041),
+        LOG_CONTEXT_PROPERTY(int32_t, prop5, 0x50515253),
+        LOG_CONTEXT_PROPERTY(uint32_t, prop6, 0x60616263),
+        LOG_CONTEXT_PROPERTY(int64_t, prop7, 0x7071727374757677),
+        LOG_CONTEXT_PROPERTY(uint64_t, prop8, 0x8081828384858687)
     );
 
     start_parse_events();
@@ -622,28 +624,28 @@ static void log_sink_etw_log_with_context_with_properties(void)
     POOR_MANS_ASSERT(strcmp(parsed_events[0].properties[1].ascii_char_ptr_value, "duru") == 0);
     POOR_MANS_ASSERT(strcmp(parsed_events[0].properties[1].property_name, "gigi") == 0);
     POOR_MANS_ASSERT(parsed_events[0].properties[2].property_type == TlgInINT8);
-    POOR_MANS_ASSERT(parsed_events[0].properties[2].int8_t_value == 42);
+    POOR_MANS_ASSERT(parsed_events[0].properties[2].int8_t_value == 0x10);
     POOR_MANS_ASSERT(strcmp(parsed_events[0].properties[2].property_name, "prop1") == 0);
     POOR_MANS_ASSERT(parsed_events[0].properties[3].property_type == TlgInUINT8);
-    POOR_MANS_ASSERT(parsed_events[0].properties[3].uint8_t_value == 43);
+    POOR_MANS_ASSERT(parsed_events[0].properties[3].uint8_t_value == 0x20);
     POOR_MANS_ASSERT(strcmp(parsed_events[0].properties[3].property_name, "prop2") == 0);
     POOR_MANS_ASSERT(parsed_events[0].properties[4].property_type == TlgInINT16);
-    POOR_MANS_ASSERT(parsed_events[0].properties[4].int16_t_value == 44);
+    POOR_MANS_ASSERT(parsed_events[0].properties[4].int16_t_value == 0x3031);
     POOR_MANS_ASSERT(strcmp(parsed_events[0].properties[4].property_name, "prop3") == 0);
     POOR_MANS_ASSERT(parsed_events[0].properties[5].property_type == TlgInUINT16);
-    POOR_MANS_ASSERT(parsed_events[0].properties[5].uint16_t_value == 45);
+    POOR_MANS_ASSERT(parsed_events[0].properties[5].uint16_t_value == 0x4041);
     POOR_MANS_ASSERT(strcmp(parsed_events[0].properties[5].property_name, "prop4") == 0);
     POOR_MANS_ASSERT(parsed_events[0].properties[6].property_type == TlgInINT32);
-    POOR_MANS_ASSERT(parsed_events[0].properties[6].int32_t_value == 46);
+    POOR_MANS_ASSERT(parsed_events[0].properties[6].int32_t_value == 0x50515253);
     POOR_MANS_ASSERT(strcmp(parsed_events[0].properties[6].property_name, "prop5") == 0);
     POOR_MANS_ASSERT(parsed_events[0].properties[7].property_type == TlgInUINT32);
-    POOR_MANS_ASSERT(parsed_events[0].properties[7].uint32_t_value == 47);
+    POOR_MANS_ASSERT(parsed_events[0].properties[7].uint32_t_value == 0x60616263);
     POOR_MANS_ASSERT(strcmp(parsed_events[0].properties[7].property_name, "prop6") == 0);
     POOR_MANS_ASSERT(parsed_events[0].properties[8].property_type == TlgInINT64);
-    POOR_MANS_ASSERT(parsed_events[0].properties[8].int64_t_value == 48);
+    POOR_MANS_ASSERT(parsed_events[0].properties[8].int64_t_value == 0x7071727374757677);
     POOR_MANS_ASSERT(strcmp(parsed_events[0].properties[8].property_name, "prop7") == 0);
     POOR_MANS_ASSERT(parsed_events[0].properties[9].property_type == TlgInUINT64);
-    POOR_MANS_ASSERT(parsed_events[0].properties[9].uint64_t_value == 49);
+    POOR_MANS_ASSERT(parsed_events[0].properties[9].uint64_t_value == 0x8081828384858687);
     POOR_MANS_ASSERT(strcmp(parsed_events[0].properties[9].property_name, "prop8") == 0);
 
     LOG_CONTEXT_DESTROY(log_context);
@@ -652,7 +654,7 @@ static void log_sink_etw_log_with_context_with_properties(void)
 static void log_sink_etw_log_with_context_with_nested_structs(void)
 {
     // arrange
-    generate_trace_session();
+    generate_trace_session(__FUNCTION__);
 
     TRACEHANDLE trace_session_handle = start_trace(TRACE_LEVEL_VERBOSE);
 
@@ -712,24 +714,11 @@ static void log_sink_etw_log_with_context_with_nested_structs(void)
 /* very "poor man's" way of testing, as no test harness available */
 int main(void)
 {
-    int result;
+    log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
+    log_sink_etw_log_all_levels_when_all_levels_enabled_succeeds();
+    log_sink_etw_log_each_individual_level();
+    log_sink_etw_log_with_context_with_properties();
+    log_sink_etw_log_with_context_with_nested_structs();
 
-    if (GetTempPathA(sizeof(test_path), test_path) == 0)
-    {
-        (void)printf("GetTempPathA failed, last error = %lu\r\n", GetLastError());
-        result = MU_FAILURE;
-    }
-    else
-    {
-        log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
-        log_sink_etw_log_all_levels_when_all_levels_enabled_succeeds();
-        log_sink_etw_log_each_individual_level();
-        log_sink_etw_log_with_context_with_properties();
-        log_sink_etw_log_with_context_with_nested_structs();
-
-        result = 0;
-    }
-
-    return result;
+    return 0;
 }
-
