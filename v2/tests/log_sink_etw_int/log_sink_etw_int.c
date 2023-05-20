@@ -133,6 +133,19 @@ typedef struct TEST_CONTEXT_TAG
     char trace_session_name[128];
 } TEST_CONTEXT;
 
+static TEST_CONTEXT* test_context_create(void)
+{
+    TEST_CONTEXT* result = malloc(sizeof(TEST_CONTEXT));
+    POOR_MANS_ASSERT(result != NULL);
+
+    return result;
+}
+
+static void test_context_destroy(TEST_CONTEXT* test_context)
+{
+    free(test_context);
+}
+
 // This callback is needed
 // Without this callback events are not properly processed
 static ULONG WINAPI event_trace_buffer_callback(PEVENT_TRACE_LOGFILEA log_file)
@@ -414,15 +427,15 @@ static void wait_for_event_count(TEST_CONTEXT* test_context, int32_t expected_ev
 static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
 {
     // arrange
-    TEST_CONTEXT test_context;
+    TEST_CONTEXT* test_context = test_context_create();
 
-    generate_trace_session(&test_context, __FUNCTION__);
+    generate_trace_session(test_context, __FUNCTION__);
 
-    TRACEHANDLE trace_session_handle = start_trace(&test_context, TRACE_LEVEL_VERBOSE);
+    TRACEHANDLE trace_session_handle = start_trace(test_context, TRACE_LEVEL_VERBOSE);
 
     int captured_line = __LINE__;
 
-    start_parse_events(&test_context);
+    start_parse_events(test_context);
 
     // act
     log_sink_etw.log_sink_log(LOG_LEVEL_ERROR, NULL, __FILE__, __FUNCTION__, captured_line, "test");
@@ -430,38 +443,40 @@ static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
     // assert
 
     // 2 events expected: one self and one for the actual event
-    wait_for_event_count(&test_context, 2);
+    wait_for_event_count(test_context, 2);
 
-    stop_trace(&test_context, trace_session_handle);
-    stop_parse_events(&test_context);
+    stop_trace(test_context, trace_session_handle);
+    stop_parse_events(test_context);
 
     // self test event
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].event_name, "LogInfo") == 0);
-    POOR_MANS_ASSERT(strlen(test_context.parsed_events[0].content) > 0);
-    POOR_MANS_ASSERT(strlen(test_context.parsed_events[0].file) > 0);
-    POOR_MANS_ASSERT(strlen(test_context.parsed_events[0].func) > 0);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].line != 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].event_name, "LogInfo") == 0);
+    POOR_MANS_ASSERT(strlen(test_context->parsed_events[0].content) > 0);
+    POOR_MANS_ASSERT(strlen(test_context->parsed_events[0].file) > 0);
+    POOR_MANS_ASSERT(strlen(test_context->parsed_events[0].func) > 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].line != 0);
 
     // error event
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[1].event_name, "LogError") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[1].content, "test") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[1].file, __FILE__) == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[1].func, __FUNCTION__) == 0);
-    POOR_MANS_ASSERT(test_context.parsed_events[1].line == captured_line);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[1].event_name, "LogError") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[1].content, "test") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[1].file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[1].func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[1].line == captured_line);
+
+    test_context_destroy(test_context);
 }
 
 static void log_sink_etw_log_all_levels_when_all_levels_enabled_succeeds(void)
 {
     // arrange
-    TEST_CONTEXT test_context;
+    TEST_CONTEXT* test_context = test_context_create();
 
-    generate_trace_session(&test_context, __FUNCTION__);
+    generate_trace_session(test_context, __FUNCTION__);
 
-    TRACEHANDLE trace_session_handle = start_trace(&test_context, TRACE_LEVEL_VERBOSE);
+    TRACEHANDLE trace_session_handle = start_trace(test_context, TRACE_LEVEL_VERBOSE);
 
     int captured_line = __LINE__;
 
-    start_parse_events(&test_context);
+    start_parse_events(test_context);
 
     // act
     log_sink_etw.log_sink_log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, captured_line, "test_critical");
@@ -473,45 +488,47 @@ static void log_sink_etw_log_all_levels_when_all_levels_enabled_succeeds(void)
     // assert
 
     // 5 events expected: all actual events
-    wait_for_event_count(&test_context, 5);
+    wait_for_event_count(test_context, 5);
 
-    stop_trace(&test_context, trace_session_handle);
-    stop_parse_events(&test_context);
+    stop_trace(test_context, trace_session_handle);
+    stop_parse_events(test_context);
 
     // critical event
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].event_name, "LogCritical") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].content, "test_critical") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].file, __FILE__) == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].func, __FUNCTION__) == 0);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].line == captured_line);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].event_name, "LogCritical") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].content, "test_critical") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].line == captured_line);
 
     // error event
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[1].event_name, "LogError") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[1].content, "test_error") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[1].file, __FILE__) == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[1].func, __FUNCTION__) == 0);
-    POOR_MANS_ASSERT(test_context.parsed_events[1].line == captured_line + 1);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[1].event_name, "LogError") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[1].content, "test_error") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[1].file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[1].func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[1].line == captured_line + 1);
 
     // warning event
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[2].event_name, "LogWarning") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[2].content, "test_warning") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[2].file, __FILE__) == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[2].func, __FUNCTION__) == 0);
-    POOR_MANS_ASSERT(test_context.parsed_events[2].line == captured_line + 2);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[2].event_name, "LogWarning") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[2].content, "test_warning") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[2].file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[2].func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[2].line == captured_line + 2);
 
     // info event
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[3].event_name, "LogInfo") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[3].content, "test_info") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[3].file, __FILE__) == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[3].func, __FUNCTION__) == 0);
-    POOR_MANS_ASSERT(test_context.parsed_events[3].line == captured_line + 3);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[3].event_name, "LogInfo") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[3].content, "test_info") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[3].file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[3].func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[3].line == captured_line + 3);
 
     // verbose event
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[4].event_name, "LogVerbose") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[4].content, "test_verbose") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[4].file, __FILE__) == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[4].func, __FUNCTION__) == 0);
-    POOR_MANS_ASSERT(test_context.parsed_events[4].line == captured_line + 4);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[4].event_name, "LogVerbose") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[4].content, "test_verbose") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[4].file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[4].func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[4].line == captured_line + 4);
+
+    test_context_destroy(test_context);
 }
 
 static void log_sink_etw_log_each_individual_level(void)
@@ -521,22 +538,22 @@ static void log_sink_etw_log_each_individual_level(void)
     {
         for (LOG_LEVEL trace_level = TRACE_LEVEL_CRITICAL; trace_level <= TRACE_LEVEL_VERBOSE; trace_level++)
         {
-            TEST_CONTEXT test_context;
+            TEST_CONTEXT* test_context = test_context_create();
 
-            generate_trace_session(&test_context, __FUNCTION__);
+            generate_trace_session(test_context, __FUNCTION__);
 
-            TRACEHANDLE trace_session_handle = start_trace(&test_context, trace_level);
+            TRACEHANDLE trace_session_handle = start_trace(test_context, trace_level);
 
             int captured_line = __LINE__;
             uint8_t expected_event_count = (trace_level - TRACE_LEVEL_CRITICAL) >= (event_log_level - LOG_LEVEL_CRITICAL) ? 1 : 0;
 
-            start_parse_events(&test_context);
+            start_parse_events(test_context);
 
             // act
             log_sink_etw.log_sink_log(event_log_level, NULL, __FILE__, __FUNCTION__, captured_line, "test_event");
 
             // assert
-            wait_for_event_count(&test_context, expected_event_count);
+            wait_for_event_count(test_context, expected_event_count);
 
             // if we are not expecting an event, wait for some time just to make sure no event is seen
             if (expected_event_count == 0)
@@ -545,10 +562,10 @@ static void log_sink_etw_log_each_individual_level(void)
                 Sleep(TEST_WAITTIME_NO_EVENT);
             }
 
-            stop_trace(&test_context, trace_session_handle);
-            stop_parse_events(&test_context);
+            stop_trace(test_context, trace_session_handle);
+            stop_parse_events(test_context);
 
-            POOR_MANS_ASSERT(test_context.parsed_event_count == expected_event_count);
+            POOR_MANS_ASSERT(test_context->parsed_event_count == expected_event_count);
 
             if (expected_event_count > 0)
             {
@@ -576,12 +593,14 @@ static void log_sink_etw_log_each_individual_level(void)
                     break;
                 }
 
-                POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].event_name, expected_event_name) == 0);
-                POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].content, "test_event") == 0);
-                POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].file, __FILE__) == 0);
-                POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].func, __FUNCTION__) == 0);
-                POOR_MANS_ASSERT(test_context.parsed_events[0].line == captured_line);
+                POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].event_name, expected_event_name) == 0);
+                POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].content, "test_event") == 0);
+                POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].file, __FILE__) == 0);
+                POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].func, __FUNCTION__) == 0);
+                POOR_MANS_ASSERT(test_context->parsed_events[0].line == captured_line);
             }
+
+            test_context_destroy(test_context);
         }
     }
 }
@@ -589,11 +608,11 @@ static void log_sink_etw_log_each_individual_level(void)
 static void log_sink_etw_log_with_context_with_properties(void)
 {
     // arrange
-    TEST_CONTEXT test_context;
+    TEST_CONTEXT* test_context = test_context_create();
 
-    generate_trace_session(&test_context, __FUNCTION__);
+    generate_trace_session(test_context, __FUNCTION__);
 
-    TRACEHANDLE trace_session_handle = start_trace(&test_context, TRACE_LEVEL_VERBOSE);
+    TRACEHANDLE trace_session_handle = start_trace(test_context, TRACE_LEVEL_VERBOSE);
 
     int captured_line = __LINE__;
 
@@ -610,7 +629,7 @@ static void log_sink_etw_log_with_context_with_properties(void)
         LOG_CONTEXT_PROPERTY(uint64_t, prop8, 0x8081828384858687)
     );
 
-    start_parse_events(&test_context);
+    start_parse_events(test_context);
 
     // act
     log_sink_etw.log_sink_log(LOG_LEVEL_CRITICAL, log_context, __FILE__, __FUNCTION__, captured_line, "test_with_context");
@@ -618,61 +637,62 @@ static void log_sink_etw_log_with_context_with_properties(void)
     // assert
 
     // 1 event expected which has att the properties
-    wait_for_event_count(&test_context, 1);
+    wait_for_event_count(test_context, 1);
  
-    stop_trace(&test_context, trace_session_handle);
-    stop_parse_events(&test_context);
+    stop_trace(test_context, trace_session_handle);
+    stop_parse_events(test_context);
 
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].event_name, "LogCritical") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].content, "test_with_context") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].file, __FILE__) == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].func, __FUNCTION__) == 0);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].line == captured_line);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].event_name, "LogCritical") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].content, "test_with_context") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].line == captured_line);
 
-    POOR_MANS_ASSERT(test_context.parsed_events[0].property_count == 10);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[0].property_type == (_TlgInSTRUCT | _TlgInChain));
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[0].struct_field_count == 9);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].properties[0].property_name, "") == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].property_count == 10);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[0].property_type == (_TlgInSTRUCT | _TlgInChain));
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[0].struct_field_count == 9);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[0].property_name, "") == 0);
 
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[1].property_type == TlgInANSISTRING);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].properties[1].ascii_char_ptr_value, "duru") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].properties[1].property_name, "gigi") == 0);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[2].property_type == TlgInINT8);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[2].int8_t_value == 0x10);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].properties[2].property_name, "prop1") == 0);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[3].property_type == TlgInUINT8);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[3].uint8_t_value == 0x20);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].properties[3].property_name, "prop2") == 0);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[4].property_type == TlgInINT16);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[4].int16_t_value == 0x3031);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].properties[4].property_name, "prop3") == 0);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[5].property_type == TlgInUINT16);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[5].uint16_t_value == 0x4041);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].properties[5].property_name, "prop4") == 0);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[6].property_type == TlgInINT32);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[6].int32_t_value == 0x50515253);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].properties[6].property_name, "prop5") == 0);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[7].property_type == TlgInUINT32);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[7].uint32_t_value == 0x60616263);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].properties[7].property_name, "prop6") == 0);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[8].property_type == TlgInINT64);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[8].int64_t_value == 0x7071727374757677);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].properties[8].property_name, "prop7") == 0);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[9].property_type == TlgInUINT64);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[9].uint64_t_value == 0x8081828384858687);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].properties[9].property_name, "prop8") == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[1].property_type == TlgInANSISTRING);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[1].ascii_char_ptr_value, "duru") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[1].property_name, "gigi") == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[2].property_type == TlgInINT8);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[2].int8_t_value == 0x10);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[2].property_name, "prop1") == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[3].property_type == TlgInUINT8);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[3].uint8_t_value == 0x20);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[3].property_name, "prop2") == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[4].property_type == TlgInINT16);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[4].int16_t_value == 0x3031);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[4].property_name, "prop3") == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[5].property_type == TlgInUINT16);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[5].uint16_t_value == 0x4041);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[5].property_name, "prop4") == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[6].property_type == TlgInINT32);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[6].int32_t_value == 0x50515253);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[6].property_name, "prop5") == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[7].property_type == TlgInUINT32);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[7].uint32_t_value == 0x60616263);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[7].property_name, "prop6") == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[8].property_type == TlgInINT64);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[8].int64_t_value == 0x7071727374757677);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[8].property_name, "prop7") == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[9].property_type == TlgInUINT64);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[9].uint64_t_value == 0x8081828384858687);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[9].property_name, "prop8") == 0);
 
     LOG_CONTEXT_DESTROY(log_context);
+    test_context_destroy(test_context);
 }
 
 static void log_sink_etw_log_with_context_with_nested_structs(void)
 {
     // arrange
-    TEST_CONTEXT test_context;
+    TEST_CONTEXT* test_context = test_context_create();
 
-    generate_trace_session(&test_context, __FUNCTION__);
+    generate_trace_session(test_context, __FUNCTION__);
 
-    TRACEHANDLE trace_session_handle = start_trace(&test_context, TRACE_LEVEL_VERBOSE);
+    TRACEHANDLE trace_session_handle = start_trace(test_context, TRACE_LEVEL_VERBOSE);
 
     int captured_line = __LINE__;
 
@@ -686,45 +706,47 @@ static void log_sink_etw_log_with_context_with_nested_structs(void)
         LOG_CONTEXT_PROPERTY(uint8_t, prop2, 43)
     );
 
-    start_parse_events(&test_context);
+    start_parse_events(test_context);
 
     // act
     log_sink_etw.log_sink_log(LOG_LEVEL_CRITICAL, log_context_2, __FILE__, __FUNCTION__, captured_line, "test_with_nested");
 
     // assert
     // 1 event expected which has att the properties
-    wait_for_event_count(&test_context, 1);
+    wait_for_event_count(test_context, 1);
 
-    stop_trace(&test_context, trace_session_handle);
-    stop_parse_events(&test_context);
+    stop_trace(test_context, trace_session_handle);
+    stop_parse_events(test_context);
 
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].event_name, "LogCritical") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].content, "test_with_nested") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].file, __FILE__) == 0);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].func, __FUNCTION__) == 0);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].line == captured_line);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].event_name, "LogCritical") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].content, "test_with_nested") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].line == captured_line);
 
-    POOR_MANS_ASSERT(test_context.parsed_events[0].property_count == 4);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[0].property_type == (_TlgInSTRUCT | _TlgInChain));
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[0].struct_field_count == 3);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].properties[0].property_name, "") == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].property_count == 4);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[0].property_type == (_TlgInSTRUCT | _TlgInChain));
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[0].struct_field_count == 3);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[0].property_name, "") == 0);
 
     // log_context_1 properties
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[1].property_type == (_TlgInSTRUCT | _TlgInChain));
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[1].struct_field_count == 1);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].properties[1].property_name, "") == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[1].property_type == (_TlgInSTRUCT | _TlgInChain));
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[1].struct_field_count == 1);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[1].property_name, "") == 0);
 
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[2].property_type == TlgInINT8);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[2].uint8_t_value == 42);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].properties[2].property_name, "prop1") == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[2].property_type == TlgInINT8);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[2].uint8_t_value == 42);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[2].property_name, "prop1") == 0);
 
     // log_context_2 properties
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[3].property_type == TlgInUINT8);
-    POOR_MANS_ASSERT(test_context.parsed_events[0].properties[3].uint8_t_value == 43);
-    POOR_MANS_ASSERT(strcmp(test_context.parsed_events[0].properties[3].property_name, "prop2") == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[3].property_type == TlgInUINT8);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[3].uint8_t_value == 43);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[3].property_name, "prop2") == 0);
 
     LOG_CONTEXT_DESTROY(log_context_2);
     LOG_CONTEXT_DESTROY(log_context_1);
+
+    test_context_destroy(test_context);
 }
 
 /* very "poor man's" way of testing, as no test harness available */
