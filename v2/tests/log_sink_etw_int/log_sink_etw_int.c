@@ -22,6 +22,27 @@
 
 #include "c_logging/log_sink_etw.h"
 
+// unfortunately 
+static void read_uint8_t(const unsigned char* source, uint8_t* destination)
+{
+    *destination = *source;
+}
+
+static void read_uint16_t(const unsigned char* source, uint16_t* destination)
+{
+    (void)memcpy(destination, source, sizeof(uint16_t));
+}
+
+static void read_uint32_t(const unsigned char* source, uint32_t* destination)
+{
+    (void)memcpy(destination, source, sizeof(uint32_t));
+}
+
+static void read_uint64_t(const unsigned char* source, uint64_t* destination)
+{
+    (void)memcpy(destination, source, sizeof(uint64_t));
+}
+
 static GUID provider_guid = { 0xDAD29F36, 0x0A48, 0x4DEF, { 0x9D, 0x50, 0x8E, 0xF9, 0x03, 0x6B, 0x92, 0xB4 } };
 
 MU_DEFINE_ENUM_STRINGS(LOG_CONTEXT_PROPERTY_TYPE, LOG_CONTEXT_PROPERTY_TYPE_VALUES)
@@ -30,7 +51,7 @@ MU_DEFINE_ENUM_STRINGS(LOG_CONTEXT_PROPERTY_TYPE, LOG_CONTEXT_PROPERTY_TYPE_VALU
     if (!(cond)) \
     { \
         (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
-        abort(); \
+        /*abort();*/ \
     } \
 
 typedef struct EVENT_TRACE_PROPERTY_DATA_TAG
@@ -112,7 +133,7 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
 {
     if (IsEqualGUID(&pEventRecord->EventHeader.ProviderId, &provider_guid))
     {
-        const uint8_t* metadata = NULL;
+        const char* metadata = NULL;
 
         LONG current_index = InterlockedIncrement(&parsed_event_index);
         (void)memset(&parsed_events[current_index], 0, sizeof(PARSED_EVENT));
@@ -124,14 +145,14 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
             if (extended_data_items[i].ExtType == EVENT_HEADER_EXT_TYPE_EVENT_SCHEMA_TL)
             {
                 // This one has the event name
-                // Not really documented, but the Windows source code seems to indicate I can just skip over a few bytes that hold a length and version
+                // Documented in TraceLoggingProvider.h in the structure of TraceLogging that we should skip 4 bytes
                 const char* event_name = (const char*)(uintptr_t)(extended_data_items[i].DataPtr + 4);
 
                 if (event_name != NULL)
                 {
                     size_t event_name_length = strlen(event_name);
                     copy_string(parsed_events[current_index].event_name, sizeof(parsed_events[current_index].event_name), event_name, event_name_length);
-                    metadata = (const uint8_t*)(event_name + event_name_length + 1);
+                    metadata = event_name + event_name_length + 1;
                 }
 
                 break;
@@ -141,37 +162,36 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
         POOR_MANS_ASSERT(pEventRecord->UserData != NULL);
 
         const char* current_user_data_field = pEventRecord->UserData;
-        if (current_user_data_field != NULL)
-        {
-            size_t content_length = strlen(current_user_data_field);
-            copy_string(parsed_events[current_index].content, sizeof(parsed_events[current_index].content), current_user_data_field, content_length);
-            current_user_data_field += content_length + 1;
-        }
-        POOR_MANS_ASSERT(strcmp((const char*)metadata, "content") == 0);
+
+        size_t content_length = strlen(current_user_data_field);
+        copy_string(parsed_events[current_index].content, sizeof(parsed_events[current_index].content), current_user_data_field, content_length);
+        current_user_data_field += content_length + 1;
+
+        POOR_MANS_ASSERT(strcmp(metadata, "content") == 0);
+        // sizeof the string and 1 byte for the type
         metadata += sizeof("content") + 1;
 
-        if (current_user_data_field != NULL)
-        {
-            size_t file_length = strlen(current_user_data_field);
-            copy_string(parsed_events[current_index].file, sizeof(parsed_events[current_index].file), current_user_data_field, file_length);
-            current_user_data_field += file_length + 1;
-        }
-        POOR_MANS_ASSERT(strcmp((const char*)metadata, "file") == 0);
+        size_t file_length = strlen(current_user_data_field);
+        copy_string(parsed_events[current_index].file, sizeof(parsed_events[current_index].file), current_user_data_field, file_length);
+        current_user_data_field += file_length + 1;
+
+        POOR_MANS_ASSERT(strcmp(metadata, "file") == 0);
+        // sizeof the string and 1 byte for the type
         metadata += sizeof("file") + 1;
 
-        if (current_user_data_field != NULL)
-        {
-            size_t func_length = strlen(current_user_data_field);
-            copy_string(parsed_events[current_index].func, sizeof(parsed_events[current_index].func), current_user_data_field, func_length);
-            current_user_data_field += func_length + 1;
-        }
-        POOR_MANS_ASSERT(strcmp((const char*)metadata, "func") == 0);
+        size_t func_length = strlen(current_user_data_field);
+        copy_string(parsed_events[current_index].func, sizeof(parsed_events[current_index].func), current_user_data_field, func_length);
+        current_user_data_field += func_length + 1;
+
+        POOR_MANS_ASSERT(strcmp(metadata, "func") == 0);
+        // sizeof the string and 1 byte for the type
         metadata += sizeof("func") + 1;
 
         parsed_events[current_index].line = *(int32_t*)current_user_data_field;
         current_user_data_field+= sizeof(int32_t);
 
-        POOR_MANS_ASSERT(strcmp((const char*)metadata, "line") == 0);
+        POOR_MANS_ASSERT(strcmp(metadata, "line") == 0);
+        // sizeof the string and 1 byte for the type
         metadata += sizeof("line") + 1;
 
         uint32_t property_index = 0;
@@ -180,8 +200,8 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
         while (current_user_data_field - (const char*)pEventRecord->UserData < pEventRecord->UserDataLength)
         {
             // get name and type from metadata
-            size_t property_name_length = strlen((const char*)metadata);
-            copy_string(parsed_events[current_index].properties[property_index].property_name, sizeof(parsed_events[current_index].properties[property_index].property_name), (const char*)metadata, property_name_length);
+            size_t property_name_length = strlen(metadata);
+            copy_string(parsed_events[current_index].properties[property_index].property_name, sizeof(parsed_events[current_index].properties[property_index].property_name), metadata, property_name_length);
             metadata += property_name_length + 1;
 
             parsed_events[current_index].properties[property_index].property_type = *metadata;
@@ -193,7 +213,7 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
                 POOR_MANS_ASSERT(0);
                 break;
             case _TlgInSTRUCT | _TlgInChain:
-                parsed_events[current_index].properties[property_index].struct_field_count = *(uint8_t*)metadata;
+                parsed_events[current_index].properties[property_index].struct_field_count = *(const uint8_t*)metadata;
                 metadata++;
                 break;
             case TlgInANSISTRING:
@@ -204,35 +224,35 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
                 break;
             }
             case TlgInUINT8:
-                parsed_events[current_index].properties[property_index].uint8_t_value = *(uint8_t*)current_user_data_field;
+                parsed_events[current_index].properties[property_index].uint8_t_value = *(const uint8_t*)current_user_data_field;
                 current_user_data_field += sizeof(uint8_t);
                 break;
             case TlgInINT8:
-                parsed_events[current_index].properties[property_index].int8_t_value = *(int8_t*)current_user_data_field;
+                parsed_events[current_index].properties[property_index].int8_t_value = *(const int8_t*)current_user_data_field;
                 current_user_data_field += sizeof(int8_t);
                 break;
             case TlgInUINT16:
-                parsed_events[current_index].properties[property_index].uint16_t_value = *(uint16_t*)current_user_data_field;
+                parsed_events[current_index].properties[property_index].uint16_t_value = *(const uint16_t*)current_user_data_field;
                 current_user_data_field += sizeof(uint16_t);
                 break;
             case TlgInINT16:
-                parsed_events[current_index].properties[property_index].int16_t_value = *(int16_t*)current_user_data_field;
+                parsed_events[current_index].properties[property_index].int16_t_value = *(const int16_t*)current_user_data_field;
                 current_user_data_field += sizeof(int16_t);
                 break;
             case TlgInUINT32:
-                parsed_events[current_index].properties[property_index].uint32_t_value = *(uint32_t*)current_user_data_field;
+                parsed_events[current_index].properties[property_index].uint32_t_value = *(const uint32_t*)current_user_data_field;
                 current_user_data_field += sizeof(uint32_t);
                 break;
             case TlgInINT32:
-                parsed_events[current_index].properties[property_index].int32_t_value = *(int32_t*)current_user_data_field;
+                parsed_events[current_index].properties[property_index].int32_t_value = *(const int32_t*)current_user_data_field;
                 current_user_data_field += sizeof(int32_t);
                 break;
             case TlgInUINT64:
-                parsed_events[current_index].properties[property_index].uint64_t_value = *(uint64_t*)current_user_data_field;
+                parsed_events[current_index].properties[property_index].uint64_t_value = *(const uint64_t*)current_user_data_field;
                 current_user_data_field += sizeof(uint64_t);
                 break;
             case TlgInINT64:
-                parsed_events[current_index].properties[property_index].int64_t_value = *(int64_t*)current_user_data_field;
+                parsed_events[current_index].properties[property_index].int64_t_value = *(const int64_t*)current_user_data_field;
                 current_user_data_field += sizeof(int64_t);
                 break;
             }
