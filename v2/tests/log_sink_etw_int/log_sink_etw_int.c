@@ -22,25 +22,45 @@
 
 #include "c_logging/log_sink_etw.h"
 
-// unfortunately 
-static void read_uint8_t(const unsigned char* source, uint8_t* destination)
+// helper functions to avoid reading unaligned fields
+static void read_uint8_t(const void* source, uint8_t* destination)
 {
-    *destination = *source;
+    *destination = *(const uint8_t*)source;
 }
 
-static void read_uint16_t(const unsigned char* source, uint16_t* destination)
+static void read_int8_t(const void* source, int8_t* destination)
+{
+    *destination = *(const int8_t*)source;
+}
+
+static void read_uint16_t(const void* source, uint16_t* destination)
 {
     (void)memcpy(destination, source, sizeof(uint16_t));
 }
 
-static void read_uint32_t(const unsigned char* source, uint32_t* destination)
+static void read_int16_t(const void* source, int16_t* destination)
+{
+    (void)memcpy(destination, source, sizeof(int16_t));
+}
+
+static void read_uint32_t(const void* source, uint32_t* destination)
 {
     (void)memcpy(destination, source, sizeof(uint32_t));
 }
 
-static void read_uint64_t(const unsigned char* source, uint64_t* destination)
+static void read_int32_t(const void* source, int32_t* destination)
+{
+    (void)memcpy(destination, source, sizeof(int32_t));
+}
+
+static void read_uint64_t(const void* source, uint64_t* destination)
 {
     (void)memcpy(destination, source, sizeof(uint64_t));
+}
+
+static void read_int64_t(const void* source, int64_t* destination)
+{
+    (void)memcpy(destination, source, sizeof(int64_t));
 }
 
 static GUID provider_guid = { 0xDAD29F36, 0x0A48, 0x4DEF, { 0x9D, 0x50, 0x8E, 0xF9, 0x03, 0x6B, 0x92, 0xB4 } };
@@ -213,7 +233,7 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
                 POOR_MANS_ASSERT(0);
                 break;
             case _TlgInSTRUCT | _TlgInChain:
-                parsed_events[current_index].properties[property_index].struct_field_count = *(const uint8_t*)metadata;
+                read_uint8_t(metadata, &parsed_events[current_index].properties[property_index].struct_field_count);
                 metadata++;
                 break;
             case TlgInANSISTRING:
@@ -224,35 +244,35 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
                 break;
             }
             case TlgInUINT8:
-                parsed_events[current_index].properties[property_index].uint8_t_value = *(const uint8_t*)current_user_data_field;
+                read_uint8_t(metadata, &parsed_events[current_index].properties[property_index].uint8_t_value);
                 current_user_data_field += sizeof(uint8_t);
                 break;
             case TlgInINT8:
-                parsed_events[current_index].properties[property_index].int8_t_value = *(const int8_t*)current_user_data_field;
+                read_int8_t(metadata, &parsed_events[current_index].properties[property_index].int8_t_value);
                 current_user_data_field += sizeof(int8_t);
                 break;
             case TlgInUINT16:
-                parsed_events[current_index].properties[property_index].uint16_t_value = *(const uint16_t*)current_user_data_field;
+                read_uint16_t(metadata, &parsed_events[current_index].properties[property_index].uint16_t_value);
                 current_user_data_field += sizeof(uint16_t);
                 break;
             case TlgInINT16:
-                parsed_events[current_index].properties[property_index].int16_t_value = *(const int16_t*)current_user_data_field;
+                read_int16_t(metadata, &parsed_events[current_index].properties[property_index].int16_t_value);
                 current_user_data_field += sizeof(int16_t);
                 break;
             case TlgInUINT32:
-                parsed_events[current_index].properties[property_index].uint32_t_value = *(const uint32_t*)current_user_data_field;
+                read_uint32_t(metadata, &parsed_events[current_index].properties[property_index].uint32_t_value);
                 current_user_data_field += sizeof(uint32_t);
                 break;
             case TlgInINT32:
-                parsed_events[current_index].properties[property_index].int32_t_value = *(const int32_t*)current_user_data_field;
+                read_int32_t(metadata, &parsed_events[current_index].properties[property_index].int32_t_value);
                 current_user_data_field += sizeof(int32_t);
                 break;
             case TlgInUINT64:
-                parsed_events[current_index].properties[property_index].uint64_t_value = *(const uint64_t*)current_user_data_field;
+                read_uint64_t(metadata, &parsed_events[current_index].properties[property_index].uint64_t_value);
                 current_user_data_field += sizeof(uint64_t);
                 break;
             case TlgInINT64:
-                parsed_events[current_index].properties[property_index].int64_t_value = *(const int64_t*)current_user_data_field;
+                read_int64_t(metadata, &parsed_events[current_index].properties[property_index].int64_t_value);
                 current_user_data_field += sizeof(int64_t);
                 break;
             }
