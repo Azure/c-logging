@@ -55,6 +55,13 @@ jobs:
       configuration: Debug
       maximumCpuCount: true
 
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifacts'
+    inputs:
+      pathtoPublish: '$(Build.BinariesDirectory)/Debug'
+      artifactName: 'x64_Debug'
+      parallel: true
+
   - task: CmdLine@1
     displayName: 'Run ctest'
     inputs:
@@ -113,6 +120,13 @@ jobs:
       configuration: RelWithDebInfo
       maximumCpuCount: true
 
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifacts'
+    inputs:
+      pathtoPublish: '$(Build.BinariesDirectory)/RelWithDebInfo'
+      artifactName: 'x64_RelWithDebInfo'
+      parallel: true
+
   - task: CmdLine@1
     displayName: 'Run ctest'
     inputs:
@@ -169,6 +183,13 @@ jobs:
       msbuildArgs: '/t:restore /t:build'
       configuration: Debug
       maximumCpuCount: true
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifacts'
+    inputs:
+      pathtoPublish: '$(Build.BinariesDirectory)/Debug'
+      artifactName: 'x86_Debug'
+      parallel: true
 
   - task: CmdLine@1
     displayName: 'Run ctest'
