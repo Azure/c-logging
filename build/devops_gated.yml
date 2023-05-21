@@ -65,6 +65,12 @@ jobs:
   - task: CmdLine@1
     displayName: 'Run ctest'
     inputs:
+      filename: build_x64/Debug/log_sink_etw_int.exe
+      workingFolder: 'build_x64/Debug'
+
+  - task: CmdLine@1
+    displayName: 'Run ctest'
+    inputs:
       filename: ctest
       arguments: '-C "Debug" -V --output-on-failure'
       workingFolder: 'build_x64'
