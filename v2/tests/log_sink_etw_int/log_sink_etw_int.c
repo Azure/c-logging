@@ -387,7 +387,6 @@ static void start_parse_events(TEST_CONTEXT* test_context)
     log_file.BufferCallback = event_trace_buffer_callback;
     log_file.LoggerName = test_context->logger_name;
     log_file.Context = test_context;
-    log_file.Context = NULL;
 
     test_context->trace = OpenTraceA(&log_file);
     POOR_MANS_ASSERT(test_context->trace != INVALID_PROCESSTRACE_HANDLE);
