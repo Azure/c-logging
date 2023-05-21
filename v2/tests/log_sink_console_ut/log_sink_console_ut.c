@@ -21,8 +21,6 @@
 
 #include "c_logging/log_sink_console.h"
 
-static size_t asserts_failed = 0;
-
 // defines how many mock calls we can have
 #define MAX_MOCK_CALL_COUNT (128)
 
@@ -336,7 +334,7 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* mock_log_context_get_property_value_pairs
     if (!(cond)) \
     { \
         (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
-        asserts_failed++; \
+        abort(); \
     } \
 
 static void setup_printf_call(void)
@@ -1352,5 +1350,5 @@ int main(void)
     when_printing_a_property_value_exceeds_log_line_size_it_is_truncated();
     when_printing_a_property_name_exceeds_log_line_size_it_is_truncated();
 
-    return asserts_failed;
+    return 0;
 }

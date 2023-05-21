@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include <stdlib.h>
 
 #include "windows.h"
 #include "TraceLoggingProvider.h"
@@ -24,8 +24,6 @@
 #include "c_logging/logger.h"
 
 #include "c_logging/log_sink_etw.h"
-
-static size_t asserts_failed = 0;
 
 // defines how many mock calls we can have
 #define MAX_MOCK_CALL_COUNT (128)
@@ -643,7 +641,7 @@ int mock_vsnprintf(char* restrict s, size_t n, const char* restrict format, va_l
     if (!(cond)) \
     { \
         (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
-        asserts_failed++; \
+        abort(); \
     } \
 
 static void setup_enabled_provider(UINT32 level)
@@ -3113,6 +3111,6 @@ int main(void)
     when_size_of_metadata_and_formatted_messages_exceeds_4096_and_2nd_vsnprintf_fails_an_error_is_printed();
     when_a_parent_context_is_used_all_properties_are_emitted();
 
-    return asserts_failed;
+    return 0;
 }
 

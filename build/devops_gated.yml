@@ -62,6 +62,14 @@ jobs:
       arguments: '-C "Debug" -V --output-on-failure'
       workingFolder: 'build_x64'
 
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifacts'
+    inputs:
+      pathtoPublish: 'build_x64'
+      artifactName: 'x64_Debug'
+      parallel: true
+    condition: failed()
+
 - job: windowsx64relwithdebinfo
   displayName: 'Build Windows x64 RelWithDebInfo'
   pool:
@@ -120,6 +128,14 @@ jobs:
       arguments: '-C "RelWithDebInfo" -V --output-on-failure'
       workingFolder: 'build_x64'
 
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifacts'
+    inputs:
+      pathtoPublish: 'build_x64'
+      artifactName: 'x64_RelWithDebInfo'
+      parallel: true
+    condition: failed()
+
 - job: windowsx86debug
   displayName: 'Build Windows x86 Debug'
   pool:
@@ -176,6 +192,14 @@ jobs:
       filename: ctest
       arguments: '-C "Debug" -V --output-on-failure'
       workingFolder: 'build_x86'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifacts'
+    inputs:
+      pathtoPublish: 'build_x86'
+      artifactName: 'x86_Debug'
+      parallel: true
+    condition: failed()
 
 - job: linuxubuntu
   displayName: 'Build Linux Ubuntu'

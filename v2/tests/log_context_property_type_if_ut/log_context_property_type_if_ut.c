@@ -3,12 +3,11 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "macro_utils/macro_utils.h"
 
 #include "c_logging/log_context_property_type_if.h"
-
-static size_t asserts_failed = 0;
 
 // defines how many mock calls we can have
 #define MAX_MOCK_CALL_COUNT (128)
@@ -22,7 +21,7 @@ MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
     if (!(cond)) \
     { \
         (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
-        asserts_failed++; \
+        abort(); \
     } \
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(type_name) */
@@ -74,5 +73,5 @@ int main(void)
     LOG_CONTEXT_PROPERTY_TYPE_INIT_produces_the_correct_token();
     LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_produces_the_correct_token();
 
-    return asserts_failed;
+    return 0;
 }

@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <stdio.h>
+#include <stdio.h> // IWYU pragma: keep
 #include <stdint.h>
+#include <stdlib.h> // IWYU pragma: keep
 
 #include "macro_utils/macro_utils.h"
 
@@ -14,13 +15,11 @@
 
 #include "c_logging/log_sink_console.h"
 
-static size_t asserts_failed = 0;
-
 #define POOR_MANS_ASSERT(cond) \
     if (!(cond)) \
     { \
         (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
-        asserts_failed++; \
+        abort(); \
     } \
 
 static void log_sink_console_prints_an_empty_string(void)
@@ -255,5 +254,5 @@ int main(void)
 
     log_sink_console_with_a_context_with_string_works();
 
-    return asserts_failed;
+    return 0;
 }

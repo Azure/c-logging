@@ -7,7 +7,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include "windows.h"
 #include "TraceLoggingProvider.h"
@@ -25,8 +24,6 @@
 #include "c_logging/logger.h"
 
 #include "c_logging/log_sink_etw.h"
-
-static size_t asserts_failed = 0;
 
 // defines how many mock calls we can have
 #define MAX_MOCK_CALL_COUNT (128)
@@ -576,7 +573,7 @@ LOG_CONTEXT_PROPERTY_TYPE mock_log_context_property_if_get_type(void)
     if (!(cond)) \
     { \
         (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
-        asserts_failed++; \
+        abort(); \
     } \
 
 static void setup_printf_call(void)
@@ -799,6 +796,6 @@ int main(void)
 {
     when__get_pgmptr_fails_log_sink_etw_log_prints_executable_as_UNKNOWN();
 
-    return asserts_failed;
+    return 0;
 }
 
