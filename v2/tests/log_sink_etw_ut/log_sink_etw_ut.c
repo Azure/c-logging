@@ -748,9 +748,9 @@ static void setup_vsnprintf_call(void)
     expected_call_count++;
 }
 
-/* log_sink_etw.log_sink_log */
+/* log_sink_etw.log */
 
-/* Tests_SRS_LOG_SINK_ETW_01_001: [ If message_format is NULL, log_sink_etw.log_sink_log shall return. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_001: [ If message_format is NULL, log_sink_etw.log shall return. ]*/
 static void log_sink_etw_log_with_NULL_message_format_returns(void)
 {
     // arrange
@@ -758,7 +758,7 @@ static void log_sink_etw_log_with_NULL_message_format_returns(void)
     setup_printf_call();
 
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, __LINE__, NULL);
+    log_sink_etw.log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, __LINE__, NULL);
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -859,7 +859,7 @@ static void log_sink_etw_log_registers_the_provider_if_not_registered_already(vo
 
 
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
+    log_sink_etw.log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -941,7 +941,7 @@ static void log_sink_log_retries_until_state_is_not_registering(void)
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata_2, 6, expected_event_data_descriptors_2);
 
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, captured_line, "test");
+    log_sink_etw.log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -954,13 +954,13 @@ static void log_sink_log_retries_until_state_is_not_registering(void)
 // Note the reason this is already registered is because previous tests have done the registration
 /* Tests_SRS_LOG_SINK_ETW_01_010: [ log_sink_etw_log shall emit a self described event that shall have the name of the event as follows: ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_025: [ If log_context is NULL only the fields content, file, func and line shall be added to the ETW event. ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_042: [ log_sink_etw.log_sink_log shall compute the metadata size for the self described event metadata as follows: ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_042: [ log_sink_etw.log shall compute the metadata size for the self described event metadata as follows: ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_043: [ Size of the event name. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_044: [ Size of the content field name. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_045: [ Size of the file field name. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_046: [ Size of the func field name. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_047: [ Size of the line field name. ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_026: [ log_sink_etw.log_sink_log shall fill a SELF_DESCRIBED_EVENT structure, setting the following fields: ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_026: [ log_sink_etw.log shall fill a SELF_DESCRIBED_EVENT structure, setting the following fields: ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_027: [ _tlgBlobTyp shall be set to _TlgBlobEvent4. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_028: [ _tlgChannel shall be set to 11. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_029: [ _tlgLevel shall be set to the appropriate logging level. ]*/
@@ -968,14 +968,14 @@ static void log_sink_log_retries_until_state_is_not_registering(void)
     /* Tests_SRS_LOG_SINK_ETW_01_031: [ _tlgKeyword shall be set to 0. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_032: [ _tlgEvtMetaSize shall be set to the computed metadata size + 4. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_033: [ _tlgEvtTag shall be set to 128. ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_034: [ log_sink_etw.log_sink_log shall fill the event metadata: ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_034: [ log_sink_etw.log shall fill the event metadata: ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_035: [ The string content (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_036: [ The string file (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_037: [ The string func (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
     /* Tests_SRS_LOG_SINK_ETW_01_038: [ The string line (as field name, excluding zero terminator), followed by one byte with the value TlgInINT32. ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_039: [ log_sink_etw.log_sink_log shall fill an EVENT_DATA_DESCRIPTOR array of size 2 + 1 + 1 + 1 + 1 + property count. ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_040: [ log_sink_etw.log_sink_log shall set event data descriptor at index 2 by calling _tlgCreate1Sz_char with the value of the formatted message as obtained by using printf with the messages format message_format and the arguments in .... ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_041: [ log_sink_etw.log_sink_log shall emit the event by calling _tlgWriteTransfer_EventWriteTransfer passing the provider, channel, number of event data descriptors and the data descriptor array. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_039: [ log_sink_etw.log shall fill an EVENT_DATA_DESCRIPTOR array of size 2 + 1 + 1 + 1 + 1 + property count. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_040: [ log_sink_etw.log shall set event data descriptor at index 2 by calling _tlgCreate1Sz_char with the value of the formatted message as obtained by using printf with the messages format message_format and the arguments in .... ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_041: [ log_sink_etw.log shall emit the event by calling _tlgWriteTransfer_EventWriteTransfer passing the provider, channel, number of event data descriptors and the data descriptor array. ]*/
 static void test_message_with_level(LOG_LEVEL log_level, uint8_t expected_tlg_level, const char* expected_event_name)
 {
     // arrange
@@ -1038,7 +1038,7 @@ static void test_message_with_level(LOG_LEVEL log_level, uint8_t expected_tlg_le
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log_sink_log(log_level, NULL, __FILE__, __FUNCTION__, captured_line, "test");
+    log_sink_etw.log(log_level, NULL, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1088,10 +1088,10 @@ static void log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds(void)
     test_message_with_level((LOG_LEVEL)0xFF, TRACE_LEVEL_NONE, "Unknown");
 }
 
-/* Tests_SRS_LOG_SINK_ETW_01_040: [ log_sink_etw.log_sink_log shall set event data descriptor at index 2 by calling _tlgCreate1Sz_char with the value of the formatted message as obtained by using printf with the messages format message_format and the arguments in .... ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_058: [ log_sink_etw.log_sink_log shall set event data descriptor at index 3 by calling _tlgCreate1Sz_char with file. ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_059: [ log_sink_etw.log_sink_log shall set event data descriptor at index 4 by calling _tlgCreate1Sz_char with func. ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_060: [ log_sink_etw.log_sink_log shall set event data descriptor at index 5 by calling EventDataDescCreate with line. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_040: [ log_sink_etw.log shall set event data descriptor at index 2 by calling _tlgCreate1Sz_char with the value of the formatted message as obtained by using printf with the messages format message_format and the arguments in .... ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_058: [ log_sink_etw.log shall set event data descriptor at index 3 by calling _tlgCreate1Sz_char with file. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_059: [ log_sink_etw.log shall set event data descriptor at index 4 by calling _tlgCreate1Sz_char with func. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_060: [ log_sink_etw.log shall set event data descriptor at index 5 by calling EventDataDescCreate with line. ]*/
 #define TEST_FORMATTED_MESSAGE_WITH_LEVEL(log_level, expected_tlg_level, expected_event_name, expected_message, message_format, ...) \
 {                                                                                                                                    \
     /* arrange */                                                                                                                    \
@@ -1154,20 +1154,20 @@ static void log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds(void)
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);                         \
                                                                                                                                      \
     /* act */                                                                                                                        \
-    log_sink_etw.log_sink_log(log_level, NULL, __FILE__, __FUNCTION__, captured_line, message_format, __VA_ARGS__);                  \
+    log_sink_etw.log(log_level, NULL, __FILE__, __FUNCTION__, captured_line, message_format, __VA_ARGS__);                  \
                                                                                                                                      \
     /* assert */                                                                                                                     \
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);                                                                      \
     POOR_MANS_ASSERT(actual_and_expected_match);                                                                                     \
 }
 
-/* Tests_SRS_LOG_SINK_ETW_01_040: [ log_sink_etw.log_sink_log shall set event data descriptor at index 2 by calling _tlgCreate1Sz_char with the value of the formatted message as obtained by using printf with the messages format message_format and the arguments in .... ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_040: [ log_sink_etw.log shall set event data descriptor at index 2 by calling _tlgCreate1Sz_char with the value of the formatted message as obtained by using printf with the messages format message_format and the arguments in .... ]*/
 static void log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds(void)
 {
     TEST_FORMATTED_MESSAGE_WITH_LEVEL(LOG_LEVEL_CRITICAL, TRACE_LEVEL_CRITICAL, "LogCritical", "test_value=42", "test_value=%d", 42);
 }
 
-/* Tests_SRS_LOG_SINK_ETW_01_040: [ log_sink_etw.log_sink_log shall set event data descriptor at index 2 by calling _tlgCreate1Sz_char with the value of the formatted message as obtained by using printf with the messages format message_format and the arguments in .... ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_040: [ log_sink_etw.log shall set event data descriptor at index 2 by calling _tlgCreate1Sz_char with the value of the formatted message as obtained by using printf with the messages format message_format and the arguments in .... ]*/
 static void log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds_2(void)
 {
     TEST_FORMATTED_MESSAGE_WITH_LEVEL(LOG_LEVEL_CRITICAL, TRACE_LEVEL_CRITICAL, "LogCritical", "test_value_string=blah, test_value=43", "test_value_string=%s, test_value=%d", "blah", 43);
@@ -1246,7 +1246,7 @@ static void test_message_with_context(LOG_LEVEL log_level, uint8_t expected_tlg_
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log_sink_log(log_level, log_context, __FILE__, __FUNCTION__, captured_line, "test");
+    log_sink_etw.log(log_level, log_context, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1254,8 +1254,8 @@ static void test_message_with_context(LOG_LEVEL log_level, uint8_t expected_tlg_
 }
 
 /* Tests_SRS_LOG_SINK_ETW_01_048: [ If log_context is not NULL: ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_049: [ log_sink_etw.log_sink_log shall call log_context_get_property_value_pair_count to obtain the count of properties that are to be added to the ETW event. ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_050: [ log_sink_etw.log_sink_log shall call log_context_get_property_value_pairs to obtain the properties that are to be added to the ETW event. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_049: [ log_sink_etw.log shall call log_context_get_property_value_pair_count to obtain the count of properties that are to be added to the ETW event. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_050: [ log_sink_etw.log shall call log_context_get_property_value_pairs to obtain the properties that are to be added to the ETW event. ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_051: [ For each property in log_context, the length of the property name + 1 and one extra byte for the type of the field. ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_052: [ For struct properties one extra byte shall be added for the field count. ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_053: [ For each property in log_context the following shall be added to the event metadata: ]*/
@@ -1415,7 +1415,7 @@ static void test_message_with_context_with_one_property(LOG_LEVEL log_level, uin
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 7, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log_sink_log(log_level, log_context, __FILE__, __FUNCTION__, captured_line, "test");
+    log_sink_etw.log(log_level, log_context, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1777,7 +1777,7 @@ static void test_message_with_context_with_multiple_properties(LOG_LEVEL log_lev
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6 + property_count, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log_sink_log(log_level, log_context, __FILE__, __FUNCTION__, captured_line, "test");
+    log_sink_etw.log(log_level, log_context, __FILE__, __FUNCTION__, captured_line, "test");
 
     free(expected_event_data_descriptors);
 
@@ -1914,7 +1914,7 @@ static void when_unknown_property_type_is_encountered_log_sink_etw_log_with_cont
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "test");
+    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1925,7 +1925,7 @@ static void when_unknown_property_type_is_encountered_log_sink_etw_log_with_cont
     free(mocked_property_value_pairs);
 }
 
-/* Tests_SRS_LOG_SINK_ETW_01_082: [ If more than 64 properties are given in log_context, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_082: [ If more than 64 properties are given in log_context, log_sink_etw.log shall not add any properties to the event. ]*/
 static void when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event(void)
 {
     // arrange
@@ -2060,7 +2060,7 @@ static void when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "test");
+    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -2069,7 +2069,7 @@ static void when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_
     LOG_CONTEXT_DESTROY(log_context);
 }
 
-/* Tests_SRS_LOG_SINK_ETW_01_082: [ If more than 64 properties are given in log_context, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_082: [ If more than 64 properties are given in log_context, log_sink_etw.log shall not add any properties to the event. ]*/
 static void when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_with_context_succeeds_and_emits_fields_for_each_property(void)
 {
     // arrange
@@ -2341,7 +2341,7 @@ static void when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_wi
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6 + property_count, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "test");
+    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -2352,7 +2352,7 @@ static void when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_wi
     free(expected_event_data_descriptors);
 }
 
-/* Tests_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log shall not add any properties to the event. ]*/
 static void when_size_of_metadata_exceeds_4096_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event(void)
 {
     // arrange
@@ -2461,7 +2461,7 @@ static void when_size_of_metadata_exceeds_4096_log_sink_etw_log_with_context_doe
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "");
+    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -2470,7 +2470,7 @@ static void when_size_of_metadata_exceeds_4096_log_sink_etw_log_with_context_doe
     LOG_CONTEXT_DESTROY(log_context);
 }
 
-/* Tests_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log shall not add any properties to the event. ]*/
 static void when_size_of_metadata_and_formatted_messages_exceeds_4096_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event(void)
 {
     // arrange
@@ -2580,7 +2580,7 @@ static void when_size_of_metadata_and_formatted_messages_exceeds_4096_log_sink_e
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "");
+    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -2589,7 +2589,7 @@ static void when_size_of_metadata_and_formatted_messages_exceeds_4096_log_sink_e
     LOG_CONTEXT_DESTROY(log_context);
 }
 
-/* Tests_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log shall not add any properties to the event. ]*/
 static void when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_places_properties_in_the_event(void)
 {
     // arrange
@@ -2836,7 +2836,7 @@ static void when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6 + property_count, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "");
+    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -2847,7 +2847,7 @@ static void when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_
     free(expected_event_data_descriptors);
 }
 
-/* Tests_SRS_LOG_SINK_ETW_01_086: [ If any error occurs log_sink_etw.log_sink_log shall print Error emitting ETW event and return. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_086: [ If any error occurs log_sink_etw.log shall print Error emitting ETW event and return. ]*/
 static void when_vsnprintf_fails_an_error_is_printed(void)
 {
     // arrange
@@ -2869,7 +2869,7 @@ static void when_vsnprintf_fails_an_error_is_printed(void)
     setup_printf_call(); // spew error
 
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, __LINE__, "");
+    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, __LINE__, "");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -2878,7 +2878,7 @@ static void when_vsnprintf_fails_an_error_is_printed(void)
     LOG_CONTEXT_DESTROY(log_context);
 }
 
-/* Tests_SRS_LOG_SINK_ETW_01_086: [ If any error occurs log_sink_etw.log_sink_log shall print Error emitting ETW event and return. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_086: [ If any error occurs log_sink_etw.log shall print Error emitting ETW event and return. ]*/
 static void when_size_of_metadata_and_formatted_messages_exceeds_4096_and_2nd_vsnprintf_fails_an_error_is_printed(void)
 {
     // arrange
@@ -2938,7 +2938,7 @@ static void when_size_of_metadata_and_formatted_messages_exceeds_4096_and_2nd_vs
     setup_printf_call();
 
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, __LINE__, "");
+    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, __LINE__, "");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -3063,7 +3063,7 @@ static void when_a_parent_context_is_used_all_properties_are_emitted(void)
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 8, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_VERBOSE, log_context_2, __FILE__, __FUNCTION__, captured_line, "test");
+    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context_2, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);

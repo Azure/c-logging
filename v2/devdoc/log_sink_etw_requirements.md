@@ -12,17 +12,17 @@
     extern const LOG_SINK_IF log_sink_etw;
 ```
 
-### log_sink_etw.log_sink_log
+### log_sink_etw.log
 
-The signature of `log_sink_etw.log_sink_log` is:
+The signature of `log_sink_etw.log` is:
 
 ```c
 typedef void (*LOG_SINK_LOG_FUNC)(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...);
 ```
 
-`log_sink_etw.log_sink_log` implements logging as an ETW provider.
+`log_sink_etw.log` implements logging as an ETW provider.
 
-**SRS_LOG_SINK_ETW_01_001: [** If `message_format` is `NULL`, `log_sink_etw.log_sink_log` shall return. **]**
+**SRS_LOG_SINK_ETW_01_001: [** If `message_format` is `NULL`, `log_sink_etw.log` shall return. **]**
 
 **SRS_LOG_SINK_ETW_01_002: [** `log_sink_etw_log` shall maintain the state of whether `TraceLoggingRegister` was called in a variable accessed via `InterlockedXXX` APIs, which shall have 3 possible values: `NOT_REGISTERED` (1), `REGISTERING` (2), `REGISTERED`(3). **]**
 
@@ -86,13 +86,13 @@ Note this can (and should) be improved to be configurable in a subsequent task.
 
 - **SRS_LOG_SINK_ETW_01_048: [** If `log_context` is not `NULL`: **]**
 
-  - **SRS_LOG_SINK_ETW_01_049: [** `log_sink_etw.log_sink_log` shall call `log_context_get_property_value_pair_count` to obtain the count of properties that are to be added to the ETW event. **]**
+  - **SRS_LOG_SINK_ETW_01_049: [** `log_sink_etw.log` shall call `log_context_get_property_value_pair_count` to obtain the count of properties that are to be added to the ETW event. **]**
 
-  - **SRS_LOG_SINK_ETW_01_050: [** `log_sink_etw.log_sink_log` shall call `log_context_get_property_value_pairs` to obtain the properties that are to be added to the ETW event. **]**
+  - **SRS_LOG_SINK_ETW_01_050: [** `log_sink_etw.log` shall call `log_context_get_property_value_pairs` to obtain the properties that are to be added to the ETW event. **]**
 
-  - **SRS_LOG_SINK_ETW_01_082: [** If more than 64 properties are given in `log_context`, `log_sink_etw.log_sink_log` shall not add any properties to the event. **]**
+  - **SRS_LOG_SINK_ETW_01_082: [** If more than 64 properties are given in `log_context`, `log_sink_etw.log` shall not add any properties to the event. **]**
 
-**SRS_LOG_SINK_ETW_01_042: [** `log_sink_etw.log_sink_log` shall compute the metadata size for the self described event metadata as follows: **]**
+**SRS_LOG_SINK_ETW_01_042: [** `log_sink_etw.log` shall compute the metadata size for the self described event metadata as follows: **]**
 
 - **SRS_LOG_SINK_ETW_01_043: [** Size of the event name. **]**
 
@@ -108,9 +108,9 @@ Note this can (and should) be improved to be configurable in a subsequent task.
 
 - **SRS_LOG_SINK_ETW_01_052: [** For struct properties one extra byte shall be added for the field count. **]**
 
-**SRS_LOG_SINK_ETW_01_085: [** If the size of the metadata and the formatted message exceeds 4096 bytes, `log_sink_etw.log_sink_log` shall not add any properties to the event. **]**
+**SRS_LOG_SINK_ETW_01_085: [** If the size of the metadata and the formatted message exceeds 4096 bytes, `log_sink_etw.log` shall not add any properties to the event. **]**
 
-**SRS_LOG_SINK_ETW_01_026: [** `log_sink_etw.log_sink_log` shall fill a `SELF_DESCRIBED_EVENT` structure, setting the following fields: **]**
+**SRS_LOG_SINK_ETW_01_026: [** `log_sink_etw.log` shall fill a `SELF_DESCRIBED_EVENT` structure, setting the following fields: **]**
 
 - **SRS_LOG_SINK_ETW_01_027: [** `_tlgBlobTyp` shall be set to `_TlgBlobEvent4`. **]**
 
@@ -128,7 +128,7 @@ Note: `_tlgBlobTyp` represents the metadata blob type in the binary form describ
 
 - **SRS_LOG_SINK_ETW_01_033: [** `_tlgEvtTag` shall be set to 128. **]**
 
-**SRS_LOG_SINK_ETW_01_034: [** `log_sink_etw.log_sink_log` shall fill the event metadata: **]**
+**SRS_LOG_SINK_ETW_01_034: [** `log_sink_etw.log` shall fill the event metadata: **]**
 
 - **SRS_LOG_SINK_ETW_01_035: [** The string `content` (as field name, excluding zero terminator), followed by one byte with the value `TlgInANSISTRING`. **]**
 
@@ -168,17 +168,17 @@ Note: `_tlgBlobTyp` represents the metadata blob type in the binary form describ
 
 - **SRS_LOG_SINK_ETW_01_057: [** If the property is a struct, an extra byte shall be added in the metadata containing the number of fields in the structure. **]**
 
-**SRS_LOG_SINK_ETW_01_039: [** `log_sink_etw.log_sink_log` shall fill an `EVENT_DATA_DESCRIPTOR` array of size `2 + 1 + 1 + 1 + 1 + property count`. **]**
+**SRS_LOG_SINK_ETW_01_039: [** `log_sink_etw.log` shall fill an `EVENT_DATA_DESCRIPTOR` array of size `2 + 1 + 1 + 1 + 1 + property count`. **]**
 
 Note: 2 entries are for the event descriptor and metadata respectively, 4 entries for the common fields (content, file, func, line) and the rest are 1 for each of the properties.
 
-**SRS_LOG_SINK_ETW_01_040: [** `log_sink_etw.log_sink_log` shall set event data descriptor at index 2 by calling `_tlgCreate1Sz_char` with the value of the formatted message as obtained by using `printf` with the messages format `message_format` and the arguments in `...`. **]**
+**SRS_LOG_SINK_ETW_01_040: [** `log_sink_etw.log` shall set event data descriptor at index 2 by calling `_tlgCreate1Sz_char` with the value of the formatted message as obtained by using `printf` with the messages format `message_format` and the arguments in `...`. **]**
 
-**SRS_LOG_SINK_ETW_01_058: [** `log_sink_etw.log_sink_log` shall set event data descriptor at index 3 by calling `_tlgCreate1Sz_char` with `file`. **]**
+**SRS_LOG_SINK_ETW_01_058: [** `log_sink_etw.log` shall set event data descriptor at index 3 by calling `_tlgCreate1Sz_char` with `file`. **]**
 
-**SRS_LOG_SINK_ETW_01_059: [** `log_sink_etw.log_sink_log` shall set event data descriptor at index 4 by calling `_tlgCreate1Sz_char` with `func`. **]**
+**SRS_LOG_SINK_ETW_01_059: [** `log_sink_etw.log` shall set event data descriptor at index 4 by calling `_tlgCreate1Sz_char` with `func`. **]**
 
-**SRS_LOG_SINK_ETW_01_060: [** `log_sink_etw.log_sink_log` shall set event data descriptor at index 5 by calling `EventDataDescCreate` with `line`. **]**
+**SRS_LOG_SINK_ETW_01_060: [** `log_sink_etw.log` shall set event data descriptor at index 5 by calling `EventDataDescCreate` with `line`. **]**
 
 **SRS_LOG_SINK_ETW_01_061: [** For each property in `log_context`: **]**
 
@@ -202,6 +202,6 @@ Note: 2 entries are for the event descriptor and metadata respectively, 4 entrie
 
 - **SRS_LOG_SINK_ETW_01_062: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_struct`, no event data descriptor shall be used. **]**
 
-**SRS_LOG_SINK_ETW_01_041: [** `log_sink_etw.log_sink_log` shall emit the event by calling `_tlgWriteTransfer_EventWriteTransfer` passing the provider, channel, number of event data descriptors and the data descriptor array. **]**
+**SRS_LOG_SINK_ETW_01_041: [** `log_sink_etw.log` shall emit the event by calling `_tlgWriteTransfer_EventWriteTransfer` passing the provider, channel, number of event data descriptors and the data descriptor array. **]**
 
-**SRS_LOG_SINK_ETW_01_086: [** If any error occurs `log_sink_etw.log_sink_log` shall print `Error emitting ETW event` and return. **]**
+**SRS_LOG_SINK_ETW_01_086: [** If any error occurs `log_sink_etw.log` shall print `Error emitting ETW event` and return. **]**

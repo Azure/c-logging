@@ -11,7 +11,7 @@ typedef void (*LOG_SINK_LOG_FUNC)(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_co
 
 typedef struct LOG_SINK_IF_TAG
 {
-    LOG_SINK_LOG_FUNC log_sink_log;
+    LOG_SINK_LOG_FUNC log;
 } LOG_SINK_IF;
 
 #endif /* LOG_SINK_IF_H */
