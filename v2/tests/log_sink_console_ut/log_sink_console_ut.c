@@ -423,9 +423,9 @@ static void validate_log_line_with_NULL_time(const char* actual_string, const ch
     POOR_MANS_ASSERT(strcmp(reset_color_code, "\x1b[0m") == 0);
 }
 
-/* log_sink_console.log_sink_log */
+/* log_sink_console.log */
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_001: [ If message_format is NULL, log_sink_console.log_sink_log shall print an error and return. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_001: [ If message_format is NULL, log_sink_console.log shall print an error and return. ]*/
 static void log_sink_console_log_with_NULL_message_format_returns(void)
 {
     // arrange
@@ -433,18 +433,18 @@ static void log_sink_console_log_with_NULL_message_format_returns(void)
     setup_printf_call();
 
     // act
-    log_sink_console.log_sink_log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, __LINE__, NULL);
+    log_sink_console.log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, __LINE__, NULL);
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log_sink_log shall obtain the time by calling time. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_003: [ log_sink_console.log_sink_log shall convert the time to string by calling ctime. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_004: [ log_sink_console.log_sink_log shall print a line in the format: {log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message} ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, log_sink_console.log_sink_log shall print the line in such a way that only one printf call is made. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_006: [ log_sink_console.log_sink_log shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log shall obtain the time by calling time. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_003: [ log_sink_console.log shall convert the time to string by calling ctime. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_004: [ log_sink_console.log shall print a line in the format: {log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message} ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, log_sink_console.log shall print the line in such a way that only one printf call is made. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_006: [ log_sink_console.log shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_007: [ LOG_LEVEL_CRITICAL shall be displayed with bright red \x1b[31;1m. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the \x1b[0m code. ]*/
 static void log_sink_console_log_prints_one_CRITICAL_log_line(void)
@@ -459,7 +459,7 @@ static void log_sink_console_log_prints_one_CRITICAL_log_line(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -468,11 +468,11 @@ static void log_sink_console_log_prints_one_CRITICAL_log_line(void)
     validate_log_line(expected_calls[4].u.printf_call.captured_output, "\x1b[31;1m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_CRITICAL), __FILE__, line_no, __FUNCTION__, "test");
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log_sink_log shall obtain the time by calling time. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_003: [ log_sink_console.log_sink_log shall convert the time to string by calling ctime. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_004: [ log_sink_console.log_sink_log shall print a line in the format: {log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message} ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, log_sink_console.log_sink_log shall print the line in such a way that only one printf call is made. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_006: [ log_sink_console.log_sink_log shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log shall obtain the time by calling time. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_003: [ log_sink_console.log shall convert the time to string by calling ctime. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_004: [ log_sink_console.log shall print a line in the format: {log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message} ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, log_sink_console.log shall print the line in such a way that only one printf call is made. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_006: [ log_sink_console.log shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_008: [ LOG_LEVEL_ERROR shall be displayed with red \x1b[31m. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the \x1b[0m code. ]*/
 static void log_sink_console_log_prints_one_ERROR_log_line(void)
@@ -487,7 +487,7 @@ static void log_sink_console_log_prints_one_ERROR_log_line(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_ERROR, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_ERROR, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -496,11 +496,11 @@ static void log_sink_console_log_prints_one_ERROR_log_line(void)
     validate_log_line(expected_calls[4].u.printf_call.captured_output, "\x1b[31m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_ERROR), __FILE__, line_no, __FUNCTION__, "test");
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log_sink_log shall obtain the time by calling time. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_003: [ log_sink_console.log_sink_log shall convert the time to string by calling ctime. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_004: [ log_sink_console.log_sink_log shall print a line in the format: {log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message} ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, log_sink_console.log_sink_log shall print the line in such a way that only one printf call is made. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_006: [ log_sink_console.log_sink_log shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log shall obtain the time by calling time. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_003: [ log_sink_console.log shall convert the time to string by calling ctime. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_004: [ log_sink_console.log shall print a line in the format: {log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message} ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, log_sink_console.log shall print the line in such a way that only one printf call is made. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_006: [ log_sink_console.log shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_009: [ LOG_LEVEL_WARNING shall be displayed with bright yellow \x1b[33;1m. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the \x1b[0m code. ]*/
 static void log_sink_console_log_prints_one_WARNING_log_line(void)
@@ -515,7 +515,7 @@ static void log_sink_console_log_prints_one_WARNING_log_line(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_WARNING, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_WARNING, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -524,11 +524,11 @@ static void log_sink_console_log_prints_one_WARNING_log_line(void)
     validate_log_line(expected_calls[4].u.printf_call.captured_output, "\x1b[33;1m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_WARNING), __FILE__, line_no, __FUNCTION__, "test");
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log_sink_log shall obtain the time by calling time. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_003: [ log_sink_console.log_sink_log shall convert the time to string by calling ctime. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_004: [ log_sink_console.log_sink_log shall print a line in the format: {log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message} ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, log_sink_console.log_sink_log shall print the line in such a way that only one printf call is made. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_006: [ log_sink_console.log_sink_log shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log shall obtain the time by calling time. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_003: [ log_sink_console.log shall convert the time to string by calling ctime. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_004: [ log_sink_console.log shall print a line in the format: {log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message} ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, log_sink_console.log shall print the line in such a way that only one printf call is made. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_006: [ log_sink_console.log shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_010: [ LOG_LEVEL_INFO shall be displayed with yellow \x1b[33m. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the \x1b[0m code. ]*/
 static void log_sink_console_log_prints_one_INFO_log_line(void)
@@ -543,7 +543,7 @@ static void log_sink_console_log_prints_one_INFO_log_line(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_INFO, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_INFO, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -552,11 +552,11 @@ static void log_sink_console_log_prints_one_INFO_log_line(void)
     validate_log_line(expected_calls[4].u.printf_call.captured_output, "\x1b[33m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_INFO), __FILE__, line_no, __FUNCTION__, "test");
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log_sink_log shall obtain the time by calling time. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_003: [ log_sink_console.log_sink_log shall convert the time to string by calling ctime. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_004: [ log_sink_console.log_sink_log shall print a line in the format: {log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message} ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, log_sink_console.log_sink_log shall print the line in such a way that only one printf call is made. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_006: [ log_sink_console.log_sink_log shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log shall obtain the time by calling time. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_003: [ log_sink_console.log shall convert the time to string by calling ctime. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_004: [ log_sink_console.log shall print a line in the format: {log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message} ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, log_sink_console.log shall print the line in such a way that only one printf call is made. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_006: [ log_sink_console.log shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_011: [ LOG_LEVEL_VERBOSE shall be displayed with white \x1b[37m. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the \x1b[0m code. ]*/
 static void log_sink_console_log_prints_one_VERBOSE_log_line(void)
@@ -571,7 +571,7 @@ static void log_sink_console_log_prints_one_VERBOSE_log_line(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -580,7 +580,7 @@ static void log_sink_console_log_prints_one_VERBOSE_log_line(void)
     validate_log_line(expected_calls[4].u.printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log_sink_log shall print Error formatting log line and return. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
 static void when_snprintf_fails_log_sink_console_log_prints_error_formatting(void)
 {
     // arrange
@@ -594,7 +594,7 @@ static void when_snprintf_fails_log_sink_console_log_prints_error_formatting(voi
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -603,7 +603,7 @@ static void when_snprintf_fails_log_sink_console_log_prints_error_formatting(voi
     POOR_MANS_ASSERT(strcmp(expected_calls[3].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log_sink_log shall print Error formatting log line and return. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
 static void when_vsnprintf_fails_log_sink_console_log_prints_error_formatting(void)
 {
     // arrange
@@ -618,7 +618,7 @@ static void when_vsnprintf_fails_log_sink_console_log_prints_error_formatting(vo
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -627,7 +627,7 @@ static void when_vsnprintf_fails_log_sink_console_log_prints_error_formatting(vo
     POOR_MANS_ASSERT(strcmp(expected_calls[4].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_023: [ If the call to time fails then log_sink_console.log_sink_log shall print the time as NULL. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_023: [ If the call to time fails then log_sink_console.log shall print the time as NULL. ]*/
 static void when_time_fails_log_sink_console_log_prints_time_as_NULL(void)
 {
     // arrange
@@ -641,7 +641,7 @@ static void when_time_fails_log_sink_console_log_prints_time_as_NULL(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -650,7 +650,7 @@ static void when_time_fails_log_sink_console_log_prints_time_as_NULL(void)
     validate_log_line_with_NULL_time(expected_calls[3].u.printf_call.captured_output, "\x1b[37m%s Time:NULL File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_024: [ If the call to ctime fails then log_sink_console.log_sink_log shall print the time as NULL. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_024: [ If the call to ctime fails then log_sink_console.log shall print the time as NULL. ]*/
 static void when_ctime_returns_NULL_log_sink_console_log_prints_time_as_NULL(void)
 {
     // arrange
@@ -665,7 +665,7 @@ static void when_ctime_returns_NULL_log_sink_console_log_prints_time_as_NULL(voi
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -675,15 +675,15 @@ static void when_ctime_returns_NULL_log_sink_console_log_prints_time_as_NULL(voi
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log_sink_log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log_sink_log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_016: [ For each property: ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_017: [ If the property type is struct (used as a container for context properties): ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log_sink_log shall print the struct property name and an opening brace. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log_sink_log shall obtain the number of fields in the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_019: [ log_sink_console.log_sink_log shall print the next n properties as being the fields that are part of the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log_sink_log shall print a closing brace as end of the struct. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log_sink_log shall call to_string for the property and print its name and value. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log shall print the struct property name and an opening brace. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log shall obtain the number of fields in the struct. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_019: [ log_sink_console.log shall print the next n properties as being the fields that are part of the struct. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log shall print a closing brace as end of the struct. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log shall call to_string for the property and print its name and value. ]*/
 static void log_sink_console_log_with_non_NULL_context_prints_one_property(void)
 {
     // arrange
@@ -705,7 +705,7 @@ static void log_sink_console_log_with_non_NULL_context_prints_one_property(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, &context_1, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_1, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -715,15 +715,15 @@ static void log_sink_console_log_with_non_NULL_context_prints_one_property(void)
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log_sink_log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log_sink_log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_016: [ For each property: ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_017: [ If the property type is struct (used as a container for context properties): ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log_sink_log shall print the struct property name and an opening brace. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log_sink_log shall obtain the number of fields in the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_019: [ log_sink_console.log_sink_log shall print the next n properties as being the fields that are part of the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log_sink_log shall print a closing brace as end of the struct. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log_sink_log shall call to_string for the property and print its name and value. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log shall print the struct property name and an opening brace. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log shall obtain the number of fields in the struct. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_019: [ log_sink_console.log shall print the next n properties as being the fields that are part of the struct. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log shall print a closing brace as end of the struct. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log shall call to_string for the property and print its name and value. ]*/
 static void log_sink_console_log_with_non_NULL_context_prints_2_properties(void)
 {
     // arrange
@@ -746,7 +746,7 @@ static void log_sink_console_log_with_non_NULL_context_prints_2_properties(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, &context_1, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_1, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -756,15 +756,15 @@ static void log_sink_console_log_with_non_NULL_context_prints_2_properties(void)
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log_sink_log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log_sink_log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_016: [ For each property: ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_017: [ If the property type is struct (used as a container for context properties): ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log_sink_log shall print the struct property name and an opening brace. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log_sink_log shall obtain the number of fields in the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_019: [ log_sink_console.log_sink_log shall print the next n properties as being the fields that are part of the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log_sink_log shall print a closing brace as end of the struct. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log_sink_log shall call to_string for the property and print its name and value. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log shall print the struct property name and an opening brace. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log shall obtain the number of fields in the struct. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_019: [ log_sink_console.log shall print the next n properties as being the fields that are part of the struct. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log shall print a closing brace as end of the struct. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log shall call to_string for the property and print its name and value. ]*/
 static void log_sink_console_log_with_non_NULL_context_with_2_levels_works(void)
 {
     // arrange
@@ -790,7 +790,7 @@ static void log_sink_console_log_with_non_NULL_context_with_2_levels_works(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -800,15 +800,15 @@ static void log_sink_console_log_with_non_NULL_context_with_2_levels_works(void)
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log_sink_log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log_sink_log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_016: [ For each property: ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_017: [ If the property type is struct (used as a container for context properties): ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log_sink_log shall print the struct property name and an opening brace. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log_sink_log shall obtain the number of fields in the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_019: [ log_sink_console.log_sink_log shall print the next n properties as being the fields that are part of the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log_sink_log shall print a closing brace as end of the struct. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log_sink_log shall call to_string for the property and print its name and value. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log shall print the struct property name and an opening brace. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log shall obtain the number of fields in the struct. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_019: [ log_sink_console.log shall print the next n properties as being the fields that are part of the struct. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log shall print a closing brace as end of the struct. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log shall call to_string for the property and print its name and value. ]*/
 static void log_sink_console_log_with_non_NULL_named_contexts_with_2_levels_works(void)
 {
     // arrange
@@ -834,7 +834,7 @@ static void log_sink_console_log_with_non_NULL_named_contexts_with_2_levels_work
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -844,14 +844,14 @@ static void log_sink_console_log_with_non_NULL_named_contexts_with_2_levels_work
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log_sink_log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log_sink_log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_016: [ For each property: ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_017: [ If the property type is struct (used as a container for context properties): ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log_sink_log shall print the struct property name and an opening brace. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log_sink_log shall obtain the number of fields in the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log_sink_log shall print a closing brace as end of the struct. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log_sink_log shall call to_string for the property and print its name and value. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log shall print the struct property name and an opening brace. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log shall obtain the number of fields in the struct. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log shall print a closing brace as end of the struct. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log shall call to_string for the property and print its name and value. ]*/
 static void log_sink_console_log_with_non_NULL_empty_context_works(void)
 {
     // arrange
@@ -872,7 +872,7 @@ static void log_sink_console_log_with_non_NULL_empty_context_works(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, &context_1, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_1, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -882,15 +882,15 @@ static void log_sink_console_log_with_non_NULL_empty_context_works(void)
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log_sink_log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log_sink_log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_016: [ For each property: ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_017: [ If the property type is struct (used as a container for context properties): ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log_sink_log shall print the struct property name and an opening brace. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log_sink_log shall obtain the number of fields in the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_019: [ log_sink_console.log_sink_log shall print the next n properties as being the fields that are part of the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log_sink_log shall print a closing brace as end of the struct. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log_sink_log shall call to_string for the property and print its name and value. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log shall print the struct property name and an opening brace. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log shall obtain the number of fields in the struct. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_019: [ log_sink_console.log shall print the next n properties as being the fields that are part of the struct. ]*/
+  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log shall print a closing brace as end of the struct. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log shall call to_string for the property and print its name and value. ]*/
 static void log_sink_console_log_with_non_NULL_dynamically_allocated_context(void)
 {
     // arrange
@@ -918,7 +918,7 @@ static void log_sink_console_log_with_non_NULL_dynamically_allocated_context(voi
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, context_2, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -931,7 +931,7 @@ static void log_sink_console_log_with_non_NULL_dynamically_allocated_context(voi
     LOG_CONTEXT_DESTROY(context_2);
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log_sink_log shall print Error formatting log line and return. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
 static void when_snprintf_fails_for_context_open_brace_log_sink_console_log_prints_error_formatting(void)
 {
     // arrange
@@ -953,7 +953,7 @@ static void when_snprintf_fails_for_context_open_brace_log_sink_console_log_prin
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -962,7 +962,7 @@ static void when_snprintf_fails_for_context_open_brace_log_sink_console_log_prin
     POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log_sink_log shall print Error formatting log line and return. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
 static void when_snprintf_fails_for_inner_context_open_brace_log_sink_console_log_prints_error_formatting(void)
 {
     // arrange
@@ -985,7 +985,7 @@ static void when_snprintf_fails_for_inner_context_open_brace_log_sink_console_lo
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -994,7 +994,7 @@ static void when_snprintf_fails_for_inner_context_open_brace_log_sink_console_lo
     POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log_sink_log shall print Error formatting log line and return. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
 static void when_snprintf_fails_for_property_in_inner_context_log_sink_console_log_prints_error_formatting(void)
 {
     // arrange
@@ -1018,7 +1018,7 @@ static void when_snprintf_fails_for_property_in_inner_context_log_sink_console_l
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1027,7 +1027,7 @@ static void when_snprintf_fails_for_property_in_inner_context_log_sink_console_l
     POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log_sink_log shall print Error formatting log line and return. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
 static void when_snprintf_fails_for_closing_of_inner_context_log_sink_console_log_prints_error_formatting(void)
 {
     // arrange
@@ -1052,7 +1052,7 @@ static void when_snprintf_fails_for_closing_of_inner_context_log_sink_console_lo
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1061,7 +1061,7 @@ static void when_snprintf_fails_for_closing_of_inner_context_log_sink_console_lo
     POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log_sink_log shall print Error formatting log line and return. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
 static void when_snprintf_fails_for_property_in_outer_context_log_sink_console_log_prints_error_formatting(void)
 {
     // arrange
@@ -1087,7 +1087,7 @@ static void when_snprintf_fails_for_property_in_outer_context_log_sink_console_l
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1096,7 +1096,7 @@ static void when_snprintf_fails_for_property_in_outer_context_log_sink_console_l
     POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log_sink_log shall print Error formatting log line and return. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
 static void when_snprintf_fails_for_closing_of_outer_context_log_sink_console_log_prints_error_formatting(void)
 {
     // arrange
@@ -1123,7 +1123,7 @@ static void when_snprintf_fails_for_closing_of_outer_context_log_sink_console_lo
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1132,7 +1132,7 @@ static void when_snprintf_fails_for_closing_of_outer_context_log_sink_console_lo
     POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_021: [ log_sink_console.log_sink_log shall print at most LOG_MAX_MESSAGE_LENGTH characters including the null terminator (the rest of the context shall be truncated). ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_021: [ log_sink_console.log shall print at most LOG_MAX_MESSAGE_LENGTH characters including the null terminator (the rest of the context shall be truncated). ]*/
 static void when_printing_the_message_exceeds_log_line_size_it_is_truncated(void)
 {
     // arrange
@@ -1153,7 +1153,7 @@ static void when_printing_the_message_exceeds_log_line_size_it_is_truncated(void
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, message_string_too_big);
+    log_sink_console.log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, message_string_too_big);
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1171,7 +1171,7 @@ static void when_printing_the_message_exceeds_log_line_size_it_is_truncated(void
     free(message_string_too_big);
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_021: [ log_sink_console.log_sink_log shall print at most LOG_MAX_MESSAGE_LENGTH characters including the null terminator (the rest of the context shall be truncated). ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_021: [ log_sink_console.log shall print at most LOG_MAX_MESSAGE_LENGTH characters including the null terminator (the rest of the context shall be truncated). ]*/
 static void when_printing_the_file_exceeds_log_line_size_it_is_truncated(void)
 {
     // arrange
@@ -1191,7 +1191,7 @@ static void when_printing_the_file_exceeds_log_line_size_it_is_truncated(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, NULL, file_too_big, __FUNCTION__, line_no, "a");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, NULL, file_too_big, __FUNCTION__, line_no, "a");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1209,7 +1209,7 @@ static void when_printing_the_file_exceeds_log_line_size_it_is_truncated(void)
     free(file_too_big);
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_021: [ log_sink_console.log_sink_log shall print at most LOG_MAX_MESSAGE_LENGTH characters including the null terminator (the rest of the context shall be truncated). ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_021: [ log_sink_console.log shall print at most LOG_MAX_MESSAGE_LENGTH characters including the null terminator (the rest of the context shall be truncated). ]*/
 static void when_printing_a_property_value_exceeds_log_line_size_it_is_truncated(void)
 {
     // arrange
@@ -1238,7 +1238,7 @@ static void when_printing_a_property_value_exceeds_log_line_size_it_is_truncated
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, context_1, __FILE__, __FUNCTION__, line_no, "a");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, context_1, __FILE__, __FUNCTION__, line_no, "a");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1257,7 +1257,7 @@ static void when_printing_a_property_value_exceeds_log_line_size_it_is_truncated
     LOG_CONTEXT_DESTROY(context_1);
 }
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_021: [ log_sink_console.log_sink_log shall print at most LOG_MAX_MESSAGE_LENGTH characters including the null terminator (the rest of the context shall be truncated). ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_021: [ log_sink_console.log shall print at most LOG_MAX_MESSAGE_LENGTH characters including the null terminator (the rest of the context shall be truncated). ]*/
 static void when_printing_a_property_name_exceeds_log_line_size_it_is_truncated(void)
 {
     // arrange
@@ -1294,7 +1294,7 @@ static void when_printing_a_property_name_exceeds_log_line_size_it_is_truncated(
     LOG_CONTEXT_CREATE(context_1, NULL, LOG_CONTEXT_STRING_PROPERTY(ab, "x"));
 
     // act
-    log_sink_console.log_sink_log(LOG_LEVEL_VERBOSE, context_1, dummy_file_name, __FUNCTION__, line_no, "a");
+    log_sink_console.log(LOG_LEVEL_VERBOSE, context_1, dummy_file_name, __FUNCTION__, line_no, "a");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);

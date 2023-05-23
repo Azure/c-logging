@@ -219,7 +219,7 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
 
         // compute event metadata size
         // event_name_length includes NULL terminator
-        /* Codes_SRS_LOG_SINK_ETW_01_042: [ log_sink_etw.log_sink_log shall compute the metadata size for the self described event metadata as follows: ]*/
+        /* Codes_SRS_LOG_SINK_ETW_01_042: [ log_sink_etw.log shall compute the metadata size for the self described event metadata as follows: ]*/
         /* Codes_SRS_LOG_SINK_ETW_01_043: [ Size of the event name. ]*/
         uint16_t i;
 
@@ -235,7 +235,7 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
 
         // copy the field metadata (name and in type)
 
-        /* Codes_SRS_LOG_SINK_ETW_01_034: [ log_sink_etw.log_sink_log shall fill the event metadata: ]*/
+        /* Codes_SRS_LOG_SINK_ETW_01_034: [ log_sink_etw.log shall fill the event metadata: ]*/
 
         /* Codes_SRS_LOG_SINK_ETW_01_035: [ The string content (as field name, excluding zero terminator), followed by one byte with the value TlgInANSISTRING. ]*/
         /* Codes_SRS_LOG_SINK_ETW_01_044: [ Size of the content field name. ]*/
@@ -266,7 +266,7 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
             {
                 /* Codes_SRS_LOG_SINK_ETW_01_051: [ For each property in log_context, the length of the property name + 1 and one extra byte for the type of the field. ]*/
                 size_t name_length = strlen(context_property_value_pairs[i].name);
-                /* Codes_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
+                /* Codes_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log shall not add any properties to the event. ]*/
                 if ((name_length > UINT16_MAX) ||
                     ((uint16_t)(&_tlgEvent.metadata[MAX_METADATA_SIZE] - pos) < name_length + 1 + 1))
                 {
@@ -363,11 +363,11 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
         }
         else
         {
-            /* Codes_SRS_LOG_SINK_ETW_01_082: [ If more than 64 properties are given in log_context, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
+            /* Codes_SRS_LOG_SINK_ETW_01_082: [ If more than 64 properties are given in log_context, log_sink_etw.log shall not add any properties to the event. ]*/
             add_properties = false;
         }
 
-        /* Codes_SRS_LOG_SINK_ETW_01_026: [ log_sink_etw.log_sink_log shall fill a SELF_DESCRIBED_EVENT structure, setting the following fields: ]*/
+        /* Codes_SRS_LOG_SINK_ETW_01_026: [ log_sink_etw.log shall fill a SELF_DESCRIBED_EVENT structure, setting the following fields: ]*/
         uint16_t metadata_size;
 
         if (!add_properties)
@@ -389,7 +389,7 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
         int formatted_message_length = vsnprintf(formatted_message, available_bytes, message_format, args);
         if (formatted_message_length < 0)
         {
-            /* Codes_SRS_LOG_SINK_ETW_01_086: [ If any error occurs log_sink_etw.log_sink_log shall print Error emitting ETW event and return. ]*/
+            /* Codes_SRS_LOG_SINK_ETW_01_086: [ If any error occurs log_sink_etw.log shall print Error emitting ETW event and return. ]*/
             (void)printf("Error emitting ETW event with %" PRIu16 " properties, file=%s, func=%s, line=%" PRId32 ".\r\n",
                 property_value_count, file, func, line);
         }
@@ -400,7 +400,7 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
                 if (add_properties)
                 {
                     // did not fit, print again without properties and limit it
-                    /* Codes_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log_sink_log shall not add any properties to the event. ]*/
+                    /* Codes_SRS_LOG_SINK_ETW_01_085: [ If the size of the metadata and the formatted message exceeds 4096 bytes, log_sink_etw.log shall not add any properties to the event. ]*/
                     add_properties = false;
                     metadata_size = metadata_size_without_properties;
 
@@ -409,7 +409,7 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
                     formatted_message_length = vsnprintf(formatted_message, available_bytes, message_format, saved_args);
                     if (formatted_message_length < 0)
                     {
-                        /* Codes_SRS_LOG_SINK_ETW_01_086: [ If any error occurs log_sink_etw.log_sink_log shall print Error emitting ETW event and return. ]*/
+                        /* Codes_SRS_LOG_SINK_ETW_01_086: [ If any error occurs log_sink_etw.log shall print Error emitting ETW event and return. ]*/
                         (void)printf("Error emitting ETW event with %" PRIu16 " properties, file=%s, func=%s, line=%" PRId32 ".\r\n",
                             property_value_count, file, func, line);
                     }
@@ -457,21 +457,21 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
                 // 1 for the func field
                 // 1 for the line field
                 // n entries (1 for each property)
-                /* Codes_SRS_LOG_SINK_ETW_01_039: [ log_sink_etw.log_sink_log shall fill an EVENT_DATA_DESCRIPTOR array of size 2 + 1 + 1 + 1 + 1 + property count. ]*/
+                /* Codes_SRS_LOG_SINK_ETW_01_039: [ log_sink_etw.log shall fill an EVENT_DATA_DESCRIPTOR array of size 2 + 1 + 1 + 1 + 1 + property count. ]*/
                 EVENT_DATA_DESCRIPTOR _tlgData[2 + 1 + 1 + 1 + 1 + LOG_MAX_ETW_PROPERTY_VALUE_PAIR_COUNT];
 
                 uint32_t _tlgIdx = 2;
 
-                /* Codes_SRS_LOG_SINK_ETW_01_040: [ log_sink_etw.log_sink_log shall set event data descriptor at index 2 by calling _tlgCreate1Sz_char with the value of the formatted message as obtained by using printf with the messages format message_format and the arguments in .... ]*/
+                /* Codes_SRS_LOG_SINK_ETW_01_040: [ log_sink_etw.log shall set event data descriptor at index 2 by calling _tlgCreate1Sz_char with the value of the formatted message as obtained by using printf with the messages format message_format and the arguments in .... ]*/
                 _tlgCreate1Sz_char(&_tlgData[_tlgIdx], formatted_message);
                 _tlgIdx++;
-                /* Codes_SRS_LOG_SINK_ETW_01_058: [ log_sink_etw.log_sink_log shall set event data descriptor at index 3 by calling _tlgCreate1Sz_char with file. ]*/
+                /* Codes_SRS_LOG_SINK_ETW_01_058: [ log_sink_etw.log shall set event data descriptor at index 3 by calling _tlgCreate1Sz_char with file. ]*/
                 _tlgCreate1Sz_char(&_tlgData[_tlgIdx], file);
                 _tlgIdx++;
-                /* Codes_SRS_LOG_SINK_ETW_01_059: [ log_sink_etw.log_sink_log shall set event data descriptor at index 4 by calling _tlgCreate1Sz_char with func. ]*/
+                /* Codes_SRS_LOG_SINK_ETW_01_059: [ log_sink_etw.log shall set event data descriptor at index 4 by calling _tlgCreate1Sz_char with func. ]*/
                 _tlgCreate1Sz_char(&_tlgData[_tlgIdx], func);
                 _tlgIdx++;
-                /* Codes_SRS_LOG_SINK_ETW_01_060: [ log_sink_etw.log_sink_log shall set event data descriptor at index 5 by calling EventDataDescCreate with line. ]*/
+                /* Codes_SRS_LOG_SINK_ETW_01_060: [ log_sink_etw.log shall set event data descriptor at index 5 by calling EventDataDescCreate with line. ]*/
                 EventDataDescCreate(&_tlgData[_tlgIdx], &line, sizeof(int32_t));
                 _tlgIdx++;
 
@@ -531,7 +531,7 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
                 }
 
                 // ... AND drumrolls, emit the event
-                /* Codes_SRS_LOG_SINK_ETW_01_041: [ log_sink_etw.log_sink_log shall emit the event by calling _tlgWriteTransfer_EventWriteTransfer passing the provider, channel, number of event data descriptors and the data descriptor array. ]*/
+                /* Codes_SRS_LOG_SINK_ETW_01_041: [ log_sink_etw.log shall emit the event by calling _tlgWriteTransfer_EventWriteTransfer passing the provider, channel, number of event data descriptors and the data descriptor array. ]*/
                 _tlgWriteTransfer_EventWriteTransfer(_tlgProv, &_tlgEvent._tlgChannel, NULL, NULL, _tlgIdx, _tlgData);
             }
         }
@@ -604,7 +604,7 @@ static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context
 {
     if (message_format == NULL)
     {
-        /* Codes_SRS_LOG_SINK_ETW_01_001: [ If message_format is NULL, log_sink_etw.log_sink_log shall return. ]*/
+        /* Codes_SRS_LOG_SINK_ETW_01_001: [ If message_format is NULL, log_sink_etw.log shall return. ]*/
         (void)printf("Invalid arguments: LOG_LEVEL log_level=%" PRI_MU_ENUM ", LOG_CONTEXT_HANDLE log_context=%p, const char* file=%s, const char* func=%s, int line=%d, const char* message_format=%s\r\n",
             MU_ENUM_VALUE(LOG_LEVEL, log_level), log_context, file, func, line, message_format);
     }
@@ -621,9 +621,9 @@ static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context
         {
             /* Codes_SRS_LOG_SINK_ETW_01_048: [ If log_context is not NULL: ]*/
 
-            /* Codes_SRS_LOG_SINK_ETW_01_049: [ log_sink_etw.log_sink_log shall call log_context_get_property_value_pair_count to obtain the count of properties that are to be added to the ETW event. ]*/
+            /* Codes_SRS_LOG_SINK_ETW_01_049: [ log_sink_etw.log shall call log_context_get_property_value_pair_count to obtain the count of properties that are to be added to the ETW event. ]*/
             value_pairs = log_context_get_property_value_pairs(log_context);
-            /* Codes_SRS_LOG_SINK_ETW_01_050: [ log_sink_etw.log_sink_log shall call log_context_get_property_value_pairs to obtain the properties that are to be added to the ETW event. ]*/
+            /* Codes_SRS_LOG_SINK_ETW_01_050: [ log_sink_etw.log shall call log_context_get_property_value_pairs to obtain the properties that are to be added to the ETW event. ]*/
             values_count = (uint16_t)log_context_get_property_value_pair_count(log_context);
         }
         else
@@ -674,4 +674,4 @@ static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context
     }
 }
 
-const LOG_SINK_IF log_sink_etw = { .log_sink_log = log_sink_etw_log };
+const LOG_SINK_IF log_sink_etw = { .log = log_sink_etw_log };

@@ -655,7 +655,7 @@ static void setup_log_context_property_if_get_type(void)
     expected_call_count++;
 }
 
-/* log_sink_etw.log_sink_log */
+/* log_sink_etw.log */
 
 /* Tests_SRS_LOG_SINK_ETW_01_083: [ If _get_pgmptr fails, the executable shall be printed as UNKNOWN. ]*/
 static void when__get_pgmptr_fails_log_sink_etw_log_prints_executable_as_UNKNOWN(void)
@@ -784,7 +784,7 @@ static void when__get_pgmptr_fails_log_sink_etw_log_prints_executable_as_UNKNOWN
     expected_calls[3]._get_pgmptr_call.call_result = 1;
 
     // act
-    log_sink_etw.log_sink_log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, captured_line, "test");
+    log_sink_etw.log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -798,4 +798,3 @@ int main(void)
 
     return 0;
 }
-
