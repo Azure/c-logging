@@ -76,18 +76,6 @@ typedef struct printf_CALL_TAG
     char captured_output[MAX_PRINTF_CAPTURED_OUPUT_SIZE];
 } printf_CALL;
 
-typedef struct InterlockedCompareExchange_CALL_TAG
-{
-    bool override_result;
-    int call_result;
-} InterlockedCompareExchange_CALL;
-
-typedef struct InterlockedExchange_CALL_TAG
-{
-    bool override_result;
-    int call_result;
-} InterlockedExchange_CALL;
-
 typedef struct log_context_get_property_value_pair_count_CALL_TAG
 {
     bool override_result;
@@ -151,8 +139,6 @@ typedef struct MOCK_CALL_TAG
     union
     {
         printf_CALL printf_call;
-        InterlockedCompareExchange_CALL InterlockedCompareExchange_call;
-        InterlockedExchange_CALL InterlockedExchange_call;
         log_context_get_property_value_pair_count_CALL log_context_get_property_value_pair_count_call;
         log_context_get_property_value_pairs_CALL log_context_get_property_value_pairs_call;
         TraceLoggingRegister_EventRegister_EventSetInformation_CALL TraceLoggingRegister_EventRegister_EventSetInformation_call;
@@ -805,6 +791,22 @@ static void log_sink_etw_init_works(void)
 
     // act
     POOR_MANS_ASSERT(log_sink_etw.init() == 0);
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
+/* Tests_SRS_LOG_SINK_ETW_01_092: [ If the module is already initialized, log_sink_etw.init shall fail and return a non-zero value. ]*/
+static void log_sink_etw_init_after_init_fails(void)
+{
+    // arrange
+    // already initialized based on the fact that the previous tests ran
+    setup_mocks();
+    setup_printf_call(); // error output
+
+    // act
+    POOR_MANS_ASSERT(log_sink_etw.init() != 0);
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -2954,11 +2956,27 @@ static void log_sink_etw_deinit_unregisters(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
+/* Tests_SRS_LOG_SINK_ETW_01_093: [ If the module is not initialized, log_sink_etw.deinit shall return. ] */
+static void log_sink_etw_deinit_after_deinit_returns(void)
+{
+    // arrange
+    setup_mocks();
+    setup_printf_call(); // error output
+
+    // act
+    log_sink_etw.deinit();
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
     when_TraceLoggingRegister_fails_log_sink_etw_init_fails();
     log_sink_etw_init_works();
+    log_sink_etw_init_after_init_fails();
 
     log_sink_etw_log_with_NULL_message_format_returns();
     log_sink_etw_log_with_LOG_LEVEL_CRITICAL_succeeds();
@@ -2992,6 +3010,7 @@ int main(void)
     when_a_parent_context_is_used_all_properties_are_emitted();
 
     log_sink_etw_deinit_unregisters();
+    log_sink_etw_deinit_after_deinit_returns();
 
     return 0;
 }

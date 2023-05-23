@@ -37,7 +37,9 @@
     MOCK_CALL_TYPE__tlgCreate1Sz_char, \
     MOCK_CALL_TYPE_EventDataDescCreate, \
     MOCK_CALL_TYPE__tlgWriteTransfer_EventWriteTransfer, \
-    MOCK_CALL_TYPE_log_context_property_if_get_type
+    MOCK_CALL_TYPE_log_context_property_if_get_type, \
+    MOCK_CALL_TYPE_vsnprintf, \
+    MOCK_CALL_TYPE_TraceLoggingUnregister
 
 MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
 
@@ -73,18 +75,6 @@ typedef struct printf_CALL_TAG
     int call_result;
     char captured_output[MAX_PRINTF_CAPTURED_OUPUT_SIZE];
 } printf_CALL;
-
-typedef struct InterlockedCompareExchange_CALL_TAG
-{
-    bool override_result;
-    int call_result;
-} InterlockedCompareExchange_CALL;
-
-typedef struct InterlockedExchange_CALL_TAG
-{
-    bool override_result;
-    int call_result;
-} InterlockedExchange_CALL;
 
 typedef struct log_context_get_property_value_pair_count_CALL_TAG
 {
@@ -128,20 +118,32 @@ typedef struct log_context_property_if_get_type_CALL_TAG
     LOG_CONTEXT_PROPERTY_TYPE call_result;
 } log_context_property_if_get_type_CALL;
 
+typedef struct vsnprintf_CALL_TAG
+{
+    bool override_result;
+    int call_result;
+    char captured_output[MAX_PRINTF_CAPTURED_OUPUT_SIZE];
+} vsnprintf_CALL;
+
+typedef struct TraceLoggingUnregister_CALL_TAG
+{
+    TraceLoggingHProvider hProvider;
+} TraceLoggingUnregister_CALL;
+
 typedef struct MOCK_CALL_TAG
 {
     MOCK_CALL_TYPE mock_call_type;
     union
     {
         printf_CALL printf_call;
-        InterlockedCompareExchange_CALL InterlockedCompareExchange_call;
-        InterlockedExchange_CALL InterlockedExchange_call;
         log_context_get_property_value_pair_count_CALL log_context_get_property_value_pair_count_call;
         log_context_get_property_value_pairs_CALL log_context_get_property_value_pairs_call;
         TraceLoggingRegister_EventRegister_EventSetInformation_CALL TraceLoggingRegister_EventRegister_EventSetInformation_call;
         _get_pgmptr_CALL _get_pgmptr_call;
         _tlgWriteTransfer_EventWriteTransfer_CALL _tlgWriteTransfer_EventWriteTransfer_call;
         log_context_property_if_get_type_CALL log_context_property_if_get_type_call;
+        vsnprintf_CALL vsnprintf_call;
+        TraceLoggingUnregister_CALL TraceLoggingUnregister_call;
     };
 } MOCK_CALL;
 
@@ -513,6 +515,56 @@ LOG_CONTEXT_PROPERTY_TYPE mock_log_context_property_if_get_type(void)
     return result;
 }
 
+int mock_vsnprintf(char* restrict s, size_t n, const char* restrict format, va_list args)
+{
+    int result;
+
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_vsnprintf))
+    {
+        actual_and_expected_match = false;
+        result = -1;
+    }
+    else
+    {
+        if (expected_calls[actual_call_count].printf_call.override_result)
+        {
+            result = expected_calls[actual_call_count].printf_call.call_result;
+        }
+        else
+        {
+            // also capture the result in a variable for comparisons in tests
+            (void)vsnprintf(expected_calls[actual_call_count].printf_call.captured_output, sizeof(expected_calls[actual_call_count].printf_call.captured_output),
+                format, args);
+
+            // call "real" function
+            result = vsnprintf(s, n, format, args);
+        }
+
+        actual_call_count++;
+    }
+
+    return result;
+}
+
+void mock_TraceLoggingUnregister(TraceLoggingHProvider hProvider)
+{
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_TraceLoggingUnregister))
+    {
+        actual_and_expected_match = false;
+    }
+    else
+    {
+        expected_calls[actual_call_count].TraceLoggingUnregister_call.hProvider = hProvider;
+
+        // call "real" function
+        TraceLoggingUnregister(hProvider);
+
+        actual_call_count++;
+    }
+}
+
 #define POOR_MANS_ASSERT(cond) \
     if (!(cond)) \
     { \
@@ -585,79 +637,17 @@ static void setup_log_context_property_if_get_type(void)
     expected_call_count++;
 }
 
-/* log_sink_etw.log */
+/* log_sink_etw.deinit */
 
-/* Tests_SRS_LOG_SINK_ETW_01_083: [ If _get_pgmptr fails, the executable shall be printed as UNKNOWN. ]*/
-static void when__get_pgmptr_fails_log_sink_etw_log_prints_executable_as_UNKNOWN(void)
+/* Tests_SRS_LOG_SINK_ETW_01_093: [ If the module is not initialized, log_sink_etw.deinit shall return. ]*/
+static void when_module_is_not_initialized_deinit_returns(void)
 {
     // arrange
     setup_mocks();
-    setup_TraceLoggingRegister_EventRegister_EventSetInformation_call();
-
-    // self test event
-    setup__get_pgmptr_call();
-
-    setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
-    setup__tlgCreate1Sz_char(); // func
-    setup_EventDataDescCreate(); // line
-    uint8_t extra_metadata_bytes[256];
-    uint8_t expected_event_bytes[sizeof(SELF_DESCRIBED_EVENT) + sizeof(extra_metadata_bytes)];
-    SELF_DESCRIBED_EVENT* expected_event_metadata = (SELF_DESCRIBED_EVENT*)&expected_event_bytes[0];
-    (void)memset(expected_event_metadata, 0, sizeof(SELF_DESCRIBED_EVENT));
-    expected_event_metadata->_tlgLevel = TRACE_LEVEL_INFORMATION;
-    expected_event_metadata->_tlgChannel = 11;
-    expected_event_metadata->_tlgOpcode = 0;
-    expected_event_metadata->_tlgKeyword = 0;
-    uint8_t* pos = (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT));
-    // event name
-    (void)memcpy(pos, "LogInfo", strlen("LogInfo") + 1);
-    pos += strlen("LogInfo") + 1;
-    // content field
-    (void)memcpy(pos, "content", strlen("content") + 1);
-    pos += strlen("content") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "file", strlen("file") + 1);
-    pos += strlen("file") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "func", strlen("func") + 1);
-    pos += strlen("func") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "line", strlen("line") + 1);
-    pos += strlen("line") + 1;
-    *pos = TlgInINT32;
-    pos++;
-
-    expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;
-
-    int captured_line = __LINE__;
-
-    static const char expected_event_message[] = "ETW provider was registered succesfully (self test). Executable file full path name = UNKNOWN";
-
-    // construct event data descriptor array
-    EVENT_DATA_DESCRIPTOR expected_event_data_descriptors[6] =
-    {
-        { 0 },
-        { 0 },
-        {.Size = (ULONG)strlen(expected_event_message) + 1, .Ptr = (ULONGLONG)expected_event_message },
-        {.Size = (ULONG)strlen(__FILE__) + 1, .Ptr = (ULONGLONG)__FILE__ },
-        {.Size = (ULONG)strlen(__FUNCTION__) + 1, .Ptr = (ULONGLONG)__FUNCTION__ },
-        {.Size = sizeof(int32_t), .Ptr = (ULONGLONG)&captured_line}
-    };
-
-    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors, /* ignore file and func data */true);
-
-    expected_calls[1]._get_pgmptr_call.override_result = true;
-    expected_calls[1]._get_pgmptr_call.call_result = 1;
+    setup_printf_call(); // error output
 
     // act
-    log_sink_etw.init();
+    log_sink_etw.deinit();
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -667,7 +657,7 @@ static void when__get_pgmptr_fails_log_sink_etw_log_prints_executable_as_UNKNOWN
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
-    when__get_pgmptr_fails_log_sink_etw_log_prints_executable_as_UNKNOWN();
+    when_module_is_not_initialized_deinit_returns();
 
     return 0;
 }
