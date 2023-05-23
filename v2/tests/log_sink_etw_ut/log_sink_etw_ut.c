@@ -891,7 +891,7 @@ static void test_message_with_level(LOG_LEVEL log_level, uint8_t expected_tlg_le
 /* Tests_SRS_LOG_SINK_ETW_01_012: [ If log_level is LOG_LEVEL_CRITICAL the event name shall be LogCritical. ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_018: [ Logging level: ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_019: [ If log_level is LOG_LEVEL_CRITICAL the ETW logging level shall be TRACE_LEVEL_CRITICAL. ]*/
-static void log_sink_etw_log_does_not_register_when_already_registered(void)
+static void log_sink_etw_log_with_LOG_LEVEL_CRITICAL_succeeds(void)
 {
     test_message_with_level(LOG_LEVEL_CRITICAL, TRACE_LEVEL_CRITICAL, "LogCritical");
 }
@@ -2918,38 +2918,36 @@ int main(void)
     when_TraceLoggingRegister_fails_log_sink_etw_init_fails();
     log_sink_etw_init_works();
 
-    //log_sink_etw_log_with_NULL_message_format_returns();
-    //log_sink_etw_log_registers_the_provider_if_not_registered_already();
-    //log_sink_log_retries_until_state_is_not_registering();
-    //log_sink_etw_log_does_not_register_when_already_registered();
-    //log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
-    //log_sink_etw_log_with_LOG_LEVEL_WARNING_succeeds();
-    //log_sink_etw_log_with_LOG_LEVEL_INFO_succeeds();
-    //log_sink_etw_log_with_LOG_LEVEL_VERBOSE_succeeds();
-    //log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds();
-    //log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds();
-    //log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds_2();
-    //
-    //log_sink_etw_log_with_context_with_no_properties_succeeds();
-    //log_sink_etw_log_with_context_with_one_ascii_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_int64_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_uint64_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_int32_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_uint32_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_int16_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_uint16_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_int8_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_one_uint8_t_property_succeeds();
-    //log_sink_etw_log_with_context_with_all_property_types_succeeds();
-    //when_unknown_property_type_is_encountered_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
-    //when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
-    //when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_with_context_succeeds_and_emits_fields_for_each_property();
-    //when_size_of_metadata_exceeds_4096_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
-    //when_size_of_metadata_and_formatted_messages_exceeds_4096_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
-    //when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_places_properties_in_the_event();
-    //when_vsnprintf_fails_an_error_is_printed();
-    //when_size_of_metadata_and_formatted_messages_exceeds_4096_and_2nd_vsnprintf_fails_an_error_is_printed();
-    //when_a_parent_context_is_used_all_properties_are_emitted();
+    log_sink_etw_log_with_NULL_message_format_returns();
+    log_sink_etw_log_with_LOG_LEVEL_CRITICAL_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_WARNING_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_INFO_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_VERBOSE_succeeds();
+    log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds();
+    log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds_2();
+    
+    log_sink_etw_log_with_context_with_no_properties_succeeds();
+    log_sink_etw_log_with_context_with_one_ascii_property_succeeds();
+    log_sink_etw_log_with_context_with_one_int64_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_uint64_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_int32_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_uint32_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_int16_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_uint16_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_int8_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_uint8_t_property_succeeds();
+    log_sink_etw_log_with_context_with_all_property_types_succeeds();
+    when_unknown_property_type_is_encountered_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
+    when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
+    when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_with_context_succeeds_and_emits_fields_for_each_property();
+    when_size_of_metadata_exceeds_4096_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
+    when_size_of_metadata_and_formatted_messages_exceeds_4096_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
+    when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_places_properties_in_the_event();
+    when_vsnprintf_fails_an_error_is_printed();
+    when_size_of_metadata_and_formatted_messages_exceeds_4096_and_2nd_vsnprintf_fails_an_error_is_printed();
+    when_a_parent_context_is_used_all_properties_are_emitted();
 
     return 0;
 }
