@@ -22,6 +22,8 @@ typedef int (*LOG_SINK_INIT_FUNC)(void);
 
 Note: No other APIs (`deinit`, `log`) should be called while `init` executes.
 
+**SRS_LOG_SINK_ETW_01_092: [** If the module is already initialized, `log_sink_etw.init` shall fail and return a non-zero value. **]**
+
 **SRS_LOG_SINK_ETW_01_006: [** `log_sink_etw.init` shall register the ETW TraceLogging provider by calling `TraceLoggingRegister` (`TraceLoggingRegister_EventRegister_EventSetInformation`). **]**
 
 **SRS_LOG_SINK_ETW_01_008: [** `log_sink_etw.init` shall emit a `LOG_LEVEL_INFO` event as a self test, printing the fact that the provider was registered and from which executable (as obtained by calling `_get_pgmptr`). **]**
@@ -43,6 +45,8 @@ typedef void (*LOG_SINK_DEINIT_FUNC)(void);
 ```
 
 Note: No other APIs (`init`, `log`) should be called while `deinit` executes.
+
+**SRS_LOG_SINK_ETW_01_093: [** If the module is not initialized, `log_sink_etw.deinit` shall return. **]**
 
 **SRS_LOG_SINK_ETW_01_090: [** `log_sink_etw.deinit` shall call `TraceLoggingUnregister` to unregister the provider. **]**
 

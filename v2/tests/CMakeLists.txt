@@ -14,6 +14,7 @@ if(${run_unittests})
    if(WIN32)
       add_subdirectory(log_sink_etw_ut)
       add_subdirectory(log_sink_etw_2_ut)
+      add_subdirectory(log_sink_etw_without_init_ut)
    endif()
 endif()
 
