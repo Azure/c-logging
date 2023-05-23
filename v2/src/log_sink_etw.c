@@ -179,7 +179,6 @@ TRACELOGGING_DEFINE_PROVIDER(
     (0xDAD29F36, 0x0A48, 0x4DEF, 0x9D, 0x50, 0x8E, 0xF9, 0x03, 0x6B, 0x92, 0xB4));
 /*DAD29F36-0A48-4DEF-9D50-8EF9036B92B4*/
 
-/* Codes_SRS_LOG_SINK_ETW_01_002: [ log_sink_etw_log shall maintain the state of whether TraceLoggingRegister was called in a variable accessed via InterlockedXXX APIs, which shall have 3 possible values: NOT_REGISTERED (1), REGISTERING (2), REGISTERED(3). ]*/
 #define PROVIDER_STATE_VALUES \
     PROVIDER_STATE_NOT_REGISTERED, \
     PROVIDER_STATE_REGISTERING, \
