@@ -251,4 +251,9 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
     }
 }
 
-const LOG_SINK_IF log_sink_console = { .log = log_sink_console_log };
+const LOG_SINK_IF log_sink_console =
+{
+    .init = log_sink_console_init,
+    .deinit = log_sink_console_deinit,
+    .log = log_sink_console_log
+};

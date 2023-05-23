@@ -231,6 +231,8 @@ static void log_sink_console_with_a_context_with_string_works(void)
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
+    log_sink_console.init();
+
     log_sink_console_prints_an_empty_string();
 
     log_sink_console_prints_with_CRITICAL_a_simple_log();
@@ -253,6 +255,8 @@ int main(void)
     log_sink_console_with_a_dynamically_allocated_context_works();
 
     log_sink_console_with_a_context_with_string_works();
+
+    log_sink_console.deinit();
 
     return 0;
 }
