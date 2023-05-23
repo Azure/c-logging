@@ -441,25 +441,18 @@ static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
 
     // assert
 
-    // 2 events expected: one self and one for the actual event
-    wait_for_event_count(test_context, 2);
+    // 1 events expected
+    wait_for_event_count(test_context, 1);
 
     stop_trace(test_context, trace_session_handle);
     stop_parse_events(test_context);
 
-    // self test event
-    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].event_name, "LogInfo") == 0);
-    POOR_MANS_ASSERT(strlen(test_context->parsed_events[0].content) > 0);
-    POOR_MANS_ASSERT(strlen(test_context->parsed_events[0].file) > 0);
-    POOR_MANS_ASSERT(strlen(test_context->parsed_events[0].func) > 0);
-    POOR_MANS_ASSERT(test_context->parsed_events[0].line != 0);
-
     // error event
-    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[1].event_name, "LogError") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[1].content, "test") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[1].file, __FILE__) == 0);
-    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[1].func, __FUNCTION__) == 0);
-    POOR_MANS_ASSERT(test_context->parsed_events[1].line == captured_line);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].event_name, "LogError") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].content, "test") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].line == captured_line);
 
     test_context_destroy(test_context);
 }
