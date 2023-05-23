@@ -550,59 +550,33 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
     va_end(args);
 }
 
-static void internal_log_sink_etw_lazy_register_provider(void)
-{
-    LONG state;
-
-    /* Codes_SRS_LOG_SINK_ETW_01_003: [ log_sink_etw_log shall perform the below actions until the provider is registered or an error is encountered: ]*/
-    /* Codes_SRS_LOG_SINK_ETW_01_004: [ If the state is NOT_REGISTERED (1): ]*/
-    /* Codes_SRS_LOG_SINK_ETW_01_005: [ log_sink_etw_log shall switch the state to REGISTERING (2). ]*/
-    /* Codes_SRS_LOG_SINK_ETW_01_009: [ Checking and changing the variable that maintains whether TraceLoggingRegister was called shall be done using InterlockedCompareExchange and InterlockedExchange. ]*/
-    /* Codes_SRS_LOG_SINK_ETW_01_011: [ If the state is REGISTERED (3), log_sink_etw_log shall proceed to log the ETW event. ]*/
-    /* Codes_SRS_LOG_SINK_ETW_01_087: [ If the state is REGISTERING (2) log_sink_etw_log shall wait until the state is not REGISTERING (2). ]*/
-    while ((state = InterlockedCompareExchange(&etw_provider_state, PROVIDER_STATE_REGISTERING, PROVIDER_STATE_NOT_REGISTERED)) != PROVIDER_STATE_REGISTERED)
-    {
-        if (state == PROVIDER_STATE_NOT_REGISTERED)
-        {
-            /* Codes_SRS_LOG_SINK_ETW_01_006: [ log_sink_etw_log shall register the ETW TraceLogging provider by calling TraceLoggingRegister (TraceLoggingRegister_EventRegister_EventSetInformation). ]*/
-            TLG_STATUS register_result = TraceLoggingRegister(log_sink_etw_provider);
-            if (SUCCEEDED(register_result))
-            {
-                /* Codes_SRS_LOG_SINK_ETW_01_007: [ log_sink_etw_log shall switch the state to REGISTERED. ]*/
-                (void)InterlockedExchange(&etw_provider_state, PROVIDER_STATE_REGISTERED);
-                /* Codes_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw_log shall printf the fact that the provider was registered and from which executable (as obtained by calling _pgmptr). ]*/
-
-                char* temp_executable_full_path_name;
-                const char* executable_full_path_name;
-
-                if (_get_pgmptr(&temp_executable_full_path_name) != 0)
-                {
-                    /* Codes_SRS_LOG_SINK_ETW_01_083: [ If _get_pgmptr fails, the executable shall be printed as UNKNOWN. ]*/
-                    executable_full_path_name = "UNKNOWN";
-                }
-                else
-                {
-                    executable_full_path_name = temp_executable_full_path_name;
-                }
-
-                /* Codes_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw_log shall emit a LOG_LEVEL_INFO event as a self test , printing the fact that the provider was registered and from which executable (as obtained by calling _get_pgmptr). ]*/
-                internal_emit_self_described_event(event_name_info, sizeof(event_name_info), TRACE_LEVEL_INFORMATION, NULL, 0, __FILE__, __FUNCTION__, __LINE__, "ETW provider was registered succesfully (self test). Executable file full path name = %s", executable_full_path_name);
-
-                break;
-            }
-            else
-            {
-                /* Codes_SRS_LOG_SINK_ETW_01_088: [ If TraceLoggingRegister fails, the state shall be switched to NOT_REGISTERED (1). ]*/
-                (void)printf("ETW provider was NOT registered (register_result=0x%08x).\r\n", register_result);
-                (void)InterlockedExchange(&etw_provider_state, PROVIDER_STATE_NOT_REGISTERED);
-            }
-        }
-    }
-}
-
 static void log_sink_etw_init(void)
 {
-    /* Codes_SRS_LOG_SINK_ETW_01_089: [ log_sink_etw.init shall return. ] */
+    /* Codes_SRS_LOG_SINK_ETW_01_006: [ log_sink_etw.init shall register the ETW TraceLogging provider by calling TraceLoggingRegister (TraceLoggingRegister_EventRegister_EventSetInformation). ]*/
+    TLG_STATUS register_result = TraceLoggingRegister(log_sink_etw_provider);
+    if (SUCCEEDED(register_result))
+    {
+        char* temp_executable_full_path_name;
+        const char* executable_full_path_name;
+
+        if (_get_pgmptr(&temp_executable_full_path_name) != 0)
+        {
+            /* Codes_SRS_LOG_SINK_ETW_01_083: [ If _get_pgmptr fails, the executable shall be printed as UNKNOWN. ]*/
+            executable_full_path_name = "UNKNOWN";
+        }
+        else
+        {
+            executable_full_path_name = temp_executable_full_path_name;
+        }
+
+        /* Codes_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw.init shall emit a LOG_LEVEL_INFO event as a self test, printing the fact that the provider was registered and from which executable (as obtained by calling _get_pgmptr). ]*/
+        internal_emit_self_described_event(event_name_info, sizeof(event_name_info), TRACE_LEVEL_INFORMATION, NULL, 0, __FILE__, __FUNCTION__, __LINE__, "ETW provider was registered succesfully (self test). Executable file full path name = %s", executable_full_path_name);
+    }
+    else
+    {
+        /* Codes_SRS_LOG_SINK_ETW_01_088: [ If TraceLoggingRegister fails, the state shall be switched to NOT_REGISTERED (1). ]*/
+        (void)printf("ETW provider was NOT registered (register_result=0x%08x).\r\n", register_result);
+    }
 }
 
 static void log_sink_etw_deinit(void)
@@ -623,10 +597,6 @@ static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context
         const LOG_CONTEXT_PROPERTY_VALUE_PAIR* value_pairs;
         uint16_t values_count;
 
-        internal_log_sink_etw_lazy_register_provider();
-
-        /* Codes_SRS_LOG_SINK_ETW_01_010: [ log_sink_etw_log shall emit a self described event that shall have the name of the event as follows: ]*/
-
         if (log_context != NULL)
         {
             /* Codes_SRS_LOG_SINK_ETW_01_048: [ If log_context is not NULL: ]*/
@@ -646,6 +616,7 @@ static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context
         va_list args;
         va_start(args, message_format);
 
+        /* Codes_SRS_LOG_SINK_ETW_01_010: [ log_sink_etw_log shall emit a self described event that shall have the name of the event as follows: ]*/
         switch (log_level)
         {
         default:

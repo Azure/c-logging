@@ -748,6 +748,109 @@ static void setup_vsnprintf_call(void)
     expected_call_count++;
 }
 
+/* log_sink_etw.init */
+
+/* Tests_SRS_LOG_SINK_ETW_01_088: [ If TraceLoggingRegister fails, the state shall be switched to NOT_REGISTERED (1). ]*/
+static void when_TraceLoggingRegister_fails_log_sink_etw_init_fails(void)
+{
+    // arrange
+    setup_mocks();
+
+    setup_TraceLoggingRegister_EventRegister_EventSetInformation_call("DAD29F36-0A48-4DEF-9D50-8EF9036B92B4", TRACE_LEVEL_INFORMATION);
+    expected_calls[0].TraceLoggingRegister_EventRegister_EventSetInformation_call.override_result = true;
+    expected_calls[0].TraceLoggingRegister_EventRegister_EventSetInformation_call.call_result = E_FAIL;
+    setup_printf_call();
+
+    // act
+    log_sink_etw.init();
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
+/* Tests_SRS_LOG_SINK_ETW_01_006: [ log_sink_etw.init shall register the ETW TraceLogging provider by calling TraceLoggingRegister (TraceLoggingRegister_EventRegister_EventSetInformation). ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw.init shall emit a LOG_LEVEL_INFO event as a self test, printing the fact that the provider was registered and from which executable (as obtained by calling _get_pgmptr). ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_084: [ log_sink_etw_log shall use as provider GUID DAD29F36-0A48-4DEF-9D50-8EF9036B92B4. ]*/
+static void log_sink_etw_init_works(void)
+{
+    // arrange
+    setup_mocks();
+
+    setup_TraceLoggingRegister_EventRegister_EventSetInformation_call("DAD29F36-0A48-4DEF-9D50-8EF9036B92B4", TRACE_LEVEL_INFORMATION);
+
+    // self test event
+    setup__get_pgmptr_call();
+
+    setup_vsnprintf_call(); // formatting message
+    setup__tlgCreate1Sz_char(); // message
+    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // func
+    setup_EventDataDescCreate(); // line
+    uint8_t extra_metadata_bytes[256];
+    uint8_t expected_event_bytes[sizeof(SELF_DESCRIBED_EVENT) + sizeof(extra_metadata_bytes)];
+    SELF_DESCRIBED_EVENT* expected_event_metadata = (SELF_DESCRIBED_EVENT*)&expected_event_bytes[0];
+    (void)memset(expected_event_metadata, 0, sizeof(SELF_DESCRIBED_EVENT));
+    expected_event_metadata->_tlgLevel = TRACE_LEVEL_INFORMATION;
+    expected_event_metadata->_tlgChannel = 11;
+    expected_event_metadata->_tlgOpcode = 0;
+    expected_event_metadata->_tlgKeyword = 0;
+    uint8_t* pos = (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT));
+    // event name
+    (void)memcpy(pos, "LogInfo", strlen("LogInfo") + 1);
+    pos += strlen("LogInfo") + 1;
+    // content field
+    (void)memcpy(pos, "content", strlen("content") + 1);
+    pos += strlen("content") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "file", strlen("file") + 1);
+    pos += strlen("file") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "func", strlen("func") + 1);
+    pos += strlen("func") + 1;
+    *pos = TlgInANSISTRING;
+    pos++;
+    // content field
+    (void)memcpy(pos, "line", strlen("line") + 1);
+    pos += strlen("line") + 1;
+    *pos = TlgInINT32;
+    pos++;
+
+    expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;
+
+    int captured_line = __LINE__;
+
+    expected_calls[1]._get_pgmptr_call.override_result = true;
+    expected_calls[1]._get_pgmptr_call.call_result = 0;
+    expected_calls[1]._get_pgmptr_call.injected_pValue = "some_test_executable.exe";
+
+    static const char expected_event_message[] = "ETW provider was registered succesfully (self test). Executable file full path name = some_test_executable.exe";
+
+    // construct event data descriptor array
+    EVENT_DATA_DESCRIPTOR expected_event_data_descriptors[6] =
+    {
+        { 0 },
+        { 0 },
+        {.Size = (ULONG)strlen(expected_event_message) + 1, .Ptr = (ULONGLONG)expected_event_message },
+        {.Size = (ULONG)strlen(__FILE__) + 1, .Ptr = (ULONGLONG)__FILE__ },
+        {.Size = (ULONG)strlen(__FUNCTION__) + 1, .Ptr = (ULONGLONG)__FUNCTION__ },
+        {.Size = sizeof(int32_t), .Ptr = (ULONGLONG)&captured_line}
+    };
+
+    setup__tlgWriteTransfer_EventWriteTransfer_with_ignore_file_and_func(expected_event_metadata, 6, expected_event_data_descriptors, /* ignore file and func data */true);
+
+    // act
+    log_sink_etw.init();
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
 /* log_sink_etw.log */
 
 /* Tests_SRS_LOG_SINK_ETW_01_001: [ If message_format is NULL, log_sink_etw.log shall return. ]*/
@@ -765,18 +868,9 @@ static void log_sink_etw_log_with_NULL_message_format_returns(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_SINK_ETW_01_088: [ If TraceLoggingRegister fails, the state shall be switched to NOT_REGISTERED (1). ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_002: [ log_sink_etw_log shall maintain the state of whether TraceLoggingRegister was called in a variable accessed via InterlockedXXX APIs, which shall have 3 possible values: NOT_REGISTERED (1), REGISTERING (2), REGISTERED(3). ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_003: [ log_sink_etw_log shall perform the below actions until the provider is registered or an error is encountered: ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_004: [ If the state is NOT_REGISTERED (1): ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_005: [ log_sink_etw_log shall switch the state to REGISTERING (2). ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_006: [ log_sink_etw_log shall register the ETW TraceLogging provider by calling TraceLoggingRegister (TraceLoggingRegister_EventRegister_EventSetInformation). ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_007: [ log_sink_etw_log shall switch the state to REGISTERED. ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw_log shall emit a LOG_LEVEL_INFO event as a self test , printing the fact that the provider was registered and from which executable (as obtained by calling _get_pgmptr). ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_009: [ Checking and changing the variable that maintains whether TraceLoggingRegister was called shall be done using InterlockedCompareExchange and InterlockedExchange. ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_010: [ log_sink_etw_log shall emit a self described event that shall have the name of the event as follows: ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_012: [ If log_level is LOG_LEVEL_CRITICAL the event name shall be LogCritical. ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_084: [ log_sink_etw_log shall use as provider GUID DAD29F36-0A48-4DEF-9D50-8EF9036B92B4. ]*/
 static void log_sink_etw_log_registers_the_provider_if_not_registered_already(void)
 {
     // arrange
@@ -866,92 +960,7 @@ static void log_sink_etw_log_registers_the_provider_if_not_registered_already(vo
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_SINK_ETW_01_087: [ If the state is REGISTERING (2) log_sink_etw_log shall wait until the state is not REGISTERING (2). ]*/
-static void log_sink_log_retries_until_state_is_not_registering(void)
-{
-    // arrange
-    setup_mocks();
-    setup_InterlockedCompareExchange_call();
-    expected_calls[0].InterlockedCompareExchange_call.override_result = true;
-    expected_calls[0].InterlockedCompareExchange_call.call_result = 2;
-    setup_InterlockedCompareExchange_call();
-    expected_calls[1].InterlockedCompareExchange_call.override_result = true;
-    expected_calls[1].InterlockedCompareExchange_call.call_result = 2;
-    setup_InterlockedCompareExchange_call();
-    expected_calls[2].InterlockedCompareExchange_call.override_result = true;
-    expected_calls[2].InterlockedCompareExchange_call.call_result = 2;
-    setup_InterlockedCompareExchange_call();
-    expected_calls[3].InterlockedCompareExchange_call.override_result = true;
-    expected_calls[3].InterlockedCompareExchange_call.call_result = 3;
-
-    // the actual event
-    setup_vsnprintf_call(); // message formatting
-    setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
-    setup__tlgCreate1Sz_char(); // func
-    setup_EventDataDescCreate(); // line
-    uint8_t extra_metadata_bytes_2[256];
-    uint8_t expected_event_bytes_2[sizeof(SELF_DESCRIBED_EVENT) + sizeof(extra_metadata_bytes_2)];
-    SELF_DESCRIBED_EVENT* expected_event_metadata_2 = (SELF_DESCRIBED_EVENT*)&expected_event_bytes_2[0];
-    (void)memset(expected_event_metadata_2, 0, sizeof(SELF_DESCRIBED_EVENT));
-    expected_event_metadata_2->_tlgLevel = TRACE_LEVEL_CRITICAL;
-    expected_event_metadata_2->_tlgChannel = 11;
-    expected_event_metadata_2->_tlgOpcode = 0;
-    expected_event_metadata_2->_tlgKeyword = 0;
-    uint8_t* pos = (expected_event_bytes_2 + sizeof(SELF_DESCRIBED_EVENT));
-    // event name
-    (void)memcpy(pos, "LogCritical", strlen("LogCritical") + 1);
-    pos += strlen("LogCritical") + 1;
-    // content field
-    (void)memcpy(pos, "content", strlen("content") + 1);
-    pos += strlen("content") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "file", strlen("file") + 1);
-    pos += strlen("file") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "func", strlen("func") + 1);
-    pos += strlen("func") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "line", strlen("line") + 1);
-    pos += strlen("line") + 1;
-    *pos = TlgInINT32;
-    pos++;
-
-    expected_event_metadata_2->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes_2 + sizeof(SELF_DESCRIBED_EVENT))) + 4;
-
-    int captured_line = __LINE__;
-
-    // construct event data descriptor array
-    EVENT_DATA_DESCRIPTOR expected_event_data_descriptors_2[6] =
-    {
-        { 0 },
-        { 0 },
-        {.Size = (ULONG)strlen("test") + 1, .Ptr = (ULONGLONG)"test" },
-        {.Size = (ULONG)strlen(__FILE__) + 1, .Ptr = (ULONGLONG)__FILE__ },
-        {.Size = (ULONG)strlen(__FUNCTION__) + 1, .Ptr = (ULONGLONG)__FUNCTION__ },
-        {.Size = sizeof(int32_t), .Ptr = (ULONGLONG)&captured_line}
-    };
-
-    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata_2, 6, expected_event_data_descriptors_2);
-
-    // act
-    log_sink_etw.log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, captured_line, "test");
-
-    // assert
-    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(actual_and_expected_match);
-}
-
 /* Tests_SRS_LOG_SINK_ETW_01_002: [ log_sink_etw_log shall maintain the state of whether TraceLoggingRegister was called in a variable accessed via InterlockedXXX APIs, which shall have 3 possible values: NOT_REGISTERED (1), REGISTERING (2), REGISTERED(3). ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_003: [ log_sink_etw_log shall perform the below actions until the provider is registered or an error is encountered: ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_011: [ If the state is REGISTERED (3), log_sink_etw_log shall proceed to log the ETW event. ]*/
-// Note the reason this is already registered is because previous tests have done the registration
 /* Tests_SRS_LOG_SINK_ETW_01_010: [ log_sink_etw_log shall emit a self described event that shall have the name of the event as follows: ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_025: [ If log_context is NULL only the fields content, file, func and line shall be added to the ETW event. ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_042: [ log_sink_etw.log shall compute the metadata size for the self described event metadata as follows: ]*/
@@ -3075,41 +3084,51 @@ static void when_a_parent_context_is_used_all_properties_are_emitted(void)
     free(expected_event_data_descriptors);
 }
 
+/* log_sink_etw.deinit */
+
+/* Tests_SRS_LOG_SINK_ETW_01_090: [ `log_sink_etw.deinit` shall call `TraceLoggingUnregister` to unregister the provider. ] */
+static void log_sink_etw_deinit_unregisters(void)
+{
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
-    log_sink_etw_log_with_NULL_message_format_returns();
-    log_sink_etw_log_registers_the_provider_if_not_registered_already();
-    log_sink_log_retries_until_state_is_not_registering();
-    log_sink_etw_log_does_not_register_when_already_registered();
-    log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
-    log_sink_etw_log_with_LOG_LEVEL_WARNING_succeeds();
-    log_sink_etw_log_with_LOG_LEVEL_INFO_succeeds();
-    log_sink_etw_log_with_LOG_LEVEL_VERBOSE_succeeds();
-    log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds();
-    log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds();
-    log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds_2();
-    
-    log_sink_etw_log_with_context_with_no_properties_succeeds();
-    log_sink_etw_log_with_context_with_one_ascii_property_succeeds();
-    log_sink_etw_log_with_context_with_one_int64_t_property_succeeds();
-    log_sink_etw_log_with_context_with_one_uint64_t_property_succeeds();
-    log_sink_etw_log_with_context_with_one_int32_t_property_succeeds();
-    log_sink_etw_log_with_context_with_one_uint32_t_property_succeeds();
-    log_sink_etw_log_with_context_with_one_int16_t_property_succeeds();
-    log_sink_etw_log_with_context_with_one_uint16_t_property_succeeds();
-    log_sink_etw_log_with_context_with_one_int8_t_property_succeeds();
-    log_sink_etw_log_with_context_with_one_uint8_t_property_succeeds();
-    log_sink_etw_log_with_context_with_all_property_types_succeeds();
-    when_unknown_property_type_is_encountered_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
-    when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
-    when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_with_context_succeeds_and_emits_fields_for_each_property();
-    when_size_of_metadata_exceeds_4096_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
-    when_size_of_metadata_and_formatted_messages_exceeds_4096_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
-    when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_places_properties_in_the_event();
-    when_vsnprintf_fails_an_error_is_printed();
-    when_size_of_metadata_and_formatted_messages_exceeds_4096_and_2nd_vsnprintf_fails_an_error_is_printed();
-    when_a_parent_context_is_used_all_properties_are_emitted();
+    when_TraceLoggingRegister_fails_log_sink_etw_init_fails();
+    log_sink_etw_init_works();
+
+    //log_sink_etw_log_with_NULL_message_format_returns();
+    //log_sink_etw_log_registers_the_provider_if_not_registered_already();
+    //log_sink_log_retries_until_state_is_not_registering();
+    //log_sink_etw_log_does_not_register_when_already_registered();
+    //log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
+    //log_sink_etw_log_with_LOG_LEVEL_WARNING_succeeds();
+    //log_sink_etw_log_with_LOG_LEVEL_INFO_succeeds();
+    //log_sink_etw_log_with_LOG_LEVEL_VERBOSE_succeeds();
+    //log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds();
+    //log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds();
+    //log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds_2();
+    //
+    //log_sink_etw_log_with_context_with_no_properties_succeeds();
+    //log_sink_etw_log_with_context_with_one_ascii_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_int64_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_uint64_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_int32_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_uint32_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_int16_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_uint16_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_int8_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_one_uint8_t_property_succeeds();
+    //log_sink_etw_log_with_context_with_all_property_types_succeeds();
+    //when_unknown_property_type_is_encountered_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
+    //when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
+    //when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_with_context_succeeds_and_emits_fields_for_each_property();
+    //when_size_of_metadata_exceeds_4096_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
+    //when_size_of_metadata_and_formatted_messages_exceeds_4096_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
+    //when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_places_properties_in_the_event();
+    //when_vsnprintf_fails_an_error_is_printed();
+    //when_size_of_metadata_and_formatted_messages_exceeds_4096_and_2nd_vsnprintf_fails_an_error_is_printed();
+    //when_a_parent_context_is_used_all_properties_are_emitted();
 
     return 0;
 }

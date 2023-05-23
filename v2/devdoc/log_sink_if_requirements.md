@@ -23,9 +23,13 @@ typedef struct LOG_SINK_IF_TAG
 
 `init` initializes a given sink. `init` is called once - upon logging system initialization - in order to make ure that `log` can perform its duties.
 
+Note: No other APIs (`deinit`, `log`) should be called while `init` executes.
+
 ### deinit
 
 `deinit` de-initializes a given sink.
+
+Note: No other APIs (`init`, `log`) should be called while `deinit` executes.
 
 ### log
 
