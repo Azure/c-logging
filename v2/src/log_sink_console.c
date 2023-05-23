@@ -138,6 +138,16 @@ static int log_n_properties(char* buffer, size_t buffer_size, const LOG_CONTEXT_
     return result;
 }
 
+static void log_sink_console_init(void)
+{
+    /* Codes_SRS_LOG_SINK_CONSOLE_01_027: [ log_sink_console.init shall return. ] */
+}
+
+static void log_sink_console_deinit(void)
+{
+    /* Codes_SRS_LOG_SINK_CONSOLE_01_028: [ log_sink_console.deinit shall return. ] */
+}
+
 static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...)
 {
     if (message_format == NULL)

@@ -16,7 +16,7 @@ The signature of `log_sink_console.init` is:
 typedef void (*LOG_SINK_INIT_FUNC)(void);
 ```
 
-`log_sink_console.init` shall return. Note: No initialization is needed for the console sink.
+**SRS_LOG_SINK_CONSOLE_01_027: [** `log_sink_console.init` shall return. **]** Note: No initialization is needed for the console sink.
 
 ### log_sink_console.deinit
 
@@ -26,7 +26,7 @@ The signature of `log_sink_console.deinit` is:
 typedef void (*LOG_SINK_DEINIT_FUNC)(void);
 ```
 
-`log_sink_console.deinit` shall return.
+**SRS_LOG_SINK_CONSOLE_01_028: [** `log_sink_console.deinit` shall return. **]**
 
 ### log_sink_console.log
 

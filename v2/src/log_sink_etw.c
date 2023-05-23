@@ -600,6 +600,16 @@ static void internal_log_sink_etw_lazy_register_provider(void)
     }
 }
 
+static void log_sink_etw_init(void)
+{
+    /* Codes_SRS_LOG_SINK_ETW_01_089: [ log_sink_etw.init shall return. ] */
+}
+
+static void log_sink_etw_deinit(void)
+{
+    /* Codes_SRS_LOG_SINK_ETW_01_090: [ log_sink_etw.deinit shall return. ] */
+}
+
 static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...)
 {
     if (message_format == NULL)
@@ -674,4 +684,9 @@ static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context
     }
 }
 
-const LOG_SINK_IF log_sink_etw = { .log = log_sink_etw_log };
+const LOG_SINK_IF log_sink_etw =
+{
+    .init = log_sink_etw_init,
+    .deinit = log_sink_etw_deinit,
+    .log = log_sink_etw_log
+};
