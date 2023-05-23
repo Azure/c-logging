@@ -425,7 +425,7 @@ static void validate_log_line_with_NULL_time(const char* actual_string, const ch
 
 /* log_sink_console.init */
 
-/* Tests_SRS_LOG_SINK_CONSOLE_01_027: [ log_sink_console.init shall return. ] */
+/* Tests_SRS_LOG_SINK_CONSOLE_01_027: [ log_sink_console.init shall return 0. ] */
 static void log_sink_console_init_returns(void)
 {
     // arrange

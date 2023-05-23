@@ -709,7 +709,7 @@ static void setup_TraceLoggingUnregister(void)
 
 /* log_sink_etw.init */
 
-/* Tests_SRS_LOG_SINK_ETW_01_088: [ If TraceLoggingRegister fails, the state shall be switched to NOT_REGISTERED (1). ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_088: [ If TraceLoggingRegister fails, log_sink_etw.init shall fail and return a non-zero value. ]*/
 static void when_TraceLoggingRegister_fails_log_sink_etw_init_fails(void)
 {
     // arrange
@@ -721,7 +721,7 @@ static void when_TraceLoggingRegister_fails_log_sink_etw_init_fails(void)
     setup_printf_call();
 
     // act
-    log_sink_etw.init();
+    POOR_MANS_ASSERT(log_sink_etw.init() != 0);
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -731,6 +731,7 @@ static void when_TraceLoggingRegister_fails_log_sink_etw_init_fails(void)
 /* Tests_SRS_LOG_SINK_ETW_01_006: [ log_sink_etw.init shall register the ETW TraceLogging provider by calling TraceLoggingRegister (TraceLoggingRegister_EventRegister_EventSetInformation). ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw.init shall emit a LOG_LEVEL_INFO event as a self test, printing the fact that the provider was registered and from which executable (as obtained by calling _get_pgmptr). ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_084: [ log_sink_etw_log shall use as provider GUID DAD29F36-0A48-4DEF-9D50-8EF9036B92B4. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_091: [ log_sink_etw.init shall succeed and return 0. ] */
 static void log_sink_etw_init_works(void)
 {
     // arrange
@@ -803,7 +804,7 @@ static void log_sink_etw_init_works(void)
     setup__tlgWriteTransfer_EventWriteTransfer_with_ignore_file_and_func(expected_event_metadata, 6, expected_event_data_descriptors, /* ignore file and func data */true);
 
     // act
-    log_sink_etw.init();
+    POOR_MANS_ASSERT(log_sink_etw.init() == 0);
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -2938,7 +2939,7 @@ static void when_a_parent_context_is_used_all_properties_are_emitted(void)
 
 /* log_sink_etw.deinit */
 
-/* Tests_SRS_LOG_SINK_ETW_01_090: [ `log_sink_etw.deinit` shall call `TraceLoggingUnregister` to unregister the provider. ] */
+/* Tests_SRS_LOG_SINK_ETW_01_090: [ log_sink_etw.deinit shall call TraceLoggingUnregister to unregister the provider. ] */
 static void log_sink_etw_deinit_unregisters(void)
 {
     // arrange

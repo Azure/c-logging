@@ -138,9 +138,10 @@ static int log_n_properties(char* buffer, size_t buffer_size, const LOG_CONTEXT_
     return result;
 }
 
-static void log_sink_console_init(void)
+static int log_sink_console_init(void)
 {
-    /* Codes_SRS_LOG_SINK_CONSOLE_01_027: [ log_sink_console.init shall return. ] */
+    /* Codes_SRS_LOG_SINK_CONSOLE_01_027: [ log_sink_console.init shall return 0. ] */
+    return 0;
 }
 
 static void log_sink_console_deinit(void)

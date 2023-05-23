@@ -13,10 +13,10 @@
 The signature of `log_sink_console.init` is:
 
 ```c
-typedef void (*LOG_SINK_INIT_FUNC)(void);
+typedef int (*LOG_SINK_INIT_FUNC)(void);
 ```
 
-**SRS_LOG_SINK_CONSOLE_01_027: [** `log_sink_console.init` shall return. **]** Note: No initialization is needed for the console sink.
+**SRS_LOG_SINK_CONSOLE_01_027: [** `log_sink_console.init` shall return 0. **]** Note: No initialization is needed for the console sink.
 
 ### log_sink_console.deinit
 

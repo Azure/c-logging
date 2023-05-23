@@ -17,7 +17,7 @@
 The signature of `log_sink_etw.init` is:
 
 ```c
-typedef void (*LOG_SINK_INIT_FUNC)(void);
+typedef int (*LOG_SINK_INIT_FUNC)(void);
 ```
 
 Note: No other APIs (`deinit`, `log`) should be called while `init` executes.
@@ -28,7 +28,9 @@ Note: No other APIs (`deinit`, `log`) should be called while `init` executes.
 
 **SRS_LOG_SINK_ETW_01_084: [** `log_sink_etw_log` shall use as provider GUID `DAD29F36-0A48-4DEF-9D50-8EF9036B92B4`. **]**
 
-**SRS_LOG_SINK_ETW_01_088: [** If `TraceLoggingRegister` fails, the state shall be switched to `NOT_REGISTERED` (1). **]**
+**SRS_LOG_SINK_ETW_01_091: [** `log_sink_etw.init` shall succeed and return 0. **]**
+
+**SRS_LOG_SINK_ETW_01_088: [** If `TraceLoggingRegister` fails, `log_sink_etw.init` shall fail and return a non-zero value. **]**
 
 Note: More interesting initialization for the module will come in a subsequent PR.
 

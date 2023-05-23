@@ -751,11 +751,15 @@ static void log_sink_etw_log_with_context_with_nested_structs(void)
 /* very "poor man's" way of testing, as no test harness available */
 int main(void)
 {
+    POOR_MANS_ASSERT(log_sink_etw.init() == 0);
+
     log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
     log_sink_etw_log_all_levels_when_all_levels_enabled_succeeds();
     log_sink_etw_log_each_individual_level();
     log_sink_etw_log_with_context_with_properties();
     log_sink_etw_log_with_context_with_nested_structs();
+
+    log_sink_etw.deinit();
 
     return 0;
 }

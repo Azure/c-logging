@@ -549,11 +549,20 @@ static void internal_emit_self_described_event(const char* event_name, uint16_t 
     va_end(args);
 }
 
-static void log_sink_etw_init(void)
+static int log_sink_etw_init(void)
 {
+    int result;
+
     /* Codes_SRS_LOG_SINK_ETW_01_006: [ log_sink_etw.init shall register the ETW TraceLogging provider by calling TraceLoggingRegister (TraceLoggingRegister_EventRegister_EventSetInformation). ]*/
     TLG_STATUS register_result = TraceLoggingRegister(log_sink_etw_provider);
-    if (SUCCEEDED(register_result))
+    if (!SUCCEEDED(register_result))
+    {
+        /* Codes_SRS_LOG_SINK_ETW_01_088: [ If TraceLoggingRegister fails, log_sink_etw.init shall fail and return a non-zero value. ]*/
+        (void)printf("ETW provider was NOT registered (register_result=0x%08x).\r\n", register_result);
+
+        result = MU_FAILURE;
+    }
+    else
     {
         char* temp_executable_full_path_name;
         const char* executable_full_path_name;
@@ -570,12 +579,12 @@ static void log_sink_etw_init(void)
 
         /* Codes_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw.init shall emit a LOG_LEVEL_INFO event as a self test, printing the fact that the provider was registered and from which executable (as obtained by calling _get_pgmptr). ]*/
         internal_emit_self_described_event(event_name_info, sizeof(event_name_info), TRACE_LEVEL_INFORMATION, NULL, 0, __FILE__, __FUNCTION__, __LINE__, "ETW provider was registered succesfully (self test). Executable file full path name = %s", executable_full_path_name);
+
+        /* Codes_SRS_LOG_SINK_ETW_01_091: [ log_sink_etw.init shall succeed and return 0. ] */
+        result = 0;
     }
-    else
-    {
-        /* Codes_SRS_LOG_SINK_ETW_01_088: [ If TraceLoggingRegister fails, the state shall be switched to NOT_REGISTERED (1). ]*/
-        (void)printf("ETW provider was NOT registered (register_result=0x%08x).\r\n", register_result);
-    }
+
+    return result;
 }
 
 static void log_sink_etw_deinit(void)

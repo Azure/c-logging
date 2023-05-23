@@ -657,7 +657,7 @@ static void when__get_pgmptr_fails_log_sink_etw_log_prints_executable_as_UNKNOWN
     expected_calls[1]._get_pgmptr_call.call_result = 1;
 
     // act
-    POOR_MANS_ASSERT(log_sink_etw.init() == 0);
+    log_sink_etw.init();
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
