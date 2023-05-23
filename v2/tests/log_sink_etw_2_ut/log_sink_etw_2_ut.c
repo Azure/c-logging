@@ -701,6 +701,9 @@ static void when__get_pgmptr_fails_log_sink_etw_log_prints_executable_as_UNKNOWN
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
+    // make abort not popup
+    _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+
     when__get_pgmptr_fails_log_sink_etw_log_prints_executable_as_UNKNOWN();
 
     return 0;

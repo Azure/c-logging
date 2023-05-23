@@ -2974,6 +2974,9 @@ static void log_sink_etw_deinit_after_deinit_returns(void)
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
+    // make abort not popup
+    _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+
     when_TraceLoggingRegister_fails_log_sink_etw_init_fails();
     log_sink_etw_init_works();
     log_sink_etw_init_after_init_fails();

@@ -657,6 +657,9 @@ static void when_module_is_not_initialized_deinit_returns(void)
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
+    // make abort not popup
+    _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+
     when_module_is_not_initialized_deinit_returns();
 
     return 0;

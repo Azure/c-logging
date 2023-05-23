@@ -751,6 +751,9 @@ static void log_sink_etw_log_with_context_with_nested_structs(void)
 /* very "poor man's" way of testing, as no test harness available */
 int main(void)
 {
+    // make abort not popup
+    _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+
     POOR_MANS_ASSERT(log_sink_etw.init() == 0);
 
     log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
