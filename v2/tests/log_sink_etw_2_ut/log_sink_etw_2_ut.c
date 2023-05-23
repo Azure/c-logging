@@ -30,8 +30,6 @@
 
 #define MOCK_CALL_TYPE_VALUES \
     MOCK_CALL_TYPE_printf, \
-    MOCK_CALL_TYPE_InterlockedCompareExchange, \
-    MOCK_CALL_TYPE_InterlockedExchange, \
     MOCK_CALL_TYPE_log_context_get_property_value_pair_count, \
     MOCK_CALL_TYPE_log_context_get_property_value_pairs, \
     MOCK_CALL_TYPE_TraceLoggingRegister_EventRegister_EventSetInformation, \
@@ -216,60 +214,6 @@ int mock_printf(const char* format, ...)
             va_start(args, format);
             result = vprintf(format, args);
             va_end(args);
-        }
-
-        actual_call_count++;
-    }
-
-    return result;
-}
-
-LONG mock_InterlockedCompareExchange(LONG volatile* Destination, LONG ExChange, LONG Comperand)
-{
-    int result;
-
-    if ((actual_call_count == expected_call_count) ||
-        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_InterlockedCompareExchange))
-    {
-        actual_and_expected_match = false;
-        result = -1;
-    }
-    else
-    {
-        if (expected_calls[actual_call_count].printf_call.override_result)
-        {
-            result = expected_calls[actual_call_count].InterlockedCompareExchange_call.call_result;
-        }
-        else
-        {
-            result = InterlockedCompareExchange(Destination, ExChange, Comperand);
-        }
-
-        actual_call_count++;
-    }
-
-    return result;
-}
-
-LONG mock_InterlockedExchange(LONG volatile* Target, LONG Value)
-{
-    int result;
-
-    if ((actual_call_count == expected_call_count) ||
-        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_InterlockedExchange))
-    {
-        actual_and_expected_match = false;
-        result = -1;
-    }
-    else
-    {
-        if (expected_calls[actual_call_count].printf_call.override_result)
-        {
-            result = expected_calls[actual_call_count].InterlockedExchange_call.call_result;
-        }
-        else
-        {
-            result = InterlockedExchange(Target, Value);
         }
 
         actual_call_count++;
@@ -583,20 +527,6 @@ static void setup_printf_call(void)
     expected_call_count++;
 }
 
-static void setup_InterlockedCompareExchange_call(void)
-{
-    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_InterlockedCompareExchange;
-    expected_calls[expected_call_count].InterlockedCompareExchange_call.override_result = false;
-    expected_call_count++;
-}
-
-static void setup_InterlockedExchange_call(void)
-{
-    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_InterlockedExchange;
-    expected_calls[expected_call_count].InterlockedExchange_call.override_result = false;
-    expected_call_count++;
-}
-
 static void setup_log_context_get_property_value_pair_count_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_log_context_get_property_value_pair_count;
@@ -662,9 +592,7 @@ static void when__get_pgmptr_fails_log_sink_etw_log_prints_executable_as_UNKNOWN
 {
     // arrange
     setup_mocks();
-    setup_InterlockedCompareExchange_call();
     setup_TraceLoggingRegister_EventRegister_EventSetInformation_call();
-    setup_InterlockedExchange_call();
 
     // self test event
     setup__get_pgmptr_call();
@@ -725,66 +653,11 @@ static void when__get_pgmptr_fails_log_sink_etw_log_prints_executable_as_UNKNOWN
 
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors, /* ignore file and func data */true);
 
-    // the actual event
-    setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
-    setup__tlgCreate1Sz_char(); // func
-    setup_EventDataDescCreate(); // line
-    uint8_t extra_metadata_bytes_2[256];
-    uint8_t expected_event_bytes_2[sizeof(SELF_DESCRIBED_EVENT) + sizeof(extra_metadata_bytes_2)];
-    SELF_DESCRIBED_EVENT* expected_event_metadata_2 = (SELF_DESCRIBED_EVENT*)&expected_event_bytes_2[0];
-    (void)memset(expected_event_metadata_2, 0, sizeof(SELF_DESCRIBED_EVENT));
-    expected_event_metadata_2->_tlgLevel = TRACE_LEVEL_CRITICAL;
-    expected_event_metadata_2->_tlgChannel = 11;
-    expected_event_metadata_2->_tlgOpcode = 0;
-    expected_event_metadata_2->_tlgKeyword = 0;
-    pos = (expected_event_bytes_2 + sizeof(SELF_DESCRIBED_EVENT));
-    // event name
-    (void)memcpy(pos, "LogCritical", strlen("LogCritical") + 1);
-    pos += strlen("LogCritical") + 1;
-    // content field
-    (void)memcpy(pos, "content", strlen("content") + 1);
-    pos += strlen("content") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "file", strlen("file") + 1);
-    pos += strlen("file") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "func", strlen("func") + 1);
-    pos += strlen("func") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "line", strlen("line") + 1);
-    pos += strlen("line") + 1;
-    *pos = TlgInINT32;
-    pos++;
-
-    expected_event_metadata_2->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes_2 + sizeof(SELF_DESCRIBED_EVENT))) + 4;
-
-    captured_line = __LINE__;
-
-    // construct event data descriptor array
-    EVENT_DATA_DESCRIPTOR expected_event_data_descriptors_2[6] =
-    {
-        { 0 },
-        { 0 },
-        {.Size = (ULONG)strlen("test") + 1, .Ptr = (ULONGLONG)"test" },
-        {.Size = (ULONG)strlen(__FILE__) + 1, .Ptr = (ULONGLONG)__FILE__ },
-        {.Size = (ULONG)strlen(__FUNCTION__) + 1, .Ptr = (ULONGLONG)__FUNCTION__ },
-        {.Size = sizeof(int32_t), .Ptr = (ULONGLONG)&captured_line}
-    };
-
-    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata_2, 6, expected_event_data_descriptors_2, false);
-
-    expected_calls[3]._get_pgmptr_call.override_result = true;
-    expected_calls[3]._get_pgmptr_call.call_result = 1;
+    expected_calls[1]._get_pgmptr_call.override_result = true;
+    expected_calls[1]._get_pgmptr_call.call_result = 1;
 
     // act
-    log_sink_etw.log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, captured_line, "test");
+    log_sink_etw.init();
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
