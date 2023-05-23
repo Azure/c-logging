@@ -12,6 +12,26 @@
     extern const LOG_SINK_IF log_sink_etw;
 ```
 
+### log_sink_etw.init
+
+The signature of `log_sink_etw.init` is:
+
+```c
+typedef void (*LOG_SINK_INIT_FUNC)(void);
+```
+
+`log_sink_etw.init` shall return. Note: More interesting initialization for the module will come in a subsequent PR.
+
+### log_sink_etw.deinit
+
+The signature of `log_sink_etw.deinit` is:
+
+```c
+typedef void (*LOG_SINK_DEINIT_FUNC)(void);
+```
+
+`log_sink_etw.deinit` shall return.
+
 ### log_sink_etw.log
 
 The signature of `log_sink_etw.log` is:
