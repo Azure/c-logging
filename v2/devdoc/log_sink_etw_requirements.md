@@ -26,7 +26,7 @@ Note: No other APIs (`deinit`, `log`) should be called while `init` executes.
 
 **SRS_LOG_SINK_ETW_01_008: [** `log_sink_etw.init` shall emit a `LOG_LEVEL_INFO` event as a self test, printing the fact that the provider was registered and from which executable (as obtained by calling `_get_pgmptr`). **]**
 
-**SRS_LOG_SINK_ETW_01_084: [** `log_sink_etw_log` shall use as provider GUID `DAD29F36-0A48-4DEF-9D50-8EF9036B92B4`. **]**
+**SRS_LOG_SINK_ETW_01_084: [** `log_sink_etw.init` shall use as provider GUID `DAD29F36-0A48-4DEF-9D50-8EF9036B92B4`. **]**
 
 **SRS_LOG_SINK_ETW_01_091: [** `log_sink_etw.init` shall succeed and return 0. **]**
 

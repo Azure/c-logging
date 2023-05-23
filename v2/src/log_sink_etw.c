@@ -172,7 +172,7 @@ static const char event_name_unknown[] = "Unknown";
 // ID Work Item Type Title State Assigned To Effort Remaining Work Original Estimate Value Area Iteration Path Tags
 // 17751591 Task Have configurable provider To Do           One\Custom\AzureMessaging\Gallium\GaM2
 
-/* Codes_SRS_LOG_SINK_ETW_01_084: [ log_sink_etw_log shall use as provider GUID DAD29F36-0A48-4DEF-9D50-8EF9036B92B4. ]*/
+/* Codes_SRS_LOG_SINK_ETW_01_084: [ log_sink_etw.init shall use as provider GUID DAD29F36-0A48-4DEF-9D50-8EF9036B92B4. ]*/
 TRACELOGGING_DEFINE_PROVIDER(
     log_sink_etw_provider,
     "block_storage_2",
