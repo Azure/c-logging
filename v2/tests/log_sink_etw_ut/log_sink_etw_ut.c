@@ -42,7 +42,8 @@
     MOCK_CALL_TYPE_EventDataDescCreate, \
     MOCK_CALL_TYPE__tlgWriteTransfer_EventWriteTransfer, \
     MOCK_CALL_TYPE_log_context_property_if_get_type, \
-    MOCK_CALL_TYPE_vsnprintf
+    MOCK_CALL_TYPE_vsnprintf, \
+    MOCK_CALL_TYPE_TraceLoggingUnregister
 
 MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
 
@@ -139,6 +140,11 @@ typedef struct vsnprintf_CALL_TAG
     char captured_output[MAX_PRINTF_CAPTURED_OUPUT_SIZE];
 } vsnprintf_CALL;
 
+typedef struct TraceLoggingUnregister_CALL_TAG
+{
+    TraceLoggingHProvider hProvider;
+} TraceLoggingUnregister_CALL;
+
 typedef struct MOCK_CALL_TAG
 {
     MOCK_CALL_TYPE mock_call_type;
@@ -154,6 +160,7 @@ typedef struct MOCK_CALL_TAG
         _tlgWriteTransfer_EventWriteTransfer_CALL _tlgWriteTransfer_EventWriteTransfer_call;
         log_context_property_if_get_type_CALL log_context_property_if_get_type_call;
         vsnprintf_CALL vsnprintf_call;
+        TraceLoggingUnregister_CALL TraceLoggingUnregister_call;
     };
 } MOCK_CALL;
 
@@ -579,6 +586,24 @@ int mock_vsnprintf(char* restrict s, size_t n, const char* restrict format, va_l
     return result;
 }
 
+void mock_TraceLoggingUnregister(TraceLoggingHProvider hProvider)
+{
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_TraceLoggingUnregister))
+    {
+        actual_and_expected_match = false;
+    }
+    else
+    {
+        expected_calls[actual_call_count].TraceLoggingUnregister_call.hProvider = hProvider;
+
+        // call "real" function
+        TraceLoggingUnregister(hProvider);
+
+        actual_call_count++;
+    }
+}
+
 #define POOR_MANS_ASSERT(cond) \
     if (!(cond)) \
     { \
@@ -673,6 +698,12 @@ static void setup_vsnprintf_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_vsnprintf;
     expected_calls[expected_call_count].vsnprintf_call.override_result = false;
+    expected_call_count++;
+}
+
+static void setup_TraceLoggingUnregister(void)
+{
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_TraceLoggingUnregister;
     expected_call_count++;
 }
 
@@ -2910,6 +2941,16 @@ static void when_a_parent_context_is_used_all_properties_are_emitted(void)
 /* Tests_SRS_LOG_SINK_ETW_01_090: [ `log_sink_etw.deinit` shall call `TraceLoggingUnregister` to unregister the provider. ] */
 static void log_sink_etw_deinit_unregisters(void)
 {
+    // arrange
+    setup_mocks();
+    setup_TraceLoggingUnregister();
+
+    // act
+    log_sink_etw.deinit();
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
@@ -2948,6 +2989,8 @@ int main(void)
     when_vsnprintf_fails_an_error_is_printed();
     when_size_of_metadata_and_formatted_messages_exceeds_4096_and_2nd_vsnprintf_fails_an_error_is_printed();
     when_a_parent_context_is_used_all_properties_are_emitted();
+
+    log_sink_etw_deinit_unregisters();
 
     return 0;
 }

@@ -581,6 +581,7 @@ static void log_sink_etw_init(void)
 static void log_sink_etw_deinit(void)
 {
     /* Codes_SRS_LOG_SINK_ETW_01_090: [ log_sink_etw.deinit shall return. ] */
+    TraceLoggingUnregister(log_sink_etw_provider);
 }
 
 static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...)

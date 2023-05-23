@@ -21,6 +21,8 @@
 #define EventDataDescCreate mock_EventDataDescCreate
 #define _tlgWriteTransfer_EventWriteTransfer mock__tlgWriteTransfer_EventWriteTransfer
 #define vsnprintf mock_vsnprintf
+#undef TraceLoggingUnregister
+#define TraceLoggingUnregister mock_TraceLoggingUnregister
 
 int mock_printf(const char* format, ...);
 uint32_t mock_log_context_get_property_value_pair_count(LOG_CONTEXT_HANDLE log_context);
@@ -31,5 +33,6 @@ void mock__tlgCreate1Sz_char(PEVENT_DATA_DESCRIPTOR pDesc, char const* psz);
 void mock_EventDataDescCreate(PEVENT_DATA_DESCRIPTOR EventDataDescriptor, const VOID* DataPtr, ULONG DataSize);
 TLG_STATUS mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvider, void const* pEventMetadata, LPCGUID pActivityId, LPCGUID pRelatedActivityId, UINT32 cData, EVENT_DATA_DESCRIPTOR* pData);
 int mock_vsnprintf(char* s, size_t n, const char* format, va_list arg);
+void mock_TraceLoggingUnregister(TraceLoggingHProvider hProvider);
 
 #include "log_sink_etw.c"
