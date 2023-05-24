@@ -608,7 +608,7 @@ static void log_sink_etw_deinit(void)
         (void)printf("log_sink_etw_deinit called in %" PRI_MU_ENUM "\r\n", MU_ENUM_VALUE(LOG_SINK_ETW_STATE, log_sink_etw_state));
         break;
     case LOG_SINK_ETW_STATE_INITIALIZED:
-        /* Codes_SRS_LOG_SINK_ETW_01_090: [ log_sink_etw.deinit shall return. ] */
+        /* Codes_SRS_LOG_SINK_ETW_01_090: [ log_sink_etw.deinit shall call TraceLoggingUnregister to unregister the provider. ] */
         TraceLoggingUnregister(log_sink_etw_provider);
         log_sink_etw_state = LOG_SINK_ETW_STATE_NOT_INITIALIZED;
         break;
