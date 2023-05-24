@@ -34,8 +34,6 @@
 
 #define MOCK_CALL_TYPE_VALUES \
     MOCK_CALL_TYPE_printf, \
-    MOCK_CALL_TYPE_InterlockedCompareExchange, \
-    MOCK_CALL_TYPE_InterlockedExchange, \
     MOCK_CALL_TYPE_log_context_get_property_value_pair_count, \
     MOCK_CALL_TYPE_log_context_get_property_value_pairs, \
     MOCK_CALL_TYPE_TraceLoggingRegister_EventRegister_EventSetInformation, \
@@ -44,7 +42,8 @@
     MOCK_CALL_TYPE_EventDataDescCreate, \
     MOCK_CALL_TYPE__tlgWriteTransfer_EventWriteTransfer, \
     MOCK_CALL_TYPE_log_context_property_if_get_type, \
-    MOCK_CALL_TYPE_vsnprintf
+    MOCK_CALL_TYPE_vsnprintf, \
+    MOCK_CALL_TYPE_TraceLoggingUnregister
 
 MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
 
@@ -76,18 +75,6 @@ typedef struct printf_CALL_TAG
     int call_result;
     char captured_output[MAX_PRINTF_CAPTURED_OUPUT_SIZE];
 } printf_CALL;
-
-typedef struct InterlockedCompareExchange_CALL_TAG
-{
-    bool override_result;
-    int call_result;
-} InterlockedCompareExchange_CALL;
-
-typedef struct InterlockedExchange_CALL_TAG
-{
-    bool override_result;
-    int call_result;
-} InterlockedExchange_CALL;
 
 typedef struct log_context_get_property_value_pair_count_CALL_TAG
 {
@@ -141,14 +128,17 @@ typedef struct vsnprintf_CALL_TAG
     char captured_output[MAX_PRINTF_CAPTURED_OUPUT_SIZE];
 } vsnprintf_CALL;
 
+typedef struct TraceLoggingUnregister_CALL_TAG
+{
+    TraceLoggingHProvider hProvider;
+} TraceLoggingUnregister_CALL;
+
 typedef struct MOCK_CALL_TAG
 {
     MOCK_CALL_TYPE mock_call_type;
     union
     {
         printf_CALL printf_call;
-        InterlockedCompareExchange_CALL InterlockedCompareExchange_call;
-        InterlockedExchange_CALL InterlockedExchange_call;
         log_context_get_property_value_pair_count_CALL log_context_get_property_value_pair_count_call;
         log_context_get_property_value_pairs_CALL log_context_get_property_value_pairs_call;
         TraceLoggingRegister_EventRegister_EventSetInformation_CALL TraceLoggingRegister_EventRegister_EventSetInformation_call;
@@ -156,6 +146,7 @@ typedef struct MOCK_CALL_TAG
         _tlgWriteTransfer_EventWriteTransfer_CALL _tlgWriteTransfer_EventWriteTransfer_call;
         log_context_property_if_get_type_CALL log_context_property_if_get_type_call;
         vsnprintf_CALL vsnprintf_call;
+        TraceLoggingUnregister_CALL TraceLoggingUnregister_call;
     };
 } MOCK_CALL;
 
@@ -229,62 +220,6 @@ int mock_printf(const char* format, ...)
             va_start(args, format);
             result = vprintf(format, args);
             va_end(args);
-        }
-
-        actual_call_count++;
-    }
-
-    return result;
-}
-
-LONG mock_InterlockedCompareExchange(LONG volatile* Destination, LONG ExChange, LONG Comperand)
-{
-    int result;
-
-    if ((actual_call_count == expected_call_count) ||
-        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_InterlockedCompareExchange))
-    {
-        actual_and_expected_match = false;
-        result = -1;
-    }
-    else
-    {
-        if (expected_calls[actual_call_count].printf_call.override_result)
-        {
-            result = expected_calls[actual_call_count].InterlockedCompareExchange_call.call_result;
-        }
-        else
-        {
-            // call "real" function
-            result = InterlockedCompareExchange(Destination, ExChange, Comperand);
-        }
-
-        actual_call_count++;
-    }
-
-    return result;
-}
-
-LONG mock_InterlockedExchange(LONG volatile* Target, LONG Value)
-{
-    int result;
-
-    if ((actual_call_count == expected_call_count) ||
-        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_InterlockedExchange))
-    {
-        actual_and_expected_match = false;
-        result = -1;
-    }
-    else
-    {
-        if (expected_calls[actual_call_count].printf_call.override_result)
-        {
-            result = expected_calls[actual_call_count].InterlockedExchange_call.call_result;
-        }
-        else
-        {
-            // call "real" function
-            result = InterlockedExchange(Target, Value);
         }
 
         actual_call_count++;
@@ -637,6 +572,24 @@ int mock_vsnprintf(char* restrict s, size_t n, const char* restrict format, va_l
     return result;
 }
 
+void mock_TraceLoggingUnregister(TraceLoggingHProvider hProvider)
+{
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_TraceLoggingUnregister))
+    {
+        actual_and_expected_match = false;
+    }
+    else
+    {
+        expected_calls[actual_call_count].TraceLoggingUnregister_call.hProvider = hProvider;
+
+        // call "real" function
+        TraceLoggingUnregister(hProvider);
+
+        actual_call_count++;
+    }
+}
+
 #define POOR_MANS_ASSERT(cond) \
     if (!(cond)) \
     { \
@@ -653,20 +606,6 @@ static void setup_printf_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_printf;
     expected_calls[expected_call_count].printf_call.override_result = false;
-    expected_call_count++;
-}
-
-static void setup_InterlockedCompareExchange_call(void)
-{
-    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_InterlockedCompareExchange;
-    expected_calls[expected_call_count].InterlockedCompareExchange_call.override_result = false;
-    expected_call_count++;
-}
-
-static void setup_InterlockedExchange_call(void)
-{
-    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_InterlockedExchange;
-    expected_calls[expected_call_count].InterlockedExchange_call.override_result = false;
     expected_call_count++;
 }
 
@@ -748,50 +687,43 @@ static void setup_vsnprintf_call(void)
     expected_call_count++;
 }
 
-/* log_sink_etw.log */
+static void setup_TraceLoggingUnregister(void)
+{
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_TraceLoggingUnregister;
+    expected_call_count++;
+}
 
-/* Tests_SRS_LOG_SINK_ETW_01_001: [ If message_format is NULL, log_sink_etw.log shall return. ]*/
-static void log_sink_etw_log_with_NULL_message_format_returns(void)
+/* log_sink_etw.init */
+
+/* Tests_SRS_LOG_SINK_ETW_01_088: [ If TraceLoggingRegister fails, log_sink_etw.init shall fail and return a non-zero value. ]*/
+static void when_TraceLoggingRegister_fails_log_sink_etw_init_fails(void)
 {
     // arrange
     setup_mocks();
+
+    setup_TraceLoggingRegister_EventRegister_EventSetInformation_call("DAD29F36-0A48-4DEF-9D50-8EF9036B92B4", TRACE_LEVEL_INFORMATION);
+    expected_calls[0].TraceLoggingRegister_EventRegister_EventSetInformation_call.override_result = true;
+    expected_calls[0].TraceLoggingRegister_EventRegister_EventSetInformation_call.call_result = E_FAIL;
     setup_printf_call();
 
     // act
-    log_sink_etw.log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, __LINE__, NULL);
+    POOR_MANS_ASSERT(log_sink_etw.init() != 0);
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_SINK_ETW_01_088: [ If TraceLoggingRegister fails, the state shall be switched to NOT_REGISTERED (1). ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_002: [ log_sink_etw_log shall maintain the state of whether TraceLoggingRegister was called in a variable accessed via InterlockedXXX APIs, which shall have 3 possible values: NOT_REGISTERED (1), REGISTERING (2), REGISTERED(3). ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_003: [ log_sink_etw_log shall perform the below actions until the provider is registered or an error is encountered: ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_004: [ If the state is NOT_REGISTERED (1): ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_005: [ log_sink_etw_log shall switch the state to REGISTERING (2). ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_006: [ log_sink_etw_log shall register the ETW TraceLogging provider by calling TraceLoggingRegister (TraceLoggingRegister_EventRegister_EventSetInformation). ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_007: [ log_sink_etw_log shall switch the state to REGISTERED. ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw_log shall emit a LOG_LEVEL_INFO event as a self test , printing the fact that the provider was registered and from which executable (as obtained by calling _get_pgmptr). ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_009: [ Checking and changing the variable that maintains whether TraceLoggingRegister was called shall be done using InterlockedCompareExchange and InterlockedExchange. ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_010: [ log_sink_etw_log shall emit a self described event that shall have the name of the event as follows: ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_012: [ If log_level is LOG_LEVEL_CRITICAL the event name shall be LogCritical. ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_084: [ log_sink_etw_log shall use as provider GUID DAD29F36-0A48-4DEF-9D50-8EF9036B92B4. ]*/
-static void log_sink_etw_log_registers_the_provider_if_not_registered_already(void)
+/* Tests_SRS_LOG_SINK_ETW_01_006: [ log_sink_etw.init shall register the ETW TraceLogging provider by calling TraceLoggingRegister (TraceLoggingRegister_EventRegister_EventSetInformation). ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw.init shall emit a LOG_LEVEL_INFO event as a self test, printing the fact that the provider was registered and from which executable (as obtained by calling _get_pgmptr). ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_084: [ log_sink_etw.init shall use as provider GUID DAD29F36-0A48-4DEF-9D50-8EF9036B92B4. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_091: [ log_sink_etw.init shall succeed and return 0. ] */
+static void log_sink_etw_init_works(void)
 {
     // arrange
     setup_mocks();
 
-    setup_InterlockedCompareExchange_call();
     setup_TraceLoggingRegister_EventRegister_EventSetInformation_call("DAD29F36-0A48-4DEF-9D50-8EF9036B92B4", TRACE_LEVEL_INFORMATION);
-    expected_calls[1].TraceLoggingRegister_EventRegister_EventSetInformation_call.override_result = true;
-    expected_calls[1].TraceLoggingRegister_EventRegister_EventSetInformation_call.call_result = E_FAIL;
-    setup_printf_call();
-    setup_InterlockedExchange_call();
-
-    setup_InterlockedCompareExchange_call();
-    setup_TraceLoggingRegister_EventRegister_EventSetInformation_call("DAD29F36-0A48-4DEF-9D50-8EF9036B92B4", TRACE_LEVEL_INFORMATION);
-    setup_InterlockedExchange_call();
 
     // self test event
     setup__get_pgmptr_call();
@@ -838,9 +770,9 @@ static void log_sink_etw_log_registers_the_provider_if_not_registered_already(vo
 
     int captured_line = __LINE__;
 
-    expected_calls[7]._get_pgmptr_call.override_result = true;
-    expected_calls[7]._get_pgmptr_call.call_result = 0;
-    expected_calls[7]._get_pgmptr_call.injected_pValue = "some_test_executable.exe";
+    expected_calls[1]._get_pgmptr_call.override_result = true;
+    expected_calls[1]._get_pgmptr_call.call_result = 0;
+    expected_calls[1]._get_pgmptr_call.injected_pValue = "some_test_executable.exe";
 
     static const char expected_event_message[] = "ETW provider was registered succesfully (self test). Executable file full path name = some_test_executable.exe";
 
@@ -857,101 +789,47 @@ static void log_sink_etw_log_registers_the_provider_if_not_registered_already(vo
 
     setup__tlgWriteTransfer_EventWriteTransfer_with_ignore_file_and_func(expected_event_metadata, 6, expected_event_data_descriptors, /* ignore file and func data */true);
 
-
     // act
-    log_sink_etw.log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, __LINE__, "test");
+    POOR_MANS_ASSERT(log_sink_etw.init() == 0);
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_SINK_ETW_01_087: [ If the state is REGISTERING (2) log_sink_etw_log shall wait until the state is not REGISTERING (2). ]*/
-static void log_sink_log_retries_until_state_is_not_registering(void)
+/* Tests_SRS_LOG_SINK_ETW_01_092: [ If the module is already initialized, log_sink_etw.init shall fail and return a non-zero value. ]*/
+static void log_sink_etw_init_after_init_fails(void)
+{
+    // arrange
+    // already initialized based on the fact that the previous tests ran
+    setup_mocks();
+    setup_printf_call(); // error output
+
+    // act
+    POOR_MANS_ASSERT(log_sink_etw.init() != 0);
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
+/* log_sink_etw.log */
+
+/* Tests_SRS_LOG_SINK_ETW_01_001: [ If message_format is NULL, log_sink_etw.log shall return. ]*/
+static void log_sink_etw_log_with_NULL_message_format_returns(void)
 {
     // arrange
     setup_mocks();
-    setup_InterlockedCompareExchange_call();
-    expected_calls[0].InterlockedCompareExchange_call.override_result = true;
-    expected_calls[0].InterlockedCompareExchange_call.call_result = 2;
-    setup_InterlockedCompareExchange_call();
-    expected_calls[1].InterlockedCompareExchange_call.override_result = true;
-    expected_calls[1].InterlockedCompareExchange_call.call_result = 2;
-    setup_InterlockedCompareExchange_call();
-    expected_calls[2].InterlockedCompareExchange_call.override_result = true;
-    expected_calls[2].InterlockedCompareExchange_call.call_result = 2;
-    setup_InterlockedCompareExchange_call();
-    expected_calls[3].InterlockedCompareExchange_call.override_result = true;
-    expected_calls[3].InterlockedCompareExchange_call.call_result = 3;
-
-    // the actual event
-    setup_vsnprintf_call(); // message formatting
-    setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
-    setup__tlgCreate1Sz_char(); // func
-    setup_EventDataDescCreate(); // line
-    uint8_t extra_metadata_bytes_2[256];
-    uint8_t expected_event_bytes_2[sizeof(SELF_DESCRIBED_EVENT) + sizeof(extra_metadata_bytes_2)];
-    SELF_DESCRIBED_EVENT* expected_event_metadata_2 = (SELF_DESCRIBED_EVENT*)&expected_event_bytes_2[0];
-    (void)memset(expected_event_metadata_2, 0, sizeof(SELF_DESCRIBED_EVENT));
-    expected_event_metadata_2->_tlgLevel = TRACE_LEVEL_CRITICAL;
-    expected_event_metadata_2->_tlgChannel = 11;
-    expected_event_metadata_2->_tlgOpcode = 0;
-    expected_event_metadata_2->_tlgKeyword = 0;
-    uint8_t* pos = (expected_event_bytes_2 + sizeof(SELF_DESCRIBED_EVENT));
-    // event name
-    (void)memcpy(pos, "LogCritical", strlen("LogCritical") + 1);
-    pos += strlen("LogCritical") + 1;
-    // content field
-    (void)memcpy(pos, "content", strlen("content") + 1);
-    pos += strlen("content") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "file", strlen("file") + 1);
-    pos += strlen("file") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "func", strlen("func") + 1);
-    pos += strlen("func") + 1;
-    *pos = TlgInANSISTRING;
-    pos++;
-    // content field
-    (void)memcpy(pos, "line", strlen("line") + 1);
-    pos += strlen("line") + 1;
-    *pos = TlgInINT32;
-    pos++;
-
-    expected_event_metadata_2->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes_2 + sizeof(SELF_DESCRIBED_EVENT))) + 4;
-
-    int captured_line = __LINE__;
-
-    // construct event data descriptor array
-    EVENT_DATA_DESCRIPTOR expected_event_data_descriptors_2[6] =
-    {
-        { 0 },
-        { 0 },
-        {.Size = (ULONG)strlen("test") + 1, .Ptr = (ULONGLONG)"test" },
-        {.Size = (ULONG)strlen(__FILE__) + 1, .Ptr = (ULONGLONG)__FILE__ },
-        {.Size = (ULONG)strlen(__FUNCTION__) + 1, .Ptr = (ULONGLONG)__FUNCTION__ },
-        {.Size = sizeof(int32_t), .Ptr = (ULONGLONG)&captured_line}
-    };
-
-    setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata_2, 6, expected_event_data_descriptors_2);
+    setup_printf_call();
 
     // act
-    log_sink_etw.log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, captured_line, "test");
+    log_sink_etw.log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, __LINE__, NULL);
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_SINK_ETW_01_002: [ log_sink_etw_log shall maintain the state of whether TraceLoggingRegister was called in a variable accessed via InterlockedXXX APIs, which shall have 3 possible values: NOT_REGISTERED (1), REGISTERING (2), REGISTERED(3). ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_003: [ log_sink_etw_log shall perform the below actions until the provider is registered or an error is encountered: ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_011: [ If the state is REGISTERED (3), log_sink_etw_log shall proceed to log the ETW event. ]*/
-// Note the reason this is already registered is because previous tests have done the registration
 /* Tests_SRS_LOG_SINK_ETW_01_010: [ log_sink_etw_log shall emit a self described event that shall have the name of the event as follows: ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_025: [ If log_context is NULL only the fields content, file, func and line shall be added to the ETW event. ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_042: [ log_sink_etw.log shall compute the metadata size for the self described event metadata as follows: ]*/
@@ -982,7 +860,6 @@ static void test_message_with_level(LOG_LEVEL log_level, uint8_t expected_tlg_le
     setup_enabled_provider(TRACE_LEVEL_VERBOSE);
 
     setup_mocks();
-    setup_InterlockedCompareExchange_call();
     setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
     setup__tlgCreate1Sz_char(); // file 
@@ -1048,7 +925,7 @@ static void test_message_with_level(LOG_LEVEL log_level, uint8_t expected_tlg_le
 /* Tests_SRS_LOG_SINK_ETW_01_012: [ If log_level is LOG_LEVEL_CRITICAL the event name shall be LogCritical. ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_018: [ Logging level: ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_019: [ If log_level is LOG_LEVEL_CRITICAL the ETW logging level shall be TRACE_LEVEL_CRITICAL. ]*/
-static void log_sink_etw_log_does_not_register_when_already_registered(void)
+static void log_sink_etw_log_with_LOG_LEVEL_CRITICAL_succeeds(void)
 {
     test_message_with_level(LOG_LEVEL_CRITICAL, TRACE_LEVEL_CRITICAL, "LogCritical");
 }
@@ -1098,7 +975,6 @@ static void log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds(void)
     setup_enabled_provider(TRACE_LEVEL_VERBOSE);                                                                                     \
                                                                                                                                      \
     setup_mocks();                                                                                                                   \
-    setup_InterlockedCompareExchange_call();                                                                                         \
     setup_vsnprintf_call(); /* formatting message */                                                                                 \
     setup__tlgCreate1Sz_char(); /* message */                                                                                        \
     setup__tlgCreate1Sz_char(); /* file */                                                                                           \
@@ -1179,7 +1055,6 @@ static void test_message_with_context(LOG_LEVEL log_level, uint8_t expected_tlg_
     setup_enabled_provider(TRACE_LEVEL_VERBOSE);
 
     setup_mocks();
-    setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
@@ -1282,7 +1157,6 @@ static void test_message_with_context_with_one_property(LOG_LEVEL log_level, uin
     setup_enabled_provider(TRACE_LEVEL_VERBOSE);
 
     setup_mocks();
-    setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
@@ -1581,7 +1455,6 @@ static void test_message_with_context_with_multiple_properties(LOG_LEVEL log_lev
     setup_enabled_provider(TRACE_LEVEL_VERBOSE);
 
     setup_mocks();
-    setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
@@ -1838,7 +1711,6 @@ static void when_unknown_property_type_is_encountered_log_sink_etw_log_with_cont
     setup_enabled_provider(TRACE_LEVEL_VERBOSE);
 
     setup_mocks();
-    setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
     setup_log_context_property_if_get_type(); // one mocked call to get_type
@@ -1893,8 +1765,8 @@ static void when_unknown_property_type_is_encountered_log_sink_etw_log_with_cont
     // hard injecting a mock here :-)
     mocked_property_value_pairs[1].type = &mocked_property_type_if;
 
-    expected_calls[1].log_context_get_property_value_pairs_call.override_result = true;
-    expected_calls[1].log_context_get_property_value_pairs_call.call_result = mocked_property_value_pairs;
+    expected_calls[0].log_context_get_property_value_pairs_call.override_result = true;
+    expected_calls[0].log_context_get_property_value_pairs_call.call_result = mocked_property_value_pairs;
 
     expected_event_metadata->_tlgEvtMetaSize = (uint16_t)(pos - (expected_event_bytes + sizeof(SELF_DESCRIBED_EVENT))) + 4;
 
@@ -2001,7 +1873,6 @@ static void when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_
     setup_enabled_provider(TRACE_LEVEL_VERBOSE);
 
     setup_mocks();
-    setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
@@ -2144,7 +2015,6 @@ static void when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_wi
     setup_enabled_provider(TRACE_LEVEL_VERBOSE);
 
     setup_mocks();
-    setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
@@ -2401,7 +2271,6 @@ static void when_size_of_metadata_exceeds_4096_log_sink_etw_log_with_context_doe
     setup_enabled_provider(TRACE_LEVEL_VERBOSE);
 
     setup_mocks();
-    setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
     setup_printf_call(); // printf error
@@ -2520,7 +2389,6 @@ static void when_size_of_metadata_and_formatted_messages_exceeds_4096_log_sink_e
     setup_enabled_provider(TRACE_LEVEL_VERBOSE);
 
     setup_mocks();
-    setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
@@ -2639,7 +2507,6 @@ static void when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_
     setup_enabled_provider(TRACE_LEVEL_VERBOSE);
 
     setup_mocks();
-    setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
@@ -2860,12 +2727,11 @@ static void when_vsnprintf_fails_an_error_is_printed(void)
     setup_enabled_provider(TRACE_LEVEL_VERBOSE);
 
     setup_mocks();
-    setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
-    expected_calls[3].vsnprintf_call.override_result = true;
-    expected_calls[3].vsnprintf_call.call_result = -1;
+    expected_calls[2].vsnprintf_call.override_result = true;
+    expected_calls[2].vsnprintf_call.call_result = -1;
     setup_printf_call(); // spew error
 
     // act
@@ -2928,13 +2794,12 @@ static void when_size_of_metadata_and_formatted_messages_exceeds_4096_and_2nd_vs
     setup_enabled_provider(TRACE_LEVEL_VERBOSE);
 
     setup_mocks();
-    setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
     setup_vsnprintf_call(); // formatting message 2nd attempt
-    expected_calls[4].vsnprintf_call.override_result = true;
-    expected_calls[4].vsnprintf_call.call_result = -1;
+    expected_calls[3].vsnprintf_call.override_result = true;
+    expected_calls[3].vsnprintf_call.call_result = -1;
     setup_printf_call();
 
     // act
@@ -2966,7 +2831,6 @@ static void when_a_parent_context_is_used_all_properties_are_emitted(void)
     setup_enabled_provider(TRACE_LEVEL_VERBOSE);
 
     setup_mocks();
-    setup_InterlockedCompareExchange_call();
     setup_log_context_get_property_value_pairs_call();
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
@@ -3075,13 +2939,50 @@ static void when_a_parent_context_is_used_all_properties_are_emitted(void)
     free(expected_event_data_descriptors);
 }
 
+/* log_sink_etw.deinit */
+
+/* Tests_SRS_LOG_SINK_ETW_01_090: [ log_sink_etw.deinit shall call TraceLoggingUnregister to unregister the provider. ] */
+static void log_sink_etw_deinit_unregisters(void)
+{
+    // arrange
+    setup_mocks();
+    setup_TraceLoggingUnregister();
+
+    // act
+    log_sink_etw.deinit();
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
+/* Tests_SRS_LOG_SINK_ETW_01_093: [ If the module is not initialized, log_sink_etw.deinit shall return. ] */
+static void log_sink_etw_deinit_after_deinit_returns(void)
+{
+    // arrange
+    setup_mocks();
+    setup_printf_call(); // error output
+
+    // act
+    log_sink_etw.deinit();
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
+    // make abort not popup
+    _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+
+    when_TraceLoggingRegister_fails_log_sink_etw_init_fails();
+    log_sink_etw_init_works();
+    log_sink_etw_init_after_init_fails();
+
     log_sink_etw_log_with_NULL_message_format_returns();
-    log_sink_etw_log_registers_the_provider_if_not_registered_already();
-    log_sink_log_retries_until_state_is_not_registering();
-    log_sink_etw_log_does_not_register_when_already_registered();
+    log_sink_etw_log_with_LOG_LEVEL_CRITICAL_succeeds();
     log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
     log_sink_etw_log_with_LOG_LEVEL_WARNING_succeeds();
     log_sink_etw_log_with_LOG_LEVEL_INFO_succeeds();
@@ -3110,6 +3011,9 @@ int main(void)
     when_vsnprintf_fails_an_error_is_printed();
     when_size_of_metadata_and_formatted_messages_exceeds_4096_and_2nd_vsnprintf_fails_an_error_is_printed();
     when_a_parent_context_is_used_all_properties_are_emitted();
+
+    log_sink_etw_deinit_unregisters();
+    log_sink_etw_deinit_after_deinit_returns();
 
     return 0;
 }

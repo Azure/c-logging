@@ -8,6 +8,26 @@
     extern const LOG_SINK_IF log_sink_console;
 ```
 
+### log_sink_console.init
+
+The signature of `log_sink_console.init` is:
+
+```c
+typedef int (*LOG_SINK_INIT_FUNC)(void);
+```
+
+**SRS_LOG_SINK_CONSOLE_01_027: [** `log_sink_console.init` shall return 0. **]** Note: No initialization is needed for the console sink.
+
+### log_sink_console.deinit
+
+The signature of `log_sink_console.deinit` is:
+
+```c
+typedef void (*LOG_SINK_DEINIT_FUNC)(void);
+```
+
+**SRS_LOG_SINK_CONSOLE_01_028: [** `log_sink_console.deinit` shall return. **]**
+
 ### log_sink_console.log
 
 The signature of `log_sink_console.log` is:

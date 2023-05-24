@@ -423,6 +423,38 @@ static void validate_log_line_with_NULL_time(const char* actual_string, const ch
     POOR_MANS_ASSERT(strcmp(reset_color_code, "\x1b[0m") == 0);
 }
 
+/* log_sink_console.init */
+
+/* Tests_SRS_LOG_SINK_CONSOLE_01_027: [ log_sink_console.init shall return 0. ] */
+static void log_sink_console_init_returns(void)
+{
+    // arrange
+    setup_mocks();
+
+    // act
+    log_sink_console.init();
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
+/* log_sink_console.deinit */
+
+/* Tests_SRS_LOG_SINK_CONSOLE_01_028: [ log_sink_console.deinit shall return. ] */
+static void log_sink_console_deinit_returns(void)
+{
+    // arrange
+    setup_mocks();
+
+    // act
+    log_sink_console.deinit();
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
 /* log_sink_console.log */
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_001: [ If message_format is NULL, log_sink_console.log shall print an error and return. ]*/

@@ -441,25 +441,18 @@ static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
 
     // assert
 
-    // 2 events expected: one self and one for the actual event
-    wait_for_event_count(test_context, 2);
+    // 1 events expected
+    wait_for_event_count(test_context, 1);
 
     stop_trace(test_context, trace_session_handle);
     stop_parse_events(test_context);
 
-    // self test event
-    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].event_name, "LogInfo") == 0);
-    POOR_MANS_ASSERT(strlen(test_context->parsed_events[0].content) > 0);
-    POOR_MANS_ASSERT(strlen(test_context->parsed_events[0].file) > 0);
-    POOR_MANS_ASSERT(strlen(test_context->parsed_events[0].func) > 0);
-    POOR_MANS_ASSERT(test_context->parsed_events[0].line != 0);
-
     // error event
-    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[1].event_name, "LogError") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[1].content, "test") == 0);
-    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[1].file, __FILE__) == 0);
-    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[1].func, __FUNCTION__) == 0);
-    POOR_MANS_ASSERT(test_context->parsed_events[1].line == captured_line);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].event_name, "LogError") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].content, "test") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].line == captured_line);
 
     test_context_destroy(test_context);
 }
@@ -751,11 +744,18 @@ static void log_sink_etw_log_with_context_with_nested_structs(void)
 /* very "poor man's" way of testing, as no test harness available */
 int main(void)
 {
+    // make abort not popup
+    _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+
+    POOR_MANS_ASSERT(log_sink_etw.init() == 0);
+
     log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
     log_sink_etw_log_all_levels_when_all_levels_enabled_succeeds();
     log_sink_etw_log_each_individual_level();
     log_sink_etw_log_with_context_with_properties();
     log_sink_etw_log_with_context_with_nested_structs();
+
+    log_sink_etw.deinit();
 
     return 0;
 }
