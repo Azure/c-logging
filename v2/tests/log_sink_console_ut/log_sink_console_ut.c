@@ -100,7 +100,7 @@ typedef struct MOCK_CALL_TAG
         snprintf_CALL snprintf_call;
         log_context_get_property_value_pair_count_CALL log_context_get_property_value_pair_count_call;
         log_context_get_property_value_pairs_CALL log_context_get_property_value_pairs_call;
-    } u;
+    };
 } MOCK_CALL;
 
 static MOCK_CALL expected_calls[MAX_MOCK_CALL_COUNT];
@@ -127,16 +127,16 @@ int mock_printf(const char* format, ...)
     }
     else
     {
-        if (expected_calls[actual_call_count].u.printf_call.override_result)
+        if (expected_calls[actual_call_count].printf_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.printf_call.call_result;
+            result = expected_calls[actual_call_count].printf_call.call_result;
         }
         else
         {
             va_list args;
             va_start(args, format);
             // also capture the result in a variable for comparisons in tests
-            (void)vsnprintf(expected_calls[actual_call_count].u.printf_call.captured_output, sizeof(expected_calls[actual_call_count].u.printf_call.captured_output),
+            (void)vsnprintf(expected_calls[actual_call_count].printf_call.captured_output, sizeof(expected_calls[actual_call_count].printf_call.captured_output),
                 format, args);
             va_end(args);
 
@@ -163,13 +163,13 @@ time_t mock_time(time_t* const _time)
     }
     else
     {
-        if (expected_calls[actual_call_count].u.time_call.override_result)
+        if (expected_calls[actual_call_count].time_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.time_call.call_result;
+            result = expected_calls[actual_call_count].time_call.call_result;
         }
         else
         {
-            expected_calls[actual_call_count].u.time_call.captured__time = _time;
+            expected_calls[actual_call_count].time_call.captured__time = _time;
             result = time(_time);
         }
 
@@ -191,13 +191,13 @@ char* mock_ctime(const time_t* timer)
     }
     else
     {
-        if (expected_calls[actual_call_count].u.ctime_call.override_result)
+        if (expected_calls[actual_call_count].ctime_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.ctime_call.call_result;
+            result = expected_calls[actual_call_count].ctime_call.call_result;
         }
         else
         {
-            expected_calls[actual_call_count].u.ctime_call.captured_timer = timer;
+            expected_calls[actual_call_count].ctime_call.captured_timer = timer;
             result = ctime(timer);
         }
 
@@ -219,13 +219,13 @@ int mock_vsnprintf(char* s, size_t n, const char* format, va_list args)
     }
     else
     {
-        if (expected_calls[actual_call_count].u.vsnprintf_call.override_result)
+        if (expected_calls[actual_call_count].vsnprintf_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.vsnprintf_call.call_result;
+            result = expected_calls[actual_call_count].vsnprintf_call.call_result;
         }
         else
         {
-            expected_calls[actual_call_count].u.vsnprintf_call.captured_format_arg = format;
+            expected_calls[actual_call_count].vsnprintf_call.captured_format_arg = format;
 
             result = vsnprintf(s, n, format, args);
 
@@ -250,13 +250,13 @@ int mock_snprintf(char* s, size_t n, const char* format, ...)
     }
     else
     {
-        if (expected_calls[actual_call_count].u.snprintf_call.override_result)
+        if (expected_calls[actual_call_count].snprintf_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.snprintf_call.call_result;
+            result = expected_calls[actual_call_count].snprintf_call.call_result;
         }
         else
         {
-            expected_calls[actual_call_count].u.snprintf_call.captured_format_arg = format;
+            expected_calls[actual_call_count].snprintf_call.captured_format_arg = format;
 
             va_list args;
             va_start(args, format);
@@ -284,13 +284,13 @@ uint32_t mock_log_context_get_property_value_pair_count(LOG_CONTEXT_HANDLE log_c
     }
     else
     {
-        if (expected_calls[actual_call_count].u.log_context_get_property_value_pair_count_call.override_result)
+        if (expected_calls[actual_call_count].log_context_get_property_value_pair_count_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.log_context_get_property_value_pair_count_call.call_result;
+            result = expected_calls[actual_call_count].log_context_get_property_value_pair_count_call.call_result;
         }
         else
         {
-            expected_calls[actual_call_count].u.log_context_get_property_value_pair_count_call.captured_log_context = log_context;
+            expected_calls[actual_call_count].log_context_get_property_value_pair_count_call.captured_log_context = log_context;
 
             result = log_context_get_property_value_pair_count(log_context);
         }
@@ -313,13 +313,13 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* mock_log_context_get_property_value_pairs
     }
     else
     {
-        if (expected_calls[actual_call_count].u.log_context_get_property_value_pairs_call.override_result)
+        if (expected_calls[actual_call_count].log_context_get_property_value_pairs_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.log_context_get_property_value_pairs_call.call_result;
+            result = expected_calls[actual_call_count].log_context_get_property_value_pairs_call.call_result;
         }
         else
         {
-            expected_calls[actual_call_count].u.log_context_get_property_value_pairs_call.captured_log_context = log_context;
+            expected_calls[actual_call_count].log_context_get_property_value_pairs_call.captured_log_context = log_context;
 
             result = log_context_get_property_value_pairs(log_context);
         }
@@ -340,49 +340,49 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* mock_log_context_get_property_value_pairs
 static void setup_printf_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_printf;
-    expected_calls[expected_call_count].u.printf_call.override_result = false;
+    expected_calls[expected_call_count].printf_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_time_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_time;
-    expected_calls[expected_call_count].u.time_call.override_result = false;
+    expected_calls[expected_call_count].time_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_ctime_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_ctime;
-    expected_calls[expected_call_count].u.ctime_call.override_result = false;
+    expected_calls[expected_call_count].ctime_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_vsnprintf_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_vsnprintf;
-    expected_calls[expected_call_count].u.vsnprintf_call.override_result = false;
+    expected_calls[expected_call_count].vsnprintf_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_snprintf_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_snprintf;
-    expected_calls[expected_call_count].u.snprintf_call.override_result = false;
+    expected_calls[expected_call_count].snprintf_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_log_context_get_property_value_pair_count_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_log_context_get_property_value_pair_count;
-    expected_calls[expected_call_count].u.log_context_get_property_value_pair_count_call.override_result = false;
+    expected_calls[expected_call_count].log_context_get_property_value_pair_count_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_log_context_get_property_value_pairs_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_log_context_get_property_value_pairs;
-    expected_calls[expected_call_count].u.log_context_get_property_value_pairs_call.override_result = false;
+    expected_calls[expected_call_count].log_context_get_property_value_pairs_call.override_result = false;
     expected_call_count++;
 }
 
@@ -495,9 +495,9 @@ static void log_sink_console_log_prints_one_CRITICAL_log_line(void)
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[4].u.printf_call.captured_output, "\x1b[31;1m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_CRITICAL), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[4].printf_call.captured_output, "\x1b[31;1m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_CRITICAL), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log shall obtain the time by calling time. ]*/
@@ -523,9 +523,9 @@ static void log_sink_console_log_prints_one_ERROR_log_line(void)
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[4].u.printf_call.captured_output, "\x1b[31m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_ERROR), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[4].printf_call.captured_output, "\x1b[31m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_ERROR), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log shall obtain the time by calling time. ]*/
@@ -551,9 +551,9 @@ static void log_sink_console_log_prints_one_WARNING_log_line(void)
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[4].u.printf_call.captured_output, "\x1b[33;1m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_WARNING), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[4].printf_call.captured_output, "\x1b[33;1m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_WARNING), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log shall obtain the time by calling time. ]*/
@@ -579,9 +579,9 @@ static void log_sink_console_log_prints_one_INFO_log_line(void)
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[4].u.printf_call.captured_output, "\x1b[33m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_INFO), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[4].printf_call.captured_output, "\x1b[33m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_INFO), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log shall obtain the time by calling time. ]*/
@@ -607,9 +607,9 @@ static void log_sink_console_log_prints_one_VERBOSE_log_line(void)
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[4].u.printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[4].printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
@@ -621,8 +621,8 @@ static void when_snprintf_fails_log_sink_console_log_prints_error_formatting(voi
     setup_ctime_call();
     setup_snprintf_call();
     setup_printf_call();
-    expected_calls[2].u.snprintf_call.override_result = true;
-    expected_calls[2].u.snprintf_call.call_result = -1;
+    expected_calls[2].snprintf_call.override_result = true;
+    expected_calls[2].snprintf_call.call_result = -1;
 
     // act
     int line_no = __LINE__;
@@ -630,9 +630,9 @@ static void when_snprintf_fails_log_sink_console_log_prints_error_formatting(voi
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(strcmp(expected_calls[3].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[3].printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
@@ -645,8 +645,8 @@ static void when_vsnprintf_fails_log_sink_console_log_prints_error_formatting(vo
     setup_snprintf_call();
     setup_vsnprintf_call();
     setup_printf_call();
-    expected_calls[3].u.vsnprintf_call.override_result = true;
-    expected_calls[3].u.vsnprintf_call.call_result = -1;
+    expected_calls[3].vsnprintf_call.override_result = true;
+    expected_calls[3].vsnprintf_call.call_result = -1;
 
     // act
     int line_no = __LINE__;
@@ -654,9 +654,9 @@ static void when_vsnprintf_fails_log_sink_console_log_prints_error_formatting(vo
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(strcmp(expected_calls[4].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[4].printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_023: [ If the call to time fails then log_sink_console.log shall print the time as NULL. ]*/
@@ -668,8 +668,8 @@ static void when_time_fails_log_sink_console_log_prints_time_as_NULL(void)
     setup_snprintf_call();
     setup_vsnprintf_call();
     setup_printf_call();
-    expected_calls[0].u.time_call.override_result = true;
-    expected_calls[0].u.time_call.call_result = (time_t)-1;
+    expected_calls[0].time_call.override_result = true;
+    expected_calls[0].time_call.call_result = (time_t)-1;
 
     // act
     int line_no = __LINE__;
@@ -677,9 +677,9 @@ static void when_time_fails_log_sink_console_log_prints_time_as_NULL(void)
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line_with_NULL_time(expected_calls[3].u.printf_call.captured_output, "\x1b[37m%s Time:NULL File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line_with_NULL_time(expected_calls[3].printf_call.captured_output, "\x1b[37m%s Time:NULL File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_024: [ If the call to ctime fails then log_sink_console.log shall print the time as NULL. ]*/
@@ -692,8 +692,8 @@ static void when_ctime_returns_NULL_log_sink_console_log_prints_time_as_NULL(voi
     setup_snprintf_call();
     setup_vsnprintf_call();
     setup_printf_call();
-    expected_calls[1].u.ctime_call.override_result = true;
-    expected_calls[1].u.ctime_call.call_result = NULL;
+    expected_calls[1].ctime_call.override_result = true;
+    expected_calls[1].ctime_call.call_result = NULL;
 
     // act
     int line_no = __LINE__;
@@ -701,9 +701,9 @@ static void when_ctime_returns_NULL_log_sink_console_log_prints_time_as_NULL(voi
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line_with_NULL_time(expected_calls[4].u.printf_call.captured_output, "\x1b[37m%s Time:NULL File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line_with_NULL_time(expected_calls[4].printf_call.captured_output, "\x1b[37m%s Time:NULL File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
@@ -741,9 +741,9 @@ static void log_sink_console_log_with_non_NULL_context_prints_one_property(void)
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { x = 42 } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { x = 42 } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
@@ -782,9 +782,9 @@ static void log_sink_console_log_with_non_NULL_context_prints_2_properties(void)
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { x=42 y=1 } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { x=42 y=1 } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
@@ -826,9 +826,9 @@ static void log_sink_console_log_with_non_NULL_context_with_2_levels_works(void)
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { { x=42 } y=1 } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { { x=42 } y=1 } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
@@ -870,9 +870,9 @@ static void log_sink_console_log_with_non_NULL_named_contexts_with_2_levels_work
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s uaga = { haga = { x=42 } y=1 } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s uaga = { haga = { x=42 } y=1 } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
@@ -908,9 +908,9 @@ static void log_sink_console_log_with_non_NULL_empty_context_works(void)
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
@@ -954,9 +954,9 @@ static void log_sink_console_log_with_non_NULL_dynamically_allocated_context(voi
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { { x=42 } y=1 } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { { x=42 } y=1 } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 
     // cleanup
     LOG_CONTEXT_DESTROY(context_1);
@@ -977,8 +977,8 @@ static void when_snprintf_fails_for_context_open_brace_log_sink_console_log_prin
     setup_snprintf_call(); // context opening
     setup_printf_call();
 
-    expected_calls[5].u.snprintf_call.override_result = true;
-    expected_calls[5].u.snprintf_call.call_result = -1;
+    expected_calls[5].snprintf_call.override_result = true;
+    expected_calls[5].snprintf_call.call_result = -1;
 
     LOG_CONTEXT_LOCAL_DEFINE(context_1, NULL, LOG_CONTEXT_PROPERTY(int32_t, x, 42));
     LOG_CONTEXT_LOCAL_DEFINE(context_2, &context_1, LOG_CONTEXT_PROPERTY(uint32_t, y, 1));
@@ -989,9 +989,9 @@ static void when_snprintf_fails_for_context_open_brace_log_sink_console_log_prin
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
@@ -1009,8 +1009,8 @@ static void when_snprintf_fails_for_inner_context_open_brace_log_sink_console_lo
     setup_snprintf_call(); // context opening
     setup_printf_call();
 
-    expected_calls[6].u.snprintf_call.override_result = true;
-    expected_calls[6].u.snprintf_call.call_result = -1;
+    expected_calls[6].snprintf_call.override_result = true;
+    expected_calls[6].snprintf_call.call_result = -1;
 
     LOG_CONTEXT_LOCAL_DEFINE(context_1, NULL, LOG_CONTEXT_PROPERTY(int32_t, x, 42));
     LOG_CONTEXT_LOCAL_DEFINE(context_2, &context_1, LOG_CONTEXT_PROPERTY(uint32_t, y, 1));
@@ -1021,9 +1021,9 @@ static void when_snprintf_fails_for_inner_context_open_brace_log_sink_console_lo
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
@@ -1042,8 +1042,8 @@ static void when_snprintf_fails_for_property_in_inner_context_log_sink_console_l
     setup_snprintf_call(); // property
     setup_printf_call();
 
-    expected_calls[7].u.snprintf_call.override_result = true;
-    expected_calls[7].u.snprintf_call.call_result = -1;
+    expected_calls[7].snprintf_call.override_result = true;
+    expected_calls[7].snprintf_call.call_result = -1;
 
     LOG_CONTEXT_LOCAL_DEFINE(context_1, NULL, LOG_CONTEXT_PROPERTY(int32_t, x, 42));
     LOG_CONTEXT_LOCAL_DEFINE(context_2, &context_1, LOG_CONTEXT_PROPERTY(uint32_t, y, 1));
@@ -1054,9 +1054,9 @@ static void when_snprintf_fails_for_property_in_inner_context_log_sink_console_l
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
@@ -1076,8 +1076,8 @@ static void when_snprintf_fails_for_closing_of_inner_context_log_sink_console_lo
     setup_snprintf_call(); // context closing
     setup_printf_call();
 
-    expected_calls[8].u.snprintf_call.override_result = true;
-    expected_calls[8].u.snprintf_call.call_result = -1;
+    expected_calls[8].snprintf_call.override_result = true;
+    expected_calls[8].snprintf_call.call_result = -1;
 
     LOG_CONTEXT_LOCAL_DEFINE(context_1, NULL, LOG_CONTEXT_PROPERTY(int32_t, x, 42));
     LOG_CONTEXT_LOCAL_DEFINE(context_2, &context_1, LOG_CONTEXT_PROPERTY(uint32_t, y, 1));
@@ -1088,9 +1088,9 @@ static void when_snprintf_fails_for_closing_of_inner_context_log_sink_console_lo
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
@@ -1111,8 +1111,8 @@ static void when_snprintf_fails_for_property_in_outer_context_log_sink_console_l
     setup_snprintf_call(); // property
     setup_printf_call();
 
-    expected_calls[9].u.snprintf_call.override_result = true;
-    expected_calls[9].u.snprintf_call.call_result = -1;
+    expected_calls[9].snprintf_call.override_result = true;
+    expected_calls[9].snprintf_call.call_result = -1;
 
     LOG_CONTEXT_LOCAL_DEFINE(context_1, NULL, LOG_CONTEXT_PROPERTY(int32_t, x, 42));
     LOG_CONTEXT_LOCAL_DEFINE(context_2, &context_1, LOG_CONTEXT_PROPERTY(uint32_t, y, 1));
@@ -1123,9 +1123,9 @@ static void when_snprintf_fails_for_property_in_outer_context_log_sink_console_l
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
@@ -1147,8 +1147,8 @@ static void when_snprintf_fails_for_closing_of_outer_context_log_sink_console_lo
     setup_snprintf_call(); // context closing
     setup_printf_call();
 
-    expected_calls[10].u.snprintf_call.override_result = true;
-    expected_calls[10].u.snprintf_call.call_result = -1;
+    expected_calls[10].snprintf_call.override_result = true;
+    expected_calls[10].snprintf_call.call_result = -1;
 
     LOG_CONTEXT_LOCAL_DEFINE(context_1, NULL, LOG_CONTEXT_PROPERTY(int32_t, x, 42));
     LOG_CONTEXT_LOCAL_DEFINE(context_2, &context_1, LOG_CONTEXT_PROPERTY(uint32_t, y, 1));
@@ -1159,9 +1159,9 @@ static void when_snprintf_fails_for_closing_of_outer_context_log_sink_console_lo
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, "Error formatting log line\r\n") == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].printf_call.captured_output, "Error formatting log line\r\n") == 0);
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_021: [ log_sink_console.log shall print at most LOG_MAX_MESSAGE_LENGTH characters including the null terminator (the rest of the context shall be truncated). ]*/
@@ -1174,8 +1174,8 @@ static void when_printing_the_message_exceeds_log_line_size_it_is_truncated(void
     setup_vsnprintf_call();
     setup_printf_call();
 
-    expected_calls[0].u.time_call.override_result = true;
-    expected_calls[0].u.time_call.call_result = (time_t)-1;
+    expected_calls[0].time_call.override_result = true;
+    expected_calls[0].time_call.call_result = (time_t)-1;
 
     char* message_string_too_big = malloc(LOG_MAX_MESSAGE_LENGTH);
     POOR_MANS_ASSERT(message_string_too_big != NULL);
@@ -1189,7 +1189,7 @@ static void when_printing_the_message_exceeds_log_line_size_it_is_truncated(void
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     char expected_string[LOG_MAX_MESSAGE_LENGTH];
@@ -1197,7 +1197,7 @@ static void when_printing_the_message_exceeds_log_line_size_it_is_truncated(void
     (void)snprintf(expected_string, sizeof(expected_string), "\x1b[37m%s Time:NULL File:%s:%d Func:%s %s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE),
         __FILE__, line_no, __FUNCTION__, message_string_too_big);
     (void)snprintf(expected_logged_printf_string, sizeof(expected_logged_printf_string), "%s\x1b[0m\r\n", expected_string);
-    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, expected_logged_printf_string) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].printf_call.captured_output, expected_logged_printf_string) == 0);
 
     // cleanup
     free(message_string_too_big);
@@ -1212,8 +1212,8 @@ static void when_printing_the_file_exceeds_log_line_size_it_is_truncated(void)
     setup_snprintf_call();
     setup_printf_call();
 
-    expected_calls[0].u.time_call.override_result = true;
-    expected_calls[0].u.time_call.call_result = (time_t)-1;
+    expected_calls[0].time_call.override_result = true;
+    expected_calls[0].time_call.call_result = (time_t)-1;
 
     char* file_too_big = malloc(LOG_MAX_MESSAGE_LENGTH);
     POOR_MANS_ASSERT(file_too_big != NULL);
@@ -1227,7 +1227,7 @@ static void when_printing_the_file_exceeds_log_line_size_it_is_truncated(void)
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     char expected_string[LOG_MAX_MESSAGE_LENGTH];
@@ -1235,7 +1235,7 @@ static void when_printing_the_file_exceeds_log_line_size_it_is_truncated(void)
     (void)snprintf(expected_string, sizeof(expected_string), "\x1b[37m%s Time:NULL File:%s:%d Func:%s a", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE),
         file_too_big, line_no, __FUNCTION__);
     (void)snprintf(expected_logged_printf_string, sizeof(expected_logged_printf_string), "%s\x1b[0m\r\n", expected_string);
-    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, expected_logged_printf_string) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].printf_call.captured_output, expected_logged_printf_string) == 0);
 
     // cleanup
     free(file_too_big);
@@ -1256,8 +1256,8 @@ static void when_printing_a_property_value_exceeds_log_line_size_it_is_truncated
     setup_snprintf_call(); // property
     setup_printf_call();
 
-    expected_calls[0].u.time_call.override_result = true;
-    expected_calls[0].u.time_call.call_result = (time_t)-1;
+    expected_calls[0].time_call.override_result = true;
+    expected_calls[0].time_call.call_result = (time_t)-1;
 
     char* string_property_value_too_big = malloc(LOG_MAX_MESSAGE_LENGTH);
     POOR_MANS_ASSERT(string_property_value_too_big != NULL);
@@ -1274,7 +1274,7 @@ static void when_printing_a_property_value_exceeds_log_line_size_it_is_truncated
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     char expected_string[LOG_MAX_MESSAGE_LENGTH];
@@ -1282,7 +1282,7 @@ static void when_printing_a_property_value_exceeds_log_line_size_it_is_truncated
     (void)snprintf(expected_string, sizeof(expected_string), "\x1b[37m%s Time:NULL File:%s:%d Func:%s { hagauaga=%s } a", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE),
         __FILE__, line_no, __FUNCTION__, string_property_value_too_big);
     (void)snprintf(expected_logged_printf_string, sizeof(expected_logged_printf_string), "%s\x1b[0m\r\n", expected_string);
-    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, expected_logged_printf_string) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].printf_call.captured_output, expected_logged_printf_string) == 0);
 
     // cleanup
     free(string_property_value_too_big);
@@ -1304,8 +1304,8 @@ static void when_printing_a_property_name_exceeds_log_line_size_it_is_truncated(
     setup_snprintf_call(); // property
     setup_printf_call();
 
-    expected_calls[0].u.time_call.override_result = true;
-    expected_calls[0].u.time_call.call_result = (time_t)-1;
+    expected_calls[0].time_call.override_result = true;
+    expected_calls[0].time_call.call_result = (time_t)-1;
 
     char* dummy_file_name = malloc(LOG_MAX_MESSAGE_LENGTH);
     POOR_MANS_ASSERT(dummy_file_name != NULL);
@@ -1330,7 +1330,7 @@ static void when_printing_a_property_name_exceeds_log_line_size_it_is_truncated(
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].u.time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     char expected_string[LOG_MAX_MESSAGE_LENGTH];
@@ -1338,7 +1338,7 @@ static void when_printing_a_property_name_exceeds_log_line_size_it_is_truncated(
     (void)snprintf(expected_string, sizeof(expected_string), "\x1b[37m%s Time:NULL File:%s:%d Func:%s { ab=x } a", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE),
         dummy_file_name, line_no, __FUNCTION__);
     (void)snprintf(expected_logged_printf_string, sizeof(expected_logged_printf_string), "%s\x1b[0m\r\n", expected_string);
-    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].u.printf_call.captured_output, expected_logged_printf_string) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].printf_call.captured_output, expected_logged_printf_string) == 0);
 
     // cleanup
     free(dummy_file_name);

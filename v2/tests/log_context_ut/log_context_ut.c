@@ -48,7 +48,7 @@ typedef struct MOCK_CALL_TAG
     {
         malloc_CALL malloc_call;
         free_CALL free_call;
-    } u;
+    };
 } MOCK_CALL;
 
 static MOCK_CALL expected_calls[MAX_MOCK_CALL_COUNT];
@@ -75,13 +75,13 @@ void* mock_malloc(size_t size)
     }
     else
     {
-        if (expected_calls[actual_call_count].u.malloc_call.override_result)
+        if (expected_calls[actual_call_count].malloc_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.malloc_call.call_result;
+            result = expected_calls[actual_call_count].malloc_call.call_result;
         }
         else
         {
-            expected_calls[actual_call_count].u.malloc_call.size = size;
+            expected_calls[actual_call_count].malloc_call.size = size;
 
             result = malloc(size);
         }
@@ -101,7 +101,7 @@ void mock_free(void* ptr)
     }
     else
     {
-        expected_calls[actual_call_count].u.free_call.ptr = ptr;
+        expected_calls[actual_call_count].free_call.ptr = ptr;
         free(ptr);
 
         actual_call_count++;
@@ -131,7 +131,7 @@ void mock_log_internal_error_report(void)
 static void setup_malloc_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_malloc;
-    expected_calls[expected_call_count].u.malloc_call.override_result = false;
+    expected_calls[expected_call_count].malloc_call.override_result = false;
     expected_call_count++;
 }
 
@@ -186,8 +186,8 @@ static void when_malloc_fails_LOG_CONTEXT_CREATE_with_no_properties_also_fails(v
     setup_mocks();
 
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_malloc;
-    expected_calls[expected_call_count].u.malloc_call.override_result = true;
-    expected_calls[expected_call_count].u.malloc_call.call_result = NULL;
+    expected_calls[expected_call_count].malloc_call.override_result = true;
+    expected_calls[expected_call_count].malloc_call.call_result = NULL;
     expected_call_count++;
 
     // act
