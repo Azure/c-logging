@@ -30,7 +30,7 @@ typedef struct MOCK_CALL_TAG
     union
     {
         _set_abort_behavior_CALL _set_abort_behavior_call;
-    } u;
+    };
 } MOCK_CALL;
 
 static MOCK_CALL expected_calls[MAX_MOCK_CALL_COUNT];
@@ -70,8 +70,8 @@ unsigned int mock__set_abort_behavior(unsigned int _Flags, unsigned int _Mask)
     }
     else
     {
-        expected_calls[actual_call_count].u._set_abort_behavior_call._Flags = _Flags;
-        expected_calls[actual_call_count].u._set_abort_behavior_call._Mask = _Mask;
+        expected_calls[actual_call_count]._set_abort_behavior_call._Flags = _Flags;
+        expected_calls[actual_call_count]._set_abort_behavior_call._Mask = _Mask;
 
 #if defined _MSC_VER
         result = _set_abort_behavior(_Flags, _Mask);

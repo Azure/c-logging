@@ -54,7 +54,7 @@ typedef struct MOCK_CALL_TAG
         snprintf_CALL snprintf_call;
         vsprintf_CALL vsprintf_call;
         vsnprintf_CALL vsnprintf_call;
-    } u;
+    };
 } MOCK_CALL;
 
 static MOCK_CALL expected_calls[MAX_MOCK_CALL_COUNT];
@@ -74,16 +74,16 @@ int mock_snprintf(char* s, size_t n, const char* format, ...)
     }
     else
     {
-        if (expected_calls[actual_call_count].u.snprintf_call.override_result)
+        if (expected_calls[actual_call_count].snprintf_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.snprintf_call.call_result;
+            result = expected_calls[actual_call_count].snprintf_call.call_result;
         }
         else
         {
             va_list args;
             va_start(args, format);
 
-            expected_calls[actual_call_count].u.snprintf_call.format_arg = format;
+            expected_calls[actual_call_count].snprintf_call.format_arg = format;
 
             result = vsnprintf(s, n, format, args);
 
@@ -108,13 +108,13 @@ int mock_vsprintf(char* s, const char* format, va_list args)
     }
     else
     {
-        if (expected_calls[actual_call_count].u.vsprintf_call.override_result)
+        if (expected_calls[actual_call_count].vsprintf_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.vsprintf_call.call_result;
+            result = expected_calls[actual_call_count].vsprintf_call.call_result;
         }
         else
         {
-            expected_calls[actual_call_count].u.vsprintf_call.format_arg = format;
+            expected_calls[actual_call_count].vsprintf_call.format_arg = format;
 
             result = vsprintf(s, format, args);
         }
@@ -137,13 +137,13 @@ int mock_vsnprintf(char* s, size_t n, const char* format, va_list arg_list)
     }
     else
     {
-        if (expected_calls[actual_call_count].u.vsnprintf_call.override_result)
+        if (expected_calls[actual_call_count].vsnprintf_call.override_result)
         {
-            result = expected_calls[actual_call_count].u.vsnprintf_call.call_result;
+            result = expected_calls[actual_call_count].vsnprintf_call.call_result;
         }
         else
         {
-            expected_calls[actual_call_count].u.vsnprintf_call.format_arg = format;
+            expected_calls[actual_call_count].vsnprintf_call.format_arg = format;
 
             result = vsnprintf(s, n, format, arg_list);
         }
@@ -164,21 +164,21 @@ static void setup_mocks(void)
 static void setup_expected_snprintf_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_snprintf;
-    expected_calls[expected_call_count].u.snprintf_call.override_result = false;
+    expected_calls[expected_call_count].snprintf_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_expected_vsprintf_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_vsprintf;
-    expected_calls[expected_call_count].u.vsprintf_call.override_result = false;
+    expected_calls[expected_call_count].vsprintf_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup_expected_vsnprintf_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_vsnprintf;
-    expected_calls[expected_call_count].u.vsnprintf_call.override_result = false;
+    expected_calls[expected_call_count].vsnprintf_call.override_result = false;
     expected_call_count++;
 }
 
@@ -264,8 +264,8 @@ static void when_snprintf_fails_ascii_char_ptr_to_string_also_fails(void)
     char buffer[4];
     setup_mocks();
     expected_calls[0].mock_call_type = MOCK_CALL_TYPE_snprintf;
-    expected_calls[0].u.snprintf_call.override_result = true;
-    expected_calls[0].u.snprintf_call.call_result = -1;
+    expected_calls[0].snprintf_call.override_result = true;
+    expected_calls[0].snprintf_call.call_result = -1;
     expected_call_count = 1;
 
     // act
@@ -467,8 +467,8 @@ static void when_underlying_call_fails_ascii_char_ptr_LOG_CONTEXT_PROPERTY_TYPE_
     char buffer[5];
     setup_mocks();
     expected_calls[0].mock_call_type = MOCK_CALL_TYPE_vsprintf;
-    expected_calls[0].u.vsprintf_call.override_result = true;
-    expected_calls[0].u.vsprintf_call.call_result = -1;
+    expected_calls[0].vsprintf_call.override_result = true;
+    expected_calls[0].vsprintf_call.call_result = -1;
     expected_call_count = 1;
 
     // act
@@ -488,8 +488,8 @@ static void when_underlying_call_fails_ascii_char_ptr_LOG_CONTEXT_PROPERTY_TYPE_
     // arrange
     setup_mocks();
     expected_calls[0].mock_call_type = MOCK_CALL_TYPE_vsnprintf;
-    expected_calls[0].u.vsnprintf_call.override_result = true;
-    expected_calls[0].u.vsnprintf_call.call_result = -1;
+    expected_calls[0].vsnprintf_call.override_result = true;
+    expected_calls[0].vsnprintf_call.call_result = -1;
     expected_call_count = 1;
 
     // act
