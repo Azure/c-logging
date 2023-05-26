@@ -105,7 +105,7 @@ static int log_sink1_init(void)
         (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_log_sink1_init))
     {
         actual_and_expected_match = false;
-        result = -1;
+        result = MU_FAILURE;
     }
     else
     {
@@ -126,6 +126,15 @@ static int log_sink1_init(void)
 
 static void log_sink1_deinit(void)
 {
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_log_sink1_deinit))
+    {
+        actual_and_expected_match = false;
+    }
+    else
+    {
+        actual_call_count++;
+    }
 }
 
 static void log_sink1_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...)
@@ -153,7 +162,7 @@ static int log_sink2_init(void)
         (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_log_sink2_init))
     {
         actual_and_expected_match = false;
-        result = -1;
+        result = MU_FAILURE;
     }
     else
     {
@@ -174,6 +183,15 @@ static int log_sink2_init(void)
 
 static void log_sink2_deinit(void)
 {
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_log_sink2_deinit))
+    {
+        actual_and_expected_match = false;
+    }
+    else
+    {
+        actual_call_count++;
+    }
 }
 
 static void log_sink2_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...)
@@ -247,9 +265,62 @@ static void setup_log_sink2_log_call(void)
     expected_call_count++;
 }
 
+/* Tests_SRS_LOGGER_01_006: [ If logger is not initialized, logger_deinit shall return. ] */
+static void logger_deinit_when_not_initialized_returns(void)
+{
+    // arrange
+    setup_mocks();
+
+    // act
+    logger_deinit();
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
 /* logger_init */
 
+/* Tests_SRS_LOGGER_01_004: [ If init fails, all sinks already initialized shall have their deinit function called and logger_init shall fail and return a non-zero value. ] */
+static void when_the_1st_sink_init_fails_logger_init_fails(void)
+{
+    // arrange
+    setup_mocks();
+    setup_log_sink1_init_call();
+    expected_calls[0].log_sink1_init_call.override_result = true;
+    expected_calls[0].log_sink1_init_call.call_result = MU_FAILURE;
+
+    // act
+    int result = logger_init();
+
+    // assert
+    POOR_MANS_ASSERT(result != 0);
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
+/* Tests_SRS_LOGGER_01_004: [ If init fails, all sinks already initialized shall have their deinit function called and logger_init shall fail and return a non-zero value. ] */
+static void when_the_2nd_sink_init_fails_logger_init_fails(void)
+{
+    // arrange
+    setup_mocks();
+    setup_log_sink1_init_call();
+    setup_log_sink2_init_call();
+    expected_calls[1].log_sink2_init_call.override_result = true;
+    expected_calls[1].log_sink2_init_call.call_result = MU_FAILURE;
+    setup_log_sink1_deinit_call();
+
+    // act
+    int result = logger_init();
+
+    // assert
+    POOR_MANS_ASSERT(result != 0);
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
 /* Tests_SRS_LOGGER_01_003: [ logger_init shall call the init function of every sink that is configured to be used. ] */
+/* Tests_SRS_LOGGER_01_005: [ Otherwise, logger_init shall succeed and return 0. ] */
 static void logger_init_initializes_sinks(void)
 {
     // arrange
@@ -266,6 +337,22 @@ static void logger_init_initializes_sinks(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
+/* Tests_SRS_LOGGER_01_002: [ If logger is already initialized, logger_init shall fail and return a non-zero value. ] */
+static void logger_init_after_init_fails(void)
+{
+    // arrange
+    setup_mocks();
+
+    // act
+    int result = logger_init();
+
+    // assert
+    POOR_MANS_ASSERT(result != 0);
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
+/* Tests_SRS_LOGGER_01_001: [ LOGGER_LOG shall call the log function of every sink that is configured to be used. ] */
 static void LOGGER_LOG_with_ERROR_works(void)
 {
     // arrange
@@ -279,13 +366,53 @@ static void LOGGER_LOG_with_ERROR_works(void)
     //POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
+/* logger_deinit */
+
+/* Tests_SRS_LOGGER_01_007: [ logger_deinit shall call the deinit function of every sink that is configured to be used. ] */
+static void logger_deinit_deinitialized_all_sinks(void)
+{
+    // arrange
+    setup_mocks();
+    setup_log_sink1_deinit_call();
+    setup_log_sink2_deinit_call();
+
+    // act
+    logger_deinit();
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
+/* Tests_SRS_LOGGER_01_006: [ If logger is not initialized, logger_deinit shall return. ] */
+static void logger_deinit_after_deinit_returns(void)
+{
+    // arrange
+    setup_mocks();
+
+    // act
+    logger_deinit();
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
     // make abort not popup
     _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 
+    logger_deinit_when_not_initialized_returns();
+
+    when_the_1st_sink_init_fails_logger_init_fails();
+    when_the_2nd_sink_init_fails_logger_init_fails();
     logger_init_initializes_sinks();
+    logger_init_after_init_fails();
+
+    logger_deinit_deinitialized_all_sinks();
+    logger_deinit_after_deinit_returns();
 
     return 0;
 }

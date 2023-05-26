@@ -615,7 +615,7 @@ static void log_sink_etw_deinit(void)
     }
 }
 
-static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...)
+static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, va_list args)
 {
     if (message_format == NULL)
     {
