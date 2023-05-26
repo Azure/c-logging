@@ -9,8 +9,11 @@
 
 const LOG_SINK_IF* log_sinks[] = 
 {
-    &log_sink_console,
-    &log_sink_etw
-};
+#ifdef USE_TRACELOGGING
+    &log_sink_console
+#endif // USE_TRACELOGGING
+#ifdef CALL_CONSOLE_LOGGER
+    , &log_sink_etw
+}; // CALL_CONSOLE_LOGGER
 
 const uint32_t log_sink_count = MU_COUNT_ARRAY_ITEMS(log_sinks);
