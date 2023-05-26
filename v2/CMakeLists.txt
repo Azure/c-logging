@@ -25,6 +25,7 @@ set(c_logging_v2_h_files
 
 set(c_logging_v2_c_files
     ./src/logger.c
+    ./src/logger_sinks_config.c
     ./src/log_context.c
     ./src/log_context_property_basic_types.c
     ./src/log_context_property_type_ascii_char_ptr.c
