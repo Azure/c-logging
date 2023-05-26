@@ -3,10 +3,20 @@
 
 #the following variables are project-wide and can be used with cmake-gui
 option(log_abort_on_error "set log_abort_on_error to ON abort in case an error is encountered while using stack contexts (default is OFF)" OFF)
+option(log_sink_console "Use the log console sink (send logs to console). Default is ON" ON)
+option(log_sink_etw "Use the TraceLogging sink. Default is OF" OFF)
 
 if(${log_abort_on_error})
     add_definitions(-DLOG_ABORT_ON_ERROR)
 endif() #(${log_abort_on_error})
+
+if(${log_sink_console})
+    add_definitions(-DUSE_LOG_SINK_CONSOLE)
+endif() #(${log_sink_console})
+
+if(${log_sink_etw})
+    add_definitions(-DUSE_LOG_SINK_ETW)
+endif() #(${log_sink_etw})
 
 set(c_logging_v2_h_files
     ./inc/c_logging/logger.h
