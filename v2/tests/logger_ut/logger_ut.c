@@ -9,6 +9,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifdef _MSC_VER
+#include "windows.h"
+#endif
+
 #include "macro_utils/macro_utils.h"
 
 #include "c_logging/log_context_property_basic_types.h"
@@ -37,6 +41,10 @@ MU_DEFINE_ENUM_STRINGS(LOG_CONTEXT_PROPERTY_TYPE, LOG_CONTEXT_PROPERTY_TYPE_VALU
 
 // very poor mans mocks :-(
 
+#define MAX_FILE_STRING_LENGTH  256
+#define MAX_FUNC_STRING_LENGTH  256
+#define MAX_MESSAGE_STRING_LENGTH  1024
+
 #define MAX_PRINTF_CAPTURED_OUPUT_SIZE (LOG_MAX_MESSAGE_LENGTH * 2)
 
 typedef struct log_sink1_init_CALL_TAG
@@ -52,7 +60,12 @@ typedef struct log_sink1_deinit_CALL_TAG
 
 typedef struct log_sink1_log_CALL_TAG
 {
-    int dummy;
+    LOG_LEVEL captured_log_level;
+    LOG_CONTEXT_HANDLE captured_log_context;
+    char captured_file[MAX_FILE_STRING_LENGTH];
+    char captured_func[MAX_FUNC_STRING_LENGTH];
+    int captured_line;
+    char captured_message[MAX_MESSAGE_STRING_LENGTH];
 } log_sink1_log_CALL;
 
 typedef struct log_sink2_init_CALL_TAG
@@ -68,7 +81,12 @@ typedef struct log_sink2_deinit_CALL_TAG
 
 typedef struct log_sink2_log_CALL_TAG
 {
-    int dummy;
+    LOG_LEVEL captured_log_level;
+    LOG_CONTEXT_HANDLE captured_log_context;
+    char captured_file[MAX_FILE_STRING_LENGTH];
+    char captured_func[MAX_FUNC_STRING_LENGTH];
+    int captured_line;
+    char captured_message[MAX_MESSAGE_STRING_LENGTH];
 } log_sink2_log_CALL;
 
 typedef struct MOCK_CALL_TAG
@@ -89,6 +107,13 @@ static MOCK_CALL expected_calls[MAX_MOCK_CALL_COUNT];
 static size_t expected_call_count;
 static size_t actual_call_count;
 static bool actual_and_expected_match;
+
+#define POOR_MANS_ASSERT(cond) \
+    if (!(cond)) \
+    { \
+        (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
+        abort(); \
+    } \
 
 static void setup_mocks(void)
 {
@@ -146,13 +171,15 @@ static void log_sink1_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, c
     }
     else
     {
-        (void)log_level;
-        (void)log_context;
-        (void)file;
-        (void)func;
-        (void)line;
-        (void)message_format;
-        (void)args;
+        expected_calls[actual_call_count].log_sink1_log_call.captured_log_level = log_level;
+        expected_calls[actual_call_count].log_sink1_log_call.captured_log_context = log_context;
+        int snprintf_result = snprintf(expected_calls[actual_call_count].log_sink1_log_call.captured_file, sizeof(expected_calls[actual_call_count].log_sink1_log_call.captured_file), "%s", file);
+        POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < sizeof(expected_calls[actual_call_count].log_sink1_log_call.captured_file)));
+        snprintf_result = snprintf(expected_calls[actual_call_count].log_sink1_log_call.captured_func, sizeof(expected_calls[actual_call_count].log_sink1_log_call.captured_func), "%s", func);
+        POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < sizeof(expected_calls[actual_call_count].log_sink1_log_call.captured_func)));
+        expected_calls[actual_call_count].log_sink1_log_call.captured_line = line;
+        snprintf_result = vsnprintf(expected_calls[actual_call_count].log_sink1_log_call.captured_message, sizeof(expected_calls[actual_call_count].log_sink1_log_call.captured_message), message_format, args);
+        POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < sizeof(expected_calls[actual_call_count].log_sink1_log_call.captured_message)));
 
         actual_call_count++;
     }
@@ -214,13 +241,15 @@ static void log_sink2_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, c
     }
     else
     {
-        (void)log_level;
-        (void)log_context;
-        (void)file;
-        (void)func;
-        (void)line;
-        (void)message_format;
-        (void)args;
+        expected_calls[actual_call_count].log_sink2_log_call.captured_log_level = log_level;
+        expected_calls[actual_call_count].log_sink2_log_call.captured_log_context = log_context;
+        int snprintf_result = snprintf(expected_calls[actual_call_count].log_sink2_log_call.captured_file, sizeof(expected_calls[actual_call_count].log_sink2_log_call.captured_file), "%s", file);
+        POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < sizeof(expected_calls[actual_call_count].log_sink2_log_call.captured_file)));
+        snprintf_result = snprintf(expected_calls[actual_call_count].log_sink2_log_call.captured_func, sizeof(expected_calls[actual_call_count].log_sink2_log_call.captured_func), "%s", func);
+        POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < sizeof(expected_calls[actual_call_count].log_sink2_log_call.captured_func)));
+        expected_calls[actual_call_count].log_sink2_log_call.captured_line = line;
+        snprintf_result = vsnprintf(expected_calls[actual_call_count].log_sink2_log_call.captured_message, sizeof(expected_calls[actual_call_count].log_sink2_log_call.captured_message), message_format, args);
+        POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < sizeof(expected_calls[actual_call_count].log_sink2_log_call.captured_message)));
 
         actual_call_count++;
     }
@@ -241,13 +270,6 @@ const LOG_SINK_IF* log_sinks[] =
 };
 
 const uint32_t log_sink_count = MU_COUNT_ARRAY_ITEMS(log_sinks);
-
-#define POOR_MANS_ASSERT(cond) \
-    if (!(cond)) \
-    { \
-        (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
-        abort(); \
-    } \
 
 static void setup_log_sink1_init_call(void)
 {
@@ -376,8 +398,7 @@ static void logger_init_after_init_fails(void)
 
 /* LOGGER_LOG */
 
-/* Tests_SRS_LOGGER_01_001: [ LOGGER_LOG shall call the log function of every sink that is configured to be used. ] */
-static void LOGGER_LOG_with_ERROR_works(void)
+static void test_with_log_level(LOG_LEVEL log_level)
 {
     // arrange
     setup_mocks();
@@ -385,11 +406,96 @@ static void LOGGER_LOG_with_ERROR_works(void)
     setup_log_sink2_log_call();
 
     // act
-    LOGGER_LOG(LOG_LEVEL_ERROR, NULL, "gigi duru");
+    // capture the line no of the error
+    int expected_line = __LINE__; LOGGER_LOG(log_level, NULL, "gigi duru");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // 1st sink
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_log_level == log_level);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_log_context == NULL);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_line == expected_line);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_message, "gigi duru") == 0);
+
+    // 2nd sink
+    POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_log_level == log_level);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink2_log_call.captured_log_context == NULL);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_line == expected_line);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_message, "gigi duru") == 0);
+}
+
+/* Tests_SRS_LOGGER_01_001: [ LOGGER_LOG shall call the log function of every sink that is configured to be used. ] */
+static void LOGGER_LOG_with_CRITICAL_works(void)
+{
+    test_with_log_level(LOG_LEVEL_CRITICAL);
+}
+
+/* Tests_SRS_LOGGER_01_001: [ LOGGER_LOG shall call the log function of every sink that is configured to be used. ] */
+static void LOGGER_LOG_with_ERROR_works(void)
+{
+    test_with_log_level(LOG_LEVEL_ERROR);
+}
+
+/* Tests_SRS_LOGGER_01_001: [ LOGGER_LOG shall call the log function of every sink that is configured to be used. ] */
+static void LOGGER_LOG_with_INFO_works(void)
+{
+    test_with_log_level(LOG_LEVEL_INFO);
+}
+
+/* Tests_SRS_LOGGER_01_001: [ LOGGER_LOG shall call the log function of every sink that is configured to be used. ] */
+static void LOGGER_LOG_with_WARNING_works(void)
+{
+    test_with_log_level(LOG_LEVEL_WARNING);
+}
+
+/* Tests_SRS_LOGGER_01_001: [ LOGGER_LOG shall call the log function of every sink that is configured to be used. ] */
+static void LOGGER_LOG_with_VERBOSE_works(void)
+{
+    test_with_log_level(LOG_LEVEL_VERBOSE);
+}
+
+/* Tests_SRS_LOGGER_01_001: [ LOGGER_LOG shall call the log function of every sink that is configured to be used. ] */
+static void LOGGER_LOG_with_non_NULL_context(void)
+{
+    // arrange
+    LOG_CONTEXT_HANDLE log_context;
+    LOG_CONTEXT_CREATE(log_context, NULL);
+
+    setup_mocks();
+    setup_log_sink1_log_call();
+    setup_log_sink2_log_call();
+
+    // act
+    // capture the line no of the error
+    int expected_line = __LINE__; LOGGER_LOG(LOG_LEVEL_ERROR, log_context, "u lala %d", 42);
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // 1st sink
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_log_level == LOG_LEVEL_ERROR);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_log_context == log_context);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_line == expected_line);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_message, "u lala 42") == 0);
+
+    // 2nd sink
+    POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_log_level == LOG_LEVEL_ERROR);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink2_log_call.captured_log_context == log_context);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_line == expected_line);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_message, "u lala 42") == 0);
+
+    LOG_CONTEXT_DESTROY(log_context);
 }
 
 /* logger_deinit */
@@ -427,6 +533,11 @@ static void logger_deinit_after_deinit_returns(void)
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
+#ifdef _MSC_VER
+    // make abort not popup
+    _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+#endif
+
     logger_deinit_when_not_initialized_returns();
 
     when_the_1st_sink_init_fails_logger_init_fails();
@@ -441,4 +552,3 @@ int main(void)
 
     return 0;
 }
-
