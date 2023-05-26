@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 #include "macro_utils/macro_utils.h"
 
@@ -89,9 +90,19 @@ void logger_deinit(void)
 
 void logger_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line_no, const char* format, ...)
 {
+    va_list args;
+
+    va_start(args, format);
+
     /* Codes_SRS_LOGGER_01_001: [ LOGGER_LOG shall call the log function of every sink that is configured to be used. ] */
     for (uint32_t i = 0; i < log_sink_count; i++)
     {
-        log_sinks[i]->log(log_level, log_context, file, func, line_no, format);
+        va_list args_copy;
+
+        va_copy(args_copy, args);
+        log_sinks[i]->log(log_level, log_context, file, func, line_no, format, args_copy);
+        va_end(args_copy);
     }
+
+    va_end(args);
 }

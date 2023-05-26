@@ -693,6 +693,14 @@ static void setup_TraceLoggingUnregister(void)
     expected_call_count++;
 }
 
+static void test_log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...)
+{
+    va_list args;
+    va_start(args, message_format);
+    log_sink_etw.log(log_level, log_context, file, func, line, message_format, args);
+    va_end(args);
+}
+
 /* log_sink_etw.init */
 
 /* Tests_SRS_LOG_SINK_ETW_01_088: [ If TraceLoggingRegister fails, log_sink_etw.init shall fail and return a non-zero value. ]*/
@@ -823,7 +831,7 @@ static void log_sink_etw_log_with_NULL_message_format_returns(void)
     setup_printf_call();
 
     // act
-    log_sink_etw.log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, __LINE__, NULL);
+    test_log_sink_etw_log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, __LINE__, NULL);
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -915,7 +923,7 @@ static void test_message_with_level(LOG_LEVEL log_level, uint8_t expected_tlg_le
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log(log_level, NULL, __FILE__, __FUNCTION__, captured_line, "test");
+    test_log_sink_etw_log(log_level, NULL, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1030,7 +1038,7 @@ static void log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds(void)
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);                         \
                                                                                                                                      \
     /* act */                                                                                                                        \
-    log_sink_etw.log(log_level, NULL, __FILE__, __FUNCTION__, captured_line, message_format, __VA_ARGS__);                  \
+    test_log_sink_etw_log(log_level, NULL, __FILE__, __FUNCTION__, captured_line, message_format, __VA_ARGS__);                  \
                                                                                                                                      \
     /* assert */                                                                                                                     \
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);                                                                      \
@@ -1121,7 +1129,7 @@ static void test_message_with_context(LOG_LEVEL log_level, uint8_t expected_tlg_
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log(log_level, log_context, __FILE__, __FUNCTION__, captured_line, "test");
+    test_log_sink_etw_log(log_level, log_context, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1289,7 +1297,7 @@ static void test_message_with_context_with_one_property(LOG_LEVEL log_level, uin
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 7, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log(log_level, log_context, __FILE__, __FUNCTION__, captured_line, "test");
+    test_log_sink_etw_log(log_level, log_context, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1650,7 +1658,7 @@ static void test_message_with_context_with_multiple_properties(LOG_LEVEL log_lev
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6 + property_count, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log(log_level, log_context, __FILE__, __FUNCTION__, captured_line, "test");
+    test_log_sink_etw_log(log_level, log_context, __FILE__, __FUNCTION__, captured_line, "test");
 
     free(expected_event_data_descriptors);
 
@@ -1786,7 +1794,7 @@ static void when_unknown_property_type_is_encountered_log_sink_etw_log_with_cont
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "test");
+    test_log_sink_etw_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1931,7 +1939,7 @@ static void when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "test");
+    test_log_sink_etw_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -2211,7 +2219,7 @@ static void when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_wi
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6 + property_count, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "test");
+    test_log_sink_etw_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -2330,7 +2338,7 @@ static void when_size_of_metadata_exceeds_4096_log_sink_etw_log_with_context_doe
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "");
+    test_log_sink_etw_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -2448,7 +2456,7 @@ static void when_size_of_metadata_and_formatted_messages_exceeds_4096_log_sink_e
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "");
+    test_log_sink_etw_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -2703,7 +2711,7 @@ static void when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 6 + property_count, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "");
+    test_log_sink_etw_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, captured_line, "");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -2735,7 +2743,7 @@ static void when_vsnprintf_fails_an_error_is_printed(void)
     setup_printf_call(); // spew error
 
     // act
-    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, __LINE__, "");
+    test_log_sink_etw_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, __LINE__, "");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -2803,7 +2811,7 @@ static void when_size_of_metadata_and_formatted_messages_exceeds_4096_and_2nd_vs
     setup_printf_call();
 
     // act
-    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, __LINE__, "");
+    test_log_sink_etw_log(LOG_LEVEL_VERBOSE, log_context, __FILE__, __FUNCTION__, __LINE__, "");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -2927,7 +2935,7 @@ static void when_a_parent_context_is_used_all_properties_are_emitted(void)
     setup__tlgWriteTransfer_EventWriteTransfer(expected_event_metadata, 8, expected_event_data_descriptors);
 
     // act
-    log_sink_etw.log(LOG_LEVEL_VERBOSE, log_context_2, __FILE__, __FUNCTION__, captured_line, "test");
+    test_log_sink_etw_log(LOG_LEVEL_VERBOSE, log_context_2, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);

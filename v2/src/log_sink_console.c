@@ -149,7 +149,7 @@ static void log_sink_console_deinit(void)
     /* Codes_SRS_LOG_SINK_CONSOLE_01_028: [ log_sink_console.deinit shall return. ] */
 }
 
-static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...)
+static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, va_list args)
 {
     if (message_format == NULL)
     {
@@ -222,8 +222,6 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
                     buffer++;
                     buffer_size--;
 
-                    va_list args;
-                    va_start(args, message_format);
                     int vsnprintf_result = vsnprintf(buffer, buffer_size, message_format, args);
                     if (vsnprintf_result < 0)
                     {
@@ -234,7 +232,6 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
                     {
                         // all ok
                     }
-                    va_end(args);
                 }
             }
 

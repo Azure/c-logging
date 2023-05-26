@@ -137,7 +137,7 @@ static void log_sink1_deinit(void)
     }
 }
 
-static void log_sink1_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...)
+static void log_sink1_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, va_list args)
 {
     (void)log_level;
     (void)log_context;
@@ -145,6 +145,7 @@ static void log_sink1_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, c
     (void)func;
     (void)line;
     (void)message_format;
+    (void)args;
 }
 
 static const LOG_SINK_IF log_sink1 =
@@ -194,7 +195,7 @@ static void log_sink2_deinit(void)
     }
 }
 
-static void log_sink2_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...)
+static void log_sink2_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, va_list args)
 {
     (void)log_level;
     (void)log_context;
@@ -202,6 +203,7 @@ static void log_sink2_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, c
     (void)func;
     (void)line;
     (void)message_format;
+    (void)args;
 }
 
 static const LOG_SINK_IF log_sink2 =
