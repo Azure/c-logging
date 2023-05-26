@@ -28,6 +28,7 @@ set(c_logging_v2_c_files
     ./src/logger_sinks_config.c
     ./src/log_context.c
     ./src/log_context_property_basic_types.c
+    ./src/log_context_property_type.c
     ./src/log_context_property_type_ascii_char_ptr.c
     ./src/log_context_property_type_struct.c
     ./src/log_internal_error.c
