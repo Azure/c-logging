@@ -139,13 +139,23 @@ static void log_sink1_deinit(void)
 
 static void log_sink1_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, va_list args)
 {
-    (void)log_level;
-    (void)log_context;
-    (void)file;
-    (void)func;
-    (void)line;
-    (void)message_format;
-    (void)args;
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_log_sink1_log))
+    {
+        actual_and_expected_match = false;
+    }
+    else
+    {
+        (void)log_level;
+        (void)log_context;
+        (void)file;
+        (void)func;
+        (void)line;
+        (void)message_format;
+        (void)args;
+
+        actual_call_count++;
+    }
 }
 
 static const LOG_SINK_IF log_sink1 =
@@ -197,13 +207,23 @@ static void log_sink2_deinit(void)
 
 static void log_sink2_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, va_list args)
 {
-    (void)log_level;
-    (void)log_context;
-    (void)file;
-    (void)func;
-    (void)line;
-    (void)message_format;
-    (void)args;
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_log_sink2_log))
+    {
+        actual_and_expected_match = false;
+    }
+    else
+    {
+        (void)log_level;
+        (void)log_context;
+        (void)file;
+        (void)func;
+        (void)line;
+        (void)message_format;
+        (void)args;
+
+        actual_call_count++;
+    }
 }
 
 static const LOG_SINK_IF log_sink2 =
@@ -354,18 +374,22 @@ static void logger_init_after_init_fails(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
+/* LOGGER_LOG */
+
 /* Tests_SRS_LOGGER_01_001: [ LOGGER_LOG shall call the log function of every sink that is configured to be used. ] */
 static void LOGGER_LOG_with_ERROR_works(void)
 {
     // arrange
-    //setup_mocks();
+    setup_mocks();
+    setup_log_sink1_log_call();
+    setup_log_sink2_log_call();
 
     // act
     LOGGER_LOG(LOG_LEVEL_ERROR, NULL, "gigi duru");
 
     // assert
-    //POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    //POOR_MANS_ASSERT(actual_and_expected_match);
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
 /* logger_deinit */
@@ -412,6 +436,8 @@ int main(void)
     when_the_2nd_sink_init_fails_logger_init_fails();
     logger_init_initializes_sinks();
     logger_init_after_init_fails();
+
+    LOGGER_LOG_with_ERROR_works();
 
     logger_deinit_deinitialized_all_sinks();
     logger_deinit_after_deinit_returns();

@@ -5,12 +5,17 @@
 ## Exposed API
 
 ```c
-int logger_init(void);
-void logger_deinit(void);
+    extern const uint32_t log_sink_count;
+    extern const LOG_SINK_IF* log_sinks[];
 
-void logger_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line_no, const char* format, ...);
+    int logger_init(void);
+    void logger_deinit(void);
+    void logger_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line_no, const char* format, ...);
 
 #define LOGGER_LOG(log_level, log_context, format, ...) \
+  // ...
+
+#define LOGGER_LOG_EX(log_level, ...) \
   // ...
 ```
 
@@ -35,7 +40,7 @@ Note: No other `logger` API should be called while `logger_init` executes.
 ### logger_deinit
 
 ```c
-int logger_deinit(void);
+void logger_deinit(void);
 ```
 
 `logger_deinit` de-initializes all logger sinks.
