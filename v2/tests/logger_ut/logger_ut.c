@@ -427,9 +427,6 @@ static void logger_deinit_after_deinit_returns(void)
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
-    // make abort not popup
-    _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
-
     logger_deinit_when_not_initialized_returns();
 
     when_the_1st_sink_init_fails_logger_init_fails();
