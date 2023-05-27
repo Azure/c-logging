@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <stdio.h>
-#include <stdint.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -423,6 +423,14 @@ static void validate_log_line_with_NULL_time(const char* actual_string, const ch
     POOR_MANS_ASSERT(strcmp(reset_color_code, "\x1b[0m") == 0);
 }
 
+static void test_log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...)
+{
+    va_list args;
+    va_start(args, message_format);
+    log_sink_console.log(log_level, log_context, file, func, line, message_format, args);
+    va_end(args);
+}
+
 /* log_sink_console.init */
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_027: [ log_sink_console.init shall return 0. ] */
@@ -465,7 +473,7 @@ static void log_sink_console_log_with_NULL_message_format_returns(void)
     setup_printf_call();
 
     // act
-    log_sink_console.log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, __LINE__, NULL);
+    test_log_sink_console_log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, __LINE__, NULL);
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -491,7 +499,7 @@ static void log_sink_console_log_prints_one_CRITICAL_log_line(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -519,7 +527,7 @@ static void log_sink_console_log_prints_one_ERROR_log_line(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_ERROR, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_ERROR, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -547,7 +555,7 @@ static void log_sink_console_log_prints_one_WARNING_log_line(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_WARNING, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_WARNING, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -575,7 +583,7 @@ static void log_sink_console_log_prints_one_INFO_log_line(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_INFO, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_INFO, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -603,7 +611,7 @@ static void log_sink_console_log_prints_one_VERBOSE_log_line(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -626,7 +634,7 @@ static void when_snprintf_fails_log_sink_console_log_prints_error_formatting(voi
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -650,7 +658,7 @@ static void when_vsnprintf_fails_log_sink_console_log_prints_error_formatting(vo
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -673,7 +681,7 @@ static void when_time_fails_log_sink_console_log_prints_time_as_NULL(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -697,7 +705,7 @@ static void when_ctime_returns_NULL_log_sink_console_log_prints_time_as_NULL(voi
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -737,7 +745,7 @@ static void log_sink_console_log_with_non_NULL_context_prints_one_property(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_1, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, &context_1, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -778,7 +786,7 @@ static void log_sink_console_log_with_non_NULL_context_prints_2_properties(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_1, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, &context_1, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -822,7 +830,7 @@ static void log_sink_console_log_with_non_NULL_context_with_2_levels_works(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -866,7 +874,7 @@ static void log_sink_console_log_with_non_NULL_named_contexts_with_2_levels_work
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -904,7 +912,7 @@ static void log_sink_console_log_with_non_NULL_empty_context_works(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_1, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, &context_1, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -950,7 +958,7 @@ static void log_sink_console_log_with_non_NULL_dynamically_allocated_context(voi
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, context_2, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -985,7 +993,7 @@ static void when_snprintf_fails_for_context_open_brace_log_sink_console_log_prin
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1017,7 +1025,7 @@ static void when_snprintf_fails_for_inner_context_open_brace_log_sink_console_lo
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1050,7 +1058,7 @@ static void when_snprintf_fails_for_property_in_inner_context_log_sink_console_l
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1084,7 +1092,7 @@ static void when_snprintf_fails_for_closing_of_inner_context_log_sink_console_lo
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1119,7 +1127,7 @@ static void when_snprintf_fails_for_property_in_outer_context_log_sink_console_l
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1155,7 +1163,7 @@ static void when_snprintf_fails_for_closing_of_outer_context_log_sink_console_lo
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1185,7 +1193,7 @@ static void when_printing_the_message_exceeds_log_line_size_it_is_truncated(void
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, message_string_too_big);
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, line_no, message_string_too_big);
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1223,7 +1231,7 @@ static void when_printing_the_file_exceeds_log_line_size_it_is_truncated(void)
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, NULL, file_too_big, __FUNCTION__, line_no, "a");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, NULL, file_too_big, __FUNCTION__, line_no, "a");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1270,7 +1278,7 @@ static void when_printing_a_property_value_exceeds_log_line_size_it_is_truncated
 
     // act
     int line_no = __LINE__;
-    log_sink_console.log(LOG_LEVEL_VERBOSE, context_1, __FILE__, __FUNCTION__, line_no, "a");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, context_1, __FILE__, __FUNCTION__, line_no, "a");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -1326,7 +1334,7 @@ static void when_printing_a_property_name_exceeds_log_line_size_it_is_truncated(
     LOG_CONTEXT_CREATE(context_1, NULL, LOG_CONTEXT_STRING_PROPERTY(ab, "x"));
 
     // act
-    log_sink_console.log(LOG_LEVEL_VERBOSE, context_1, dummy_file_name, __FUNCTION__, line_no, "a");
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, context_1, dummy_file_name, __FUNCTION__, line_no, "a");
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);

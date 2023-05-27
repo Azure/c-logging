@@ -421,6 +421,14 @@ static void wait_for_event_count(TEST_CONTEXT* test_context, int32_t expected_ev
     } while (1);
 }
 
+static void test_log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...)
+{
+    va_list args;
+    va_start(args, message_format);
+    log_sink_etw.log(log_level, log_context, file, func, line, message_format, args);
+    va_end(args);
+}
+
 // This test is a bit special because it is the first event and thus the time the provider gets registered.
 // So instead of expecting 1 event we'll be expecting a self test event and the actual logging event.
 static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
@@ -437,7 +445,7 @@ static void log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds(void)
     start_parse_events(test_context);
 
     // act
-    log_sink_etw.log(LOG_LEVEL_ERROR, NULL, __FILE__, __FUNCTION__, captured_line, "test");
+    test_log_sink_etw_log(LOG_LEVEL_ERROR, NULL, __FILE__, __FUNCTION__, captured_line, "test");
 
     // assert
 
@@ -471,11 +479,11 @@ static void log_sink_etw_log_all_levels_when_all_levels_enabled_succeeds(void)
     start_parse_events(test_context);
 
     // act
-    log_sink_etw.log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, captured_line, "test_critical");
-    log_sink_etw.log(LOG_LEVEL_ERROR, NULL, __FILE__, __FUNCTION__, captured_line + 1, "test_error");
-    log_sink_etw.log(LOG_LEVEL_WARNING, NULL, __FILE__, __FUNCTION__, captured_line + 2, "test_warning");
-    log_sink_etw.log(LOG_LEVEL_INFO, NULL, __FILE__, __FUNCTION__, captured_line + 3, "test_info");
-    log_sink_etw.log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, captured_line + 4, "test_verbose");
+    test_log_sink_etw_log(LOG_LEVEL_CRITICAL, NULL, __FILE__, __FUNCTION__, captured_line, "test_critical");
+    test_log_sink_etw_log(LOG_LEVEL_ERROR, NULL, __FILE__, __FUNCTION__, captured_line + 1, "test_error");
+    test_log_sink_etw_log(LOG_LEVEL_WARNING, NULL, __FILE__, __FUNCTION__, captured_line + 2, "test_warning");
+    test_log_sink_etw_log(LOG_LEVEL_INFO, NULL, __FILE__, __FUNCTION__, captured_line + 3, "test_info");
+    test_log_sink_etw_log(LOG_LEVEL_VERBOSE, NULL, __FILE__, __FUNCTION__, captured_line + 4, "test_verbose");
 
     // assert
 
@@ -542,7 +550,7 @@ static void log_sink_etw_log_each_individual_level(void)
             start_parse_events(test_context);
 
             // act
-            log_sink_etw.log(event_log_level, NULL, __FILE__, __FUNCTION__, captured_line, "test_event");
+            test_log_sink_etw_log(event_log_level, NULL, __FILE__, __FUNCTION__, captured_line, "test_event");
 
             // assert
             wait_for_event_count(test_context, expected_event_count);
@@ -624,7 +632,7 @@ static void log_sink_etw_log_with_context_with_properties(void)
     start_parse_events(test_context);
 
     // act
-    log_sink_etw.log(LOG_LEVEL_CRITICAL, log_context, __FILE__, __FUNCTION__, captured_line, "test_with_context");
+    test_log_sink_etw_log(LOG_LEVEL_CRITICAL, log_context, __FILE__, __FUNCTION__, captured_line, "test_with_context");
 
     // assert
 
@@ -701,7 +709,7 @@ static void log_sink_etw_log_with_context_with_nested_structs(void)
     start_parse_events(test_context);
 
     // act
-    log_sink_etw.log(LOG_LEVEL_CRITICAL, log_context_2, __FILE__, __FUNCTION__, captured_line, "test_with_nested");
+    test_log_sink_etw_log(LOG_LEVEL_CRITICAL, log_context_2, __FILE__, __FUNCTION__, captured_line, "test_with_nested");
 
     // assert
     // 1 event expected which has att the properties

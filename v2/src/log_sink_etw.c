@@ -203,7 +203,7 @@ typedef struct SELF_DESCRIBED_EVENT_TAG
 } SELF_DESCRIBED_EVENT;
 __pragma(pack(pop))
 
-static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...);
+static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, va_list args);
 
 // This function was written with a little bit of reverse engineering of TraceLogging and guidance from 
 // the TraceLogging.h header about the format of the self described events
@@ -615,7 +615,7 @@ static void log_sink_etw_deinit(void)
     }
 }
 
-static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, ...)
+static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, va_list args)
 {
     if (message_format == NULL)
     {
@@ -643,9 +643,6 @@ static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context
             value_pairs = NULL;
             values_count = 0;
         }
-
-        va_list args;
-        va_start(args, message_format);
 
         /* Codes_SRS_LOG_SINK_ETW_01_010: [ log_sink_etw_log shall emit a self described event that shall have the name of the event as follows: ]*/
         switch (log_level)
@@ -681,8 +678,6 @@ static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context
             internal_emit_self_described_event_va(event_name_verbose, sizeof(event_name_verbose), TRACE_LEVEL_VERBOSE, value_pairs, values_count, file, func, line, message_format, args);
             break;
         }
-
-        va_end(args);
     }
 }
 
