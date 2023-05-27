@@ -3,9 +3,17 @@
 
 #include <stdint.h>
 
+#include "macro_utils/macro_utils.h" // IWYU pragma: keep
+
 #include "c_logging/log_sink_if.h"
+
+#ifdef USE_LOG_SINK_CONSOLE
 #include "c_logging/log_sink_console.h"
+#endif // USE_LOG_SINK_CONSOLE
+
+#ifdef USE_LOG_SINK_ETW
 #include "c_logging/log_sink_etw.h"
+#endif // USE_LOG_SINK_ETW
 
 #if USE_LOG_SINK_CONSOLE || USE_LOG_SINK_ETW
 const LOG_SINK_IF* log_sinks[] = {
