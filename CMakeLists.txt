@@ -89,6 +89,7 @@ set(LOGGING_STACKTRACE_H_FILE ./inc/c_logging/logging_stacktrace.h)
 
 else()
     set(LOGGING_STACKTRACE_C_FILE ./src/logging_stacktrace_dummy.c)
+    set(LOGGING_STACKTRACE_H_FILE ./inc/c_logging/logging_stacktrace.h)
 endif()#win32
 
 if(${logerror_captures_stack_traces})
