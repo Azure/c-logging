@@ -457,6 +457,40 @@ static void LOGGER_LOG_with_VERBOSE_works(void)
     test_with_log_level(LOG_LEVEL_VERBOSE);
 }
 
+/* LOGGER_LOG_EX */
+
+static void LOGGER_LOG_EX_works(void)
+{
+    // arrange
+    setup_mocks();
+    setup_log_sink1_log_call();
+    setup_log_sink2_log_call();
+
+    // act
+    // capture the line no of the error
+    int expected_line = __LINE__; LOGGER_LOG_EX(LOG_LEVEL_INFO, NULL, "gigi duru");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // 1st sink
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_log_level == LOG_LEVEL_INFO);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_log_context == NULL);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_line == expected_line);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_message, "gigi duru") == 0);
+
+    // 2nd sink
+    POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_log_level == LOG_LEVEL_INFO);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink2_log_call.captured_log_context == NULL);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_line == expected_line);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_message, "gigi duru") == 0);
+}
+
 /* Tests_SRS_LOGGER_01_001: [ LOGGER_LOG shall call the log function of every sink that is configured to be used. ] */
 static void LOGGER_LOG_with_non_NULL_context(void)
 {
@@ -542,7 +576,13 @@ int main(void)
     logger_init_initializes_sinks();
     logger_init_after_init_fails();
 
+    LOGGER_LOG_with_CRITICAL_works();
     LOGGER_LOG_with_ERROR_works();
+    LOGGER_LOG_with_INFO_works();
+    LOGGER_LOG_with_WARNING_works();
+    LOGGER_LOG_with_VERBOSE_works();
+
+    LOGGER_LOG_EX_works();
 
     logger_deinit_deinitialized_all_sinks();
     logger_deinit_after_deinit_returns();
