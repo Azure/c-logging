@@ -84,10 +84,13 @@ if(${use_etw} STREQUAL "TRACELOGGING")
     add_definitions(-DUSE_TRACELOGGING)
 endif() #(${use_etw} STREQUAL "TRACELOGGING")
 
-endif()
-
 set(LOGGING_STACKTRACE_C_FILE ./src/logging_stacktrace.c)
 set(LOGGING_STACKTRACE_H_FILE ./inc/c_logging/logging_stacktrace.h)
+
+else()
+    set(LOGGING_STACKTRACE_C_FILE ./src/logging_stacktrace_dummy.c)
+endif()#win32
+
 if(${logerror_captures_stack_traces})
     #set a preprocessor option (LOGERROR_CAPTURES_STACK_TRACES) and add the files that provide the functionality
     add_definitions(-DLOGERROR_CAPTURES_STACK_TRACES)
