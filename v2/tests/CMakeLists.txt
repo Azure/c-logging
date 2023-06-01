@@ -29,4 +29,7 @@ if(${run_int_tests})
 endif()
 
 if(${run_perf_tests})
+   if(WIN32)
+       add_subdirectory(logger_perf)
+   endif()
 endif()

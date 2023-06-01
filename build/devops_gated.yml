@@ -136,6 +136,72 @@ jobs:
       parallel: true
     condition: failed()
 
+- job: windowsx64etwperf
+  displayName: 'Run Windows x64 RelWithDebInfo ETW Perf tests'
+  pool:
+    name: Azure-MessagingStore-WinBuildPoolVS2022
+    demands:
+    - Cmd
+    - msbuild
+    - cmake
+    - visualstudio
+    - vstest
+
+  steps:
+  - task: BatchScript@1
+    displayName: 'Git submodule update'
+    inputs:
+      filename: 'C:\Program Files\Git\bin\git.exe'
+      arguments: 'submodule update --init --force'
+
+  - task: BatchScript@1
+    displayName: 'Git submodule clean'
+    inputs:
+      filename: 'C:\Program Files\Git\bin\git.exe'
+      arguments: 'submodule foreach --recursive "git clean -xdff"'
+
+  - task: BatchScript@1
+    displayName: 'Git clean'
+    inputs:
+      filename: 'C:\Program Files\Git\bin\git.exe'
+      arguments: 'clean -xdff'
+
+  - task: BatchScript@1
+    displayName: 'Setup VS Vars'
+    inputs:
+      filename: '"c:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"'
+      modifyEnvironment: true
+
+  - task: CMake@1
+    displayName: 'CMake .. -Drun_perf_tests:bool=ON -Dlog_sink_etw:bool=ON -Dlog_sink_console:bool=OFF -Duse_etw:string=TRACELOGGING -G "Visual Studio 17 2022" -A x64'
+    inputs:
+      workingDirectory: 'build_x64'
+      cmakeArgs: '.. -Drun_perf_tests:bool=ON -Dlog_sink_etw:bool=ON -Dlog_sink_console:bool=OFF -Duse_etw:string=TRACELOGGING -G "Visual Studio 17 2022" -A x64'
+
+  - task: VSBuild@1
+    displayName: 'Build solution build_x64\*.sln'
+    inputs:
+      solution: 'build_x64\*.sln'
+      platform: x64
+      msbuildArgs: '/t:restore /t:build'
+      configuration: RelWithDebInfo
+      maximumCpuCount: true
+
+  - task: CmdLine@1
+    displayName: 'Run ctest'
+    inputs:
+      filename: ctest
+      arguments: '-C "RelWithDebInfo" -V --output-on-failure'
+      workingFolder: 'build_x64'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifacts'
+    inputs:
+      pathtoPublish: 'build_x64'
+      artifactName: 'x64_RelWithDebInfo_perf'
+      parallel: true
+    condition: failed()
+
 - job: windowsx86debug
   displayName: 'Build Windows x86 Debug'
   pool:
