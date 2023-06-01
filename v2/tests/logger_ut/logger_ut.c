@@ -457,41 +457,6 @@ static void LOGGER_LOG_with_VERBOSE_works(void)
     test_with_log_level(LOG_LEVEL_VERBOSE);
 }
 
-/* LOGGER_LOG_EX */
-
-/* Tests_SRS_LOGGER_01_008: [ LOGGER_LOG_EX shall call the log function of every sink that is configured to be used. ]*/
-static void LOGGER_LOG_EX_works(void)
-{
-    // arrange
-    setup_mocks();
-    setup_log_sink1_log_call();
-    setup_log_sink2_log_call();
-
-    // act
-    // capture the line no of the error
-    int expected_line = __LINE__; LOGGER_LOG_EX(LOG_LEVEL_INFO, LOG_CONTEXT_PROPERTY(int32_t, prop1, 42));
-
-    // assert
-    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(actual_and_expected_match);
-
-    // 1st sink
-    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_log_level == LOG_LEVEL_INFO);
-    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_log_context != NULL);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_file, __FILE__) == 0);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_func, __FUNCTION__) == 0);
-    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_line == expected_line);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_message, "") == 0);
-
-    // 2nd sink
-    POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_log_level == LOG_LEVEL_INFO);
-    POOR_MANS_ASSERT(expected_calls[0].log_sink2_log_call.captured_log_context != NULL);
-    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_file, __FILE__) == 0);
-    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_func, __FUNCTION__) == 0);
-    POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_line == expected_line);
-    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_message, "") == 0);
-}
-
 /* Tests_SRS_LOGGER_01_001: [ LOGGER_LOG shall call the log function of every sink that is configured to be used. ] */
 static void LOGGER_LOG_with_non_NULL_context(void)
 {
@@ -528,6 +493,124 @@ static void LOGGER_LOG_with_non_NULL_context(void)
     POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_message, "u lala 42") == 0);
 
     LOG_CONTEXT_DESTROY(log_context);
+}
+
+/* LOGGER_LOG_EX */
+
+/* Tests_SRS_LOGGER_01_008: [ LOGGER_LOG_EX shall call the log function of every sink that is configured to be used. ]*/
+static void LOGGER_LOG_EX_works(void)
+{
+    // arrange
+    setup_mocks();
+    setup_log_sink1_log_call();
+    setup_log_sink2_log_call();
+
+    // act
+    // capture the line no of the error
+    int expected_line = __LINE__; LOGGER_LOG_EX(LOG_LEVEL_INFO, LOG_CONTEXT_PROPERTY(int32_t, prop1, 42));
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // 1st sink
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_log_level == LOG_LEVEL_INFO);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_log_context != NULL);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_line == expected_line);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_message, "") == 0);
+
+    // check properties
+    uint32_t captured_context_property_count = log_context_get_property_value_pair_count(expected_calls[0].log_sink1_log_call.captured_log_context);
+    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* captured_context_properties = log_context_get_property_value_pairs(expected_calls[0].log_sink1_log_call.captured_log_context);
+    POOR_MANS_ASSERT(captured_context_property_count == 2);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[0].name, "") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[0].value == 1);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "prop1") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int32_t);
+    POOR_MANS_ASSERT(*(int32_t*)captured_context_properties[1].value == 42);
+
+    // 2nd sink
+    POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_log_level == LOG_LEVEL_INFO);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink2_log_call.captured_log_context != NULL);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_line == expected_line);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_message, "") == 0);
+
+    // check properties
+    captured_context_property_count = log_context_get_property_value_pair_count(expected_calls[0].log_sink2_log_call.captured_log_context);
+    captured_context_properties = log_context_get_property_value_pairs(expected_calls[0].log_sink2_log_call.captured_log_context);
+    POOR_MANS_ASSERT(captured_context_property_count == 2);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[0].name, "") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[0].value == 1);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "prop1") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int32_t);
+    POOR_MANS_ASSERT(*(int32_t*)captured_context_properties[1].value == 42);
+}
+
+/* Tests_SRS_LOGGER_01_008: [ LOGGER_LOG_EX shall call the log function of every sink that is configured to be used. ]*/
+static void LOGGER_LOG_EX_works_with_2_properties(void)
+{
+    // arrange
+    setup_mocks();
+    setup_log_sink1_log_call();
+    setup_log_sink2_log_call();
+
+    // act
+    // capture the line no of the error
+    int expected_line = __LINE__; LOGGER_LOG_EX(LOG_LEVEL_INFO, LOG_CONTEXT_PROPERTY(int8_t, prop1, 42), LOG_CONTEXT_PROPERTY(uint8_t, prop2, 43));
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // 1st sink
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_log_level == LOG_LEVEL_INFO);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_log_context != NULL);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_line == expected_line);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_message, "") == 0);
+
+    // check properties
+    uint32_t captured_context_property_count = log_context_get_property_value_pair_count(expected_calls[0].log_sink1_log_call.captured_log_context);
+    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* captured_context_properties = log_context_get_property_value_pairs(expected_calls[0].log_sink1_log_call.captured_log_context);
+    POOR_MANS_ASSERT(captured_context_property_count == 3);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[0].name, "") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[0].value == 2);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "prop1") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int8_t);
+    POOR_MANS_ASSERT(*(int8_t*)captured_context_properties[1].value == 42);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[2].name, "prop2") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_uint8_t);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[2].value == 43);
+
+    // 2nd sink
+    POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_log_level == LOG_LEVEL_INFO);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink2_log_call.captured_log_context != NULL);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_line == expected_line);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_message, "") == 0);
+
+    // check properties
+    captured_context_property_count = log_context_get_property_value_pair_count(expected_calls[0].log_sink2_log_call.captured_log_context);
+    captured_context_properties = log_context_get_property_value_pairs(expected_calls[0].log_sink2_log_call.captured_log_context);
+    POOR_MANS_ASSERT(captured_context_property_count == 3);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[0].name, "") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[0].value == 2);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "prop1") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int8_t);
+    POOR_MANS_ASSERT(*(int8_t*)captured_context_properties[1].value == 42);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[2].name, "prop2") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_uint8_t);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[2].value == 43);
 }
 
 /* logger_deinit */
@@ -576,14 +659,16 @@ int main(void)
     when_the_2nd_sink_init_fails_logger_init_fails();
     logger_init_initializes_sinks();
     logger_init_after_init_fails();
-    //
+    
     //LOGGER_LOG_with_CRITICAL_works();
     //LOGGER_LOG_with_ERROR_works();
     //LOGGER_LOG_with_INFO_works();
     //LOGGER_LOG_with_WARNING_works();
     //LOGGER_LOG_with_VERBOSE_works();
+    //LOGGER_LOG_with_non_NULL_context();
 
     LOGGER_LOG_EX_works();
+    LOGGER_LOG_EX_works_with_2_properties();
 
     logger_deinit_deinitialized_all_sinks();
     logger_deinit_after_deinit_returns();
