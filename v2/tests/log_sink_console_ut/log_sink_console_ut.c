@@ -390,7 +390,7 @@ static void validate_log_line(const char* actual_string, const char* expected_fo
 {
     char expected_string[LOG_MAX_MESSAGE_LENGTH * 2];
     int snprintf_result = snprintf(expected_string, sizeof(expected_string), expected_format, expected_log_level_string, file, line, func, expected_message);
-    POOR_MANS_ASSERT(snprintf_result > 0);
+    POOR_MANS_ASSERT(snprintf_result >= 0);
     char day_of_week[4];
     char month[4];
     int day;
@@ -412,7 +412,7 @@ static void validate_log_line_with_NULL_time(const char* actual_string, const ch
 {
     char expected_string[LOG_MAX_MESSAGE_LENGTH * 2];
     int snprintf_result = snprintf(expected_string, sizeof(expected_string), expected_format, expected_log_level_string, file, line, func, expected_message);
-    POOR_MANS_ASSERT(snprintf_result > 0);
+    POOR_MANS_ASSERT(snprintf_result >= 0);
     char reset_color_code[10];
     char anything_else[200];
     int scanned_values = sscanf(actual_string, expected_string, reset_color_code, anything_else);

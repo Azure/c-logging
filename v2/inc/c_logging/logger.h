@@ -25,7 +25,9 @@ extern "C" {
     logger_log(log_level, log_context, __FILE__, __FUNCTION__, __LINE__, format MU_IFCOMMALOGIC(MU_COUNT_ARG(__VA_ARGS__)) __VA_ARGS__)
 
 #define LOGGER_LOG_EX(log_level, ...) \
-    /* To be implemented */
+    LOG_CONTEXT_LOCAL_DEFINE(local_context, NULL, __VA_ARGS__); \
+    /* Codes_SRS_LOGGER_01_008: [ LOGGER_LOG_EX shall call the log function of every sink that is configured to be used. ]*/ \
+    logger_log(log_level, &local_context, __FILE__, __FUNCTION__, __LINE__, "");
 
 #ifdef __cplusplus
 }
