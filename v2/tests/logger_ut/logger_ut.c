@@ -810,6 +810,39 @@ static void LOGGER_LOG_EX_with_no_properties_works(void)
     POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_message, "") == 0);
 }
 
+/* Tests_SRS_LOGGER_01_012: [ If LOG_CONTEXT_MESSAGE is specified in ..., message_format shall be passed to the log call together with a argument list made out of the ... portion of the LOG_CONTEXT_MESSAGE macro. ] */
+static void LOGGER_LOG_EX_with_message_works(void)
+{
+    // arrange
+    setup_mocks();
+    setup_log_sink1_log_call();
+    setup_log_sink2_log_call();
+
+    // act
+    // capture the line no of the error
+    int expected_line = __LINE__; LOGGER_LOG_EX(LOG_LEVEL_INFO, LOG_MESSAGE("baba %s %d", "cloantza", 42));
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // 1st sink
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_log_level == LOG_LEVEL_INFO);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_log_context == NULL);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_line == expected_line);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_message, "baba %s %d") == 0);
+
+    // 2nd sink
+    POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_log_level == LOG_LEVEL_INFO);
+    POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_log_context == NULL);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_line == expected_line);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_message, "baba %s %d") == 0);
+}
+
 /* logger_deinit */
 
 /* Tests_SRS_LOGGER_01_007: [ logger_deinit shall call the deinit function of every sink that is configured to be used. ] */
@@ -869,6 +902,8 @@ int main(void)
     LOGGER_LOG_EX_twice_works();
     LOGGER_LOG_EX_with_no_properties_works();
     LOGGER_LOG_EX_with_string_property_works();
+
+    LOGGER_LOG_EX_with_message();
 
     logger_deinit_deinitialized_all_sinks();
     logger_deinit_after_deinit_returns();

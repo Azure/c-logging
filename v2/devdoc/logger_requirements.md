@@ -79,10 +79,10 @@ It is syntactic sugar for creating a context and calling `LOGGER_LOG`.
 
 **SRS_LOGGER_01_010: [** Otherwise, `LOGGER_LOG_EX` shall construct a log context with all the properties specified in `...`. **]**
 
-Each `LOG_CONTEXT_STRING_PROPERTY` and `LOG_CONTEXT_PROPERTY` entry in `...` shall be added as properties in the context that is passed to `log`.
+**SRS_LOGGER_01_011: [** Each `LOG_CONTEXT_STRING_PROPERTY` and `LOG_CONTEXT_PROPERTY` entry in `...` shall be added as a property in the context that is passed to `log`. **]**
 
 ```c
 LOG_CONTEXT_MESSAGE(message_format, ...)
 ```
 
-If `LOG_CONTEXT_MESSAGE` is specified in `...`, `message_format` shall be passed to the `log` call together with a argument list made out of the `...` portion of the `LOG_CONTEXT_MESSAGE` macro.
+**SRS_LOGGER_01_012: [** If `LOG_CONTEXT_MESSAGE` is specified in `...`, `message_format` shall be passed to the `log` call together with a argument list made out of the `...` portion of the `LOG_CONTEXT_MESSAGE` macro. **]**

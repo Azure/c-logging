@@ -24,6 +24,8 @@ extern "C" {
 #define LOGGER_LOG(log_level, log_context, format, ...) \
     logger_log(log_level, log_context, __FILE__, __FUNCTION__, __LINE__, format MU_IFCOMMALOGIC(MU_COUNT_ARG(__VA_ARGS__)) __VA_ARGS__)
 
+    /* Tests_SRS_LOGGER_01_012: [ If LOG_CONTEXT_MESSAGE is specified in ..., message_format shall be passed to the log call together with a argument list made out of the ... portion of the LOG_CONTEXT_MESSAGE macro. ] */
+
 #define LOGGER_LOG_EX(log_level, ...) \
     MU_IF(MU_COUNT_ARG(__VA_ARGS__), \
     do { \
