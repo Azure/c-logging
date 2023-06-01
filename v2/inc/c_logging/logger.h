@@ -25,9 +25,16 @@ extern "C" {
     logger_log(log_level, log_context, __FILE__, __FUNCTION__, __LINE__, format MU_IFCOMMALOGIC(MU_COUNT_ARG(__VA_ARGS__)) __VA_ARGS__)
 
 #define LOGGER_LOG_EX(log_level, ...) \
-    LOG_CONTEXT_LOCAL_DEFINE(local_context, NULL, __VA_ARGS__); \
-    /* Codes_SRS_LOGGER_01_008: [ LOGGER_LOG_EX shall call the log function of every sink that is configured to be used. ]*/ \
-    logger_log(log_level, &local_context, __FILE__, __FUNCTION__, __LINE__, "");
+    MU_IF(MU_COUNT_ARG(__VA_ARGS__), \
+    do { \
+        LOG_CONTEXT_LOCAL_DEFINE(local_context_3DFCB6F0_39A4_4C45_881B_A3BDA8B18CC1, NULL, __VA_ARGS__); \
+        /* Codes_SRS_LOGGER_01_008: [ LOGGER_LOG_EX shall call the log function of every sink that is configured to be used. ]*/ \
+        logger_log(log_level, &local_context_3DFCB6F0_39A4_4C45_881B_A3BDA8B18CC1, __FILE__, __FUNCTION__, __LINE__, ""); \
+    } while (0); \
+    , \
+    /* Codes_SRS_LOGGER_01_009: [ If no properties are specified in ..., LOGGER_LOG_EX shall call log with log_context being NULL. ] */ \
+    logger_log(log_level, NULL, __FILE__, __FUNCTION__, __LINE__, ""); \
+    )
 
 #ifdef __cplusplus
 }
