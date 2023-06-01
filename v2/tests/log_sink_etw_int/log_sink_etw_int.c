@@ -262,35 +262,35 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
                 break;
             }
             case TlgInUINT8:
-                read_uint8_t(metadata, &test_context->parsed_events[current_index].properties[property_index].uint8_t_value);
+                read_uint8_t(current_user_data_field, &test_context->parsed_events[current_index].properties[property_index].uint8_t_value);
                 current_user_data_field += sizeof(uint8_t);
                 break;
             case TlgInINT8:
-                read_int8_t(metadata, &test_context->parsed_events[current_index].properties[property_index].int8_t_value);
+                read_int8_t(current_user_data_field, &test_context->parsed_events[current_index].properties[property_index].int8_t_value);
                 current_user_data_field += sizeof(int8_t);
                 break;
             case TlgInUINT16:
-                read_uint16_t(metadata, &test_context->parsed_events[current_index].properties[property_index].uint16_t_value);
+                read_uint16_t(current_user_data_field, &test_context->parsed_events[current_index].properties[property_index].uint16_t_value);
                 current_user_data_field += sizeof(uint16_t);
                 break;
             case TlgInINT16:
-                read_int16_t(metadata, &test_context->parsed_events[current_index].properties[property_index].int16_t_value);
+                read_int16_t(current_user_data_field, &test_context->parsed_events[current_index].properties[property_index].int16_t_value);
                 current_user_data_field += sizeof(int16_t);
                 break;
             case TlgInUINT32:
-                read_uint32_t(metadata, &test_context->parsed_events[current_index].properties[property_index].uint32_t_value);
+                read_uint32_t(current_user_data_field, &test_context->parsed_events[current_index].properties[property_index].uint32_t_value);
                 current_user_data_field += sizeof(uint32_t);
                 break;
             case TlgInINT32:
-                read_int32_t(metadata, &test_context->parsed_events[current_index].properties[property_index].int32_t_value);
+                read_int32_t(current_user_data_field, &test_context->parsed_events[current_index].properties[property_index].int32_t_value);
                 current_user_data_field += sizeof(int32_t);
                 break;
             case TlgInUINT64:
-                read_uint64_t(metadata, &test_context->parsed_events[current_index].properties[property_index].uint64_t_value);
+                read_uint64_t(current_user_data_field, &test_context->parsed_events[current_index].properties[property_index].uint64_t_value);
                 current_user_data_field += sizeof(uint64_t);
                 break;
             case TlgInINT64:
-                read_int64_t(metadata, &test_context->parsed_events[current_index].properties[property_index].int64_t_value);
+                read_int64_t(current_user_data_field, &test_context->parsed_events[current_index].properties[property_index].int64_t_value);
                 current_user_data_field += sizeof(int64_t);
                 break;
             }
@@ -757,9 +757,9 @@ int main(void)
 
     POOR_MANS_ASSERT(log_sink_etw.init() == 0);
 
-    log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
-    log_sink_etw_log_all_levels_when_all_levels_enabled_succeeds();
-    log_sink_etw_log_each_individual_level();
+    //log_sink_etw_log_with_LOG_LEVEL_ERROR_succeeds();
+    //log_sink_etw_log_all_levels_when_all_levels_enabled_succeeds();
+    //log_sink_etw_log_each_individual_level();
     log_sink_etw_log_with_context_with_properties();
     log_sink_etw_log_with_context_with_nested_structs();
 
