@@ -9,14 +9,8 @@ extern "C"
 {
 #endif
 
-typedef struct TIMER_HANDLE_DATA_TAG* TIMER_HANDLE;
+// This is a minimal version of the timer unit (just for tests)
 
-TIMER_HANDLE timer_create_new(void);
-int timer_start(TIMER_HANDLE handle);
-double timer_get_elapsed(TIMER_HANDLE timer);
-double timer_get_elapsed_ms(TIMER_HANDLE timer);
-void timer_destroy(TIMER_HANDLE timer);
-double timer_global_get_elapsed_ms(void);
 double timer_global_get_elapsed_us(void);
 
 #ifdef __cplusplus

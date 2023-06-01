@@ -71,7 +71,7 @@ MU_DEFINE_ENUM_STRINGS(LOG_CONTEXT_PROPERTY_TYPE, LOG_CONTEXT_PROPERTY_TYPE_VALU
     if (!(cond)) \
     { \
         (void)printf("%s:%d test failed\r\n", __FUNCTION__, __LINE__); \
-        /*abort();*/ \
+        abort(); \
     } \
 
 typedef struct EVENT_TRACE_PROPERTY_DATA_TAG
