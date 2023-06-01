@@ -27,6 +27,8 @@ extern "C" {
 #define LOGGER_LOG_EX(log_level, ...) \
     MU_IF(MU_COUNT_ARG(__VA_ARGS__), \
     do { \
+        /* Codes_SRS_LOGGER_01_010: [ Otherwise, LOGGER_LOG_EX shall construct a log context with all the properties specified in .... ] */ \
+        /* Codes_SRS_LOGGER_01_011: [ Each LOG_CONTEXT_STRING_PROPERTY and LOG_CONTEXT_PROPERTY entry in ... shall be added as a property in the context that is passed to log. ] */ \
         LOG_CONTEXT_LOCAL_DEFINE(local_context_3DFCB6F0_39A4_4C45_881B_A3BDA8B18CC1, NULL, __VA_ARGS__); \
         /* Codes_SRS_LOGGER_01_008: [ LOGGER_LOG_EX shall call the log function of every sink that is configured to be used. ]*/ \
         logger_log(log_level, &local_context_3DFCB6F0_39A4_4C45_881B_A3BDA8B18CC1, __FILE__, __FUNCTION__, __LINE__, ""); \
