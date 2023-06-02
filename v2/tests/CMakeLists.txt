@@ -26,6 +26,7 @@ if(${run_int_tests})
    if(WIN32)
        add_subdirectory(log_sink_etw_int)
    endif()
+   add_subdirectory(logger_int)
 endif()
 
 if(${run_perf_tests})

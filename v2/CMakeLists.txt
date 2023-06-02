@@ -35,7 +35,6 @@ set(c_logging_v2_h_files
 
 set(c_logging_v2_c_files
     ./src/logger.c
-    ./src/logger_sinks_config.c
     ./src/log_context.c
     ./src/log_context_property_basic_types.c
     ./src/log_context_property_type.c
@@ -61,9 +60,13 @@ FILE(GLOB c_logging_v2_md_files "devdoc/*.md")
 SOURCE_GROUP(devdoc FILES ${c_logging_v2_md_files})
 
 #this is the product (a logging library)
-add_library(c_logging_v2 ${c_logging_v2_c_files} ${c_logging_v2_h_files} ${c_logging_v2_md_files})
+add_library(c_logging_v2_core ${c_logging_v2_c_files} ${c_logging_v2_h_files})
+add_library(c_logging_v2 ${c_logging_v2_c_files} ${c_logging_v2_h_files} ${c_logging_v2_md_files} ./src/logger_sinks_config.c)
 
 target_include_directories(c_logging_v2 PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/inc>)
+target_include_directories(c_logging_v2_core PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/inc>)
+
+target_link_libraries(c_logging_v2 c_logging_v2_core)
 
 if((CMAKE_GENERATOR MATCHES "Visual Studio") AND (${run_traceability}))
     #add traceability custom target
