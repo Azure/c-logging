@@ -69,7 +69,7 @@ Note: No other `logger` API should be called while `logger_deinit` executes.
   // ...
 ```
 
-`LOGGER_LOG_EX` allows the user to log one logging event with a ist of logging context properties.
+`LOGGER_LOG_EX` allows the user to log one logging event with a list of logging context properties.
 
 It is syntactic sugar for creating a context and calling `LOGGER_LOG`.
 
