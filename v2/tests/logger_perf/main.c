@@ -23,10 +23,13 @@
 //
 // LOGGER_TYPE:
 // - LOGGER_TYPE_V1
+// - LOGGER_TYPE_V2_NO_CONTEXT
 // - LOGGER_TYPE_V2_LOCAL_CONTEXT_CREATED_ONCE
 // - LOGGER_TYPE_V2_DYNAMIC_CONTEXT_CREATED_ONCE
 // - LOGGER_TYPE_V2_LOCAL_CONTEXT_CREATED_EVERY_TIME
 // - LOGGER_TYPE_V2_DYNAMIC_CONTEXT_CREATED_EVERY_TIME
+// - LOGGER_TYPE_V2_LOGGER_LOG_EX_ONLY_MESSAGE
+// - LOGGER_TYPE_V2_LOGGER_LOG_EX_ONLY_PROPERTY
 //
 // CONSUMER_ENABLE_TYPE:
 // - CONSUMER_DISABLED
@@ -38,7 +41,9 @@
     LOGGER_TYPE_V2_LOCAL_CONTEXT_CREATED_ONCE, \
     LOGGER_TYPE_V2_DYNAMIC_CONTEXT_CREATED_ONCE, \
     LOGGER_TYPE_V2_LOCAL_CONTEXT_CREATED_EVERY_TIME, \
-    LOGGER_TYPE_V2_DYNAMIC_CONTEXT_CREATED_EVERY_TIME
+    LOGGER_TYPE_V2_DYNAMIC_CONTEXT_CREATED_EVERY_TIME, \
+    LOGGER_TYPE_V2_LOGGER_LOG_EX_ONLY_MESSAGE, \
+    LOGGER_TYPE_V2_LOGGER_LOG_EX_ONLY_PROPERTY \
 
 // The tests assume that there is no other consumer and no tracing session capturing the events
 // except for the one that is started by this test
@@ -235,6 +240,64 @@ static void test_all_with_consumer_enable_type(CONSUMER_ENABLE_TYPE consumer_ena
     results[logger_type][consumer_enable_type].time = current_time - start_time;
     
     print_results(logger_type, consumer_enable_type, &results[logger_type][consumer_enable_type]);
+
+    // now have the test run with LOGGER_LOG_EX with a message only
+    logger_type = LOGGER_TYPE_V2_LOGGER_LOG_EX_ONLY_MESSAGE;
+    (void)printf("Starting test with logger_type=%" PRI_MU_ENUM", consumer_enable_type=%" PRI_MU_ENUM "\r\n", MU_ENUM_VALUE(LOGGER_TYPE, logger_type), MU_ENUM_VALUE(CONSUMER_ENABLE_TYPE, consumer_enable_type));
+
+    start_time = timer_global_get_elapsed_us();
+    iterations = 0;
+
+    current_time;
+    while ((current_time = timer_global_get_elapsed_us()) - start_time < TEST_TIME * 1000)
+    {
+        uint32_t i;
+        for (i = 0; i < ITERATION_COUNT; i++)
+        {
+            LOG_CONTEXT_HANDLE dynamic_log_context_x;
+            LOG_CONTEXT_CREATE(dynamic_log_context_x, NULL, LOG_CONTEXT_NAME(dynamic_log_context_x), LOG_CONTEXT_STRING_PROPERTY(block_id, "%s", "pachoo"));
+
+            LOGGER_LOG_EX(LOG_LEVEL_CRITICAL, LOG_MESSAGE("hello world %" PRI_MU_ENUM " i=%" PRIu32 "!", MU_ENUM_VALUE(LOGGER_TYPE, logger_type), i));
+
+            LOG_CONTEXT_DESTROY(dynamic_log_context_x);
+        }
+
+        iterations += i;
+    }
+
+    results[logger_type][consumer_enable_type].log_count = iterations;
+    results[logger_type][consumer_enable_type].time = current_time - start_time;
+
+    print_results(logger_type, consumer_enable_type, &results[logger_type][consumer_enable_type]);
+
+    // now have the test run with LOGGER_LOG_EX with properties only
+    logger_type = LOGGER_TYPE_V2_LOGGER_LOG_EX_ONLY_PROPERTY;
+    (void)printf("Starting test with logger_type=%" PRI_MU_ENUM", consumer_enable_type=%" PRI_MU_ENUM "\r\n", MU_ENUM_VALUE(LOGGER_TYPE, logger_type), MU_ENUM_VALUE(CONSUMER_ENABLE_TYPE, consumer_enable_type));
+
+    start_time = timer_global_get_elapsed_us();
+    iterations = 0;
+
+    current_time;
+    while ((current_time = timer_global_get_elapsed_us()) - start_time < TEST_TIME * 1000)
+    {
+        uint32_t i;
+        for (i = 0; i < ITERATION_COUNT; i++)
+        {
+            LOG_CONTEXT_HANDLE dynamic_log_context_x;
+            LOG_CONTEXT_CREATE(dynamic_log_context_x, NULL, LOG_CONTEXT_NAME(dynamic_log_context_x), LOG_CONTEXT_STRING_PROPERTY(block_id, "%s", "pachoo"));
+
+            LOGGER_LOG_EX(LOG_LEVEL_CRITICAL, LOG_CONTEXT_PROPERTY(uint32_t, i, i));
+
+            LOG_CONTEXT_DESTROY(dynamic_log_context_x);
+        }
+
+        iterations += i;
+    }
+
+    results[logger_type][consumer_enable_type].log_count = iterations;
+    results[logger_type][consumer_enable_type].time = current_time - start_time;
+
+    print_results(logger_type, consumer_enable_type, &results[logger_type][consumer_enable_type]);
 }
 
 static GUID provider_guid = { 0xDAD29F36, 0x0A48, 0x4DEF, { 0x9D, 0x50, 0x8E, 0xF9, 0x03, 0x6B, 0x92, 0xB4 } };
@@ -272,7 +335,7 @@ static void generate_trace_session(TEST_CONTEXT* test_context, const char* funct
     POOR_MANS_ASSERT(UuidCreate(&uuid) == RPC_S_OK);
     int snprintf_result = snprintf(test_context->trace_session_name, sizeof(test_context->trace_session_name), "%s-%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X",
         function_name, uuid.Data1, uuid.Data2, uuid.Data3, uuid.Data4[0], uuid.Data4[1], uuid.Data4[2], uuid.Data4[3], uuid.Data4[4], uuid.Data4[5], uuid.Data4[6], uuid.Data4[7]);
-    POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < sizeof(test_context->trace_session_name)));
+    POOR_MANS_ASSERT((snprintf_result >= 0) && (snprintf_result < sizeof(test_context->trace_session_name)));
 }
 
 static TRACEHANDLE start_trace(TEST_CONTEXT* test_context, uint8_t trace_level)

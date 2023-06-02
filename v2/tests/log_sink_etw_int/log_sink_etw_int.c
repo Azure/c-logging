@@ -311,7 +311,7 @@ static void generate_trace_session(TEST_CONTEXT* test_context, const char* funct
     POOR_MANS_ASSERT(UuidCreate(&uuid) == RPC_S_OK);
     int snprintf_result = snprintf(test_context->trace_session_name, sizeof(test_context->trace_session_name), "%s-%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X",
         function_name, uuid.Data1, uuid.Data2, uuid.Data3, uuid.Data4[0], uuid.Data4[1], uuid.Data4[2], uuid.Data4[3], uuid.Data4[4], uuid.Data4[5], uuid.Data4[6], uuid.Data4[7]);
-    POOR_MANS_ASSERT((snprintf_result > 0) && (snprintf_result < sizeof(test_context->trace_session_name)));
+    POOR_MANS_ASSERT((snprintf_result >= 0) && (snprintf_result < sizeof(test_context->trace_session_name)));
 }
 
 static TRACEHANDLE start_trace(TEST_CONTEXT* test_context, uint8_t trace_level)

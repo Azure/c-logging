@@ -61,3 +61,28 @@ Note: No other `logger` API should be called while `logger_deinit` executes.
 `LOGGER_LOG` allows the user to log one logging event.
 
 **SRS_LOGGER_01_001: [** `LOGGER_LOG` shall call the `log` function of every sink that is configured to be used. **]**
+
+### LOGGER_LOG
+
+```c
+#define LOGGER_LOG_EX(log_level, ...) \
+  // ...
+```
+
+`LOGGER_LOG_EX` allows the user to log one logging event with a list of logging context properties.
+
+It is syntactic sugar for creating a context and calling `LOGGER_LOG`.
+
+**SRS_LOGGER_01_008: [** `LOGGER_LOG_EX` shall call the `log` function of every sink that is configured to be used. **]**
+
+**SRS_LOGGER_01_009: [** If no properties are specified in `...`, `LOGGER_LOG_EX` shall call `log` with `log_context` being `NULL`. **]**
+
+**SRS_LOGGER_01_010: [** Otherwise, `LOGGER_LOG_EX` shall construct a log context with all the properties specified in `...`. **]**
+
+**SRS_LOGGER_01_011: [** Each `LOG_CONTEXT_STRING_PROPERTY` and `LOG_CONTEXT_PROPERTY` entry in `...` shall be added as a property in the context that is passed to `log`. **]**
+
+```c
+LOG_CONTEXT_MESSAGE(message_format, ...)
+```
+
+**SRS_LOGGER_01_012: [** If `LOG_CONTEXT_MESSAGE` is specified in `...`, `message_format` shall be passed to the `log` call together with a argument list made out of the `...` portion of the `LOG_CONTEXT_MESSAGE` macro. **]**
