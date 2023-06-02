@@ -169,7 +169,14 @@ static void log_sink1_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, c
     else
     {
         expected_calls[actual_call_count].log_sink1_log_call.captured_log_level = log_level;
-        expected_calls[actual_call_count].log_sink1_log_call.captured_log_context = log_context;
+        if (log_context == NULL)
+        {
+            expected_calls[actual_call_count].log_sink1_log_call.captured_log_context = NULL;
+        }
+        else
+        {
+            LOG_CONTEXT_CREATE(expected_calls[actual_call_count].log_sink1_log_call.captured_log_context, log_context);
+        }
         int snprintf_result = snprintf(expected_calls[actual_call_count].log_sink1_log_call.captured_file, sizeof(expected_calls[actual_call_count].log_sink1_log_call.captured_file), "%s", file);
         POOR_MANS_ASSERT((snprintf_result >= 0) && (snprintf_result < sizeof(expected_calls[actual_call_count].log_sink1_log_call.captured_file)));
         snprintf_result = snprintf(expected_calls[actual_call_count].log_sink1_log_call.captured_func, sizeof(expected_calls[actual_call_count].log_sink1_log_call.captured_func), "%s", func);
@@ -239,7 +246,14 @@ static void log_sink2_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, c
     else
     {
         expected_calls[actual_call_count].log_sink2_log_call.captured_log_level = log_level;
-        expected_calls[actual_call_count].log_sink2_log_call.captured_log_context = log_context;
+        if (log_context == NULL)
+        {
+            expected_calls[actual_call_count].log_sink2_log_call.captured_log_context = NULL;
+        }
+        else
+        {
+            LOG_CONTEXT_CREATE(expected_calls[actual_call_count].log_sink2_log_call.captured_log_context, log_context);
+        }
         int snprintf_result = snprintf(expected_calls[actual_call_count].log_sink2_log_call.captured_file, sizeof(expected_calls[actual_call_count].log_sink2_log_call.captured_file), "%s", file);
         POOR_MANS_ASSERT((snprintf_result >= 0) && (snprintf_result < sizeof(expected_calls[actual_call_count].log_sink2_log_call.captured_file)));
         snprintf_result = snprintf(expected_calls[actual_call_count].log_sink2_log_call.captured_func, sizeof(expected_calls[actual_call_count].log_sink2_log_call.captured_func), "%s", func);
@@ -526,13 +540,14 @@ static void LOGGER_LOG_EX_works(void)
     // check properties
     uint32_t captured_context_property_count = log_context_get_property_value_pair_count(expected_calls[0].log_sink1_log_call.captured_log_context);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* captured_context_properties = log_context_get_property_value_pairs(expected_calls[0].log_sink1_log_call.captured_log_context);
-    POOR_MANS_ASSERT(captured_context_property_count == 2);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[0].name, "") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
-    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[0].value == 1);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "prop1") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int32_t);
-    POOR_MANS_ASSERT(*(int32_t*)captured_context_properties[1].value == 42);
+    // we expect one extra property as we're "copying" the context by creating a parent one
+    POOR_MANS_ASSERT(captured_context_property_count == 3); 
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[1].value == 1);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[2].name, "prop1") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int32_t);
+    POOR_MANS_ASSERT(*(int32_t*)captured_context_properties[2].value == 42);
 
     // 2nd sink
     POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_log_level == LOG_LEVEL_INFO);
@@ -545,13 +560,14 @@ static void LOGGER_LOG_EX_works(void)
     // check properties
     captured_context_property_count = log_context_get_property_value_pair_count(expected_calls[0].log_sink2_log_call.captured_log_context);
     captured_context_properties = log_context_get_property_value_pairs(expected_calls[0].log_sink2_log_call.captured_log_context);
-    POOR_MANS_ASSERT(captured_context_property_count == 2);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[0].name, "") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
-    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[0].value == 1);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "prop1") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int32_t);
-    POOR_MANS_ASSERT(*(int32_t*)captured_context_properties[1].value == 42);
+    // we expect one extra property as we're "copying" the context by creating a parent one
+    POOR_MANS_ASSERT(captured_context_property_count == 3);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[1].value == 1);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[2].name, "prop1") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int32_t);
+    POOR_MANS_ASSERT(*(int32_t*)captured_context_properties[2].value == 42);
 }
 
 /* Tests_SRS_LOGGER_01_008: [ LOGGER_LOG_EX shall call the log function of every sink that is configured to be used. ]*/
@@ -583,16 +599,17 @@ static void LOGGER_LOG_EX_works_with_2_properties(void)
     // check properties
     uint32_t captured_context_property_count = log_context_get_property_value_pair_count(expected_calls[0].log_sink1_log_call.captured_log_context);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* captured_context_properties = log_context_get_property_value_pairs(expected_calls[0].log_sink1_log_call.captured_log_context);
-    POOR_MANS_ASSERT(captured_context_property_count == 3);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[0].name, "") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
-    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[0].value == 2);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "prop1") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int8_t);
-    POOR_MANS_ASSERT(*(int8_t*)captured_context_properties[1].value == 42);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[2].name, "prop2") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_uint8_t);
-    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[2].value == 43);
+    // we expect one extra property as we're "copying" the context by creating a parent one
+    POOR_MANS_ASSERT(captured_context_property_count == 4);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[1].value == 2);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[2].name, "prop1") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int8_t);
+    POOR_MANS_ASSERT(*(int8_t*)captured_context_properties[2].value == 42);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[3].name, "prop2") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[3].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_uint8_t);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[3].value == 43);
 
     // 2nd sink
     POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_log_level == LOG_LEVEL_INFO);
@@ -605,16 +622,17 @@ static void LOGGER_LOG_EX_works_with_2_properties(void)
     // check properties
     captured_context_property_count = log_context_get_property_value_pair_count(expected_calls[0].log_sink2_log_call.captured_log_context);
     captured_context_properties = log_context_get_property_value_pairs(expected_calls[0].log_sink2_log_call.captured_log_context);
-    POOR_MANS_ASSERT(captured_context_property_count == 3);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[0].name, "") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
-    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[0].value == 2);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "prop1") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int8_t);
-    POOR_MANS_ASSERT(*(int8_t*)captured_context_properties[1].value == 42);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[2].name, "prop2") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_uint8_t);
-    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[2].value == 43);
+    // we expect one extra property as we're "copying" the context by creating a parent one
+    POOR_MANS_ASSERT(captured_context_property_count == 4);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[1].value == 2);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[2].name, "prop1") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int8_t);
+    POOR_MANS_ASSERT(*(int8_t*)captured_context_properties[2].value == 42);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[3].name, "prop2") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[3].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_uint8_t);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[3].value == 43);
 }
 
 /* Tests_SRS_LOGGER_01_008: [ LOGGER_LOG_EX shall call the log function of every sink that is configured to be used. ]*/
@@ -651,13 +669,14 @@ static void LOGGER_LOG_EX_twice_works(void)
     // check properties
     uint32_t captured_context_property_count = log_context_get_property_value_pair_count(expected_calls[0].log_sink1_log_call.captured_log_context);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* captured_context_properties = log_context_get_property_value_pairs(expected_calls[0].log_sink1_log_call.captured_log_context);
-    POOR_MANS_ASSERT(captured_context_property_count == 2);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[0].name, "") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
-    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[0].value == 1);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "prop1") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int8_t);
-    POOR_MANS_ASSERT(*(int8_t*)captured_context_properties[1].value == 42);
+    // we expect one extra property as we're "copying" the context by creating a parent one
+    POOR_MANS_ASSERT(captured_context_property_count == 3);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[1].value == 1);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[2].name, "prop1") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int8_t);
+    POOR_MANS_ASSERT(*(int8_t*)captured_context_properties[2].value == 42);
 
     // 2nd sink
     POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_log_level == LOG_LEVEL_INFO);
@@ -670,13 +689,14 @@ static void LOGGER_LOG_EX_twice_works(void)
     // check properties
     captured_context_property_count = log_context_get_property_value_pair_count(expected_calls[0].log_sink2_log_call.captured_log_context);
     captured_context_properties = log_context_get_property_value_pairs(expected_calls[0].log_sink2_log_call.captured_log_context);
-    POOR_MANS_ASSERT(captured_context_property_count == 2);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[0].name, "") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
-    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[0].value == 1);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "prop1") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int8_t);
-    POOR_MANS_ASSERT(*(int8_t*)captured_context_properties[1].value == 42);
+    // we expect one extra property as we're "copying" the context by creating a parent one
+    POOR_MANS_ASSERT(captured_context_property_count == 3);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[1].value == 1);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[2].name, "prop1") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int8_t);
+    POOR_MANS_ASSERT(*(int8_t*)captured_context_properties[2].value == 42);
 
     // second call
 
@@ -691,13 +711,14 @@ static void LOGGER_LOG_EX_twice_works(void)
     // check properties
     log_context_get_property_value_pair_count(expected_calls[0].log_sink1_log_call.captured_log_context);
     captured_context_properties = log_context_get_property_value_pairs(expected_calls[0].log_sink1_log_call.captured_log_context);
-    POOR_MANS_ASSERT(captured_context_property_count == 2);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[0].name, "") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
-    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[0].value == 1);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "prop1") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int8_t);
-    POOR_MANS_ASSERT(*(int8_t*)captured_context_properties[1].value == 42);
+    // we expect one extra property as we're "copying" the context by creating a parent one
+    POOR_MANS_ASSERT(captured_context_property_count == 3);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[1].value == 1);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[2].name, "prop1") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int8_t);
+    POOR_MANS_ASSERT(*(int8_t*)captured_context_properties[2].value == 42);
 
     // 2nd sink
     POOR_MANS_ASSERT(expected_calls[3].log_sink2_log_call.captured_log_level == LOG_LEVEL_CRITICAL);
@@ -710,13 +731,14 @@ static void LOGGER_LOG_EX_twice_works(void)
     // check properties
     captured_context_property_count = log_context_get_property_value_pair_count(expected_calls[0].log_sink2_log_call.captured_log_context);
     captured_context_properties = log_context_get_property_value_pairs(expected_calls[0].log_sink2_log_call.captured_log_context);
-    POOR_MANS_ASSERT(captured_context_property_count == 2);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[0].name, "") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
-    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[0].value == 1);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "prop1") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int8_t);
-    POOR_MANS_ASSERT(*(int8_t*)captured_context_properties[1].value == 42);
+    // we expect one extra property as we're "copying" the context by creating a parent one
+    POOR_MANS_ASSERT(captured_context_property_count == 3);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[1].value == 1);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[2].name, "prop1") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int8_t);
+    POOR_MANS_ASSERT(*(int8_t*)captured_context_properties[2].value == 42);
 }
 
 /* Tests_SRS_LOGGER_01_008: [ LOGGER_LOG_EX shall call the log function of every sink that is configured to be used. ]*/
@@ -749,13 +771,14 @@ static void LOGGER_LOG_EX_with_string_property_works(void)
     // check properties
     uint32_t captured_context_property_count = log_context_get_property_value_pair_count(expected_calls[0].log_sink1_log_call.captured_log_context);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* captured_context_properties = log_context_get_property_value_pairs(expected_calls[0].log_sink1_log_call.captured_log_context);
-    POOR_MANS_ASSERT(captured_context_property_count == 2);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[0].name, "") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
-    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[0].value == 1);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "prop1") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].value, "gigi duru") == 0);
+    // we expect one extra property as we're "copying" the context by creating a parent one
+    POOR_MANS_ASSERT(captured_context_property_count == 3);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[1].value == 1);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[2].name, "prop1") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[2].value, "gigi duru") == 0);
 
     // 2nd sink
     POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_log_level == LOG_LEVEL_INFO);
@@ -768,13 +791,14 @@ static void LOGGER_LOG_EX_with_string_property_works(void)
     // check properties
     captured_context_property_count = log_context_get_property_value_pair_count(expected_calls[0].log_sink2_log_call.captured_log_context);
     captured_context_properties = log_context_get_property_value_pairs(expected_calls[0].log_sink2_log_call.captured_log_context);
-    POOR_MANS_ASSERT(captured_context_property_count == 2);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[0].name, "") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
-    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[0].value == 1);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "prop1") == 0);
-    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr);
-    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].value, "gigi duru") == 0);
+    // we expect one extra property as we're "copying" the context by creating a parent one
+    POOR_MANS_ASSERT(captured_context_property_count == 3);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[1].value == 1);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[2].name, "prop1") == 0);
+    POOR_MANS_ASSERT(captured_context_properties[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr);
+    POOR_MANS_ASSERT(strcmp(captured_context_properties[2].value, "gigi duru") == 0);
 }
 
 /* Tests_SRS_LOGGER_01_009: [ If no properties are specified in ..., LOGGER_LOG_EX shall call log with log_context being NULL. ] */
@@ -832,7 +856,7 @@ static void LOGGER_LOG_EX_with_message_works(void)
     POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_file, __FILE__) == 0);
     POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_func, __FUNCTION__) == 0);
     POOR_MANS_ASSERT(expected_calls[0].log_sink1_log_call.captured_line == expected_line);
-    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_message, "baba %s %d") == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink1_log_call.captured_message, "baba cloantza 42") == 0);
 
     // 2nd sink
     POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_log_level == LOG_LEVEL_INFO);
@@ -840,7 +864,7 @@ static void LOGGER_LOG_EX_with_message_works(void)
     POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_file, __FILE__) == 0);
     POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_func, __FUNCTION__) == 0);
     POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_line == expected_line);
-    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_message, "baba %s %d") == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_message, "baba cloantza 42") == 0);
 }
 
 /* logger_deinit */
@@ -903,7 +927,7 @@ int main(void)
     LOGGER_LOG_EX_with_no_properties_works();
     LOGGER_LOG_EX_with_string_property_works();
 
-    LOGGER_LOG_EX_with_message();
+    LOGGER_LOG_EX_with_message_works();
 
     logger_deinit_deinitialized_all_sinks();
     logger_deinit_after_deinit_returns();

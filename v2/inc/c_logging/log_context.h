@@ -62,6 +62,8 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
 
 // DEFINE_PROPERTY_AS_PARAMETER
 
+#define EXPAND_DEFINE_PROPERTY_AS_PARAMETER_LOG_MESSAGE(...) \
+
 #define EXPAND_DEFINE_PROPERTY_AS_PARAMETER_LOG_CONTEXT_STRING_PROPERTY(property_name, ...) \
     , int property_name
 
@@ -77,6 +79,8 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
 // if used twice a field with the same name is defined => compiler error
 
 // DEFINE_LOG_CONTEXT_NAME_AS_FIELD
+
+#define EXPAND_DEFINE_CONTEXT_NAME_AS_PARAMETER_LOG_MESSAGE(...) \
 
 #define EXPAND_DEFINE_CONTEXT_NAME_AS_PARAMETER_LOG_CONTEXT_STRING_PROPERTY(property_name, ...) \
 
@@ -98,6 +102,8 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
     (void)(void (*)(int MU_FOR_EACH_1(DEFINE_CONTEXT_NAME_AS_PARAMETER, __VA_ARGS__)))0x4242; \
 
 // SETUP_PROPERTY_PAIR
+
+#define EXPAND_SETUP_PROPERTY_PAIR_LOG_MESSAGE(...) \
 
 #define EXPAND_SETUP_PROPERTY_PAIR_LOG_CONTEXT_STRING_PROPERTY(property_name, ...) \
     /* Codes_SRS_LOG_CONTEXT_01_007: [ LOG_CONTEXT_STRING_PROPERTY shall expand to code allocating a property/value pair of type ascii_char_ptr and the name property_name. ]*/ \
@@ -128,6 +134,8 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
 
 // COUNT_PROPERTY
 
+#define EXPAND_COUNT_PROPERTY_LOG_MESSAGE(...) \
+
 #define EXPAND_COUNT_PROPERTY_LOG_CONTEXT_STRING_PROPERTY(property_name, ...) \
     + 1
 
@@ -140,6 +148,8 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
     MU_C2(EXPAND_COUNT_PROPERTY_, field_desc)
 
 // COUNT_DATA_BYTES
+
+#define EXPAND_COUNT_DATA_BYTES_LOG_MESSAGE(...) \
 
 // ... here is expected to be (format, ...) for a printf invocation
 #define EXPAND_COUNT_DATA_BYTES_LOG_CONTEXT_STRING_PROPERTY(property_name, ...) \
