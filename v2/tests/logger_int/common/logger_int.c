@@ -11,7 +11,6 @@
 
 #include "c_logging/log_level.h"
 #include "c_logging/log_context.h"
-#include "c_logging/log_lasterror.h"
 
 #include "c_logging/logger.h"
 
