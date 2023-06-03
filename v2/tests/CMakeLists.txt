@@ -16,6 +16,7 @@ if(${run_unittests})
       add_subdirectory(log_sink_etw_ut)
       add_subdirectory(log_sink_etw_2_ut)
       add_subdirectory(log_sink_etw_without_init_ut)
+      add_subdirectory(log_lasterror_ut)
    endif()
 endif()
 
