@@ -23,6 +23,7 @@
 //
 // LOGGER_TYPE:
 // - LOGGER_TYPE_V1
+// - LOGGER_TYPE_V1_LASTERROR
 // - LOGGER_TYPE_V2_NO_CONTEXT
 // - LOGGER_TYPE_V2_LOCAL_CONTEXT_CREATED_ONCE
 // - LOGGER_TYPE_V2_DYNAMIC_CONTEXT_CREATED_ONCE
@@ -30,6 +31,7 @@
 // - LOGGER_TYPE_V2_DYNAMIC_CONTEXT_CREATED_EVERY_TIME
 // - LOGGER_TYPE_V2_LOGGER_LOG_EX_ONLY_MESSAGE
 // - LOGGER_TYPE_V2_LOGGER_LOG_EX_ONLY_PROPERTY
+// - LOGGER_TYPE_V2_LASTERROR
 //
 // CONSUMER_ENABLE_TYPE:
 // - CONSUMER_DISABLED
@@ -37,13 +39,15 @@
 
 #define LOGGER_TYPE_VALUES \
     LOGGER_TYPE_V1, \
+    LOGGER_TYPE_V1_LASTERROR, \
     LOGGER_TYPE_V2_NO_CONTEXT, \
     LOGGER_TYPE_V2_LOCAL_CONTEXT_CREATED_ONCE, \
     LOGGER_TYPE_V2_DYNAMIC_CONTEXT_CREATED_ONCE, \
     LOGGER_TYPE_V2_LOCAL_CONTEXT_CREATED_EVERY_TIME, \
     LOGGER_TYPE_V2_DYNAMIC_CONTEXT_CREATED_EVERY_TIME, \
     LOGGER_TYPE_V2_LOGGER_LOG_EX_ONLY_MESSAGE, \
-    LOGGER_TYPE_V2_LOGGER_LOG_EX_ONLY_PROPERTY \
+    LOGGER_TYPE_V2_LOGGER_LOG_EX_ONLY_PROPERTY, \
+    LOGGER_TYPE_V2_LASTERROR \
 
 // The tests assume that there is no other consumer and no tracing session capturing the events
 // except for the one that is started by this test
@@ -91,7 +95,6 @@ static void test_all_with_consumer_enable_type(CONSUMER_ENABLE_TYPE consumer_ena
     start_time = timer_global_get_elapsed_us();
     iterations = 0;
     
-    /* v1 */
     while ((current_time = timer_global_get_elapsed_us()) - start_time < TEST_TIME * 1000)
     {
         uint32_t i;
@@ -108,8 +111,8 @@ static void test_all_with_consumer_enable_type(CONSUMER_ENABLE_TYPE consumer_ena
     
     print_results(logger_type, consumer_enable_type, &results[logger_type][consumer_enable_type]);
 
-    /* v2 no context */
-    logger_type = LOGGER_TYPE_V2_NO_CONTEXT;
+    // v1 with LastError
+    logger_type = LOGGER_TYPE_V1_LASTERROR;
     (void)printf("Starting test with logger_type=%" PRI_MU_ENUM", consumer_enable_type=%" PRI_MU_ENUM "\r\n", MU_ENUM_VALUE(LOGGER_TYPE, logger_type), MU_ENUM_VALUE(CONSUMER_ENABLE_TYPE, consumer_enable_type));
 
     start_time = timer_global_get_elapsed_us();
@@ -120,7 +123,7 @@ static void test_all_with_consumer_enable_type(CONSUMER_ENABLE_TYPE consumer_ena
         uint32_t i;
         for (i = 0; i < ITERATION_COUNT; i++)
         {
-            LOGGER_LOG(LOG_LEVEL_CRITICAL, NULL, "hello world %" PRI_MU_ENUM " i=%" PRIu32 "!", MU_ENUM_VALUE(LOGGER_TYPE, logger_type), i);
+            LogLastError("hello world %" PRI_MU_ENUM " i=%" PRIu32 "!", MU_ENUM_VALUE(LOGGER_TYPE, logger_type), i);
         }
 
         iterations += i;
@@ -131,6 +134,29 @@ static void test_all_with_consumer_enable_type(CONSUMER_ENABLE_TYPE consumer_ena
 
     print_results(logger_type, consumer_enable_type, &results[logger_type][consumer_enable_type]);
 
+    /* v2 no context */
+    logger_type = LOGGER_TYPE_V2_NO_CONTEXT;
+    (void)printf("Starting test with logger_type=%" PRI_MU_ENUM", consumer_enable_type=%" PRI_MU_ENUM "\r\n", MU_ENUM_VALUE(LOGGER_TYPE, logger_type), MU_ENUM_VALUE(CONSUMER_ENABLE_TYPE, consumer_enable_type));
+    
+    start_time = timer_global_get_elapsed_us();
+    iterations = 0;
+    
+    while ((current_time = timer_global_get_elapsed_us()) - start_time < TEST_TIME * 1000)
+    {
+        uint32_t i;
+        for (i = 0; i < ITERATION_COUNT; i++)
+        {
+            LOGGER_LOG(LOG_LEVEL_CRITICAL, NULL, "hello world %" PRI_MU_ENUM " i=%" PRIu32 "!", MU_ENUM_VALUE(LOGGER_TYPE, logger_type), i);
+        }
+    
+        iterations += i;
+    }
+    
+    results[logger_type][consumer_enable_type].log_count = iterations;
+    results[logger_type][consumer_enable_type].time = current_time - start_time;
+    
+    print_results(logger_type, consumer_enable_type, &results[logger_type][consumer_enable_type]);
+    
     // now have the test run with local context created once
     logger_type = LOGGER_TYPE_V2_LOCAL_CONTEXT_CREATED_ONCE;
     (void)printf("Starting test with logger_type=%" PRI_MU_ENUM", consumer_enable_type=%" PRI_MU_ENUM "\r\n", MU_ENUM_VALUE(LOGGER_TYPE, logger_type), MU_ENUM_VALUE(CONSUMER_ENABLE_TYPE, consumer_enable_type));
@@ -240,14 +266,14 @@ static void test_all_with_consumer_enable_type(CONSUMER_ENABLE_TYPE consumer_ena
     results[logger_type][consumer_enable_type].time = current_time - start_time;
     
     print_results(logger_type, consumer_enable_type, &results[logger_type][consumer_enable_type]);
-
+    
     // now have the test run with LOGGER_LOG_EX with a message only
     logger_type = LOGGER_TYPE_V2_LOGGER_LOG_EX_ONLY_MESSAGE;
     (void)printf("Starting test with logger_type=%" PRI_MU_ENUM", consumer_enable_type=%" PRI_MU_ENUM "\r\n", MU_ENUM_VALUE(LOGGER_TYPE, logger_type), MU_ENUM_VALUE(CONSUMER_ENABLE_TYPE, consumer_enable_type));
-
+    
     start_time = timer_global_get_elapsed_us();
     iterations = 0;
-
+    
     current_time;
     while ((current_time = timer_global_get_elapsed_us()) - start_time < TEST_TIME * 1000)
     {
@@ -256,22 +282,51 @@ static void test_all_with_consumer_enable_type(CONSUMER_ENABLE_TYPE consumer_ena
         {
             LOG_CONTEXT_HANDLE dynamic_log_context_x;
             LOG_CONTEXT_CREATE(dynamic_log_context_x, NULL, LOG_CONTEXT_NAME(dynamic_log_context_x), LOG_CONTEXT_STRING_PROPERTY(block_id, "%s", "pachoo"));
-
+    
             LOGGER_LOG_EX(LOG_LEVEL_CRITICAL, LOG_MESSAGE("hello world %" PRI_MU_ENUM " i=%" PRIu32 "!", MU_ENUM_VALUE(LOGGER_TYPE, logger_type), i));
-
+    
             LOG_CONTEXT_DESTROY(dynamic_log_context_x);
         }
-
+    
         iterations += i;
     }
-
+    
     results[logger_type][consumer_enable_type].log_count = iterations;
     results[logger_type][consumer_enable_type].time = current_time - start_time;
-
+    
     print_results(logger_type, consumer_enable_type, &results[logger_type][consumer_enable_type]);
-
+    
     // now have the test run with LOGGER_LOG_EX with properties only
     logger_type = LOGGER_TYPE_V2_LOGGER_LOG_EX_ONLY_PROPERTY;
+    (void)printf("Starting test with logger_type=%" PRI_MU_ENUM", consumer_enable_type=%" PRI_MU_ENUM "\r\n", MU_ENUM_VALUE(LOGGER_TYPE, logger_type), MU_ENUM_VALUE(CONSUMER_ENABLE_TYPE, consumer_enable_type));
+    
+    start_time = timer_global_get_elapsed_us();
+    iterations = 0;
+    
+    current_time;
+    while ((current_time = timer_global_get_elapsed_us()) - start_time < TEST_TIME * 1000)
+    {
+        uint32_t i;
+        for (i = 0; i < ITERATION_COUNT; i++)
+        {
+            LOG_CONTEXT_HANDLE dynamic_log_context_x;
+            LOG_CONTEXT_CREATE(dynamic_log_context_x, NULL, LOG_CONTEXT_NAME(dynamic_log_context_x), LOG_CONTEXT_STRING_PROPERTY(block_id, "%s", "pachoo"));
+    
+            LOGGER_LOG_EX(LOG_LEVEL_CRITICAL, LOG_CONTEXT_PROPERTY(uint32_t, i, i));
+    
+            LOG_CONTEXT_DESTROY(dynamic_log_context_x);
+        }
+    
+        iterations += i;
+    }
+    
+    results[logger_type][consumer_enable_type].log_count = iterations;
+    results[logger_type][consumer_enable_type].time = current_time - start_time;
+    
+    print_results(logger_type, consumer_enable_type, &results[logger_type][consumer_enable_type]);
+
+    // now have the test run with v2 LastError property
+    logger_type = LOGGER_TYPE_V2_LASTERROR;
     (void)printf("Starting test with logger_type=%" PRI_MU_ENUM", consumer_enable_type=%" PRI_MU_ENUM "\r\n", MU_ENUM_VALUE(LOGGER_TYPE, logger_type), MU_ENUM_VALUE(CONSUMER_ENABLE_TYPE, consumer_enable_type));
 
     start_time = timer_global_get_elapsed_us();
@@ -283,12 +338,7 @@ static void test_all_with_consumer_enable_type(CONSUMER_ENABLE_TYPE consumer_ena
         uint32_t i;
         for (i = 0; i < ITERATION_COUNT; i++)
         {
-            LOG_CONTEXT_HANDLE dynamic_log_context_x;
-            LOG_CONTEXT_CREATE(dynamic_log_context_x, NULL, LOG_CONTEXT_NAME(dynamic_log_context_x), LOG_CONTEXT_STRING_PROPERTY(block_id, "%s", "pachoo"));
-
-            LOGGER_LOG_EX(LOG_LEVEL_CRITICAL, LOG_CONTEXT_PROPERTY(uint32_t, i, i));
-
-            LOG_CONTEXT_DESTROY(dynamic_log_context_x);
+            LOGGER_LOG_EX(LOG_LEVEL_CRITICAL, LOG_LASTERROR(), LOG_MESSAGE("hello world %" PRI_MU_ENUM " i=%" PRIu32 "!", MU_ENUM_VALUE(LOGGER_TYPE, logger_type), i));
         }
 
         iterations += i;
