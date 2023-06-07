@@ -54,6 +54,7 @@ set(c_logging_v2_h_files
 set(c_logging_v2_c_files
     ${c_logging_v2_c_files}
     ./src/log_sink_etw.c
+    ./src/log_lasterror.c
     )
 endif()
 

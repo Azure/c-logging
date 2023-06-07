@@ -3,6 +3,7 @@
 
 add_executable(log_lasterror_ut
     ../../src/logger.c
+    ../../src/log_lasterror.c
     log_lasterror_ut.c
 )
 

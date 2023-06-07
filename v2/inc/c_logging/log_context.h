@@ -72,6 +72,9 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
 #define EXPAND_DEFINE_PROPERTY_AS_PARAMETER_LOG_CONTEXT_PROPERTY(property_type, property_name, field_value) \
     , int property_name
 
+#define EXPAND_DEFINE_PROPERTY_AS_PARAMETER_LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function) \
+    , int property_name
+
 #define DEFINE_PROPERTY_AS_PARAMETER(field_desc) \
     MU_C2(EXPAND_DEFINE_PROPERTY_AS_PARAMETER_, field_desc)
 
@@ -88,6 +91,8 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
     , int log_context_is_used_multiple_times
 
 #define EXPAND_DEFINE_CONTEXT_NAME_AS_PARAMETER_LOG_CONTEXT_PROPERTY(property_type, property_name, field_value) \
+
+#define EXPAND_DEFINE_CONTEXT_NAME_AS_PARAMETER_LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function) \
 
 #define DEFINE_CONTEXT_NAME_AS_PARAMETER(field_desc) \
     MU_C2(EXPAND_DEFINE_CONTEXT_NAME_AS_PARAMETER_, field_desc)
@@ -129,6 +134,15 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
     data_pos += sizeof(property_type); \
     property_value_pair++; \
 
+#define EXPAND_SETUP_PROPERTY_PAIR_LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function) \
+    /* C_odes_SRS_LOG_CONTEXT_01_004: [ LOG_CONTEXT_PROPERTY shall expand to code allocating a property/value pair entry with the type property_type and the name property_name. ]*/ \
+    property_value_pair->value = data_pos; \
+    property_value_pair->name = MU_TOSTRING(property_name); \
+    property_value_pair->type = &property_type##_log_context_property_type; \
+    /* C_odes_SRS_LOG_CONTEXT_01_005: [ LOG_CONTEXT_PROPERTY shall expand to code copying the value property_value to be the value of the property/value pair. ]*/ \
+    data_pos += value_function((void*)data_pos); \
+    property_value_pair++; \
+
 #define SETUP_PROPERTY_PAIR(field_desc) \
     MU_C2(EXPAND_SETUP_PROPERTY_PAIR_, field_desc)
 
@@ -142,6 +156,9 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
 #define EXPAND_COUNT_PROPERTY_LOG_CONTEXT_NAME(log_context_name) \
 
 #define EXPAND_COUNT_PROPERTY_LOG_CONTEXT_PROPERTY(property_type, property_name, field_value) \
+    + 1
+
+#define EXPAND_COUNT_PROPERTY_LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function) \
     + 1
 
 #define COUNT_PROPERTY(field_desc) \
@@ -159,6 +176,9 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
 
 #define EXPAND_COUNT_DATA_BYTES_LOG_CONTEXT_PROPERTY(property_type, property_name, field_value) \
     + property_type##_log_context_property_type_get_init_data_size()
+
+#define EXPAND_COUNT_DATA_BYTES_LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function) \
+    + value_function(NULL)
 
 #define COUNT_DATA_BYTES(field_desc) \
     MU_C2(EXPAND_COUNT_DATA_BYTES_, field_desc)
