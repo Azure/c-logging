@@ -102,6 +102,7 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
 #define LOG_CONTEXT_CHECK_VARIABLE_ARGS(...) \
     /* Codes_SRS_LOG_CONTEXT_01_019: [ If 2 properties have the same property_name for a context a compiler error shall be emitted. ]*/ \
     /* Codes_SRS_LOG_CONTEXT_01_026: [ If 2 properties have the same property_name for a context a compiler error shall be emitted. ]*/ \
+    /* Codes_SRS_LOG_CONTEXT_01_030: [ If 2 properties have the same property_name for a context a compiler error shall be emitted. ]*/ \
     (void)(void (*)(int MU_FOR_EACH_1(DEFINE_PROPERTY_AS_PARAMETER, __VA_ARGS__)))0x4242; \
     /* Codes_SRS_LOG_CONTEXT_01_011: [ If LOG_CONTEXT_NAME is specified multiple times a compiler error shall be emitted. ]*/ \
     (void)(void (*)(int MU_FOR_EACH_1(DEFINE_CONTEXT_NAME_AS_PARAMETER, __VA_ARGS__)))0x4242; \
@@ -135,11 +136,11 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
     property_value_pair++; \
 
 #define EXPAND_SETUP_PROPERTY_PAIR_LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function) \
-    /* C_odes_SRS_LOG_CONTEXT_01_004: [ LOG_CONTEXT_PROPERTY shall expand to code allocating a property/value pair entry with the type property_type and the name property_name. ]*/ \
+    /* Codes_SRS_LOG_CONTEXT_01_027: [ LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION shall expand to code allocating a property/value pair entry with the type property_type and the name property_name. ]*/ \
     property_value_pair->value = data_pos; \
     property_value_pair->name = MU_TOSTRING(property_name); \
     property_value_pair->type = &property_type##_log_context_property_type; \
-    /* C_odes_SRS_LOG_CONTEXT_01_005: [ LOG_CONTEXT_PROPERTY shall expand to code copying the value property_value to be the value of the property/value pair. ]*/ \
+    /* Codes_SRS_LOG_CONTEXT_01_029: [ LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION shall expand to code filling the property value by calling value_function. ]*/ \
     data_pos += value_function((void*)data_pos); \
     property_value_pair++; \
 
@@ -178,6 +179,7 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
     + property_type##_log_context_property_type_get_init_data_size()
 
 #define EXPAND_COUNT_DATA_BYTES_LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function) \
+    /* Codes_SRS_LOG_CONTEXT_01_028: [ LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION shall expand to code that calls value_function with NULL in order to determine how much memory shall be reserved for the property. ] */ \
     + value_function(NULL)
 
 #define COUNT_DATA_BYTES(field_desc) \

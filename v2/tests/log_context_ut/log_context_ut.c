@@ -24,7 +24,8 @@
 #define MOCK_CALL_TYPE_VALUES \
     MOCK_CALL_TYPE_malloc, \
     MOCK_CALL_TYPE_free, \
-    MOCK_CALL_TYPE_log_internal_error_report \
+    MOCK_CALL_TYPE_log_internal_error_report, \
+    MOCK_CALL_TYPE_call_this_function_to_get_value
 
 MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
 
@@ -41,6 +42,11 @@ typedef struct free_CALL_TAG
     void* ptr;
 } free_CALL;
 
+typedef struct call_this_function_to_get_value_CALL_TAG
+{
+    void* captured_buffer;
+} call_this_function_to_get_value_CALL;
+
 typedef struct MOCK_CALL_TAG
 {
     MOCK_CALL_TYPE mock_call_type;
@@ -48,6 +54,7 @@ typedef struct MOCK_CALL_TAG
     {
         malloc_CALL malloc_call;
         free_CALL free_call;
+        call_this_function_to_get_value_CALL call_this_function_to_get_value_call;
     };
 } MOCK_CALL;
 
@@ -144,6 +151,12 @@ static void setup_free_call(void)
 static void setup_log_internal_error_report(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_log_internal_error_report;
+    expected_call_count++;
+}
+
+static void setup_call_this_function_to_get_value_call(void)
+{
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_call_this_function_to_get_value;
     expected_call_count++;
 }
 
@@ -360,6 +373,120 @@ static void LOG_CONTEXT_CREATE_with_all_int_property_types_succeeds(void)
     POOR_MANS_ASSERT(*(uint64_t*)pairs[8].value == UINT64_MAX);
     POOR_MANS_ASSERT(strcmp(pairs[8].name, "test_uint64_t") == 0);
     POOR_MANS_ASSERT(pairs[8].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_uint64_t);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // clean
+    setup_mocks();
+    setup_free_call();
+    LOG_CONTEXT_DESTROY(result);
+}
+
+/* LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION */
+
+static const char TEST_STRING[] = "blargh";
+
+static int mock_call_this_function_to_get_value(void* buffer)
+{
+    int result;
+
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_call_this_function_to_get_value))
+    {
+        actual_and_expected_match = false;
+        result = 0;
+    }
+    else
+    {
+        expected_calls[actual_call_count].call_this_function_to_get_value_call.captured_buffer = buffer;
+
+        if (buffer != NULL)
+        {
+            (void)memcpy(buffer, TEST_STRING, sizeof(TEST_STRING));
+        }
+
+        actual_call_count++;
+
+        result = sizeof(TEST_STRING);
+    }
+
+    return result;
+}
+
+/* Tests_SRS_LOG_CONTEXT_01_001: [ LOG_CONTEXT_CREATE shall allocate memory for the log context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_003: [ LOG_CONTEXT_CREATE shall store the property types and values specified by using LOG_CONTEXT_PROPERTY in the context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_027: [ LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION shall expand to code allocating a property/value pair entry with the type property_type and the name property_name. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_028: [ LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION shall expand to code that calls value_function with NULL in order to determine how much memory shall be reserved for the property. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_029: [ LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION shall expand to code filling the property value by calling value_function. ]*/
+static void LOG_CONTEXT_CREATE_CUSTOM_FUNCTION_succeeds(void)
+{
+    // arrange
+    setup_mocks();
+    setup_call_this_function_to_get_value_call();
+    setup_malloc_call();
+    setup_call_this_function_to_get_value_call();
+
+    // act
+    LOG_CONTEXT_HANDLE result;
+    LOG_CONTEXT_CREATE(result, NULL, LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, test_property, mock_call_this_function_to_get_value));
+
+    // assert
+    POOR_MANS_ASSERT(result != NULL);
+    POOR_MANS_ASSERT(log_context_get_property_value_pair_count(result) == 2);
+    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(result);
+    // context struct
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 1);
+    POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
+    POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    // ascii_char_ptr property
+    POOR_MANS_ASSERT(strcmp(pairs[1].value, TEST_STRING) == 0);
+    POOR_MANS_ASSERT(strcmp(pairs[1].name, "test_property") == 0);
+    POOR_MANS_ASSERT(pairs[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // clean
+    setup_mocks();
+    setup_free_call();
+    LOG_CONTEXT_DESTROY(result);
+}
+
+/* Tests_SRS_LOG_CONTEXT_01_001: [ LOG_CONTEXT_CREATE shall allocate memory for the log context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_003: [ LOG_CONTEXT_CREATE shall store the property types and values specified by using LOG_CONTEXT_PROPERTY in the context. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_027: [ LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION shall expand to code allocating a property/value pair entry with the type property_type and the name property_name. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_028: [ LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION shall expand to code that calls value_function with NULL in order to determine how much memory shall be reserved for the property. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_029: [ LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION shall expand to code filling the property value by calling value_function. ]*/
+static void LOG_CONTEXT_CREATE_CUSTOM_FUNCTION_with_two_properties_succeeds(void)
+{
+    // arrange
+    setup_mocks();
+    setup_call_this_function_to_get_value_call();
+    setup_call_this_function_to_get_value_call();
+    setup_malloc_call();
+    setup_call_this_function_to_get_value_call();
+    setup_call_this_function_to_get_value_call();
+
+    // act
+    LOG_CONTEXT_HANDLE result;
+    LOG_CONTEXT_CREATE(result, NULL,
+        LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, test_property_1, mock_call_this_function_to_get_value),
+        LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, test_property_2, mock_call_this_function_to_get_value)
+        );
+
+    // assert
+    POOR_MANS_ASSERT(result != NULL);
+    POOR_MANS_ASSERT(log_context_get_property_value_pair_count(result) == 3);
+    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(result);
+    // context struct
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 2);
+    POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
+    POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    // 1st property
+    POOR_MANS_ASSERT(strcmp(pairs[1].value, TEST_STRING) == 0);
+    POOR_MANS_ASSERT(strcmp(pairs[1].name, "test_property_1") == 0);
+    POOR_MANS_ASSERT(pairs[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr);
+    // 2nd property
+    POOR_MANS_ASSERT(strcmp(pairs[1].value, TEST_STRING) == 0);
+    POOR_MANS_ASSERT(strcmp(pairs[2].name, "test_property_2") == 0);
+    POOR_MANS_ASSERT(pairs[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr);
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // clean
@@ -616,6 +743,27 @@ static void LOG_CONTEXT_CREATE_with_2_properties_with_the_same_name_does_not_com
         LOG_CONTEXT_NAME(grrrrr),
         LOG_CONTEXT_PROPERTY(int32_t, x, 42),
         LOG_CONTEXT_PROPERTY(int16_t, x, 43)
+    );
+
+    // assert
+
+    // clean
+}
+#endif
+
+/* Tests_SRS_LOG_CONTEXT_01_030: [ If 2 properties have the same property_name for a context a compiler error shall be emitted. ]*/
+#if 0
+// If this code compiles we are not passing the test
+static void LOG_CONTEXT_CREATE_with_2_properties_CUSTOM_FUNCTION_with_the_same_name_does_not_compile(void)
+{
+    // arrange
+
+    // act
+    LOG_CONTEXT_HANDLE result;
+    LOG_CONTEXT_CREATE(result, NULL,
+        LOG_CONTEXT_NAME(grrrrr),
+        LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, test_property_1, mock_call_this_function_to_get_value),
+        LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, test_property_1, mock_call_this_function_to_get_value)
     );
 
     // assert
@@ -1851,7 +1999,10 @@ int main(void)
     LOG_CONTEXT_CREATE_with_one_int32_t_succeeds();
     LOG_CONTEXT_CREATE_with_two_properties_succeeds();
     LOG_CONTEXT_CREATE_with_all_int_property_types_succeeds();
-    
+
+    LOG_CONTEXT_CREATE_CUSTOM_FUNCTION_succeeds();
+    LOG_CONTEXT_CREATE_CUSTOM_FUNCTION_with_two_properties_succeeds();
+
     LOG_CONTEXT_CREATE_with_one_string_property_with_only_format_passed_to_it_succeeds();
     LOG_CONTEXT_CREATE_with_2_string_properties_with_only_format_passed_to_it_succeeds();
     LOG_CONTEXT_CREATE_with_a_string_property_using_printf_formatting_succeeds();
