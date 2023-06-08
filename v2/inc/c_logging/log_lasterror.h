@@ -16,7 +16,7 @@
 
 int log_lasterror_fill_property(void* buffer);
 
-/* Codes_SRS_LOG_LASTERROR_01_001: [ LOG_LASTERROR shall expand to a LOG_CONTEXT_PROPERTY with name LastError, type int32_t and value the result of calling GetLastError. ] */
+/* Codes_SRS_LOG_LASTERROR_01_001: [ LOG_LASTERROR shall expand to a LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION with name LastError, type ascii_char_ptr and value function call being log_lasterror_fill_property. ] */
 #define LOG_LASTERROR() \
     LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, LastError, log_lasterror_fill_property)
 
