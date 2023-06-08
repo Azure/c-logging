@@ -13,7 +13,8 @@ static const char FormatMessageA_failure_message[] = "failure in FormatMessageA"
 
 #define MESSAGE_BUFFER_SIZE 512
 
-static const char message[MESSAGE_BUFFER_SIZE * (MESSAGE_BUFFER_SIZE >= sizeof(FormatMessageA_failure_message))] = { 0 }; /*this construct will generate a compile time error (array of size 0) when LOG_SIZE_REGULAR is not enough to hold even the failure message*/
+// This array is not used for anything, but rather just to emit a compiler error
+static const char test_message_to_trigger_a_compiler_error[1 * (MESSAGE_BUFFER_SIZE >= sizeof(FormatMessageA_failure_message))] = { 0 }; /*this construct will generate a compile time error (array of size 0) when LOG_SIZE_REGULAR is not enough to hold even the failure message*/
 
 int log_lasterror_fill_property(void* buffer)
 {
