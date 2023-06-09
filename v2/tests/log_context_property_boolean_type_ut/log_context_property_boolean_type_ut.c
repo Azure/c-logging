@@ -6,6 +6,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "macro_utils/macro_utils.h"
 
