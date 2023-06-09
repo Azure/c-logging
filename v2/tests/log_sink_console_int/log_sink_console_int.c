@@ -5,6 +5,7 @@
 #include <stdio.h> // IWYU pragma: keep
 #include <stdint.h>
 #include <stdlib.h> // IWYU pragma: keep
+#include <stdbool.h>
 
 #include "macro_utils/macro_utils.h"
 
