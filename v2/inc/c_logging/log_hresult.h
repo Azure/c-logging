@@ -14,7 +14,7 @@
 
 #include "c_logging/log_context.h"
 
-int log_hresult_fill_property(void* buffer, ...);
+int log_hresult_fill_property(void* buffer, HRESULT hresult);
 
 #define LOG_HRESULT(hresult) \
     LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, hresult, log_hresult_fill_property)

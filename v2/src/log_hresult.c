@@ -6,27 +6,21 @@
 #include "macro_utils/macro_utils.h"
 
 #include "windows.h"
+#include "psapi.h"
 
 #include "c_logging/log_hresult.h"
 
 #define MESSAGE_BUFFER_SIZE 512
 #define N_MAX_MODULES 10
 
-int log_hresult_fill_property(void* buffer, ...)
+int log_hresult_fill_property(void* buffer, HRESULT hresult)
 {
-    int result;
-    va_list args;
-    va_start(args, buffer);
-
-    HRESULT hr = va_arg(args, HRESULT);
-    va_end(args);
-
     /*Codes_SRS_HRESULT_TO_STRING_02_002: [ log_hresult_fill_property shall call FormatMessageA with dwFlags set to FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS. ]*/
     /*see if the "system" can provide the code*/
     if (FormatMessageA(
         FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
         NULL,
-        hr,
+        hresult,
         0, /*if you pass in zero, FormatMessage looks for a message for LANGIDs in the following order...*/
         buffer, MESSAGE_BUFFER_SIZE, NULL) != 0)
     {
@@ -55,9 +49,9 @@ int log_hresult_fill_property(void* buffer, ...)
                 if (FormatMessageA(
                     FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS,
                     hModules[iModule],
-                    hr,
+                    hresult,
                     0,
-                    (LPVOID)result, MESSAGE_BUFFER_SIZE, NULL) != 0)
+                    buffer, MESSAGE_BUFFER_SIZE, NULL) != 0)
                 {
                     /*Codes_SRS_HRESULT_TO_STRING_02_006: [ If a module can decode hresult then that value shall be returned. */
                     break;
@@ -71,7 +65,7 @@ int log_hresult_fill_property(void* buffer, ...)
             /*Codes_SRS_HRESULT_TO_STRING_02_007: [ Otherwise NULL shall be returned. ]*/
             if (iModule == (enumModulesUsedBytes / sizeof(HMODULE)))
             {
-                (void)snprintf(buffer, MESSAGE_BUFFER_SIZE, "unknown HRESULT 0x%x", hr);
+                (void)snprintf(buffer, MESSAGE_BUFFER_SIZE, "unknown HRESULT 0x%x", hresult);
             }
             else
             {
@@ -79,5 +73,6 @@ int log_hresult_fill_property(void* buffer, ...)
             }
         }
     }
-    return result;
+
+    return MESSAGE_BUFFER_SIZE;
 }

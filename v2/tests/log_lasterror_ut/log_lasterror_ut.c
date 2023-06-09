@@ -13,8 +13,9 @@
 
 #include "macro_utils/macro_utils.h"
 
-#include "c_logging/log_lasterror.h"
 #include "c_logging/log_context.h"
+
+#include "c_logging/log_lasterror.h"
 
 // defines how many mock calls we can have
 #define MAX_MOCK_CALL_COUNT (128)
