@@ -19,7 +19,7 @@ int log_hresult_fill_property(void* buffer, ...);
 
 `log_hresult_fill_property` fills a property buffer with a formatted string for an `HRESULT` value. There is no check on the size of the buffer (it is by convention that the buffer has 512 bytes in size).
 
-If `buffer` is `NULL`, `log_hresult_fill_property` shall return 512 to indicate how many bytes shall be reserved for the last error string formatted version.
+If `buffer` is `NULL`, `log_hresult_fill_property` shall return 512 to indicate how many bytes shall be reserved for the `HRESULT` string formatted version.
 
 Otherwise, `log_hresult_fill_property` shall call `GetLastError` to obtain the last error information.
 
