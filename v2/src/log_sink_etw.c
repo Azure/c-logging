@@ -205,7 +205,7 @@ __pragma(pack(pop))
 
 static void log_sink_etw_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, va_list args);
 
-// This function was written with a little bit of reverse engineering of TraceLogging and guidance from 
+// This function was written with a little bit of reverse engineering of TraceLogging and guidance from
 // the TraceLogging.h header about the format of the self described events
 static void internal_emit_self_described_event_va(const char* event_name, uint16_t event_name_length, uint8_t trace_level, const LOG_CONTEXT_PROPERTY_VALUE_PAIR* context_property_value_pairs, uint16_t property_value_count, const char* file, const char* func, int32_t line, const char* message_format, va_list args)
 {
@@ -229,7 +229,7 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
 
         // fill metadata bytes
         // first one is the event name, followed by metadata for all the fields
-        // copy event name 
+        // copy event name
         (void)memcpy(pos, event_name, event_name_length); pos += event_name_length;
 
         // copy the field metadata (name and in type)
@@ -296,6 +296,10 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
                 case LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr:
                     /* Codes_SRS_LOG_SINK_ETW_01_063: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr, a byte with the value TlgInANSISTRING shall be added in the metadata. ]*/
                     *pos = TlgInANSISTRING;
+                    break;
+                case LOG_CONTEXT_PROPERTY_TYPE_bool:
+                    /* Codes_SRS_LOG_SINK_ETW_07_001: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_bool, a byte with the value TlgInBOOL32 shall be added in the metadata. ]*/
+                    *pos = TlgInBOOL32;
                     break;
                 case LOG_CONTEXT_PROPERTY_TYPE_int64_t:
                     /* Codes_SRS_LOG_SINK_ETW_01_064: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_int64_t, a byte with the value TlgInINT64 shall be added in the metadata. ]*/
@@ -514,6 +518,10 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
                         case LOG_CONTEXT_PROPERTY_TYPE_uint8_t:
                             /* Codes_SRS_LOG_SINK_ETW_01_080: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_uint8_t, the event data descriptor shall be filled with the value of the property by calling EventDataDescCreate. ]*/
                             EventDataDescCreate(&_tlgData[_tlgIdx], context_property_value_pairs[i].value, sizeof(uint8_t));
+                            break;
+                        case LOG_CONTEXT_PROPERTY_TYPE_bool:
+                            /* Codes_SRS_LOG_SINK_ETW_07_002: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_bool, the event data descriptor shall be filled with the value of the property by calling EventDataDescCreate. ]*/
+                            EventDataDescCreate(&_tlgData[_tlgIdx], context_property_value_pairs[i].value, sizeof(bool));
                             break;
                         case LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr:
                             /* Codes_SRS_LOG_SINK_ETW_01_067: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr, the event data descriptor shall be filled with the value of the property by calling _tlgCreate1Sz_char. ]*/

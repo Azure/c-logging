@@ -11,6 +11,7 @@
 #include "c_logging/log_context.h"
 #include "c_logging/log_context_property_basic_types.h"
 #include "c_logging/log_context_property_type_ascii_char_ptr.h"
+#include "c_logging/log_context_property_boolean_type.h"
 #include "c_logging/log_level.h"
 #include "c_logging/log_sink_if.h"
 
@@ -168,6 +169,20 @@ static void log_sink_console_with_a_context_with_2_properties_works(void)
     // no explicit assert, no crash expected
 }
 
+static void log_sink_console_with_a_context_with_2_properties_works_2(void)
+{
+    // arrange
+    LOG_CONTEXT_LOCAL_DEFINE(test_context, NULL,
+        LOG_CONTEXT_PROPERTY(int32_t, x, 42),
+        LOG_CONTEXT_PROPERTY(bool, y, 1));
+
+    // act
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, &test_context, __FILE__, __FUNCTION__, __LINE__, "");
+
+    // assert
+    // no explicit assert, no crash expected
+}
+
 static void log_sink_console_with_context_with_parent_works(void)
 {
     // arrange
@@ -237,6 +252,23 @@ static void log_sink_console_with_a_context_with_string_works(void)
     LOG_CONTEXT_DESTROY(test_context);
 }
 
+static void log_sink_console_with_a_context_with_boolean_works(void)
+{
+    // arrange
+    LOG_CONTEXT_HANDLE test_context;
+    LOG_CONTEXT_CREATE(test_context, NULL,
+        LOG_CONTEXT_STRING_PROPERTY(my_string, "1 + 1 == 3 is %s (%d)", MU_BOOL_VALUE(0)));
+
+    // act
+    test_log_sink_console_log(LOG_LEVEL_VERBOSE, test_context, __FILE__, __FUNCTION__, __LINE__, "");
+
+    // assert
+    // no explicit assert, no crash expected
+
+    // cleanup
+    LOG_CONTEXT_DESTROY(test_context);
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
@@ -258,12 +290,15 @@ int main(void)
     log_sink_console_with_empty_context_works();
     log_sink_console_with_a_context_with_one_property_works();
     log_sink_console_with_a_context_with_2_properties_works();
+    log_sink_console_with_a_context_with_2_properties_works_2();
     log_sink_console_with_context_with_parent_works();
     log_sink_console_with_a_chain_of_3_contexts_works();
 
     log_sink_console_with_a_dynamically_allocated_context_works();
 
     log_sink_console_with_a_context_with_string_works();
+
+    log_sink_console_with_a_context_with_boolean_works();
 
     log_sink_console.deinit();
 
