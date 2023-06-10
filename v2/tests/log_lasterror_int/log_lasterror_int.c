@@ -7,9 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _MSC_VER
 #include "windows.h"
-#endif
 
 #include "macro_utils/macro_utils.h"
 

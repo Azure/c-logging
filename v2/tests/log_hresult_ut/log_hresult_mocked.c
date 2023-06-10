@@ -13,7 +13,7 @@ BOOL mock_EnumProcessModules(HANDLE hProcess, HMODULE* lphModule, DWORD cb, LPDW
 int mock_snprintf(char* s, size_t n, const char* format, ...);
 
 #define GetLastError mock_GetLastError
-#define FormatMessageA mock_FormatMessageA
+#define FormatMessageA_no_newline mock_FormatMessageA_no_newline
 #define GetCurrentProcess mock_GetCurrentProcess
 #undef EnumProcessModules
 #define EnumProcessModules mock_EnumProcessModules

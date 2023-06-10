@@ -21,7 +21,7 @@
 
 #define MOCK_CALL_TYPE_VALUES \
     MOCK_CALL_TYPE_GetLastError, \
-    MOCK_CALL_TYPE_FormatMessageA, \
+    MOCK_CALL_TYPE_FormatMessageA_no_newline, \
     MOCK_CALL_TYPE_snprintf, \
     MOCK_CALL_TYPE_GetCurrentProcess, \
     MOCK_CALL_TYPE_EnumProcessModules
@@ -36,7 +36,7 @@ typedef struct GetLastError_CALL_TAG
     int call_result;
 } GetLastError_CALL;
 
-typedef struct FormatMessageA_CALL_TAG
+typedef struct FormatMessageA_no_newline_CALL_TAG
 {
     bool override_result;
     int call_result;
@@ -48,7 +48,7 @@ typedef struct FormatMessageA_CALL_TAG
     DWORD captured_nSize;
     va_list* captured_Arguments;
     const char* buffer_payload;
-} FormatMessageA_CALL;
+} FormatMessageA_no_newline_CALL;
 
 typedef struct snprintf_CALL_TAG
 {
@@ -79,7 +79,7 @@ typedef struct MOCK_CALL_TAG
     union
     {
         GetLastError_CALL GetLastError_call;
-        FormatMessageA_CALL FormatMessageA_no_newline_call;
+        FormatMessageA_no_newline_CALL FormatMessageA_no_newline_call;
         snprintf_CALL snprintf_call;
         GetCurrentProcess_CALL GetCurrentProcess_call;
         EnumProcessModules_CALL EnumProcessModules_call;
@@ -136,12 +136,12 @@ DWORD mock_GetLastError(void)
     return result;
 }
 
-DWORD mock_FormatMessageA(DWORD dwFlags, LPCVOID lpSource, DWORD dwMessageId, DWORD dwLanguageId, LPSTR lpBuffer, DWORD nSize, va_list* Arguments)
+DWORD mock_FormatMessageA_no_newline(DWORD dwFlags, LPCVOID lpSource, DWORD dwMessageId, DWORD dwLanguageId, LPSTR lpBuffer, DWORD nSize, va_list* Arguments)
 {
     DWORD result;
 
     if ((actual_call_count == expected_call_count) ||
-        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_FormatMessageA))
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_FormatMessageA_no_newline))
     {
         actual_and_expected_match = false;
         result = MU_FAILURE;
@@ -277,7 +277,7 @@ static void setup_GetLastError_call(void)
 
 static void setup_FormatMessageA_no_newline_call(void)
 {
-    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_FormatMessageA;
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_FormatMessageA_no_newline;
     expected_calls[expected_call_count].FormatMessageA_no_newline_call.override_result = false;
     expected_calls[expected_call_count].FormatMessageA_no_newline_call.buffer_payload = NULL;
     expected_call_count++;
