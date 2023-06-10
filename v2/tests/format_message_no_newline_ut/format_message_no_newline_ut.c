@@ -232,6 +232,36 @@ static void FormatMessageA_no_newline_removes_only_end_crlf(void)
     test_with_crlf("A dummy LE\n\r\n\rx", "A dummy LE\n\r\n\rx");
 }
 
+static const char TEST_NEWLINES_ONLY[] = "\r\n";
+
+/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer. ] */
+static void when_string_only_contains_newlines_FormatMessageA_no_newline_returns_0(void)
+{
+    // arrange
+    char buffer[512];
+
+    setup_mocks();
+    setup_FormatMessageA_call();
+    expected_calls[0].FormatMessageA_call.override_result = true;
+    expected_calls[0].FormatMessageA_call.call_result = (int)strlen(TEST_NEWLINES_ONLY);
+    expected_calls[0].FormatMessageA_call.buffer_payload = TEST_NEWLINES_ONLY;
+
+    // act
+    int result = FormatMessageA_no_newline(TEST_FLAGS_2, TEST_SOURCE_2, TEST_MESSAGE_ID_2, TEST_LANGUAGE_ID_2, buffer, sizeof(buffer), TEST_VA_LIST_2);
+
+    // assert
+    POOR_MANS_ASSERT(result == 0);
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_dwFlags == TEST_FLAGS_2);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_lpSource == TEST_SOURCE_2);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_dwMessageId == TEST_MESSAGE_ID_2);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_dwLanguageId == TEST_LANGUAGE_ID_2);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_Arguments == TEST_VA_LIST_2);
+}
+
 /* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_002: [ If FormatMessageA returns 0, FormatMessageA_no_newline shall return 0. ] */
 static void when_FormatMessageA_fails_FormatMessageA_no_newline_returns_0(void)
 {
@@ -275,6 +305,8 @@ int main(void)
     FormatMessageA_no_newline_removes_2_pairs();
     FormatMessageA_no_newline_removes_2_pairs_reverse();
     FormatMessageA_no_newline_removes_only_end_crlf();
+
+    when_string_only_contains_newlines_FormatMessageA_no_newline_returns_0();
     
     when_FormatMessageA_fails_FormatMessageA_no_newline_returns_0();
 
