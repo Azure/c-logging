@@ -159,10 +159,8 @@ static void LOG_LASTERROR_emits_the_underlying_property_with_a_preceding_and_fol
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
-#ifdef _MSC_VER
     // make abort not popup
     _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
-#endif
 
     LOG_LASTERROR_emits_the_underlying_property();
     LOG_LASTERROR_emits_the_underlying_property_with_a_preceding_and_following_property();
