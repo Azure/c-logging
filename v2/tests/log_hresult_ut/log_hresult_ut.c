@@ -7,9 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _MSC_VER
 #include "windows.h"
-#endif
+#include "psapi.h"
 
 #include "macro_utils/macro_utils.h"
 
@@ -23,7 +22,9 @@
 #define MOCK_CALL_TYPE_VALUES \
     MOCK_CALL_TYPE_GetLastError, \
     MOCK_CALL_TYPE_FormatMessageA, \
-    MOCK_CALL_TYPE_snprintf \
+    MOCK_CALL_TYPE_snprintf, \
+    MOCK_CALL_TYPE_GetCurrentProcess, \
+    MOCK_CALL_TYPE_EnumProcessModules
 
 MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
 
@@ -56,14 +57,32 @@ typedef struct snprintf_CALL_TAG
     const char* captured_format_arg;
 } snprintf_CALL;
 
+typedef struct GetCurrentProcess_CALL_TAG
+{
+    bool override_result;
+    HANDLE call_result;
+} GetCurrentProcess_CALL;
+
+typedef struct EnumProcessModules_CALL_TAG
+{
+    bool override_result;
+    BOOL call_result;
+    DWORD returned_filled_bytes;
+    const HMODULE* returned_lphModule;
+    HANDLE captured_hProcess;
+    DWORD captured_cb;
+} EnumProcessModules_CALL;
+
 typedef struct MOCK_CALL_TAG
 {
     MOCK_CALL_TYPE mock_call_type;
     union
     {
         GetLastError_CALL GetLastError_call;
-        FormatMessageA_CALL FormatMessageA_call;
+        FormatMessageA_CALL FormatMessageA_no_newline_call;
         snprintf_CALL snprintf_call;
+        GetCurrentProcess_CALL GetCurrentProcess_call;
+        EnumProcessModules_CALL EnumProcessModules_call;
     };
 } MOCK_CALL;
 
@@ -74,6 +93,7 @@ static bool actual_and_expected_match;
 
 const char TEST_FORMATTED_HRESULT_S_OK[] = "A dummy S_OK";
 const char TEST_FORMATTED_HRESULT_E_FAIL[] = "A dummy E_FAIL";
+const char TEST_FORMATTED_HRESULT_E_FAIL_OTHER[] = "Another dummy E_FAIL";
 
 #define POOR_MANS_ASSERT(cond) \
     if (!(cond)) \
@@ -128,21 +148,21 @@ DWORD mock_FormatMessageA(DWORD dwFlags, LPCVOID lpSource, DWORD dwMessageId, DW
     }
     else
     {
-        expected_calls[actual_call_count].FormatMessageA_call.captured_dwFlags = dwFlags;
-        expected_calls[actual_call_count].FormatMessageA_call.captured_lpSource = lpSource;
-        expected_calls[actual_call_count].FormatMessageA_call.captured_dwLanguageId = dwLanguageId;
-        expected_calls[actual_call_count].FormatMessageA_call.captured_lpBuffer = lpBuffer;
-        expected_calls[actual_call_count].FormatMessageA_call.captured_nSize = nSize;
-        expected_calls[actual_call_count].FormatMessageA_call.captured_Arguments = Arguments;
-        expected_calls[actual_call_count].FormatMessageA_call.captured_dwMessageId = dwMessageId;
+        expected_calls[actual_call_count].FormatMessageA_no_newline_call.captured_dwFlags = dwFlags;
+        expected_calls[actual_call_count].FormatMessageA_no_newline_call.captured_lpSource = lpSource;
+        expected_calls[actual_call_count].FormatMessageA_no_newline_call.captured_dwLanguageId = dwLanguageId;
+        expected_calls[actual_call_count].FormatMessageA_no_newline_call.captured_lpBuffer = lpBuffer;
+        expected_calls[actual_call_count].FormatMessageA_no_newline_call.captured_nSize = nSize;
+        expected_calls[actual_call_count].FormatMessageA_no_newline_call.captured_Arguments = Arguments;
+        expected_calls[actual_call_count].FormatMessageA_no_newline_call.captured_dwMessageId = dwMessageId;
 
-        if (expected_calls[actual_call_count].FormatMessageA_call.override_result)
+        if (expected_calls[actual_call_count].FormatMessageA_no_newline_call.override_result)
         {
-            if (expected_calls[actual_call_count].FormatMessageA_call.buffer_payload != NULL)
+            if (expected_calls[actual_call_count].FormatMessageA_no_newline_call.buffer_payload != NULL)
             {
-                (void)memcpy(lpBuffer, expected_calls[actual_call_count].FormatMessageA_call.buffer_payload, expected_calls[actual_call_count].FormatMessageA_call.call_result + 1);
+                (void)memcpy(lpBuffer, expected_calls[actual_call_count].FormatMessageA_no_newline_call.buffer_payload, expected_calls[actual_call_count].FormatMessageA_no_newline_call.call_result + 1);
             }
-            result = expected_calls[actual_call_count].FormatMessageA_call.call_result;
+            result = expected_calls[actual_call_count].FormatMessageA_no_newline_call.call_result;
         }
         else
         {
@@ -189,6 +209,65 @@ int mock_snprintf(char* s, size_t n, const char* format, ...)
     return result;
 }
 
+HANDLE mock_GetCurrentProcess(void)
+{
+    HANDLE result;
+
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_GetCurrentProcess))
+    {
+        actual_and_expected_match = false;
+        result = NULL;
+    }
+    else
+    {
+        if (expected_calls[actual_call_count].GetCurrentProcess_call.override_result)
+        {
+            result = expected_calls[actual_call_count].GetCurrentProcess_call.call_result;
+        }
+        else
+        {
+            result = GetCurrentProcess();
+        }
+
+        actual_call_count++;
+    }
+
+    return result;
+}
+
+BOOL mock_EnumProcessModules(HANDLE hProcess, HMODULE* lphModule, DWORD cb, LPDWORD lpcbNeeded)
+{
+    BOOL result;
+
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_EnumProcessModules))
+    {
+        actual_and_expected_match = false;
+        result = FALSE;
+    }
+    else
+    {
+        expected_calls[actual_call_count].EnumProcessModules_call.captured_hProcess = hProcess;
+        expected_calls[actual_call_count].EnumProcessModules_call.captured_cb = cb;
+
+        if (expected_calls[actual_call_count].EnumProcessModules_call.override_result)
+        {
+            *lpcbNeeded = expected_calls[actual_call_count].EnumProcessModules_call.returned_filled_bytes;
+            (void)memcpy(lphModule, expected_calls[actual_call_count].EnumProcessModules_call.returned_lphModule, expected_calls[actual_call_count].EnumProcessModules_call.returned_filled_bytes);
+            result = expected_calls[actual_call_count].EnumProcessModules_call.call_result;
+        }
+        else
+        {
+            result = EnumProcessModules(hProcess, lphModule, cb, lpcbNeeded);
+        }
+
+        actual_call_count++;
+    }
+
+    return result;
+}
+
 static void setup_GetLastError_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_GetLastError;
@@ -196,11 +275,11 @@ static void setup_GetLastError_call(void)
     expected_call_count++;
 }
 
-static void setup_FormatMessageA_call(void)
+static void setup_FormatMessageA_no_newline_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_FormatMessageA;
-    expected_calls[expected_call_count].FormatMessageA_call.override_result = false;
-    expected_calls[expected_call_count].FormatMessageA_call.buffer_payload = NULL;
+    expected_calls[expected_call_count].FormatMessageA_no_newline_call.override_result = false;
+    expected_calls[expected_call_count].FormatMessageA_no_newline_call.buffer_payload = NULL;
     expected_call_count++;
 }
 
@@ -208,6 +287,20 @@ static void setup_snprintf_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_snprintf;
     expected_calls[expected_call_count].snprintf_call.override_result = false;
+    expected_call_count++;
+}
+
+static void setup_GetCurrentProcess_call(void)
+{
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_GetCurrentProcess;
+    expected_calls[expected_call_count].GetCurrentProcess_call.override_result = false;
+    expected_call_count++;
+}
+
+static void setup_EnumProcessModules_call(void)
+{
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_EnumProcessModules;
+    expected_calls[expected_call_count].EnumProcessModules_call.override_result = false;
     expected_call_count++;
 }
 
@@ -229,16 +322,17 @@ static void log_hresult_fill_property_with_NULL_returns_needed_buffer_size(void)
 }
 
 /* Tests_SRS_LOG_HRESULT_01_002: [ log_hresult_fill_property shall call FormatMessageA_no_newline with FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, hresult, 0 as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
+/* Tests_SRS_LOG_HRESULT_01_003: [ log_lasterror_fill_property shall return 512. ] */
 static void log_hresult_fill_property_with_non_NULL_formats_S_OK(void)
 {
     // arrange
     char buffer[512];
 
     setup_mocks();
-    setup_FormatMessageA_call();
-    expected_calls[0].FormatMessageA_call.override_result = true;
-    expected_calls[0].FormatMessageA_call.call_result = sizeof(TEST_FORMATTED_HRESULT_S_OK) - 1;
-    expected_calls[0].FormatMessageA_call.buffer_payload = TEST_FORMATTED_HRESULT_S_OK;
+    setup_FormatMessageA_no_newline_call();
+    expected_calls[0].FormatMessageA_no_newline_call.override_result = true;
+    expected_calls[0].FormatMessageA_no_newline_call.call_result = sizeof(TEST_FORMATTED_HRESULT_S_OK) - 1;
+    expected_calls[0].FormatMessageA_no_newline_call.buffer_payload = TEST_FORMATTED_HRESULT_S_OK;
 
     // act
     int result = log_hresult_fill_property(buffer, S_OK);
@@ -247,27 +341,28 @@ static void log_hresult_fill_property_with_non_NULL_formats_S_OK(void)
     POOR_MANS_ASSERT(result == 512);
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
-    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_lpSource == NULL);
-    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_dwMessageId == S_OK);
-    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_dwLanguageId == 0);
-    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_lpBuffer == buffer);
-    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_nSize == 512);
-    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_Arguments == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpSource == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwMessageId == S_OK);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwLanguageId == 0);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_Arguments == NULL);
     POOR_MANS_ASSERT(strcmp(buffer, TEST_FORMATTED_HRESULT_S_OK) == 0);
 }
 
 /* Tests_SRS_LOG_HRESULT_01_002: [ log_hresult_fill_property shall call FormatMessageA_no_newline with FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, hresult, 0 as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
+/* Tests_SRS_LOG_HRESULT_01_003: [ log_lasterror_fill_property shall return 512. ] */
 static void log_hresult_fill_property_with_non_NULL_formats_E_FAIL(void)
 {
     // arrange
     char buffer[512];
 
     setup_mocks();
-    setup_FormatMessageA_call();
-    expected_calls[0].FormatMessageA_call.override_result = true;
-    expected_calls[0].FormatMessageA_call.call_result = sizeof(TEST_FORMATTED_HRESULT_E_FAIL) - 1;
-    expected_calls[0].FormatMessageA_call.buffer_payload = TEST_FORMATTED_HRESULT_E_FAIL;
+    setup_FormatMessageA_no_newline_call();
+    expected_calls[0].FormatMessageA_no_newline_call.override_result = true;
+    expected_calls[0].FormatMessageA_no_newline_call.call_result = sizeof(TEST_FORMATTED_HRESULT_E_FAIL) - 1;
+    expected_calls[0].FormatMessageA_no_newline_call.buffer_payload = TEST_FORMATTED_HRESULT_E_FAIL;
 
     // act
     int result = log_hresult_fill_property(buffer, E_FAIL);
@@ -276,139 +371,376 @@ static void log_hresult_fill_property_with_non_NULL_formats_E_FAIL(void)
     POOR_MANS_ASSERT(result == 512);
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
-    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_lpSource == NULL);
-    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_dwMessageId == E_FAIL);
-    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_dwLanguageId == 0);
-    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_lpBuffer == buffer);
-    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_nSize == 512);
-    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_Arguments == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpSource == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwMessageId == E_FAIL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwLanguageId == 0);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_Arguments == NULL);
     POOR_MANS_ASSERT(strcmp(buffer, TEST_FORMATTED_HRESULT_E_FAIL) == 0);
 }
 
-#if 0
-static void test_with_crlf(const char* returned_formatted_string, const char* expected_string)
+/* Tests_SRS_LOG_HRESULT_01_004: [ If FormatMessageA_no_newline returns 0, log_hresult_fill_property attempt to look up the formatted string from the loaded modules: ] */
+/* Tests_SRS_LOG_HRESULT_01_005: [ log_hresult_fill_property shall get the current process handle by calling GetCurrentProcess. ] */
+/* Tests_SRS_LOG_HRESULT_01_006: [ log_hresult_fill_property shall call EnumProcessModules and obtain the information about 10 modules. ] */
+/* Tests_SRS_LOG_HRESULT_01_007: [ If no module has the formatted message, log_hresult_fill_property shall place in buffer the string unknown HRESULT 0x%x, where %x is the hresult value. ] */
+static void when_FormatMessageA_fails_and_no_modules_are_returned_log_hresult_fill_property_places_unknown_hresult_in_buffer(void)
 {
     // arrange
     char buffer[512];
 
     setup_mocks();
-    setup_GetLastError_call();
-    setup_FormatMessageA_call();
-    expected_calls[0].GetLastError_call.override_result = true;
-    expected_calls[0].GetLastError_call.call_result = 995;
-    expected_calls[1].FormatMessageA_call.override_result = true;
-    expected_calls[1].FormatMessageA_call.call_result = (int)strlen(returned_formatted_string);
-    expected_calls[1].FormatMessageA_call.buffer_payload = returned_formatted_string;
+    setup_FormatMessageA_no_newline_call();
+    setup_GetCurrentProcess_call();
+    setup_EnumProcessModules_call();
+    setup_snprintf_call();
+    
+    expected_calls[0].FormatMessageA_no_newline_call.override_result = true;
+    expected_calls[0].FormatMessageA_no_newline_call.call_result = 0;
+    expected_calls[1].GetCurrentProcess_call.override_result = true;
+    expected_calls[1].GetCurrentProcess_call.call_result = (HANDLE)0x4242;
+    expected_calls[2].EnumProcessModules_call.override_result = true;
+    expected_calls[2].EnumProcessModules_call.returned_filled_bytes = 0;
+    expected_calls[2].EnumProcessModules_call.call_result = TRUE;
 
     // act
-    int result = log_hresult_fill_property(buffer);
+    int result = log_hresult_fill_property(buffer, E_FAIL);
 
     // assert
     POOR_MANS_ASSERT(result == 512);
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_lpSource == NULL);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwMessageId == 995);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwLanguageId == MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT));
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_lpBuffer == buffer);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_nSize == 512);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_Arguments == NULL);
-    POOR_MANS_ASSERT(strcmp(buffer, expected_string) == 0);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpSource == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwMessageId == E_FAIL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwLanguageId == 0);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_Arguments == NULL);
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_hProcess == (HANDLE)0x4242);
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * 10));
+    POOR_MANS_ASSERT(strcmp(buffer, "unknown HRESULT 0x80004005") == 0);
 }
 
-/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_hresult_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
-static void log_hresult_fill_property_with_non_NULL_formats_last_error_42_one_newline(void)
-{
-    test_with_crlf("A dummy LE\n", "A dummy LE");
-}
-
-/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_hresult_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
-static void log_hresult_fill_property_with_non_NULL_formats_last_error_42_2_newlines(void)
-{
-    test_with_crlf("A dummy LE\n\n", "A dummy LE");
-}
-
-/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_hresult_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
-static void log_hresult_fill_property_with_non_NULL_formats_last_error_42_1_CR(void)
-{
-    test_with_crlf("A dummy LE\r", "A dummy LE");
-}
-
-/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_hresult_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
-static void log_hresult_fill_property_with_non_NULL_formats_last_error_42_2_CR(void)
-{
-    test_with_crlf("A dummy LE\r\r", "A dummy LE");
-}
-
-/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_hresult_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
-static void log_hresult_fill_property_with_non_NULL_formats_last_error_42_2_pairs(void)
-{
-    test_with_crlf("A dummy LE\r\n\r\n", "A dummy LE");
-}
-
-/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_hresult_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
-static void log_hresult_fill_property_with_non_NULL_formats_last_error_42_2_pairs_reverse(void)
-{
-    test_with_crlf("A dummy LE\n\r\n\r", "A dummy LE");
-}
-
-/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_hresult_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
-static void log_hresult_fill_property_with_non_NULL_formats_last_error_42_only_end_crlf_removed(void)
-{
-    test_with_crlf("A dummy LE\n\r\n\rx", "A dummy LE\n\r\n\rx");
-}
-
-/* Tests_SRS_LOG_LASTERROR_01_005: [ If FormatMessageA returns 0, log_hresult_fill_property shall copy in buffer the string failure in FormatMessageA and return 512. ] */
-static void when_FormatMessageA_fails_log_hresult_fill_property_places_a_default_string_in_the_buffer(void)
+/* Tests_SRS_LOG_HRESULT_01_008: [ If printing the unknown HRESULT 0x%x string fails, log_hresult_fill_property shall place in buffer the string snprintf failed. ] */
+static void when_snprintf_fails_log_hresult_fill_property_places_snprintf_failed_in_the_buffer(void)
 {
     // arrange
     char buffer[512];
 
     setup_mocks();
-    setup_GetLastError_call();
-    setup_FormatMessageA_call();
-    expected_calls[0].GetLastError_call.override_result = true;
-    expected_calls[0].GetLastError_call.call_result = 995;
-    expected_calls[1].FormatMessageA_call.override_result = true;
-    expected_calls[1].FormatMessageA_call.call_result = 0;
-    expected_calls[1].FormatMessageA_call.buffer_payload = TEST_FORMATTED_LASTERROR_995_with_newlines;
+    setup_FormatMessageA_no_newline_call();
+    setup_GetCurrentProcess_call();
+    setup_EnumProcessModules_call();
+    setup_snprintf_call();
+
+    expected_calls[0].FormatMessageA_no_newline_call.override_result = true;
+    expected_calls[0].FormatMessageA_no_newline_call.call_result = 0;
+    expected_calls[1].GetCurrentProcess_call.override_result = true;
+    expected_calls[1].GetCurrentProcess_call.call_result = (HANDLE)0x4242;
+    expected_calls[2].EnumProcessModules_call.override_result = true;
+    expected_calls[2].EnumProcessModules_call.returned_filled_bytes = 0;
+    expected_calls[2].EnumProcessModules_call.call_result = TRUE;
+    expected_calls[3].snprintf_call.override_result = true;
+    expected_calls[3].snprintf_call.call_result = -1;
 
     // act
-    int result = log_hresult_fill_property(buffer);
+    int result = log_hresult_fill_property(buffer, E_FAIL);
 
     // assert
     POOR_MANS_ASSERT(result == 512);
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_lpSource == NULL);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwMessageId == 995);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwLanguageId == MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT));
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_lpBuffer == buffer);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_nSize == 512);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_Arguments == NULL);
-    POOR_MANS_ASSERT(strcmp(buffer, TEST_FAILURE_STRING) == 0);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpSource == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwMessageId == E_FAIL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwLanguageId == 0);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_Arguments == NULL);
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_hProcess == (HANDLE)0x4242);
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * 10));
+    POOR_MANS_ASSERT(strcmp(buffer, "snprintf failed") == 0);
 }
 
-/* LOGGER_LOG */
+/* Tests_SRS_LOG_HRESULT_01_009: [ If EnumProcessModules fails, log_hresult_fill_property shall place in buffer a string indicating what failed, the last error and unknown HRESULT 0x%x, where %x is the hresult value. ] */
+static void when_EnumProcessModules_fails_log_hresult_fill_property_places_unknown_hresult_with_lasterror_in_buffer(void)
+{
+    // arrange
+    char buffer[512];
 
-/* Tests_SRS_LOG_LASTERROR_01_001: [ LOG_LASTERROR shall expand to a LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION with name LastError, type ascii_char_ptr and value function call being log_hresult_fill_property. ] */
-static void LOG_LASTERROR_emits_the_underlying_property(void)
+    setup_mocks();
+    setup_FormatMessageA_no_newline_call();
+    setup_GetCurrentProcess_call();
+    setup_EnumProcessModules_call();
+    setup_GetLastError_call();
+    setup_snprintf_call();
+
+    expected_calls[0].FormatMessageA_no_newline_call.override_result = true;
+    expected_calls[0].FormatMessageA_no_newline_call.call_result = 0;
+    expected_calls[1].GetCurrentProcess_call.override_result = true;
+    expected_calls[1].GetCurrentProcess_call.call_result = (HANDLE)0x4242;
+    expected_calls[2].EnumProcessModules_call.override_result = true;
+    expected_calls[2].EnumProcessModules_call.call_result = FALSE;
+    expected_calls[3].GetLastError_call.override_result = true;
+    expected_calls[3].GetLastError_call.call_result = 42;
+
+    // act
+    int result = log_hresult_fill_property(buffer, E_FAIL);
+
+    // assert
+    POOR_MANS_ASSERT(result == 512);
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpSource == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwMessageId == E_FAIL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwLanguageId == 0);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_Arguments == NULL);
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_hProcess == (HANDLE)0x4242);
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * 10));
+    POOR_MANS_ASSERT(strcmp(buffer, "failure in EnumProcessModules, LE=42, unknown HRESULT 0x80004005") == 0);
+}
+
+/* Tests_SRS_LOG_HRESULT_01_008: [ If printing the unknown HRESULT 0x%x string fails, log_hresult_fill_property shall place in buffer the string snprintf failed. ] */
+static void when_snprintf_fails_after_EnumProcessModules_fails_log_hresult_fill_property_places_snprintf_failed_in_the_buffer(void)
+{
+    // arrange
+    char buffer[512];
+
+    setup_mocks();
+    setup_FormatMessageA_no_newline_call();
+    setup_GetCurrentProcess_call();
+    setup_EnumProcessModules_call();
+    setup_GetLastError_call();
+    setup_snprintf_call();
+
+    expected_calls[0].FormatMessageA_no_newline_call.override_result = true;
+    expected_calls[0].FormatMessageA_no_newline_call.call_result = 0;
+    expected_calls[1].GetCurrentProcess_call.override_result = true;
+    expected_calls[1].GetCurrentProcess_call.call_result = (HANDLE)0x4242;
+    expected_calls[2].EnumProcessModules_call.override_result = true;
+    expected_calls[2].EnumProcessModules_call.call_result = FALSE;
+    expected_calls[4].snprintf_call.override_result = true;
+    expected_calls[4].snprintf_call.call_result = -1;
+
+    // act
+    int result = log_hresult_fill_property(buffer, E_FAIL);
+
+    // assert
+    POOR_MANS_ASSERT(result == 512);
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpSource == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwMessageId == E_FAIL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwLanguageId == 0);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_Arguments == NULL);
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_hProcess == (HANDLE)0x4242);
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * 10));
+    POOR_MANS_ASSERT(strcmp(buffer, "snprintf failed") == 0);
+}
+
+#define TEST_MODULE_1 ((HANDLE)0x45)
+#define TEST_MODULE_2 ((HANDLE)0x46)
+
+/* Tests_SRS_LOG_HRESULT_01_010: [ For each module: ] */
+/* Tests_SRS_LOG_HRESULT_01_011: [ log_hresult_fill_property shall call FormatMessageA with FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS, the module handle, the hresult value, 0 as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
+static void when_first_module_out_of_2_FormatMessageA_no_newline_formats_log_hresult_fill_property_formats_success(void)
+{
+    // arrange
+    char buffer[512];
+    HMODULE test_modules[] = { TEST_MODULE_1, TEST_MODULE_2 };
+
+    setup_mocks();
+    setup_FormatMessageA_no_newline_call();
+    setup_GetCurrentProcess_call();
+    setup_EnumProcessModules_call();
+    setup_FormatMessageA_no_newline_call();
+
+    expected_calls[0].FormatMessageA_no_newline_call.override_result = true;
+    expected_calls[0].FormatMessageA_no_newline_call.call_result = 0;
+    expected_calls[1].GetCurrentProcess_call.override_result = true;
+    expected_calls[1].GetCurrentProcess_call.call_result = (HANDLE)0x4242;
+    expected_calls[2].EnumProcessModules_call.override_result = true;
+    expected_calls[2].EnumProcessModules_call.returned_filled_bytes = sizeof(HMODULE) * 2;
+    expected_calls[2].EnumProcessModules_call.returned_lphModule = test_modules;
+    expected_calls[2].EnumProcessModules_call.call_result = TRUE;
+    expected_calls[3].FormatMessageA_no_newline_call.override_result = true;
+    expected_calls[3].FormatMessageA_no_newline_call.call_result = sizeof(TEST_FORMATTED_HRESULT_E_FAIL);
+    expected_calls[3].FormatMessageA_no_newline_call.buffer_payload = TEST_FORMATTED_HRESULT_E_FAIL;
+
+    // act
+    int result = log_hresult_fill_property(buffer, E_FAIL);
+
+    // assert
+    POOR_MANS_ASSERT(result == 512);
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpSource == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwMessageId == E_FAIL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwLanguageId == 0);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_Arguments == NULL);
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_hProcess == (HANDLE)0x4242);
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * 10));
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS));
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_lpSource == TEST_MODULE_1);
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_dwMessageId == E_FAIL);
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_dwLanguageId == 0);
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_Arguments == NULL);
+    POOR_MANS_ASSERT(strcmp(buffer, TEST_FORMATTED_HRESULT_E_FAIL) == 0);
+}
+
+/* Tests_SRS_LOG_HRESULT_01_010: [ For each module: ] */
+/* Tests_SRS_LOG_HRESULT_01_011: [ log_hresult_fill_property shall call FormatMessageA with FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS, the module handle, the hresult value, 0 as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
+static void when_2nd_module_out_of_2_FormatMessageA_no_newline_formats_log_hresult_fill_property_formats_success(void)
+{
+    // arrange
+    char buffer[512];
+    HMODULE test_modules[] = { TEST_MODULE_1, TEST_MODULE_2 };
+
+    setup_mocks();
+    setup_FormatMessageA_no_newline_call();
+    setup_GetCurrentProcess_call();
+    setup_EnumProcessModules_call();
+    setup_FormatMessageA_no_newline_call();
+    setup_FormatMessageA_no_newline_call();
+
+    expected_calls[0].FormatMessageA_no_newline_call.override_result = true;
+    expected_calls[0].FormatMessageA_no_newline_call.call_result = 0;
+    expected_calls[1].GetCurrentProcess_call.override_result = true;
+    expected_calls[1].GetCurrentProcess_call.call_result = (HANDLE)0x4242;
+    expected_calls[2].EnumProcessModules_call.override_result = true;
+    expected_calls[2].EnumProcessModules_call.returned_filled_bytes = sizeof(HMODULE) * 2;
+    expected_calls[2].EnumProcessModules_call.returned_lphModule = test_modules;
+    expected_calls[2].EnumProcessModules_call.call_result = TRUE;
+    expected_calls[3].FormatMessageA_no_newline_call.override_result = true;
+    expected_calls[3].FormatMessageA_no_newline_call.call_result = 0;
+    expected_calls[4].FormatMessageA_no_newline_call.override_result = true;
+    expected_calls[4].FormatMessageA_no_newline_call.call_result = sizeof(TEST_FORMATTED_HRESULT_E_FAIL_OTHER);
+    expected_calls[4].FormatMessageA_no_newline_call.buffer_payload = TEST_FORMATTED_HRESULT_E_FAIL_OTHER;
+
+    // act
+    int result = log_hresult_fill_property(buffer, E_FAIL);
+
+    // assert
+    POOR_MANS_ASSERT(result == 512);
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpSource == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwMessageId == E_FAIL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwLanguageId == 0);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_Arguments == NULL);
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_hProcess == (HANDLE)0x4242);
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * 10));
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS));
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_lpSource == TEST_MODULE_1);
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_dwMessageId == E_FAIL);
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_dwLanguageId == 0);
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_Arguments == NULL);
+    POOR_MANS_ASSERT(expected_calls[4].FormatMessageA_no_newline_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS));
+    POOR_MANS_ASSERT(expected_calls[4].FormatMessageA_no_newline_call.captured_lpSource == TEST_MODULE_2);
+    POOR_MANS_ASSERT(expected_calls[4].FormatMessageA_no_newline_call.captured_dwMessageId == E_FAIL);
+    POOR_MANS_ASSERT(expected_calls[4].FormatMessageA_no_newline_call.captured_dwLanguageId == 0);
+    POOR_MANS_ASSERT(expected_calls[4].FormatMessageA_no_newline_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[4].FormatMessageA_no_newline_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[4].FormatMessageA_no_newline_call.captured_Arguments == NULL);
+    POOR_MANS_ASSERT(strcmp(buffer, TEST_FORMATTED_HRESULT_E_FAIL_OTHER) == 0);
+}
+
+/* Tests_SRS_LOG_HRESULT_01_007: [ If no module has the formatted message, log_hresult_fill_property shall place in buffer the string unknown HRESULT 0x%x, where %x is the hresult value. ] */
+static void when_none_of_2_FormatMessageA_no_newline_formats_it_log_hresult_fill_property_formats_yields_unknown(void)
+{
+    // arrange
+    char buffer[512];
+    HMODULE test_modules[] = { TEST_MODULE_1, TEST_MODULE_2 };
+
+    setup_mocks();
+    setup_FormatMessageA_no_newline_call();
+    setup_GetCurrentProcess_call();
+    setup_EnumProcessModules_call();
+    setup_FormatMessageA_no_newline_call();
+    setup_FormatMessageA_no_newline_call();
+    setup_snprintf_call(); // for unknown
+
+    expected_calls[0].FormatMessageA_no_newline_call.override_result = true;
+    expected_calls[0].FormatMessageA_no_newline_call.call_result = 0;
+    expected_calls[1].GetCurrentProcess_call.override_result = true;
+    expected_calls[1].GetCurrentProcess_call.call_result = (HANDLE)0x4242;
+    expected_calls[2].EnumProcessModules_call.override_result = true;
+    expected_calls[2].EnumProcessModules_call.returned_filled_bytes = sizeof(HMODULE) * 2;
+    expected_calls[2].EnumProcessModules_call.returned_lphModule = test_modules;
+    expected_calls[2].EnumProcessModules_call.call_result = TRUE;
+    expected_calls[3].FormatMessageA_no_newline_call.override_result = true;
+    expected_calls[3].FormatMessageA_no_newline_call.call_result = 0;
+    expected_calls[4].FormatMessageA_no_newline_call.override_result = true;
+    expected_calls[4].FormatMessageA_no_newline_call.call_result = 0;
+
+    // act
+    int result = log_hresult_fill_property(buffer, E_FAIL);
+
+    // assert
+    POOR_MANS_ASSERT(result == 512);
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpSource == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwMessageId == E_FAIL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_dwLanguageId == 0);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_Arguments == NULL);
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_hProcess == (HANDLE)0x4242);
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * 10));
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS));
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_lpSource == TEST_MODULE_1);
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_dwMessageId == E_FAIL);
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_dwLanguageId == 0);
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_Arguments == NULL);
+    POOR_MANS_ASSERT(expected_calls[4].FormatMessageA_no_newline_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS));
+    POOR_MANS_ASSERT(expected_calls[4].FormatMessageA_no_newline_call.captured_lpSource == TEST_MODULE_2);
+    POOR_MANS_ASSERT(expected_calls[4].FormatMessageA_no_newline_call.captured_dwMessageId == E_FAIL);
+    POOR_MANS_ASSERT(expected_calls[4].FormatMessageA_no_newline_call.captured_dwLanguageId == 0);
+    POOR_MANS_ASSERT(expected_calls[4].FormatMessageA_no_newline_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[4].FormatMessageA_no_newline_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[4].FormatMessageA_no_newline_call.captured_Arguments == NULL);
+    POOR_MANS_ASSERT(strcmp(buffer, "unknown HRESULT 0x80004005") == 0);
+}
+
+/* LOG_HRESULT */
+
+/* Tests_SRS_LOG_HRESULT_01_012: [ LOG_HRESULT shall expand to a LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION with name hresult, type ascii_char_ptr and value function call being log_hresult_fill_property(hresult). ] */
+static void LOG_HRESULT_emits_the_underlying_property(void)
 {
     // arrange
     setup_mocks();
-    setup_GetLastError_call();
-    setup_FormatMessageA_call();
+    setup_FormatMessageA_no_newline_call();
+
     expected_calls[0].GetLastError_call.override_result = true;
-    expected_calls[0].GetLastError_call.call_result = 995;
-    expected_calls[1].FormatMessageA_call.override_result = true;
-    expected_calls[1].FormatMessageA_call.call_result = sizeof(TEST_FORMATTED_LASTERROR_995_with_newlines) - 1;
-    expected_calls[1].FormatMessageA_call.buffer_payload = TEST_FORMATTED_LASTERROR_995_with_newlines;
+    expected_calls[0].GetLastError_call.call_result = E_FAIL;
+    expected_calls[1].FormatMessageA_no_newline_call.override_result = true;
+    expected_calls[1].FormatMessageA_no_newline_call.call_result = sizeof(TEST_FORMATTED_HRESULT_E_FAIL_OTHER) - 1;
+    expected_calls[1].FormatMessageA_no_newline_call.buffer_payload = TEST_FORMATTED_HRESULT_E_FAIL_OTHER;
 
     // act
-    LOG_CONTEXT_LOCAL_DEFINE(log_context, NULL, LOG_LASTERROR());
+    LOG_CONTEXT_LOCAL_DEFINE(log_context, NULL, LOG_HRESULT(E_FAIL));
 
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
@@ -422,9 +754,8 @@ static void LOG_LASTERROR_emits_the_underlying_property(void)
     POOR_MANS_ASSERT(*(uint8_t*)properties[0].value == 1);
     POOR_MANS_ASSERT(strcmp(properties[1].name, "LastError") == 0);
     POOR_MANS_ASSERT(properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr);
-    POOR_MANS_ASSERT(strcmp(properties[1].value, TEST_FORMATTED_LASTERROR_995) == 0);
+    POOR_MANS_ASSERT(strcmp(properties[1].value, TEST_FORMATTED_HRESULT_E_FAIL_OTHER) == 0);
 }
-#endif
 
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
@@ -438,16 +769,15 @@ int main(void)
     log_hresult_fill_property_with_non_NULL_formats_S_OK();
     log_hresult_fill_property_with_non_NULL_formats_E_FAIL();
     
-    //log_hresult_fill_property_with_non_NULL_formats_last_error_42_one_newline();
-    //log_hresult_fill_property_with_non_NULL_formats_last_error_42_2_newlines();
-    //log_hresult_fill_property_with_non_NULL_formats_last_error_42_1_CR();
-    //log_hresult_fill_property_with_non_NULL_formats_last_error_42_2_CR();
-    //log_hresult_fill_property_with_non_NULL_formats_last_error_42_2_pairs();
-    //log_hresult_fill_property_with_non_NULL_formats_last_error_42_2_pairs_reverse();
-    //log_hresult_fill_property_with_non_NULL_formats_last_error_42_only_end_crlf_removed();
-    //
-    //when_FormatMessageA_fails_log_hresult_fill_property_places_a_default_string_in_the_buffer();
-    //
+    when_FormatMessageA_fails_and_no_modules_are_returned_log_hresult_fill_property_places_unknown_hresult_in_buffer();
+    when_snprintf_fails_log_hresult_fill_property_places_snprintf_failed_in_the_buffer();
+    when_EnumProcessModules_fails_log_hresult_fill_property_places_unknown_hresult_with_lasterror_in_buffer();
+    when_snprintf_fails_after_EnumProcessModules_fails_log_hresult_fill_property_places_snprintf_failed_in_the_buffer();
+
+    when_first_module_out_of_2_FormatMessageA_no_newline_formats_log_hresult_fill_property_formats_success();
+    when_2nd_module_out_of_2_FormatMessageA_no_newline_formats_log_hresult_fill_property_formats_success();
+    when_none_of_2_FormatMessageA_no_newline_formats_it_log_hresult_fill_property_formats_yields_unknown();
+
     //LOG_LASTERROR_emits_the_underlying_property();
 
     return 0;

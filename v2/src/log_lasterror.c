@@ -17,8 +17,10 @@ static const char FormatMessageA_failure_message[] = "failure in FormatMessageA"
 // This array is not used for anything, but rather just to emit a compiler error
 static const char test_message_to_trigger_a_compiler_error[1 * (MESSAGE_BUFFER_SIZE >= sizeof(FormatMessageA_failure_message))] = { 0 }; /*this construct will generate a compile time error (array of size 0) when LOG_SIZE_REGULAR is not enough to hold even the failure message*/
 
-int log_lasterror_fill_property(void* buffer)
+int log_lasterror_fill_property(void* buffer, int dummy)
 {
+    (void)dummy;
+
     if (buffer == NULL)
     {
         /* Codes_SRS_LOG_LASTERROR_01_002: [ If buffer is NULL, log_lasterror_fill_property shall return 512 to indicate how many bytes shall be reserved for the last error string formatted version. ] */

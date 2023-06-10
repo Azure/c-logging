@@ -385,7 +385,7 @@ static void LOG_CONTEXT_CREATE_with_all_int_property_types_succeeds(void)
 
 static const char TEST_STRING[] = "blargh";
 
-static int mock_call_this_function_to_get_value(void* buffer)
+static int mock_call_this_function_to_get_value(void* buffer, ...)
 {
     int result;
 
@@ -427,7 +427,7 @@ static void LOG_CONTEXT_CREATE_CUSTOM_FUNCTION_succeeds(void)
 
     // act
     LOG_CONTEXT_HANDLE result;
-    LOG_CONTEXT_CREATE(result, NULL, LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, test_property, mock_call_this_function_to_get_value));
+    LOG_CONTEXT_CREATE(result, NULL, LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, test_property, mock_call_this_function_to_get_value, 42));
 
     // assert
     POOR_MANS_ASSERT(result != NULL);
@@ -467,8 +467,8 @@ static void LOG_CONTEXT_CREATE_CUSTOM_FUNCTION_with_two_properties_succeeds(void
     // act
     LOG_CONTEXT_HANDLE result;
     LOG_CONTEXT_CREATE(result, NULL,
-        LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, test_property_1, mock_call_this_function_to_get_value),
-        LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, test_property_2, mock_call_this_function_to_get_value)
+        LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, test_property_1, mock_call_this_function_to_get_value, 0), // has one dummy parameter
+        LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, test_property_2, mock_call_this_function_to_get_value, 0)  // has one dummy parameter
         );
 
     // assert

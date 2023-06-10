@@ -5,7 +5,7 @@
 ## Exposed API
 
 ```c
-int log_lasterror_fill_property(void* buffer)
+int log_lasterror_fill_property(void* buffer, int dummy)
 
 #define LOG_LASTERROR() \
     ...
@@ -14,10 +14,12 @@ int log_lasterror_fill_property(void* buffer)
 ## log_lasterror_fill_property
 
 ```c
-int log_lasterror_fill_property(void* buffer);
+int log_lasterror_fill_property(void* buffer, int dummy);
 ```
 
 `log_lasterror_fill_property` fills a property buffer with the last error formatted as a string. There is no check on the size of the buffer (it is by convention that the buffer has 512 bytes in size).
+
+Note: The argument `dummy` is not used, it only exists to make expansion of macros less complex.
 
 **SRS_LOG_LASTERROR_01_002: [** If `buffer` is `NULL`, `log_lasterror_fill_property` shall return 512 to indicate how many bytes shall be reserved for the last error string formatted version. **]**
 

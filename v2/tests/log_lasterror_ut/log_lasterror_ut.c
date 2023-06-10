@@ -172,7 +172,7 @@ static void log_lasterror_fill_property_with_NULL_returns_needed_buffer_size(voi
     setup_mocks();
 
     // act
-    int result = log_lasterror_fill_property(NULL);
+    int result = log_lasterror_fill_property(NULL, 0);
 
     // assert
     POOR_MANS_ASSERT(result == 512);
@@ -198,7 +198,7 @@ static void log_lasterror_fill_property_with_non_NULL_formats_last_error_995(voi
     expected_calls[1].FormatMessageA_no_newline_call.buffer_payload = TEST_FORMATTED_LASTERROR_995;
 
     // act
-    int result = log_lasterror_fill_property(buffer);
+    int result = log_lasterror_fill_property(buffer, 0);
 
     // assert
     POOR_MANS_ASSERT(result == 512);
@@ -232,7 +232,7 @@ static void log_lasterror_fill_property_with_non_NULL_formats_last_error_42(void
     expected_calls[1].FormatMessageA_no_newline_call.buffer_payload = TEST_FORMATTED_LASTERROR_42;
 
     // act
-    int result = log_lasterror_fill_property(buffer);
+    int result = log_lasterror_fill_property(buffer, 0);
 
     // assert
     POOR_MANS_ASSERT(result == 512);
@@ -264,7 +264,7 @@ static void when_FormatMessageA_fails_log_lasterror_fill_property_places_a_defau
     expected_calls[1].FormatMessageA_no_newline_call.buffer_payload = TEST_FORMATTED_LASTERROR_995;
 
     // act
-    int result = log_lasterror_fill_property(buffer);
+    int result = log_lasterror_fill_property(buffer, 0);
 
     // assert
     POOR_MANS_ASSERT(result == 512);

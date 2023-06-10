@@ -72,7 +72,7 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
 #define EXPAND_DEFINE_PROPERTY_AS_PARAMETER_LOG_CONTEXT_PROPERTY(property_type, property_name, field_value) \
     , int property_name
 
-#define EXPAND_DEFINE_PROPERTY_AS_PARAMETER_LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function) \
+#define EXPAND_DEFINE_PROPERTY_AS_PARAMETER_LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function, ...) \
     , int property_name
 
 #define DEFINE_PROPERTY_AS_PARAMETER(field_desc) \
@@ -92,7 +92,7 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
 
 #define EXPAND_DEFINE_CONTEXT_NAME_AS_PARAMETER_LOG_CONTEXT_PROPERTY(property_type, property_name, field_value) \
 
-#define EXPAND_DEFINE_CONTEXT_NAME_AS_PARAMETER_LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function) \
+#define EXPAND_DEFINE_CONTEXT_NAME_AS_PARAMETER_LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function, ...) \
 
 #define DEFINE_CONTEXT_NAME_AS_PARAMETER(field_desc) \
     MU_C2(EXPAND_DEFINE_CONTEXT_NAME_AS_PARAMETER_, field_desc)
@@ -135,13 +135,13 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
     data_pos += sizeof(property_type); \
     property_value_pair++; \
 
-#define EXPAND_SETUP_PROPERTY_PAIR_LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function) \
+#define EXPAND_SETUP_PROPERTY_PAIR_LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function, ...) \
     /* Codes_SRS_LOG_CONTEXT_01_027: [ LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION shall expand to code allocating a property/value pair entry with the type property_type and the name property_name. ]*/ \
     property_value_pair->value = data_pos; \
     property_value_pair->name = MU_TOSTRING(property_name); \
     property_value_pair->type = &property_type##_log_context_property_type; \
     /* Codes_SRS_LOG_CONTEXT_01_029: [ LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION shall expand to code filling the property value by calling value_function. ]*/ \
-    data_pos += value_function((void*)data_pos); \
+    data_pos += value_function((void*)data_pos, __VA_ARGS__); \
     property_value_pair++; \
 
 #define SETUP_PROPERTY_PAIR(field_desc) \
@@ -159,7 +159,7 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
 #define EXPAND_COUNT_PROPERTY_LOG_CONTEXT_PROPERTY(property_type, property_name, field_value) \
     + 1
 
-#define EXPAND_COUNT_PROPERTY_LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function) \
+#define EXPAND_COUNT_PROPERTY_LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function, ...) \
     + 1
 
 #define COUNT_PROPERTY(field_desc) \
@@ -178,9 +178,9 @@ static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_C
 #define EXPAND_COUNT_DATA_BYTES_LOG_CONTEXT_PROPERTY(property_type, property_name, field_value) \
     + property_type##_log_context_property_type_get_init_data_size()
 
-#define EXPAND_COUNT_DATA_BYTES_LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function) \
+#define EXPAND_COUNT_DATA_BYTES_LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function, ...) \
     /* Codes_SRS_LOG_CONTEXT_01_028: [ LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION shall expand to code that calls value_function with NULL in order to determine how much memory shall be reserved for the property. ] */ \
-    + value_function(NULL)
+    + value_function(NULL, __VA_ARGS__)
 
 #define COUNT_DATA_BYTES(field_desc) \
     MU_C2(EXPAND_COUNT_DATA_BYTES_, field_desc)
