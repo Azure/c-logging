@@ -37,28 +37,10 @@ int log_lasterror_fill_property(void* buffer)
         }
         else
         {
-            /* Codes_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_lasterror_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
-            char* where_is_last_char = (char*)buffer + chars_written - 1;
-            while (where_is_last_char >= (char*)buffer)
-            {
-                if (
-                    (*where_is_last_char != '\r') &&
-                    (*where_is_last_char != '\n')
-                    )
-                {
-                    break;
-                }
-
-                where_is_last_char--;
-            }
-
-            // get the next character, as we go backwards by design of the loop one extra character
-            where_is_last_char++;
-            *where_is_last_char = '\0';
-
-            /* Codes_SRS_LOG_LASTERROR_01_007: [ log_lasterror_fill_property shall return 512. ] */
+            // return
         }
     }
 
+    /* Codes_SRS_LOG_LASTERROR_01_007: [ log_lasterror_fill_property shall return 512. ] */
     return MESSAGE_BUFFER_SIZE;
 }
