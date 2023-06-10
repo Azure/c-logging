@@ -19,11 +19,9 @@ int log_hresult_fill_property(void* buffer, ...);
 
 `log_hresult_fill_property` fills a property buffer with a formatted string for an `HRESULT` value. There is no check on the size of the buffer (it is by convention that the buffer has 512 bytes in size).
 
-If `buffer` is `NULL`, `log_hresult_fill_property` shall return 512 to indicate how many bytes shall be reserved for the `HRESULT` string formatted version.
+**SRS_LOG_HRESULT_01_001: [** If `buffer` is `NULL`, `log_hresult_fill_property` shall return 512 to indicate how many bytes shall be reserved for the `HRESULT` string formatted version. **]**
 
-Otherwise, `log_hresult_fill_property` shall use the first argument from `...` as having `HRESULT` type.
-
-`log_hresult_fill_property` shall call `FormatMessageA` with `FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS`, the `HRESULT` value, 0 as language Id, `buffer` as buffer to place the output and 512 as buffer size.
+**SRS_LOG_HRESULT_01_002: [** `log_hresult_fill_property` shall call `FormatMessageA` with `FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS`, `hresult`, 0 as language Id, `buffer` as buffer to place the output and 512 as buffer size. **]**
 
 If `FormatMessageA` returns 0, `log_hresult_fill_property` attempt to look up the formatted string from the loaded modules:
 
@@ -39,7 +37,7 @@ If `FormatMessageA` returns 0, `log_hresult_fill_property` attempt to look up th
 
 If `EnumProcessModules` or other APIs fail, `log_hresult_fill_property` shall place in buffer a string indicating what failed, the last error and `unknown HRESULT 0x%x`, where %x is the `HRESULT value`.
 
-`log_lasterror_fill_property` shall return 512.
+**SRS_LOG_HRESULT_01_003: [** `log_lasterror_fill_property` shall return 512. **]**
 
 ## LOG_HRESULT
 

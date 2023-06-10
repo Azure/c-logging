@@ -15,15 +15,14 @@
 
 #include "c_logging/log_context.h"
 
-#include "c_logging/log_hresult.h"
+#include "c_logging/log_lasterror.h"
 
 // defines how many mock calls we can have
 #define MAX_MOCK_CALL_COUNT (128)
 
 #define MOCK_CALL_TYPE_VALUES \
     MOCK_CALL_TYPE_GetLastError, \
-    MOCK_CALL_TYPE_FormatMessageA, \
-    MOCK_CALL_TYPE_snprintf \
+    MOCK_CALL_TYPE_FormatMessageA \
 
 MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
 
@@ -49,13 +48,6 @@ typedef struct FormatMessageA_CALL_TAG
     const char* buffer_payload;
 } FormatMessageA_CALL;
 
-typedef struct snprintf_CALL_TAG
-{
-    bool override_result;
-    int call_result;
-    const char* captured_format_arg;
-} snprintf_CALL;
-
 typedef struct MOCK_CALL_TAG
 {
     MOCK_CALL_TYPE mock_call_type;
@@ -63,7 +55,6 @@ typedef struct MOCK_CALL_TAG
     {
         GetLastError_CALL GetLastError_call;
         FormatMessageA_CALL FormatMessageA_call;
-        snprintf_CALL snprintf_call;
     };
 } MOCK_CALL;
 
@@ -72,11 +63,13 @@ static size_t expected_call_count;
 static size_t actual_call_count;
 static bool actual_and_expected_match;
 
-const char TEST_FORMATTED_HRESULT_S_OK_with_newlines[] = "A dummy S_OK\r\n";
-const char TEST_FORMATTED_HRESULT_S_OK[] = "A dummy S_OK";
+const char TEST_FORMATTED_LASTERROR_995_with_newlines[] = "A dummy 995\r\n\r\n";
+const char TEST_FORMATTED_LASTERROR_995[] = "A dummy 995";
 
-const char TEST_FORMATTED_E_FAIL_with_newlines[] = "A dummy E_FAIL\r\n";
-const char TEST_FORMATTED_E_FAIL[] = "A dummy E_FAIL";
+const char TEST_FORMATTED_LASTERROR_42_with_newlines[] = "A dummy 42\r\n\r\n";
+const char TEST_FORMATTED_LASTERROR_42[] = "A dummy 42";
+
+const char TEST_FAILURE_STRING[] = "failure in FormatMessageA";
 
 #define POOR_MANS_ASSERT(cond) \
     if (!(cond)) \
@@ -155,40 +148,6 @@ DWORD mock_FormatMessageA(DWORD dwFlags, LPCVOID lpSource, DWORD dwMessageId, DW
     return result;
 }
 
-int mock_snprintf(char* s, size_t n, const char* format, ...)
-{
-    int result;
-
-    if ((actual_call_count == expected_call_count) ||
-        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_snprintf))
-    {
-        actual_and_expected_match = false;
-        return -1;
-    }
-    else
-    {
-        if (expected_calls[actual_call_count].snprintf_call.override_result)
-        {
-            result = expected_calls[actual_call_count].snprintf_call.call_result;
-        }
-        else
-        {
-            va_list args;
-            va_start(args, format);
-
-            expected_calls[actual_call_count].snprintf_call.captured_format_arg = format;
-
-            result = vsnprintf(s, n, format, args);
-
-            va_end(args);
-        }
-
-        actual_call_count++;
-    }
-
-    return result;
-}
-
 static void setup_GetLastError_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_GetLastError;
@@ -203,23 +162,16 @@ static void setup_FormatMessageA_call(void)
     expected_call_count++;
 }
 
-static void setup_snprintf_call(void)
-{
-    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_snprintf;
-    expected_calls[expected_call_count].snprintf_call.override_result = false;
-    expected_call_count++;
-}
+/* log_lasterror_fill_property */
 
-/* log_hresult_fill_property */
-
-/* Tests_SRS_LOG_HRESULT_01_001: [ If buffer is NULL, log_hresult_fill_property shall return 512 to indicate how many bytes shall be reserved for the HRESULT string formatted version. ] */
-static void log_hresult_fill_property_with_NULL_returns_needed_buffer_size(void)
+/* Tests_SRS_LOG_LASTERROR_01_002: [ If buffer is NULL, log_lasterror_fill_property shall return 512 to indicate how many bytes shall be reserved for the last error string formatted version. ] */
+static void log_lasterror_fill_property_with_NULL_returns_needed_buffer_size(void)
 {
     // arrange
     setup_mocks();
 
     // act
-    int result = log_hresult_fill_property(NULL, S_OK);
+    int result = log_lasterror_fill_property(NULL);
 
     // assert
     POOR_MANS_ASSERT(result == 512);
@@ -227,39 +179,11 @@ static void log_hresult_fill_property_with_NULL_returns_needed_buffer_size(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_HRESULT_01_002: [ log_hresult_fill_property shall call FormatMessageA with FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, hresult, 0 as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
-/* Tests_SRS_LOG_HRESULT_01_003: [ log_lasterror_fill_property shall return 512. ] */
-static void log_hresult_fill_property_with_non_NULL_formats_S_OK(void)
-{
-    // arrange
-    char buffer[512];
-
-    setup_mocks();
-    setup_FormatMessageA_call();
-    expected_calls[0].FormatMessageA_call.override_result = true;
-    expected_calls[0].FormatMessageA_call.call_result = sizeof(TEST_FORMATTED_HRESULT_S_OK_with_newlines) - 1;
-    expected_calls[0].FormatMessageA_call.buffer_payload = TEST_FORMATTED_HRESULT_S_OK;
-
-    // act
-    int result = log_hresult_fill_property(buffer, S_OK);
-
-    // assert
-    POOR_MANS_ASSERT(result == 512);
-    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_lpSource == NULL);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwMessageId == 995);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwLanguageId == MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT));
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_lpBuffer == buffer);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_nSize == 512);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_Arguments == NULL);
-    POOR_MANS_ASSERT(strcmp(buffer, TEST_FORMATTED_HRESULT_S_OK) == 0);
-}
-
-/* Tests_SRS_LOG_HRESULT_01_002: [ log_hresult_fill_property shall call FormatMessageA with FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, hresult, 0 as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
-/* Tests_SRS_LOG_HRESULT_01_003: [ log_lasterror_fill_property shall return 512. ] */
-static void log_hresult_fill_property_with_non_NULL_formats_E_FAIL(void)
+/* Tests_SRS_LOG_LASTERROR_01_003: [ Otherwise, log_lasterror_fill_property shall call GetLastError to obtain the last error information. ] */
+/* Tests_SRS_LOG_LASTERROR_01_004: [ log_lasterror_fill_property shall call FormatMessageA with FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, the last error value, LANG_NEUTRAL as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
+/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_lasterror_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
+/* Tests_SRS_LOG_LASTERROR_01_007: [ log_lasterror_fill_property shall return 512. ] */
+static void log_lasterror_fill_property_with_non_NULL_formats_last_error_995(void)
 {
     // arrange
     char buffer[512];
@@ -270,11 +194,11 @@ static void log_hresult_fill_property_with_non_NULL_formats_E_FAIL(void)
     expected_calls[0].GetLastError_call.override_result = true;
     expected_calls[0].GetLastError_call.call_result = 995;
     expected_calls[1].FormatMessageA_call.override_result = true;
-    expected_calls[1].FormatMessageA_call.call_result = sizeof(TEST_FORMATTED_E_FAIL_with_newlines) - 1;
-    expected_calls[1].FormatMessageA_call.buffer_payload = TEST_FORMATTED_E_FAIL;
+    expected_calls[1].FormatMessageA_call.call_result = sizeof(TEST_FORMATTED_LASTERROR_995_with_newlines) - 1;
+    expected_calls[1].FormatMessageA_call.buffer_payload = TEST_FORMATTED_LASTERROR_995_with_newlines;
 
     // act
-    int result = log_hresult_fill_property(buffer, E_FAIL);
+    int result = log_lasterror_fill_property(buffer);
 
     // assert
     POOR_MANS_ASSERT(result == 512);
@@ -287,10 +211,44 @@ static void log_hresult_fill_property_with_non_NULL_formats_E_FAIL(void)
     POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_lpBuffer == buffer);
     POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_nSize == 512);
     POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_Arguments == NULL);
-    POOR_MANS_ASSERT(strcmp(buffer, TEST_FORMATTED_E_FAIL) == 0);
+    POOR_MANS_ASSERT(strcmp(buffer, TEST_FORMATTED_LASTERROR_995) == 0);
 }
 
-#if 0
+/* Tests_SRS_LOG_LASTERROR_01_003: [ Otherwise, log_lasterror_fill_property shall call GetLastError to obtain the last error information. ] */
+/* Tests_SRS_LOG_LASTERROR_01_004: [ log_lasterror_fill_property shall call FormatMessageA with FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, the last error value, LANG_NEUTRAL as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
+/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_lasterror_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
+/* Tests_SRS_LOG_LASTERROR_01_007: [ log_lasterror_fill_property shall return 512. ] */
+static void log_lasterror_fill_property_with_non_NULL_formats_last_error_42(void)
+{
+    // arrange
+    char buffer[512];
+
+    setup_mocks();
+    setup_GetLastError_call();
+    setup_FormatMessageA_call();
+    expected_calls[0].GetLastError_call.override_result = true;
+    expected_calls[0].GetLastError_call.call_result = 995;
+    expected_calls[1].FormatMessageA_call.override_result = true;
+    expected_calls[1].FormatMessageA_call.call_result = sizeof(TEST_FORMATTED_LASTERROR_42_with_newlines) - 1;
+    expected_calls[1].FormatMessageA_call.buffer_payload = TEST_FORMATTED_LASTERROR_42_with_newlines;
+
+    // act
+    int result = log_lasterror_fill_property(buffer);
+
+    // assert
+    POOR_MANS_ASSERT(result == 512);
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
+    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_lpSource == NULL);
+    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwMessageId == 995);
+    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwLanguageId == MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT));
+    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_Arguments == NULL);
+    POOR_MANS_ASSERT(strcmp(buffer, TEST_FORMATTED_LASTERROR_42) == 0);
+}
+
 static void test_with_crlf(const char* returned_formatted_string, const char* expected_string)
 {
     // arrange
@@ -306,7 +264,7 @@ static void test_with_crlf(const char* returned_formatted_string, const char* ex
     expected_calls[1].FormatMessageA_call.buffer_payload = returned_formatted_string;
 
     // act
-    int result = log_hresult_fill_property(buffer);
+    int result = log_lasterror_fill_property(buffer);
 
     // assert
     POOR_MANS_ASSERT(result == 512);
@@ -322,50 +280,50 @@ static void test_with_crlf(const char* returned_formatted_string, const char* ex
     POOR_MANS_ASSERT(strcmp(buffer, expected_string) == 0);
 }
 
-/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_hresult_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
-static void log_hresult_fill_property_with_non_NULL_formats_last_error_42_one_newline(void)
+/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_lasterror_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
+static void log_lasterror_fill_property_with_non_NULL_formats_last_error_42_one_newline(void)
 {
     test_with_crlf("A dummy LE\n", "A dummy LE");
 }
 
-/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_hresult_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
-static void log_hresult_fill_property_with_non_NULL_formats_last_error_42_2_newlines(void)
+/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_lasterror_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
+static void log_lasterror_fill_property_with_non_NULL_formats_last_error_42_2_newlines(void)
 {
     test_with_crlf("A dummy LE\n\n", "A dummy LE");
 }
 
-/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_hresult_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
-static void log_hresult_fill_property_with_non_NULL_formats_last_error_42_1_CR(void)
+/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_lasterror_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
+static void log_lasterror_fill_property_with_non_NULL_formats_last_error_42_1_CR(void)
 {
     test_with_crlf("A dummy LE\r", "A dummy LE");
 }
 
-/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_hresult_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
-static void log_hresult_fill_property_with_non_NULL_formats_last_error_42_2_CR(void)
+/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_lasterror_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
+static void log_lasterror_fill_property_with_non_NULL_formats_last_error_42_2_CR(void)
 {
     test_with_crlf("A dummy LE\r\r", "A dummy LE");
 }
 
-/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_hresult_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
-static void log_hresult_fill_property_with_non_NULL_formats_last_error_42_2_pairs(void)
+/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_lasterror_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
+static void log_lasterror_fill_property_with_non_NULL_formats_last_error_42_2_pairs(void)
 {
     test_with_crlf("A dummy LE\r\n\r\n", "A dummy LE");
 }
 
-/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_hresult_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
-static void log_hresult_fill_property_with_non_NULL_formats_last_error_42_2_pairs_reverse(void)
+/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_lasterror_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
+static void log_lasterror_fill_property_with_non_NULL_formats_last_error_42_2_pairs_reverse(void)
 {
     test_with_crlf("A dummy LE\n\r\n\r", "A dummy LE");
 }
 
-/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_hresult_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
-static void log_hresult_fill_property_with_non_NULL_formats_last_error_42_only_end_crlf_removed(void)
+/* Tests_SRS_LOG_LASTERROR_01_006: [ Otherwise, log_lasterror_fill_property shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA. ] */
+static void log_lasterror_fill_property_with_non_NULL_formats_last_error_42_only_end_crlf_removed(void)
 {
     test_with_crlf("A dummy LE\n\r\n\rx", "A dummy LE\n\r\n\rx");
 }
 
-/* Tests_SRS_LOG_LASTERROR_01_005: [ If FormatMessageA returns 0, log_hresult_fill_property shall copy in buffer the string failure in FormatMessageA and return 512. ] */
-static void when_FormatMessageA_fails_log_hresult_fill_property_places_a_default_string_in_the_buffer(void)
+/* Tests_SRS_LOG_LASTERROR_01_005: [ If FormatMessageA returns 0, log_lasterror_fill_property shall copy in buffer the string failure in FormatMessageA and return 512. ] */
+static void when_FormatMessageA_fails_log_lasterror_fill_property_places_a_default_string_in_the_buffer(void)
 {
     // arrange
     char buffer[512];
@@ -380,7 +338,7 @@ static void when_FormatMessageA_fails_log_hresult_fill_property_places_a_default
     expected_calls[1].FormatMessageA_call.buffer_payload = TEST_FORMATTED_LASTERROR_995_with_newlines;
 
     // act
-    int result = log_hresult_fill_property(buffer);
+    int result = log_lasterror_fill_property(buffer);
 
     // assert
     POOR_MANS_ASSERT(result == 512);
@@ -398,7 +356,7 @@ static void when_FormatMessageA_fails_log_hresult_fill_property_places_a_default
 
 /* LOGGER_LOG */
 
-/* Tests_SRS_LOG_LASTERROR_01_001: [ LOG_LASTERROR shall expand to a LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION with name LastError, type ascii_char_ptr and value function call being log_hresult_fill_property. ] */
+/* Tests_SRS_LOG_LASTERROR_01_001: [ LOG_LASTERROR shall expand to a LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION with name LastError, type ascii_char_ptr and value function call being log_lasterror_fill_property. ] */
 static void LOG_LASTERROR_emits_the_underlying_property(void)
 {
     // arrange
@@ -428,7 +386,6 @@ static void LOG_LASTERROR_emits_the_underlying_property(void)
     POOR_MANS_ASSERT(properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr);
     POOR_MANS_ASSERT(strcmp(properties[1].value, TEST_FORMATTED_LASTERROR_995) == 0);
 }
-#endif
 
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
@@ -438,21 +395,21 @@ int main(void)
     _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 #endif
 
-    log_hresult_fill_property_with_NULL_returns_needed_buffer_size();
-    log_hresult_fill_property_with_non_NULL_formats_S_OK();
-    log_hresult_fill_property_with_non_NULL_formats_E_FAIL();
-    
-    //log_hresult_fill_property_with_non_NULL_formats_last_error_42_one_newline();
-    //log_hresult_fill_property_with_non_NULL_formats_last_error_42_2_newlines();
-    //log_hresult_fill_property_with_non_NULL_formats_last_error_42_1_CR();
-    //log_hresult_fill_property_with_non_NULL_formats_last_error_42_2_CR();
-    //log_hresult_fill_property_with_non_NULL_formats_last_error_42_2_pairs();
-    //log_hresult_fill_property_with_non_NULL_formats_last_error_42_2_pairs_reverse();
-    //log_hresult_fill_property_with_non_NULL_formats_last_error_42_only_end_crlf_removed();
-    //
-    //when_FormatMessageA_fails_log_hresult_fill_property_places_a_default_string_in_the_buffer();
-    //
-    //LOG_LASTERROR_emits_the_underlying_property();
+    log_lasterror_fill_property_with_NULL_returns_needed_buffer_size();
+    log_lasterror_fill_property_with_non_NULL_formats_last_error_995();
+    log_lasterror_fill_property_with_non_NULL_formats_last_error_42();
+
+    log_lasterror_fill_property_with_non_NULL_formats_last_error_42_one_newline();
+    log_lasterror_fill_property_with_non_NULL_formats_last_error_42_2_newlines();
+    log_lasterror_fill_property_with_non_NULL_formats_last_error_42_1_CR();
+    log_lasterror_fill_property_with_non_NULL_formats_last_error_42_2_CR();
+    log_lasterror_fill_property_with_non_NULL_formats_last_error_42_2_pairs();
+    log_lasterror_fill_property_with_non_NULL_formats_last_error_42_2_pairs_reverse();
+    log_lasterror_fill_property_with_non_NULL_formats_last_error_42_only_end_crlf_removed();
+
+    when_FormatMessageA_fails_log_lasterror_fill_property_places_a_default_string_in_the_buffer();
+
+    LOG_LASTERROR_emits_the_underlying_property();
 
     return 0;
 }

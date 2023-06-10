@@ -15,64 +15,68 @@
 
 int log_hresult_fill_property(void* buffer, HRESULT hresult)
 {
-    /*Codes_SRS_HRESULT_TO_STRING_02_002: [ log_hresult_fill_property shall call FormatMessageA with dwFlags set to FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS. ]*/
-    /*see if the "system" can provide the code*/
-    if (FormatMessageA(
-        FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL,
-        hresult,
-        0, /*if you pass in zero, FormatMessage looks for a message for LANGIDs in the following order...*/
-        buffer, MESSAGE_BUFFER_SIZE, NULL) != 0)
+    if (buffer == NULL)
     {
-        /*Codes_SRS_HRESULT_TO_STRING_02_003: [ If FormatMessageA succeeds then hresult_to_string shall return the value as given by FormatMessageA. ]*/
-        /*success, SYSTEM was able to find the message*/
-        /*return as is*/
+        /* Codes_SRS_LOG_HRESULT_01_001: [ If buffer is NULL, log_hresult_fill_property shall return 512 to indicate how many bytes shall be reserved for the HRESULT string formatted version. ] */
     }
     else
     {
-        HANDLE currentProcess = GetCurrentProcess();
-        /*apparently this cannot fail and returns somewhat of a "pseudo handle"*/
-
-        HMODULE hModules[N_MAX_MODULES];
-        DWORD enumModulesUsedBytes;
-        if (EnumProcessModules(currentProcess, hModules, sizeof(hModules), &enumModulesUsedBytes) == 0)
+        /*see if the "system" can provide the code*/
+        /* Codes_SRS_LOG_HRESULT_01_002: [ log_hresult_fill_property shall call FormatMessageA with FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, hresult, 0 as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
+        if (FormatMessageA(
+            FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            hresult,
+            0, /*if you pass in zero, FormatMessage looks for a message for LANGIDs in the following order...*/
+            buffer, MESSAGE_BUFFER_SIZE, NULL) != 0)
         {
-            /*Codes_SRS_HRESULT_TO_STRING_02_008: [ If there are any failures then hresult_to_string shall return NULL. ]*/
-            (void)snprintf(buffer, MESSAGE_BUFFER_SIZE, "failure in EnumProcessModules, LE=%lu", GetLastError());
+            /*success, SYSTEM was able to find the message*/
+            /*return as is*/
         }
         else
         {
-            size_t iModule;
-            for (iModule = 0; iModule < (enumModulesUsedBytes / sizeof(HMODULE)); iModule++)
-            {
-                /*see if this module */
-                if (FormatMessageA(
-                    FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS,
-                    hModules[iModule],
-                    hresult,
-                    0,
-                    buffer, MESSAGE_BUFFER_SIZE, NULL) != 0)
-                {
-                    /*Codes_SRS_HRESULT_TO_STRING_02_006: [ If a module can decode hresult then that value shall be returned. */
-                    break;
-                }
-                else
-                {
-                    /*this module does not have it...*/
-                }
-            }
+            HANDLE currentProcess = GetCurrentProcess();
+            /*apparently this cannot fail and returns somewhat of a "pseudo handle"*/
 
-            /*Codes_SRS_HRESULT_TO_STRING_02_007: [ Otherwise NULL shall be returned. ]*/
-            if (iModule == (enumModulesUsedBytes / sizeof(HMODULE)))
+            HMODULE module_handles[N_MAX_MODULES];
+            DWORD enumModulesUsedBytes;
+            if (EnumProcessModules(currentProcess, module_handles, sizeof(module_handles), &enumModulesUsedBytes) == 0)
             {
-                (void)snprintf(buffer, MESSAGE_BUFFER_SIZE, "unknown HRESULT 0x%x", hresult);
+                (void)snprintf(buffer, MESSAGE_BUFFER_SIZE, "failure in EnumProcessModules, LE=%lu", GetLastError());
             }
             else
             {
-                // all good
+                size_t iModule;
+                for (iModule = 0; iModule < (enumModulesUsedBytes / sizeof(HMODULE)); iModule++)
+                {
+                    /*see if this module */
+                    if (FormatMessageA(
+                        FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS,
+                        module_handles[iModule],
+                        hresult,
+                        0,
+                        buffer, MESSAGE_BUFFER_SIZE, NULL) != 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        /*this module does not have it...*/
+                    }
+                }
+
+                if (iModule == (enumModulesUsedBytes / sizeof(HMODULE)))
+                {
+                    (void)snprintf(buffer, MESSAGE_BUFFER_SIZE, "unknown HRESULT 0x%x", hresult);
+                }
+                else
+                {
+                    // all good
+                }
             }
         }
     }
 
+    /* Codes_SRS_LOG_HRESULT_01_003: [ log_lasterror_fill_property shall return 512. ] */
     return MESSAGE_BUFFER_SIZE;
 }

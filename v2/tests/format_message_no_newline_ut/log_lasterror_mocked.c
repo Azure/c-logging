@@ -9,4 +9,4 @@ DWORD mock_FormatMessageA(DWORD dwFlags, LPCVOID lpSource, DWORD dwMessageId, DW
 #define GetLastError mock_GetLastError
 #define FormatMessageA mock_FormatMessageA
 
-#include "log_hresult.c"
+#include "log_lasterror.c"
