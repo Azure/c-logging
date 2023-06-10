@@ -131,7 +131,10 @@ DWORD mock_FormatMessageA_no_newline(DWORD dwFlags, LPCVOID lpSource, DWORD dwMe
 
         if (expected_calls[actual_call_count].FormatMessageA_no_newline_call.override_result)
         {
-            (void)memcpy(lpBuffer, expected_calls[actual_call_count].FormatMessageA_no_newline_call.buffer_payload, expected_calls[actual_call_count].FormatMessageA_no_newline_call.call_result);
+            if (expected_calls[actual_call_count].FormatMessageA_no_newline_call.buffer_payload != NULL)
+            {
+                (void)memcpy(lpBuffer, expected_calls[actual_call_count].FormatMessageA_no_newline_call.buffer_payload, expected_calls[actual_call_count].FormatMessageA_no_newline_call.call_result + 1);
+            }
             result = expected_calls[actual_call_count].FormatMessageA_no_newline_call.call_result;
         }
         else
@@ -156,6 +159,7 @@ static void setup_FormatMessageA_no_newline_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_FormatMessageA_no_newline;
     expected_calls[expected_call_count].FormatMessageA_no_newline_call.override_result = false;
+    expected_calls[expected_call_count].FormatMessageA_no_newline_call.buffer_payload = NULL;
     expected_call_count++;
 }
 

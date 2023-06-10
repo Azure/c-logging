@@ -72,11 +72,8 @@ static size_t expected_call_count;
 static size_t actual_call_count;
 static bool actual_and_expected_match;
 
-const char TEST_FORMATTED_HRESULT_S_OK_with_newlines[] = "A dummy S_OK\r\n";
 const char TEST_FORMATTED_HRESULT_S_OK[] = "A dummy S_OK";
-
-const char TEST_FORMATTED_E_FAIL_with_newlines[] = "A dummy E_FAIL\r\n";
-const char TEST_FORMATTED_E_FAIL[] = "A dummy E_FAIL";
+const char TEST_FORMATTED_HRESULT_E_FAIL[] = "A dummy E_FAIL";
 
 #define POOR_MANS_ASSERT(cond) \
     if (!(cond)) \
@@ -141,7 +138,10 @@ DWORD mock_FormatMessageA(DWORD dwFlags, LPCVOID lpSource, DWORD dwMessageId, DW
 
         if (expected_calls[actual_call_count].FormatMessageA_call.override_result)
         {
-            (void)memcpy(lpBuffer, expected_calls[actual_call_count].FormatMessageA_call.buffer_payload, expected_calls[actual_call_count].FormatMessageA_call.call_result);
+            if (expected_calls[actual_call_count].FormatMessageA_call.buffer_payload != NULL)
+            {
+                (void)memcpy(lpBuffer, expected_calls[actual_call_count].FormatMessageA_call.buffer_payload, expected_calls[actual_call_count].FormatMessageA_call.call_result + 1);
+            }
             result = expected_calls[actual_call_count].FormatMessageA_call.call_result;
         }
         else
@@ -200,6 +200,7 @@ static void setup_FormatMessageA_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_FormatMessageA;
     expected_calls[expected_call_count].FormatMessageA_call.override_result = false;
+    expected_calls[expected_call_count].FormatMessageA_call.buffer_payload = NULL;
     expected_call_count++;
 }
 
@@ -228,7 +229,6 @@ static void log_hresult_fill_property_with_NULL_returns_needed_buffer_size(void)
 }
 
 /* Tests_SRS_LOG_HRESULT_01_002: [ log_hresult_fill_property shall call FormatMessageA_no_newline with FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, hresult, 0 as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
-/* Tests_SRS_LOG_HRESULT_01_003: [ log_lasterror_fill_property shall return 512. ] */
 static void log_hresult_fill_property_with_non_NULL_formats_S_OK(void)
 {
     // arrange
@@ -237,7 +237,7 @@ static void log_hresult_fill_property_with_non_NULL_formats_S_OK(void)
     setup_mocks();
     setup_FormatMessageA_call();
     expected_calls[0].FormatMessageA_call.override_result = true;
-    expected_calls[0].FormatMessageA_call.call_result = sizeof(TEST_FORMATTED_HRESULT_S_OK_with_newlines) - 1;
+    expected_calls[0].FormatMessageA_call.call_result = sizeof(TEST_FORMATTED_HRESULT_S_OK) - 1;
     expected_calls[0].FormatMessageA_call.buffer_payload = TEST_FORMATTED_HRESULT_S_OK;
 
     // act
@@ -247,31 +247,27 @@ static void log_hresult_fill_property_with_non_NULL_formats_S_OK(void)
     POOR_MANS_ASSERT(result == 512);
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_lpSource == NULL);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwMessageId == 995);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwLanguageId == MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT));
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_lpBuffer == buffer);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_nSize == 512);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_Arguments == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_lpSource == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_dwMessageId == S_OK);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_dwLanguageId == 0);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_Arguments == NULL);
     POOR_MANS_ASSERT(strcmp(buffer, TEST_FORMATTED_HRESULT_S_OK) == 0);
 }
 
 /* Tests_SRS_LOG_HRESULT_01_002: [ log_hresult_fill_property shall call FormatMessageA_no_newline with FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, hresult, 0 as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
-/* Tests_SRS_LOG_HRESULT_01_003: [ log_lasterror_fill_property shall return 512. ] */
 static void log_hresult_fill_property_with_non_NULL_formats_E_FAIL(void)
 {
     // arrange
     char buffer[512];
 
     setup_mocks();
-    setup_GetLastError_call();
     setup_FormatMessageA_call();
-    expected_calls[0].GetLastError_call.override_result = true;
-    expected_calls[0].GetLastError_call.call_result = 995;
-    expected_calls[1].FormatMessageA_call.override_result = true;
-    expected_calls[1].FormatMessageA_call.call_result = sizeof(TEST_FORMATTED_E_FAIL_with_newlines) - 1;
-    expected_calls[1].FormatMessageA_call.buffer_payload = TEST_FORMATTED_E_FAIL;
+    expected_calls[0].FormatMessageA_call.override_result = true;
+    expected_calls[0].FormatMessageA_call.call_result = sizeof(TEST_FORMATTED_HRESULT_E_FAIL) - 1;
+    expected_calls[0].FormatMessageA_call.buffer_payload = TEST_FORMATTED_HRESULT_E_FAIL;
 
     // act
     int result = log_hresult_fill_property(buffer, E_FAIL);
@@ -280,14 +276,14 @@ static void log_hresult_fill_property_with_non_NULL_formats_E_FAIL(void)
     POOR_MANS_ASSERT(result == 512);
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_lpSource == NULL);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwMessageId == 995);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_dwLanguageId == MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT));
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_lpBuffer == buffer);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_nSize == 512);
-    POOR_MANS_ASSERT(expected_calls[1].FormatMessageA_call.captured_Arguments == NULL);
-    POOR_MANS_ASSERT(strcmp(buffer, TEST_FORMATTED_E_FAIL) == 0);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS));
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_lpSource == NULL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_dwMessageId == E_FAIL);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_dwLanguageId == 0);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_lpBuffer == buffer);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_nSize == 512);
+    POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_Arguments == NULL);
+    POOR_MANS_ASSERT(strcmp(buffer, TEST_FORMATTED_HRESULT_E_FAIL) == 0);
 }
 
 #if 0
