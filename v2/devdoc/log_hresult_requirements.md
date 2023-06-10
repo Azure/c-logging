@@ -21,7 +21,7 @@ int log_hresult_fill_property(void* buffer, ...);
 
 **SRS_LOG_HRESULT_01_001: [** If `buffer` is `NULL`, `log_hresult_fill_property` shall return 512 to indicate how many bytes shall be reserved for the `HRESULT` string formatted version. **]**
 
-**SRS_LOG_HRESULT_01_002: [** `log_hresult_fill_property` shall call `FormatMessageA` with `FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS`, `hresult`, 0 as language Id, `buffer` as buffer to place the output and 512 as buffer size. **]**
+**SRS_LOG_HRESULT_01_002: [** `log_hresult_fill_property` shall call `FormatMessageA_no_newline` with `FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS`, `hresult`, 0 as language Id, `buffer` as buffer to place the output and 512 as buffer size. **]**
 
 If `FormatMessageA` returns 0, `log_hresult_fill_property` attempt to look up the formatted string from the loaded modules:
 

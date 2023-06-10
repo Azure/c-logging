@@ -227,7 +227,7 @@ static void log_hresult_fill_property_with_NULL_returns_needed_buffer_size(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_HRESULT_01_002: [ log_hresult_fill_property shall call FormatMessageA with FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, hresult, 0 as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
+/* Tests_SRS_LOG_HRESULT_01_002: [ log_hresult_fill_property shall call FormatMessageA_no_newline with FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, hresult, 0 as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
 /* Tests_SRS_LOG_HRESULT_01_003: [ log_lasterror_fill_property shall return 512. ] */
 static void log_hresult_fill_property_with_non_NULL_formats_S_OK(void)
 {
@@ -257,7 +257,7 @@ static void log_hresult_fill_property_with_non_NULL_formats_S_OK(void)
     POOR_MANS_ASSERT(strcmp(buffer, TEST_FORMATTED_HRESULT_S_OK) == 0);
 }
 
-/* Tests_SRS_LOG_HRESULT_01_002: [ log_hresult_fill_property shall call FormatMessageA with FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, hresult, 0 as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
+/* Tests_SRS_LOG_HRESULT_01_002: [ log_hresult_fill_property shall call FormatMessageA_no_newline with FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, hresult, 0 as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
 /* Tests_SRS_LOG_HRESULT_01_003: [ log_lasterror_fill_property shall return 512. ] */
 static void log_hresult_fill_property_with_non_NULL_formats_E_FAIL(void)
 {

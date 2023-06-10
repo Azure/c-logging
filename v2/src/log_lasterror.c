@@ -7,6 +7,7 @@
 
 #include "windows.h"
 
+#include "c_logging/format_message_no_newline.h"
 #include "c_logging/log_lasterror.h"
 
 static const char FormatMessageA_failure_message[] = "failure in FormatMessageA";
@@ -27,8 +28,8 @@ int log_lasterror_fill_property(void* buffer)
         /* Codes_SRS_LOG_LASTERROR_01_003: [ Otherwise, log_lasterror_fill_property shall call GetLastError to obtain the last error information. ] */
         DWORD last_error = GetLastError();
 
-        /* Codes_SRS_LOG_LASTERROR_01_004: [ log_lasterror_fill_property shall call FormatMessageA with FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, the last error value, LANG_NEUTRAL as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
-        DWORD chars_written = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, last_error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), buffer, MESSAGE_BUFFER_SIZE, NULL);
+        /* Codes_SRS_LOG_LASTERROR_01_004: [ log_lasterror_fill_property shall call FormatMessageA_no_newline with FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, the last error value, LANG_NEUTRAL as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
+        DWORD chars_written = FormatMessageA_no_newline(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, last_error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), buffer, MESSAGE_BUFFER_SIZE, NULL);
         if (chars_written == 0)
         {
             /* Codes_SRS_LOG_LASTERROR_01_005: [ If FormatMessageA returns 0, log_lasterror_fill_property shall copy in buffer the string failure in FormatMessageA and return 512. ] */

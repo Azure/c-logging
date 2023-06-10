@@ -4,9 +4,9 @@
 #include "windows.h"
 
 DWORD mock_GetLastError(void);
-DWORD mock_FormatMessageA(DWORD dwFlags, LPCVOID lpSource, DWORD dwMessageId, DWORD dwLanguageId, LPSTR lpBuffer, DWORD nSize, va_list* Arguments);
+DWORD mock_FormatMessageA_no_newline(DWORD dwFlags, LPCVOID lpSource, DWORD dwMessageId, DWORD dwLanguageId, LPSTR lpBuffer, DWORD nSize, va_list* Arguments);
 
 #define GetLastError mock_GetLastError
-#define FormatMessageA mock_FormatMessageA
+#define FormatMessageA_no_newline mock_FormatMessageA_no_newline
 
 #include "log_lasterror.c"

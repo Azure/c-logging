@@ -22,7 +22,7 @@ int log_hresult_fill_property(void* buffer, HRESULT hresult)
     else
     {
         /*see if the "system" can provide the code*/
-        /* Codes_SRS_LOG_HRESULT_01_002: [ log_hresult_fill_property shall call FormatMessageA with FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, hresult, 0 as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
+        /* Codes_SRS_LOG_HRESULT_01_002: [ log_hresult_fill_property shall call FormatMessageA_no_newline with FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, hresult, 0 as language Id, buffer as buffer to place the output and 512 as buffer size. ] */
         if (FormatMessageA(
             FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
             NULL,
