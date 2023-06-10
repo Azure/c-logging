@@ -181,7 +181,7 @@ static void test_with_crlf(const char* returned_formatted_string, const char* ex
     int result = FormatMessageA_no_newline(TEST_FLAGS_2, TEST_SOURCE_2, TEST_MESSAGE_ID_2, TEST_LANGUAGE_ID_2, buffer, sizeof(buffer), TEST_VA_LIST_2);
 
     // assert
-    POOR_MANS_ASSERT(result == strlen(expected_string));
+    POOR_MANS_ASSERT(result == (int)strlen(expected_string));
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_call.captured_dwFlags == TEST_FLAGS_2);
