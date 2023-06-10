@@ -19,7 +19,6 @@ if(${log_sink_etw})
 endif() #(${log_sink_etw})
 
 set(c_logging_v2_h_files
-    ./inc/c_logging/format_message_no_newline.h
     ./inc/c_logging/logger.h
     ./inc/c_logging/log_context.h
     ./inc/c_logging/log_context_property_type.h
@@ -35,7 +34,6 @@ set(c_logging_v2_h_files
     )
 
 set(c_logging_v2_c_files
-    ./src/format_message_no_newline.c
     ./src/logger.c
     ./src/log_context.c
     ./src/log_context_property_basic_types.c
@@ -49,6 +47,7 @@ set(c_logging_v2_c_files
 if(WIN32)
 set(c_logging_v2_h_files
     ${c_logging_v2_h_files}
+    ./inc/c_logging/format_message_no_newline.h
     ./inc/c_logging/log_sink_etw.h
     ./inc/c_logging/log_lasterror.h
     ./inc/c_logging/log_hresult.h
@@ -56,6 +55,7 @@ set(c_logging_v2_h_files
 
 set(c_logging_v2_c_files
     ${c_logging_v2_c_files}
+    ./src/format_message_no_newline.c
     ./src/log_sink_etw.c
     ./src/log_lasterror.c
     ./src/log_hresult.c
