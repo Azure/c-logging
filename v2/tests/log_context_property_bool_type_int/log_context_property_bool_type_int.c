@@ -11,7 +11,7 @@
 
 #include "c_logging/log_context_property_type.h"
 #include "c_logging/log_context_property_type_if.h"
-#include "c_logging/log_context_property_boolean_type.h"
+#include "c_logging/log_context_property_bool_type.h"
 
 #define TEST_BUFFER_SIZE 1024
 
@@ -36,88 +36,68 @@ static void bool_to_string_with_NULL_value_fails(void)
     POOR_MANS_ASSERT(result < 0);
 }
 
-static void bool_to_string_succeeds(void)
+static void bool_false_to_string_succeeds(void)
 {
     // arrange
     char buffer[TEST_BUFFER_SIZE];
-    bool bool_value = 0;
+    bool bool_value = false;
 
     // act
     int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(bool).to_string(&bool_value, buffer, sizeof(buffer));
 
     // assert
     POOR_MANS_ASSERT(result == 9);
-    POOR_MANS_ASSERT(strcmp(buffer, "false (0)") == 0);
+    char bool_value_buffer[10];
+    (void)snprintf(bool_value_buffer, 10, "%" PRI_BOOL, MU_BOOL_VALUE(bool_value));
+    POOR_MANS_ASSERT(strcmp(buffer, bool_value_buffer) == 0);
 }
 
-static void bool_to_string_INT32_MAX_succeeds(void)
+static void bool_true_to_string_succeeds(void)
 {
     // arrange
     char buffer[TEST_BUFFER_SIZE];
-    bool bool_value = INT32_MAX;
+    bool bool_value = true;
 
     // act
     int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(bool).to_string(&bool_value, buffer, sizeof(buffer));
 
     // assert
     POOR_MANS_ASSERT(result == 8);
-    POOR_MANS_ASSERT(strcmp(buffer, "true (1)") == 0);
+    char bool_value_buffer[9];
+    (void)snprintf(bool_value_buffer, 9, "%" PRI_BOOL, MU_BOOL_VALUE(bool_value));
+    POOR_MANS_ASSERT(strcmp(buffer, bool_value_buffer) == 0);
 }
 
-static void bool_to_string_with_truncation_succeeds(void)
+static void bool_true_to_string_with_just_enough_big_buffer_succeeds(void)
 {
     // arrange
     char buffer[2];
-    bool bool_value = 42;
+    bool bool_value = true;
 
     // act
     int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(bool).to_string(&bool_value, buffer, sizeof(buffer));
 
     // assert
     POOR_MANS_ASSERT(result == 8);
-    POOR_MANS_ASSERT(strcmp(buffer, "t") == 0);
+    char bool_value_buffer[2];
+    (void)snprintf(bool_value_buffer, 2, "%" PRI_BOOL, MU_BOOL_VALUE(bool_value));
+    POOR_MANS_ASSERT(strcmp(buffer, bool_value_buffer) == 0);
 }
 
-static void bool_to_string_with_truncation_minus_1_succeeds(void)
+static void bool_false_to_string_with_just_enough_big_buffer_succeeds(void)
 {
     // arrange
     char buffer[2];
-    bool bool_value = -1;
+    bool bool_value = false;
 
     // act
     int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(bool).to_string(&bool_value, buffer, sizeof(buffer));
 
     // assert
-    POOR_MANS_ASSERT(result == 8);
-    POOR_MANS_ASSERT(strcmp(buffer, "t") == 0);
-}
-
-static void bool_to_string_with_negative_value_succeeds(void)
-{
-    // arrange
-    char buffer[TEST_BUFFER_SIZE];
-    bool bool_value = -1;
-
-    // act
-    int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(bool).to_string(&bool_value, buffer, sizeof(buffer));
-
-    // assert
-    POOR_MANS_ASSERT(result == 8);
-    POOR_MANS_ASSERT(strcmp(buffer, "true (1)") == 0);
-}
-
-static void bool_to_string_with_just_enough_big_buffer_succeeds(void)
-{
-    // arrange
-    char buffer[2];
-    bool bool_value = 1;
-
-    // act
-    int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(bool).to_string(&bool_value, buffer, sizeof(buffer));
-
-    // assert
-    POOR_MANS_ASSERT(result == 8);
-    POOR_MANS_ASSERT(strcmp(buffer, "t") == 0);
+    POOR_MANS_ASSERT(result == 9);
+    char bool_value_buffer[2];
+    (void)snprintf(bool_value_buffer, 2, "%" PRI_BOOL, MU_BOOL_VALUE(bool_value));
+    POOR_MANS_ASSERT(strcmp(buffer, bool_value_buffer) == 0);
 }
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(bool).copy */
@@ -125,7 +105,7 @@ static void bool_to_string_with_just_enough_big_buffer_succeeds(void)
 static void bool_copy_called_with_NULL_dst_value_fails(void)
 {
     // arrange
-    bool src = 42;
+    bool src = true;
 
     // act
     int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(bool).copy(NULL, &src);
@@ -146,40 +126,52 @@ static void bool_copy_called_with_NULL_src_value_fails(void)
     POOR_MANS_ASSERT(result != 0);
 }
 
-static void bool_copy_succeeds(void)
+static void bool_copy_true_succeeds(void)
 {
     // arrange
-    bool src = 42;
-    bool dst = 43;
+    bool src = true;
+    bool dst = false;
 
     // act
     int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(bool).copy(&dst, &src);
 
     // assert
     POOR_MANS_ASSERT(result == 0);
-    POOR_MANS_ASSERT(dst == 1);
+    POOR_MANS_ASSERT(dst == true);
 }
 
-static void bool_copy_succeeds_2(void)
+static void bool_copy_false_succeeds(void)
 {
     // arrange
-    bool src = INT32_MAX;
-    bool dst = 43;
+    bool src = false;
+    bool dst = true;
 
     // act
     int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(bool).copy(&dst, &src);
 
     // assert
     POOR_MANS_ASSERT(result == 0);
-    POOR_MANS_ASSERT(dst == 1);
+    POOR_MANS_ASSERT(dst == false);
 }
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(bool).free */
 
-static void bool_free_returns(void)
+static void bool_free_true_returns(void)
 {
     // arrange
-    bool value = INT32_MAX;
+    bool value = true;
+
+    // act
+    LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(bool).free(&value);
+
+    // assert
+    // no explicit assert, no crash expected
+}
+
+static void bool_free_false_returns(void)
+{
+    // arrange
+    bool value = false;
 
     // act
     LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(bool).free(&value);
@@ -208,36 +200,36 @@ static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(bool), _with_NULL_dst_value_fai
     // arrange
 
     // act
-    int result = LOG_CONTEXT_PROPERTY_TYPE_INIT(bool)(NULL, 42);
+    int result = LOG_CONTEXT_PROPERTY_TYPE_INIT(bool)(NULL, true);
 
     // assert
     POOR_MANS_ASSERT(result != 0);
 }
 
-static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(bool), _with_bool_min_value_succeeds)(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(bool), _with_bool_true_succeeds)(void)
 {
     // arrange
-    bool dst = 43;
+    bool dst = false;
 
     // act
-    int result = LOG_CONTEXT_PROPERTY_TYPE_INIT(bool)(&dst, INT32_MIN);
+    int result = LOG_CONTEXT_PROPERTY_TYPE_INIT(bool)(&dst, true);
 
     // assert
     POOR_MANS_ASSERT(result == 0);
-    POOR_MANS_ASSERT(dst == 1);
+    POOR_MANS_ASSERT(dst == true);
 }
 
-static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(bool), _with_bool_max_value_succeeds)(void)
+static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(bool), _with_bool_false_succeeds)(void)
 {
     // arrange
-    bool dst = 43;
+    bool dst = true;
 
     // act
-    int result = LOG_CONTEXT_PROPERTY_TYPE_INIT(bool)(&dst, INT32_MAX);
+    int result = LOG_CONTEXT_PROPERTY_TYPE_INIT(bool)(&dst, false);
 
     // assert
     POOR_MANS_ASSERT(result == 0);
-    POOR_MANS_ASSERT(dst == 1);
+    POOR_MANS_ASSERT(dst == false);
 }
 
 /* LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(bool) */
@@ -257,25 +249,24 @@ static void MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(bool), _succeeds)
 int main(void)
 {
     bool_to_string_with_NULL_value_fails();
-    bool_to_string_succeeds();
-    bool_to_string_INT32_MAX_succeeds();
-    bool_to_string_with_truncation_succeeds();
-    bool_to_string_with_truncation_minus_1_succeeds();
-    bool_to_string_with_negative_value_succeeds();
-    bool_to_string_with_just_enough_big_buffer_succeeds();
+    bool_true_to_string_succeeds();
+    bool_false_to_string_succeeds();
+    bool_true_to_string_with_just_enough_big_buffer_succeeds();
+    bool_false_to_string_with_just_enough_big_buffer_succeeds();
 
     bool_copy_called_with_NULL_dst_value_fails();
     bool_copy_called_with_NULL_src_value_fails();
-    bool_copy_succeeds();
-    bool_copy_succeeds_2();
+    bool_copy_true_succeeds();
+    bool_copy_false_succeeds();
 
-    bool_free_returns();
+    bool_free_true_returns();
+    bool_free_false_returns();
 
     bool_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_bool();
 
     MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(bool), _with_NULL_dst_value_fails)();
-    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(bool), _with_bool_min_value_succeeds)();
-    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(bool), _with_bool_max_value_succeeds)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(bool), _with_bool_true_succeeds)();
+    MU_C2(LOG_CONTEXT_PROPERTY_TYPE_INIT(bool), _with_bool_false_succeeds)();
 
     MU_C2(LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(bool), _succeeds)();
 }

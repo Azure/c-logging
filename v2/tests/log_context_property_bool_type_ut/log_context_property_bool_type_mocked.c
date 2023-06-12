@@ -12,4 +12,4 @@ extern int mock_snprintf(char* s, size_t n, const char* format, ...);
 extern int mock_vsprintf(char* s, const char* format, va_list arg_list);
 extern int mock_vsnprintf(char* s, size_t n, const char* format, va_list arg_list);
 
-#include "log_context_property_boolean_type.c"
+#include "log_context_property_bool_type.c"

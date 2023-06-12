@@ -14,7 +14,7 @@
 #include "macro_utils/macro_utils.h"
 
 #include "c_logging/log_context_property_basic_types.h"
-#include "c_logging/log_context_property_boolean_type.h"
+#include "c_logging/log_context_property_bool_type.h"
 #include "c_logging/log_context_property_type_ascii_char_ptr.h"
 #include "c_logging/log_context_property_value_pair.h"
 #include "c_logging/log_level.h"
@@ -639,7 +639,8 @@ static void log_sink_etw_log_with_context_with_properties(void)
         LOG_CONTEXT_PROPERTY(uint32_t, prop6, 0x60616263),
         LOG_CONTEXT_PROPERTY(int64_t, prop7, 0x7071727374757677),
         LOG_CONTEXT_PROPERTY(uint64_t, prop8, 0x8081828384858687),
-        LOG_CONTEXT_PROPERTY(bool, prop9, 9)
+        LOG_CONTEXT_PROPERTY(bool, prop9, true),
+        LOG_CONTEXT_PROPERTY(bool, prop10, false)
     );
 
     start_parse_events(test_context);
@@ -661,9 +662,9 @@ static void log_sink_etw_log_with_context_with_properties(void)
     POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].func, __FUNCTION__) == 0);
     POOR_MANS_ASSERT(test_context->parsed_events[0].line == captured_line);
 
-    POOR_MANS_ASSERT(test_context->parsed_events[0].property_count == 11);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].property_count == 12);
     POOR_MANS_ASSERT(test_context->parsed_events[0].properties[0].property_type == (_TlgInSTRUCT | _TlgInChain));
-    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[0].struct_field_count == 10);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[0].struct_field_count == 11);
     POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[0].property_name, "") == 0);
 
     POOR_MANS_ASSERT(test_context->parsed_events[0].properties[1].property_type == TlgInANSISTRING);
@@ -694,8 +695,11 @@ static void log_sink_etw_log_with_context_with_properties(void)
     POOR_MANS_ASSERT(test_context->parsed_events[0].properties[9].uint64_t_value == 0x8081828384858687);
     POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[9].property_name, "prop8") == 0);
     POOR_MANS_ASSERT(test_context->parsed_events[0].properties[10].property_type == TlgInBOOL32);
-    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[10].bool_value == 1);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[10].bool_value == true);
     POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[10].property_name, "prop9") == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[11].property_type == TlgInBOOL32);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[11].bool_value == false);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[11].property_name, "prop10") == 0);
 
     LOG_CONTEXT_DESTROY(log_context);
     test_context_destroy(test_context);
