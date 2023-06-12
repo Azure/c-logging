@@ -3,18 +3,25 @@
 
 #include <inttypes.h>
 
-#include "macro_utils/macro_utils.h"
-
 #include "windows.h"
 #include "psapi.h"
+
+#include "macro_utils/macro_utils.h"
 
 #include "c_logging/format_message_no_newline.h"
 #include "c_logging/log_hresult.h"
 
 #define MESSAGE_BUFFER_SIZE 512
-#define N_MAX_MODULES 10
+
+// "It is a good idea to specify a large array of HMODULE values, because it is hard to predict how many modules there will be in the process at the time you call EnumProcessModules. "
+// https://learn.microsoft.com/en-us/windows/win32/api/psapi/nf-psapi-enumprocessmodules
+#define N_MAX_MODULES 100
 
 static const char snprintf_failure_message[] = "snprintf failed";
+
+// This array is not used for anything, but rather just to emit a compiler error
+static const char test_message_to_trigger_a_compiler_error[1 * (MESSAGE_BUFFER_SIZE >= sizeof(snprintf_failure_message))] = { 0 }; /*this construct will generate a compile time error (array of size 0) when LOG_SIZE_REGULAR is not enough to hold even the failure message*/
+
 
 int log_hresult_fill_property(void* buffer, HRESULT hresult)
 {

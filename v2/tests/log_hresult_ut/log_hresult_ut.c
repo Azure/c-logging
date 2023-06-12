@@ -95,6 +95,8 @@ const char TEST_FORMATTED_HRESULT_S_OK[] = "A dummy S_OK";
 const char TEST_FORMATTED_HRESULT_E_FAIL[] = "A dummy E_FAIL";
 const char TEST_FORMATTED_HRESULT_E_FAIL_OTHER[] = "Another dummy E_FAIL";
 
+#define TEST_HMODULE_COUNT 100
+
 #define POOR_MANS_ASSERT(cond) \
     if (!(cond)) \
     { \
@@ -419,7 +421,7 @@ static void when_FormatMessageA_fails_and_no_modules_are_returned_log_hresult_fi
     POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_nSize == 512);
     POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_Arguments == NULL);
     POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_hProcess == (HANDLE)0x4242);
-    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * 10));
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * TEST_HMODULE_COUNT));
     POOR_MANS_ASSERT(strcmp(buffer, "unknown HRESULT 0x80004005") == 0);
 }
 
@@ -460,7 +462,7 @@ static void when_snprintf_fails_log_hresult_fill_property_places_snprintf_failed
     POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_nSize == 512);
     POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_Arguments == NULL);
     POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_hProcess == (HANDLE)0x4242);
-    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * 10));
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * TEST_HMODULE_COUNT));
     POOR_MANS_ASSERT(strcmp(buffer, "snprintf failed") == 0);
 }
 
@@ -501,7 +503,7 @@ static void when_EnumProcessModules_fails_log_hresult_fill_property_places_unkno
     POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_nSize == 512);
     POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_Arguments == NULL);
     POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_hProcess == (HANDLE)0x4242);
-    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * 10));
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * TEST_HMODULE_COUNT));
     POOR_MANS_ASSERT(strcmp(buffer, "failure in EnumProcessModules, LE=42, unknown HRESULT 0x80004005") == 0);
 }
 
@@ -542,7 +544,7 @@ static void when_snprintf_fails_after_EnumProcessModules_fails_log_hresult_fill_
     POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_nSize == 512);
     POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_Arguments == NULL);
     POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_hProcess == (HANDLE)0x4242);
-    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * 10));
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * TEST_HMODULE_COUNT));
     POOR_MANS_ASSERT(strcmp(buffer, "snprintf failed") == 0);
 }
 
@@ -590,7 +592,7 @@ static void when_first_module_out_of_2_FormatMessageA_no_newline_formats_log_hre
     POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_nSize == 512);
     POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_Arguments == NULL);
     POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_hProcess == (HANDLE)0x4242);
-    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * 10));
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * TEST_HMODULE_COUNT));
     POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS));
     POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_lpSource == TEST_MODULE_1);
     POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_dwMessageId == E_FAIL);
@@ -645,7 +647,7 @@ static void when_2nd_module_out_of_2_FormatMessageA_no_newline_formats_log_hresu
     POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_nSize == 512);
     POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_Arguments == NULL);
     POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_hProcess == (HANDLE)0x4242);
-    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * 10));
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * TEST_HMODULE_COUNT));
     POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS));
     POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_lpSource == TEST_MODULE_1);
     POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_dwMessageId == E_FAIL);
@@ -706,7 +708,7 @@ static void when_none_of_2_FormatMessageA_no_newline_formats_it_log_hresult_fill
     POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_nSize == 512);
     POOR_MANS_ASSERT(expected_calls[0].FormatMessageA_no_newline_call.captured_Arguments == NULL);
     POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_hProcess == (HANDLE)0x4242);
-    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * 10));
+    POOR_MANS_ASSERT(expected_calls[2].EnumProcessModules_call.captured_cb == (sizeof(HMODULE) * TEST_HMODULE_COUNT));
     POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_dwFlags == (FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS));
     POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_lpSource == TEST_MODULE_1);
     POOR_MANS_ASSERT(expected_calls[3].FormatMessageA_no_newline_call.captured_dwMessageId == E_FAIL);
