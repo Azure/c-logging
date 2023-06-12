@@ -14,10 +14,10 @@
 
 #include "c_logging/log_context.h"
 
-int log_lasterror_fill_property(void* buffer);
+int log_lasterror_fill_property(void* buffer, int dummy);
 
-/* Codes_SRS_LOG_LASTERROR_01_001: [ LOG_LASTERROR shall expand to a LOG_CONTEXT_PROPERTY with name LastError, type int32_t and value the result of calling GetLastError. ] */
+/* Codes_SRS_LOG_LASTERROR_01_001: [ LOG_LASTERROR shall expand to a LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION with name LastError, type ascii_char_ptr and value function call being log_lasterror_fill_property. ] */
 #define LOG_LASTERROR() \
-    LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, LastError, log_lasterror_fill_property)
+    LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, LastError, log_lasterror_fill_property, 42)
 
 #endif /* LOG_LASTERROR_H */

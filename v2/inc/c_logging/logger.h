@@ -11,6 +11,7 @@
 // for convenience let's include log_lasterror too on Windows
 #if WIN32
 #include "c_logging/log_lasterror.h" // IWYU pragma: keep
+#include "c_logging/log_hresult.h" // IWYU pragma: keep
 #endif
 
 #define LOG_MAX_MESSAGE_LENGTH              4096 /*in bytes - a message is not expected to exceed this size in bytes, if it does, only LOG_MAX_MESSAGE_LENGTH characters are retained*/
