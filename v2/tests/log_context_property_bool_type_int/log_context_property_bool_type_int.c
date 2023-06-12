@@ -79,7 +79,7 @@ static void bool_true_to_string_with_just_enough_big_buffer_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 8);
-    char bool_value_buffer[2];
+    char bool_value_buffer[15];
     (void)snprintf(bool_value_buffer, sizeof(bool_value_buffer), "%" PRI_BOOL, MU_BOOL_VALUE(bool_value));
     POOR_MANS_ASSERT(strcmp(buffer, bool_value_buffer) == 0);
 }
@@ -95,7 +95,7 @@ static void bool_false_to_string_with_just_enough_big_buffer_succeeds(void)
 
     // assert
     POOR_MANS_ASSERT(result == 9);
-    char bool_value_buffer[2];
+    char bool_value_buffer[15];
     (void)snprintf(bool_value_buffer, sizeof(bool_value_buffer), "%" PRI_BOOL, MU_BOOL_VALUE(bool_value));
     POOR_MANS_ASSERT(strcmp(buffer, bool_value_buffer) == 0);
 }
