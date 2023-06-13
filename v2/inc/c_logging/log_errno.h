@@ -15,6 +15,7 @@
 int log_errno_fill_property(void* buffer, int dummy);
 
 #define LOG_ERRNO() \
-    LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, hresult, log_errno_fill_property, errno())
+    /* Codes_SRS_LOG_ERRNO_01_001: [ LOG_ERRNO shall expand to a LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION with name errno_value, type ascii_char_ptr and value function call being log_errno_fill_property. ] */ \
+    LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, errno_value, log_errno_fill_property, errno)
 
 #endif /* LOG_ERRNO_H */
