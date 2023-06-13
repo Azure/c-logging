@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 #include <stdbool.h>
 
 #include "macro_utils/macro_utils.h"
@@ -64,38 +63,6 @@ static void bool_true_to_string_succeeds(void)
     // assert
     POOR_MANS_ASSERT(result == 8);
     char bool_value_buffer[TEST_BUFFER_SIZE];
-    (void)snprintf(bool_value_buffer, sizeof(bool_value_buffer), "%" PRI_BOOL, MU_BOOL_VALUE(bool_value));
-    POOR_MANS_ASSERT(strcmp(buffer, bool_value_buffer) == 0);
-}
-
-static void bool_true_to_string_with_just_enough_big_buffer_succeeds(void)
-{
-    // arrange
-    char buffer[2];
-    bool bool_value = true;
-
-    // act
-    int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(bool).to_string(&bool_value, buffer, sizeof(buffer));
-
-    // assert
-    POOR_MANS_ASSERT(result == 8);
-    char bool_value_buffer[15];
-    (void)snprintf(bool_value_buffer, sizeof(bool_value_buffer), "%" PRI_BOOL, MU_BOOL_VALUE(bool_value));
-    POOR_MANS_ASSERT(strcmp(buffer, bool_value_buffer) == 0);
-}
-
-static void bool_false_to_string_with_just_enough_big_buffer_succeeds(void)
-{
-    // arrange
-    char buffer[2];
-    bool bool_value = false;
-
-    // act
-    int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(bool).to_string(&bool_value, buffer, sizeof(buffer));
-
-    // assert
-    POOR_MANS_ASSERT(result == 9);
-    char bool_value_buffer[15];
     (void)snprintf(bool_value_buffer, sizeof(bool_value_buffer), "%" PRI_BOOL, MU_BOOL_VALUE(bool_value));
     POOR_MANS_ASSERT(strcmp(buffer, bool_value_buffer) == 0);
 }
@@ -251,8 +218,6 @@ int main(void)
     bool_to_string_with_NULL_value_fails();
     bool_true_to_string_succeeds();
     bool_false_to_string_succeeds();
-    bool_true_to_string_with_just_enough_big_buffer_succeeds();
-    bool_false_to_string_with_just_enough_big_buffer_succeeds();
 
     bool_copy_called_with_NULL_dst_value_fails();
     bool_copy_called_with_NULL_src_value_fails();
