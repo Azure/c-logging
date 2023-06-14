@@ -8,9 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "windows.h"
-#include "psapi.h"
-
 #include "macro_utils/macro_utils.h"
 
 #include "c_logging/log_context.h"

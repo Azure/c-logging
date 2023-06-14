@@ -5,9 +5,9 @@
 #define LOG_ERRNO_H
 
 #ifndef __cplusplus
-#include <stdint.h>
+#include <errno.h>
 #else
-#include <cstdint>
+#include <cerrno>
 #endif
 
 #include "c_logging/log_context.h"

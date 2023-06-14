@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "windows.h"
 
 #include "macro_utils/macro_utils.h"
 
@@ -58,9 +57,9 @@ static void setup_mocks(void)
     actual_and_expected_match = true;
 }
 
-DWORD mock_errno(void)
+errno_t mock_errno(void)
 {
-    DWORD result;
+    errno_t result;
     
     if ((actual_call_count == expected_call_count) ||
         (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_errno))

@@ -59,7 +59,7 @@ int main(void)
     _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 
     FormatMessageA_no_newline_fills_995_last_error();
-    //FormatMessageA_no_newline_all_error_codes_does_not_crash();
+    FormatMessageA_no_newline_all_error_codes_does_not_crash();
 
     return 0;
 }
