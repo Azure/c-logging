@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <errno.h>
+#include <errno.h> // IWYU pragma: keep
 #include <stddef.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -16,6 +16,10 @@ typedef int errno_t;
 #include "macro_utils/macro_utils.h"
 
 #include "c_logging/log_context.h"
+#include "c_logging/log_context_property_type.h"
+#include "c_logging/log_context_property_type_ascii_char_ptr.h"
+#include "c_logging/log_context_property_type_if.h"
+#include "c_logging/log_context_property_value_pair.h"
 
 #include "c_logging/log_errno.h"
 
