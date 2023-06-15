@@ -8,6 +8,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef errno_t
+typedef int errno_t;
+#endif
+
 #include "macro_utils/macro_utils.h"
 
 #include "c_logging/log_errno.h"

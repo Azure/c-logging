@@ -148,7 +148,7 @@ static void setup_strerror_s_call(void)
 
 /* log_errno_fill_property */
 
-/* Tests_SRS_LOG_ERRNO_01_002: [ If buffer is NULL, log_errno_fill_property shall return 512 to indicate how many bytes shall be reserved for the string formatted errno. ] */
+/* Tests_SRS_LOG_ERRNO_WIN32_01_002: [ If buffer is NULL, log_errno_fill_property shall return 512 to indicate how many bytes shall be reserved for the string formatted errno. ] */
 static void log_errno_fill_property_with_NULL_returns_needed_buffer_size(void)
 {
     // arrange
@@ -163,9 +163,9 @@ static void log_errno_fill_property_with_NULL_returns_needed_buffer_size(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_ERRNO_01_003: [ Otherwise, log_errno_fill_property shall obtain the errno value. ] */
-/* Tests_SRS_LOG_ERRNO_01_004: [ log_errno_fill_property shall call strerror_s with buffer, 512 and the errno value. ] */
-/* Tests_SRS_LOG_ERRNO_01_007: [ log_errno_fill_property shall return 512. ] */
+/* Tests_SRS_LOG_ERRNO_WIN32_01_003: [ Otherwise, log_errno_fill_property shall obtain the errno value. ] */
+/* Tests_SRS_LOG_ERRNO_WIN32_01_004: [ log_errno_fill_property shall call strerror_s with buffer, 512 and the errno value. ] */
+/* Tests_SRS_LOG_ERRNO_WIN32_01_007: [ log_errno_fill_property shall return 512. ] */
 static void log_errno_fill_property_with_non_NULL_formats_0(void)
 {
     // arrange
@@ -191,9 +191,9 @@ static void log_errno_fill_property_with_non_NULL_formats_0(void)
     POOR_MANS_ASSERT(strcmp(buffer, TEST_FORMATTED_errno_0) == 0);
 }
 
-/* Tests_SRS_LOG_ERRNO_01_003: [ Otherwise, log_errno_fill_property shall obtain the errno value. ] */
-/* Tests_SRS_LOG_ERRNO_01_004: [ log_errno_fill_property shall call strerror_s with buffer, 512 and the errno value. ] */
-/* Tests_SRS_LOG_ERRNO_01_007: [ log_errno_fill_property shall return 512. ] */
+/* Tests_SRS_LOG_ERRNO_WIN32_01_003: [ Otherwise, log_errno_fill_property shall obtain the errno value. ] */
+/* Tests_SRS_LOG_ERRNO_WIN32_01_004: [ log_errno_fill_property shall call strerror_s with buffer, 512 and the errno value. ] */
+/* Tests_SRS_LOG_ERRNO_WIN32_01_007: [ log_errno_fill_property shall return 512. ] */
 static void log_errno_fill_property_with_non_NULL_formats_42(void)
 {
     // arrange
@@ -221,7 +221,7 @@ static void log_errno_fill_property_with_non_NULL_formats_42(void)
     POOR_MANS_ASSERT(strcmp(buffer, TEST_FORMATTED_errno_42) == 0);
 }
 
-/* Tests_SRS_LOG_ERRNO_01_005: [ If strerror_s fails, log_errno_fill_property shall copy in buffer the string failure in strerror_s and return 512. ] */
+/* Tests_SRS_LOG_ERRNO_WIN32_01_005: [ If strerror_s fails, log_errno_fill_property shall copy in buffer the string failure in strerror_s and return 512. ] */
 static void when_strerror_s_fails_log_errno_fill_property_places_failure_string_in_buffer(void)
 {
     // arrange
@@ -251,7 +251,7 @@ static void when_strerror_s_fails_log_errno_fill_property_places_failure_string_
 
 /* LOG_ERRNO */
 
-/* Tests_SRS_LOG_ERRNO_01_001: [ LOG_ERRNO shall expand to a LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION with name errno_value, type ascii_char_ptr and value function call being log_errno_fill_property. ] */
+/* Tests_SRS_LOG_ERRNO_WIN32_01_001: [ LOG_ERRNO shall expand to a LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION with name errno_value, type ascii_char_ptr and value function call being log_errno_fill_property. ] */
 static void LOG_ERRNO_emits_the_underlying_property(void)
 {
     // arrange

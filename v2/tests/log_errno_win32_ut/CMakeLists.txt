@@ -3,8 +3,8 @@
 
 add_executable(log_errno_ut
     ../../src/logger.c
-    log_errno_mocked.c
-    log_errno_ut.c
+    log_errno_win32_mocked.c
+    log_errno_win32_ut.c
 )
 
 include_directories(../../src)

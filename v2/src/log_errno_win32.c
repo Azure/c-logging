@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <errno.h>
+#define __STDC_WANT_LIB_EXT1__ 1
 #include <string.h>
 
 #include "macro_utils/macro_utils.h"
@@ -21,16 +22,19 @@ int log_errno_fill_property(void* buffer, int dummy)
 
     if (buffer == NULL)
     {
-        /* Codes_SRS_LOG_ERRNO_01_002: [ If buffer is NULL, log_errno_fill_property shall return 512 to indicate how many bytes shall be reserved for the string formatted errno. ] */
+        /* Codes_SRS_LOG_ERRNO_WIN32_01_002: [ If buffer is NULL, log_errno_fill_property shall return 512 to indicate how many bytes shall be reserved for the string formatted errno. ] */
         // do nothing
     }
     else
     {
-        /* Codes_SRS_LOG_ERRNO_01_003: [ Otherwise, log_errno_fill_property shall obtain the errno value. ] */
-        /* Codes_SRS_LOG_ERRNO_01_004: [ log_errno_fill_property shall call strerror_s with buffer, 512 and the errno value. ] */
+        /* Codes_SRS_LOG_ERRNO_WIN32_01_003: [ Otherwise, log_errno_fill_property shall obtain the errno value. ] */
+        /* Codes_SRS_LOG_ERRNO_WIN32_01_004: [ log_errno_fill_property shall call strerror_s with buffer, 512 and the errno value. ] */
+#ifndef WIN32
+#define strerror_s(b, size, errnum) strerror_r(errnum, b, size)
+#endif
         if (strerror_s(buffer, MESSAGE_BUFFER_SIZE, errno) != 0)
         {
-            /* Codes_SRS_LOG_ERRNO_01_005: [ If strerror_s fails, log_errno_fill_property shall copy in buffer the string failure in strerror_s and return 512. ] */
+            /* Codes_SRS_LOG_ERRNO_WIN32_01_005: [ If strerror_s fails, log_errno_fill_property shall copy in buffer the string failure in strerror_s and return 512. ] */
             (void)memcpy(buffer, strerror_s_failure_message, sizeof(strerror_s_failure_message));
         }
         else
@@ -39,6 +43,6 @@ int log_errno_fill_property(void* buffer, int dummy)
         }
     }
 
-    /* Codes_SRS_LOG_ERRNO_01_007: [ log_errno_fill_property shall return 512. ] */
+    /* Codes_SRS_LOG_ERRNO_WIN32_01_007: [ log_errno_fill_property shall return 512. ] */
     return MESSAGE_BUFFER_SIZE;
 }

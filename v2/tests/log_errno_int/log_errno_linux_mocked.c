@@ -6,11 +6,13 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#ifndef errno_t
+typedef int errno_t;
+#endif
+
 #undef errno
 #define errno (mock_errno())
-#define strerror_s mock_strerror_s
 
 errno_t mock_errno(void);
-errno_t mock_strerror_s(char* s, rsize_t maxsize, errno_t errnum);
 
-#include "log_errno.c"
+#include "log_errno_linux.c"
