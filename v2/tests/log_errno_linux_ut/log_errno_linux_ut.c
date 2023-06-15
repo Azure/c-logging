@@ -13,7 +13,7 @@
 typedef int errno_t;
 #endif
 
-#include "macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h" // IWYU pragma: keep
 
 #include "c_logging/log_context.h"
 #include "c_logging/log_context_property_type.h"
