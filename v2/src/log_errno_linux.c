@@ -4,8 +4,6 @@
 #include <errno.h>
 #include <string.h>
 
-#include "macro_utils/macro_utils.h"
-
 #include "c_logging/log_errno.h"
 
 #define MESSAGE_BUFFER_SIZE 512
