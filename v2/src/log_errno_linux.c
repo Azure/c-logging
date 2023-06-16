@@ -11,7 +11,7 @@
 static const char strerror_r_failure_message[] = "failure in strerror_r";
 
 // This array is not used for anything, but rather just to emit a compiler error
-static const char test_message_to_trigger_a_compiler_error[1 * (MESSAGE_BUFFER_SIZE >= sizeof(strerror_r_failure_message))] = { 0 }; /*this construct will generate a compile time error (array of size 0) when LOG_SIZE_REGULAR is not enough to hold even the failure message*/
+static const char test_message_to_trigger_a_compiler_error[1 * (MESSAGE_BUFFER_SIZE >= sizeof(strerror_r_failure_message))] = { 0 }; /*this construct will generate a compile time error (array of size 0) when MESSAGE_BUFFER_SIZE is not enough to hold even the failure message*/
 
 int log_errno_fill_property(void* buffer, int dummy)
 {
