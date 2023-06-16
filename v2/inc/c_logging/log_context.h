@@ -47,6 +47,7 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* log_context_get_property_value_pairs(LOG_
 int internal_log_context_init_from_parent(LOG_CONTEXT_HANDLE dest_log_context, LOG_CONTEXT_HANDLE parent_log_context);
 uint32_t internal_log_context_get_values_data_length_or_zero(LOG_CONTEXT_HANDLE log_context);
 
+MU_SUPPRESS_WARNING(4505) // warning C4505: 'internal_log_context_get_property_value_pair_count_or_zero': unreferenced function with internal linkage has been removed
 static uint32_t internal_log_context_get_property_value_pair_count_or_zero(LOG_CONTEXT_HANDLE log_context)
 {
     uint32_t result = log_context_get_property_value_pair_count(log_context);
