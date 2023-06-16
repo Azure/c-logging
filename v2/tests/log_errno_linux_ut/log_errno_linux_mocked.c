@@ -3,7 +3,7 @@
 
 #include <errno.h> // IWYU pragma: keep
 #include <string.h> // IWYU pragma: keep
-#include <stddef.h>
+#include <stddef.h> // IWYU pragma: keep
 
 #ifndef errno_t
 typedef int errno_t;
