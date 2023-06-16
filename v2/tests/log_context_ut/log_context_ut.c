@@ -1637,7 +1637,7 @@ static void LOG_CONTEXT_CREATE_with_a_stack_log_context_succeeds(void)
 
 /* log_context_get_property_value_pair_count */
 
-/* Tests_SRS_LOG_CONTEXT_01_020: [ If log_context is NULL, log_context_get_property_value_pair_count shall return UINT32_MAX. ]*/
+/* Tests_SRS_LOG_CONTEXT_01_020: [ If log_context is NULL, log_context_get_property_value_pair_count shall return 0. ]*/
 static void log_context_get_property_value_pair_count_with_NULL_log_context_returns_UINT32_MAX(void)
 {
     // arrange
@@ -1648,7 +1648,7 @@ static void log_context_get_property_value_pair_count_with_NULL_log_context_retu
     uint32_t result = log_context_get_property_value_pair_count(NULL);
 
     // assert
-    POOR_MANS_ASSERT(result == UINT32_MAX);
+    POOR_MANS_ASSERT(result == 0);
 }
 
 /* Tests_SRS_LOG_CONTEXT_01_021: [ Otherwise, log_context_get_property_value_pair_count shall return the number of property/value pairs stored by log_context. ]*/
