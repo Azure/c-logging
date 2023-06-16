@@ -734,12 +734,9 @@ static void LOG_HRESULT_emits_the_underlying_property(void)
     // arrange
     setup_mocks();
     setup_FormatMessageA_no_newline_call();
-
-    expected_calls[0].GetLastError_call.override_result = true;
-    expected_calls[0].GetLastError_call.call_result = E_FAIL;
-    expected_calls[1].FormatMessageA_no_newline_call.override_result = true;
-    expected_calls[1].FormatMessageA_no_newline_call.call_result = sizeof(TEST_FORMATTED_HRESULT_E_FAIL_OTHER) - 1;
-    expected_calls[1].FormatMessageA_no_newline_call.buffer_payload = TEST_FORMATTED_HRESULT_E_FAIL_OTHER;
+    expected_calls[0].FormatMessageA_no_newline_call.override_result = true;
+    expected_calls[0].FormatMessageA_no_newline_call.call_result = sizeof(TEST_FORMATTED_HRESULT_E_FAIL_OTHER) - 1;
+    expected_calls[0].FormatMessageA_no_newline_call.buffer_payload = TEST_FORMATTED_HRESULT_E_FAIL_OTHER;
 
     // act
     LOG_CONTEXT_LOCAL_DEFINE(log_context, NULL, LOG_HRESULT(E_FAIL));
@@ -754,7 +751,7 @@ static void LOG_HRESULT_emits_the_underlying_property(void)
     POOR_MANS_ASSERT(strcmp(properties[0].name, "") == 0);
     POOR_MANS_ASSERT(properties[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
     POOR_MANS_ASSERT(*(uint8_t*)properties[0].value == 1);
-    POOR_MANS_ASSERT(strcmp(properties[1].name, "LastError") == 0);
+    POOR_MANS_ASSERT(strcmp(properties[1].name, "hresult") == 0);
     POOR_MANS_ASSERT(properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr);
     POOR_MANS_ASSERT(strcmp(properties[1].value, TEST_FORMATTED_HRESULT_E_FAIL_OTHER) == 0);
 }
@@ -780,7 +777,7 @@ int main(void)
     when_2nd_module_out_of_2_FormatMessageA_no_newline_formats_log_hresult_fill_property_formats_success();
     when_none_of_2_FormatMessageA_no_newline_formats_it_log_hresult_fill_property_formats_yields_unknown();
 
-    //LOG_LASTERROR_emits_the_underlying_property();
+    LOG_HRESULT_emits_the_underlying_property();
 
     return 0;
 }
