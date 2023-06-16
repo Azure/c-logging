@@ -159,7 +159,7 @@ uint32_t log_context_get_property_value_pair_count(LOG_CONTEXT_HANDLE log_contex
 
 `log_context_get_property_value_pair_count` returns the number of property/value pairs stored by the context.
 
-**SRS_LOG_CONTEXT_01_020: [** If `log_context` is `NULL`, `log_context_get_property_value_pair_count` shall return `UINT32_MAX`. **]**
+**SRS_LOG_CONTEXT_01_020: [** If `log_context` is `NULL`, `log_context_get_property_value_pair_count` shall return `0`. **]**
 
 **SRS_LOG_CONTEXT_01_021: [** Otherwise, `log_context_get_property_value_pair_count` shall return the number of property/value pairs stored by `log_context`. **]**
 

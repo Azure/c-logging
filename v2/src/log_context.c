@@ -17,8 +17,8 @@ uint32_t log_context_get_property_value_pair_count(LOG_CONTEXT_HANDLE log_contex
 
     if (log_context == NULL)
     {
-        /* Codes_SRS_LOG_CONTEXT_01_020: [ If log_context is NULL, log_context_get_property_value_pair_count shall return UINT32_MAX. ]*/
-        result = UINT32_MAX;
+        /* Codes_SRS_LOG_CONTEXT_01_020: [ If log_context is NULL, log_context_get_property_value_pair_count shall return 0. ]*/
+        result = 0;
     }
     else
     {
