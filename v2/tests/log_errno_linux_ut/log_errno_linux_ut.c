@@ -85,7 +85,7 @@ static void setup_mocks(void)
 errno_t mock_errno(void)
 {
     errno_t result;
-    
+
     if ((actual_call_count == expected_call_count) ||
         (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_errno))
     {
