@@ -65,9 +65,9 @@ static void read_int64_t(const void* source, int64_t* destination)
     (void)memcpy(destination, source, sizeof(int64_t));
 }
 
-static void read_bool(const void* source, bool* destination)
+static void read_bool(const void* source, int32_t* destination)
 {
-    (void)memcpy(destination, source, sizeof(bool));
+    (void)memcpy(destination, source, sizeof(int32_t));
 }
 
 static GUID provider_guid = { 0xDAD29F36, 0x0A48, 0x4DEF, { 0x9D, 0x50, 0x8E, 0xF9, 0x03, 0x6B, 0x92, 0xB4 } };
@@ -112,7 +112,7 @@ typedef struct PARSED_EVENT_PROPERTY_TAG
         int32_t int32_t_value;
         uint64_t uint64_t_value;
         int64_t int64_t_value;
-        bool bool_value;
+        int32_t bool_value;
         uint8_t struct_field_count;
     };
 } PARSED_EVENT_PROPERTY;
@@ -303,7 +303,7 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
                 break;
             case TlgInBOOL32:
                 read_bool(current_user_data_field, &test_context->parsed_events[current_index].properties[property_index].bool_value);
-                current_user_data_field += sizeof(bool);
+                current_user_data_field += sizeof(int32_t);
                 break;
             }
 
@@ -639,7 +639,8 @@ static void log_sink_etw_log_with_context_with_properties(void)
         LOG_CONTEXT_PROPERTY(uint32_t, prop6, 0x60616263),
         LOG_CONTEXT_PROPERTY(int64_t, prop7, 0x7071727374757677),
         LOG_CONTEXT_PROPERTY(uint64_t, prop8, 0x8081828384858687),
-        LOG_CONTEXT_PROPERTY(bool, prop9, true)
+        LOG_CONTEXT_PROPERTY(bool, prop9, true),
+        LOG_CONTEXT_PROPERTY(bool, prop10, false)
     );
 
     start_parse_events(test_context);
@@ -661,9 +662,9 @@ static void log_sink_etw_log_with_context_with_properties(void)
     POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].func, __FUNCTION__) == 0);
     POOR_MANS_ASSERT(test_context->parsed_events[0].line == captured_line);
 
-    POOR_MANS_ASSERT(test_context->parsed_events[0].property_count == 11);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].property_count == 12);
     POOR_MANS_ASSERT(test_context->parsed_events[0].properties[0].property_type == (_TlgInSTRUCT | _TlgInChain));
-    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[0].struct_field_count == 10);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[0].struct_field_count == 11);
     POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[0].property_name, "") == 0);
 
     POOR_MANS_ASSERT(test_context->parsed_events[0].properties[1].property_type == TlgInANSISTRING);
@@ -696,6 +697,9 @@ static void log_sink_etw_log_with_context_with_properties(void)
     POOR_MANS_ASSERT(test_context->parsed_events[0].properties[10].property_type == TlgInBOOL32);
     POOR_MANS_ASSERT(test_context->parsed_events[0].properties[10].bool_value == true);
     POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[10].property_name, "prop9") == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[11].property_type == TlgInBOOL32);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[11].bool_value == false);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[11].property_name, "prop10") == 0);
 
     LOG_CONTEXT_DESTROY(log_context);
     test_context_destroy(test_context);
