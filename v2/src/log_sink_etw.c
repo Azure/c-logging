@@ -520,10 +520,10 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
                             EventDataDescCreate(&_tlgData[_tlgIdx], context_property_value_pairs[i].value, sizeof(uint8_t));
                             break;
                         case LOG_CONTEXT_PROPERTY_TYPE_bool:
-                            int32_t* context_property_value_32_bits = malloc(sizeof(int32_t));
-                            context_property_value_32_bits = (int32_t*)context_property_value_pairs[i].value;
+                            const int32_t true_value = 1;
+                            const int32_t false_value = 0;
                             /* Codes_SRS_LOG_SINK_ETW_07_002: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_bool, the event data descriptor shall be filled with the value of the property by calling EventDataDescCreate. ]*/
-                            EventDataDescCreate(&_tlgData[_tlgIdx], context_property_value_32_bits, sizeof(bool));
+                            EventDataDescCreate(&_tlgData[_tlgIdx], *(bool*)context_property_value_pairs[i].value ? &true_value : &false_value, sizeof(bool));
                             break;
                         case LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr:
                             /* Codes_SRS_LOG_SINK_ETW_01_067: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr, the event data descriptor shall be filled with the value of the property by calling _tlgCreate1Sz_char. ]*/
