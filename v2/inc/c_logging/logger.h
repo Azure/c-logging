@@ -7,6 +7,7 @@
 #include "c_logging/log_context.h"
 #include "c_logging/log_level.h"
 #include "c_logging/log_sink_if.h"
+#include "c_logging/logger_v1_v2.h"
 
 // for convenience let's include log_lasterror too on Windows
 #if WIN32
