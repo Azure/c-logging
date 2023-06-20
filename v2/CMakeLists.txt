@@ -28,6 +28,7 @@ set(c_logging_v2_h_files
     ./inc/c_logging/log_context_property_type_ascii_char_ptr.h
     ./inc/c_logging/log_context_property_type_struct.h
     ./inc/c_logging/log_context_property_value_pair.h
+    ./inc/c_logging/log_errno.h
     ./inc/c_logging/log_internal_error.h
     ./inc/c_logging/log_level.h
     ./inc/c_logging/log_sink_if.h
@@ -49,12 +50,24 @@ set(c_logging_v2_c_files
 if(WIN32)
 set(c_logging_v2_h_files
     ${c_logging_v2_h_files}
+    ./inc/c_logging/format_message_no_newline.h
     ./inc/c_logging/log_sink_etw.h
+    ./inc/c_logging/log_lasterror.h
+    ./inc/c_logging/log_hresult.h
     )
 
 set(c_logging_v2_c_files
     ${c_logging_v2_c_files}
+    ./src/format_message_no_newline.c
     ./src/log_sink_etw.c
+    ./src/log_lasterror.c
+    ./src/log_hresult.c
+    ./src/log_errno_win32.c
+    )
+else()
+set(c_logging_v2_c_files
+    ${c_logging_v2_c_files}
+    ./src/log_errno_linux.c
     )
 endif()
 

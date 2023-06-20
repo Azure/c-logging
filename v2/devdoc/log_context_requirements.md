@@ -71,6 +71,29 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* log_context_get_property_value_pairs(LOG_
 
 **SRS_LOG_CONTEXT_01_019: [** If 2 properties have the same `property_name` for a context a compiler error shall be emitted. **]**
 
+## LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION
+
+```c
+#define LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(property_type, property_name, value_function) \
+    ...
+```
+
+`LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION` allows defining a property/value pair of a given supported type which calls a function to obtain the property value.
+
+**SRS_LOG_CONTEXT_01_027: [** `LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION` shall expand to code allocating a property/value pair entry with the type `property_type` and the name `property_name`. **]**
+
+**SRS_LOG_CONTEXT_01_028: [** `LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION` shall expand to code that calls `value_function` with `NULL` in order to determine how much memory shall be reserved for the property. **]**
+
+**SRS_LOG_CONTEXT_01_029: [** `LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION` shall expand to code filling the property value by calling `value_function`. **]**
+
+**SRS_LOG_CONTEXT_01_030: [** If 2 properties have the same `property_name` for a context a compiler error shall be emitted. **]**
+
+The signature of `value_function` is:
+
+```c
+int (*VALUE_FUNCTION)(void* buffer)
+```
+
 ## LOG_CONTEXT_STRING_PROPERTY
 
 ```c
@@ -136,7 +159,7 @@ uint32_t log_context_get_property_value_pair_count(LOG_CONTEXT_HANDLE log_contex
 
 `log_context_get_property_value_pair_count` returns the number of property/value pairs stored by the context.
 
-**SRS_LOG_CONTEXT_01_020: [** If `log_context` is `NULL`, `log_context_get_property_value_pair_count` shall return `UINT32_MAX`. **]**
+**SRS_LOG_CONTEXT_01_020: [** If `log_context` is `NULL`, `log_context_get_property_value_pair_count` shall return `0`. **]**
 
 **SRS_LOG_CONTEXT_01_021: [** Otherwise, `log_context_get_property_value_pair_count` shall return the number of property/value pairs stored by `log_context`. **]**
 

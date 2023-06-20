@@ -235,7 +235,7 @@ uint32_t mock_log_context_get_property_value_pair_count(LOG_CONTEXT_HANDLE log_c
         (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_log_context_get_property_value_pair_count))
     {
         actual_and_expected_match = false;
-        result = UINT32_MAX;
+        result = 0;
     }
     else
     {
