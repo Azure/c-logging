@@ -520,8 +520,8 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
                             EventDataDescCreate(&_tlgData[_tlgIdx], context_property_value_pairs[i].value, sizeof(uint8_t));
                             break;
                         case LOG_CONTEXT_PROPERTY_TYPE_bool:
-                            const int32_t true_value = 1;
-                            const int32_t false_value = 0;
+                            static const int32_t true_value = 1;
+                            static const int32_t false_value = 0;
                             /* Codes_SRS_LOG_SINK_ETW_07_002: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_bool, the event data descriptor shall be filled with the value of the property by calling EventDataDescCreate. ]*/
                             EventDataDescCreate(&_tlgData[_tlgIdx], *(bool*)context_property_value_pairs[i].value ? &true_value : &false_value, sizeof(bool));
                             break;
