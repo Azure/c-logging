@@ -24,6 +24,7 @@ set(c_logging_v2_h_files
     ./inc/c_logging/log_context_property_type.h
     ./inc/c_logging/log_context_property_type_if.h
     ./inc/c_logging/log_context_property_basic_types.h
+    ./inc/c_logging/log_context_property_bool_type.h
     ./inc/c_logging/log_context_property_type_ascii_char_ptr.h
     ./inc/c_logging/log_context_property_type_struct.h
     ./inc/c_logging/log_context_property_value_pair.h
@@ -38,6 +39,7 @@ set(c_logging_v2_c_files
     ./src/logger.c
     ./src/log_context.c
     ./src/log_context_property_basic_types.c
+    ./src/log_context_property_bool_type.c
     ./src/log_context_property_type.c
     ./src/log_context_property_type_ascii_char_ptr.c
     ./src/log_context_property_type_struct.c

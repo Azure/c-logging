@@ -160,6 +160,8 @@ Note: `_tlgBlobTyp` represents the metadata blob type in the binary form describ
 
   - **SRS_LOG_SINK_ETW_01_063: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr`, a byte with the value `TlgInANSISTRING` shall be added in the metadata. **]**
 
+  - **SRS_LOG_SINK_ETW_07_001: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_bool`, a byte with the value `TlgInBOOL32` shall be added in the metadata. **]**
+
   - **SRS_LOG_SINK_ETW_01_064: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int64_t`, a byte with the value `TlgInINT64` shall be added in the metadata. **]**
 
   - **SRS_LOG_SINK_ETW_01_065: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_uint64_t`, a byte with the value `TlgInUINT64` shall be added in the metadata. **]**
@@ -197,6 +199,8 @@ Note: 2 entries are for the event descriptor and metadata respectively, 4 entrie
 **SRS_LOG_SINK_ETW_01_061: [** For each property in `log_context`: **]**
 
 - **SRS_LOG_SINK_ETW_01_067: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr`, the event data descriptor shall be filled with the value of the property by calling `_tlgCreate1Sz_char`. **]**
+
+- **SRS_LOG_SINK_ETW_07_002: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_bool`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`. **]**
 
 - **SRS_LOG_SINK_ETW_01_066: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int64_t`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`. **]**
 

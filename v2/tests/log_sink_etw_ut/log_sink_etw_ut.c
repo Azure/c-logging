@@ -16,6 +16,7 @@
 #include "macro_utils/macro_utils.h"
 
 #include "c_logging/log_context_property_basic_types.h"
+#include "c_logging/log_context_property_bool_type.h"
 #include "c_logging/log_context_property_type_ascii_char_ptr.h"
 #include "c_logging/log_context_property_value_pair.h"
 #include "c_logging/log_level.h"
@@ -738,7 +739,7 @@ static void log_sink_etw_init_works(void)
 
     setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // file
     setup__tlgCreate1Sz_char(); // func
     setup_EventDataDescCreate(); // line
     uint8_t extra_metadata_bytes[256];
@@ -870,7 +871,7 @@ static void test_message_with_level(LOG_LEVEL log_level, uint8_t expected_tlg_le
     setup_mocks();
     setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // file
     setup__tlgCreate1Sz_char(); // func
     setup_EventDataDescCreate(); // line
     uint8_t extra_metadata_bytes[256];
@@ -1067,7 +1068,7 @@ static void test_message_with_context(LOG_LEVEL log_level, uint8_t expected_tlg_
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // file
     setup__tlgCreate1Sz_char(); // func
     setup_EventDataDescCreate(); // line
     uint8_t extra_metadata_bytes[256];
@@ -1169,7 +1170,7 @@ static void test_message_with_context_with_one_property(LOG_LEVEL log_level, uin
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // file
     setup__tlgCreate1Sz_char(); // func
     setup_EventDataDescCreate(); // line
     uint8_t extra_metadata_bytes[256];
@@ -1225,6 +1226,12 @@ static void test_message_with_context_with_one_property(LOG_LEVEL log_level, uin
         {
             setup__tlgCreate1Sz_char();
             *pos = TlgInANSISTRING;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_bool:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInBOOL32;
             break;
         }
         case LOG_CONTEXT_PROPERTY_TYPE_int64_t:
@@ -1457,6 +1464,23 @@ static void log_sink_etw_log_with_context_with_one_uint8_t_property_succeeds(voi
     LOG_CONTEXT_DESTROY(log_context);
 }
 
+/* Tests_SRS_LOG_SINK_ETW_07_001: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_bool, a byte with the value TlgInBOOL32 shall be added in the metadata. ]*/
+/* Tests_SRS_LOG_SINK_ETW_07_002: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_bool, the event data descriptor shall be filled with the value of the property by calling EventDataDescCreate. ]*/
+static void log_sink_etw_log_with_context_with_one_bool_property_succeeds(void)
+{
+    LOG_CONTEXT_HANDLE log_context;
+
+    LOG_CONTEXT_CREATE(log_context, NULL,
+        LOG_CONTEXT_PROPERTY(bool, gigi, 42)
+    );
+
+    test_message_with_context_with_one_property(LOG_LEVEL_VERBOSE, TRACE_LEVEL_VERBOSE, "LogVerbose", log_context, "",
+        sizeof(bool) // expected property value size
+    );
+
+    LOG_CONTEXT_DESTROY(log_context);
+}
+
 static void test_message_with_context_with_multiple_properties(LOG_LEVEL log_level, uint8_t expected_tlg_level, const char* expected_event_name, LOG_CONTEXT_HANDLE log_context, const char* expected_context_name, uint8_t property_count)
 {
     // arrange
@@ -1467,7 +1491,7 @@ static void test_message_with_context_with_multiple_properties(LOG_LEVEL log_lev
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // file
     setup__tlgCreate1Sz_char(); // func
     setup_EventDataDescCreate(); // line
     uint8_t extra_metadata_bytes[256];
@@ -1525,6 +1549,12 @@ static void test_message_with_context_with_multiple_properties(LOG_LEVEL log_lev
         {
             setup__tlgCreate1Sz_char();
             *pos = TlgInANSISTRING;
+            break;
+        }
+        case LOG_CONTEXT_PROPERTY_TYPE_bool:
+        {
+            setup_EventDataDescCreate();
+            *pos = TlgInBOOL32;
             break;
         }
         case LOG_CONTEXT_PROPERTY_TYPE_int64_t:
@@ -1610,6 +1640,11 @@ static void test_message_with_context_with_multiple_properties(LOG_LEVEL log_lev
             expected_property_size = (ULONG)(strlen(log_context_property_value_pairs[i + 1].value) + 1);
             break;
         }
+        case LOG_CONTEXT_PROPERTY_TYPE_bool:
+        {
+            expected_property_size = sizeof(bool);
+            break;
+        }
         case LOG_CONTEXT_PROPERTY_TYPE_int64_t:
         {
             expected_property_size = sizeof(int64_t);
@@ -1685,6 +1720,8 @@ static void test_message_with_context_with_multiple_properties(LOG_LEVEL log_lev
 /* Tests_SRS_LOG_SINK_ETW_01_078: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_int8_t, the event data descriptor shall be filled with the value of the property by calling EventDataDescCreate. ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_079: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_uint8_t, a byte with the value TlgInUINT8 shall be added in the metadata. ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_080: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_uint8_t, the event data descriptor shall be filled with the value of the property by calling EventDataDescCreate. ]*/
+/* Tests_SRS_LOG_SINK_ETW_07_001: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_bool, a byte with the value TlgInBOOL32 shall be added in the metadata. ]*/
+/* Tests_SRS_LOG_SINK_ETW_07_002: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_bool, the event data descriptor shall be filled with the value of the property by calling EventDataDescCreate. ]*/
 static void log_sink_etw_log_with_context_with_all_property_types_succeeds(void)
 {
     LOG_CONTEXT_HANDLE log_context;
@@ -1698,10 +1735,11 @@ static void log_sink_etw_log_with_context_with_all_property_types_succeeds(void)
         LOG_CONTEXT_PROPERTY(int16_t, prop6, 46),
         LOG_CONTEXT_PROPERTY(uint16_t, prop7, 47),
         LOG_CONTEXT_PROPERTY(int8_t, prop8, 48),
-        LOG_CONTEXT_PROPERTY(uint8_t, prop9, 49)
+        LOG_CONTEXT_PROPERTY(uint8_t, prop9, 49),
+        LOG_CONTEXT_PROPERTY(bool, prop10, 42)
         );
 
-    test_message_with_context_with_multiple_properties(LOG_LEVEL_VERBOSE, TRACE_LEVEL_VERBOSE, "LogVerbose", log_context, "", 9);
+    test_message_with_context_with_multiple_properties(LOG_LEVEL_VERBOSE, TRACE_LEVEL_VERBOSE, "LogVerbose", log_context, "", 10);
 
     LOG_CONTEXT_DESTROY(log_context);
 }
@@ -1725,7 +1763,7 @@ static void when_unknown_property_type_is_encountered_log_sink_etw_log_with_cont
     setup_printf_call(); // printf error
     setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // file
     setup__tlgCreate1Sz_char(); // func
     setup_EventDataDescCreate(); // line
     uint8_t extra_metadata_bytes[256];
@@ -1885,7 +1923,7 @@ static void when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // file
     setup__tlgCreate1Sz_char(); // func
     setup_EventDataDescCreate(); // line
     uint8_t extra_metadata_bytes[256];
@@ -2027,7 +2065,7 @@ static void when_exactly_64_properties_are_passed_in_context_log_sink_etw_log_wi
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // file
     setup__tlgCreate1Sz_char(); // func
     setup_EventDataDescCreate(); // line
     uint8_t extra_metadata_bytes[8192];
@@ -2238,7 +2276,7 @@ static void when_size_of_metadata_exceeds_4096_log_sink_etw_log_with_context_doe
 
     // 38 bytes are in metadata by default with the setting below, 3 extra bytes for the struct that holds all properties, makes 41 bytes
     // Need 4055 bytes of properties metadata to go over
-    // 
+    //
     // Each line below adds 150 bytes, 27 * 150 = 4050, last line needs 5 bytes to get to exactly the limit, 6 bytes goes over the limit
     LOG_CONTEXT_CREATE(log_context, NULL,
         LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________1, 1),
@@ -2284,7 +2322,7 @@ static void when_size_of_metadata_exceeds_4096_log_sink_etw_log_with_context_doe
     setup_printf_call(); // printf error
     setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // file
     setup__tlgCreate1Sz_char(); // func
     setup_EventDataDescCreate(); // line
     uint8_t extra_metadata_bytes[4096];
@@ -2356,7 +2394,7 @@ static void when_size_of_metadata_and_formatted_messages_exceeds_4096_log_sink_e
     // 38 bytes are in metadata by default with the setting below, 3 extra bytes for the struct that holds all properties, makes 41 bytes
     // 1 byte of formatted message
     // Need 4054 bytes to go over
-    // 
+    //
     // Each line below adds 150 bytes, 27 * 150 = 4050, last line needs 4 bytes to get to exactly the limit, 5 bytes goes over the limit
     LOG_CONTEXT_CREATE(log_context, NULL,
         LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________1, 1),
@@ -2402,7 +2440,7 @@ static void when_size_of_metadata_and_formatted_messages_exceeds_4096_log_sink_e
     setup_vsnprintf_call(); // formatting message
     setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // file
     setup__tlgCreate1Sz_char(); // func
     setup_EventDataDescCreate(); // line
     uint8_t extra_metadata_bytes[4096];
@@ -2474,7 +2512,7 @@ static void when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_
     // 38 bytes are in metadata by default with the setting below, 3 extra bytes for the struct that holds all properties, makes 41 bytes
     // 1 byte of formatted message
     // Need 4054 bytes to go over
-    // 
+    //
     // Each line below adds 150 bytes, 27 * 150 = 4050, last line needs 4 bytes to get to exactly the limit, 5 bytes goes over the limit
     LOG_CONTEXT_CREATE(log_context, NULL,
         LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________1, 1),
@@ -2519,7 +2557,7 @@ static void when_size_of_metadata_of_exactly_4096_log_sink_etw_log_with_context_
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // file
     setup__tlgCreate1Sz_char(); // func
     setup_EventDataDescCreate(); // line
     uint8_t extra_metadata_bytes[4096];
@@ -2761,7 +2799,7 @@ static void when_size_of_metadata_and_formatted_messages_exceeds_4096_and_2nd_vs
     // 38 bytes are in metadata by default with the setting below, 3 extra bytes for the struct that holds all properties, makes 41 bytes
     // 1 byte of formatted message
     // Need 4054 bytes to go over
-    // 
+    //
     // Each line below adds 150 bytes, 27 * 150 = 4050, last line needs 4 bytes to get to exactly the limit, 5 bytes goes over the limit
     LOG_CONTEXT_CREATE(log_context, NULL,
         LOG_CONTEXT_PROPERTY(uint8_t, property___________________________________________________________________________________________________________________________________________1, 1),
@@ -2843,7 +2881,7 @@ static void when_a_parent_context_is_used_all_properties_are_emitted(void)
     setup_log_context_get_property_value_pair_count_call();
     setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
-    setup__tlgCreate1Sz_char(); // file 
+    setup__tlgCreate1Sz_char(); // file
     setup__tlgCreate1Sz_char(); // func
     setup_EventDataDescCreate(); // line
     setup_EventDataDescCreate(); // prop1
@@ -2998,7 +3036,7 @@ int main(void)
     log_sink_etw_log_with_unknown_LOG_LEVEL_succeeds();
     log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds();
     log_sink_etw_log_with_LOG_LEVEL_CRITICAL_format_message_succeeds_2();
-    
+
     log_sink_etw_log_with_context_with_no_properties_succeeds();
     log_sink_etw_log_with_context_with_one_ascii_property_succeeds();
     log_sink_etw_log_with_context_with_one_int64_t_property_succeeds();
@@ -3009,6 +3047,7 @@ int main(void)
     log_sink_etw_log_with_context_with_one_uint16_t_property_succeeds();
     log_sink_etw_log_with_context_with_one_int8_t_property_succeeds();
     log_sink_etw_log_with_context_with_one_uint8_t_property_succeeds();
+    log_sink_etw_log_with_context_with_one_bool_property_succeeds();
     log_sink_etw_log_with_context_with_all_property_types_succeeds();
     when_unknown_property_type_is_encountered_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
     when_more_than_64_properties_are_passed_in_context_log_sink_etw_log_with_context_does_not_place_any_properties_in_the_event();
