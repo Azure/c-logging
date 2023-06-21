@@ -16,20 +16,22 @@
 #endif // USE_LOG_SINK_ETW
 
 #if USE_LOG_SINK_CONSOLE || USE_LOG_SINK_ETW
-const LOG_SINK_IF* log_sinks[] = {
+const LOG_SINK_IF* all_sinks[] = {
 #ifdef USE_LOG_SINK_CONSOLE
-    & log_sink_console,
+    &log_sink_console,
 #endif // USE_LOG_SINK_CONSOLE
 #ifdef USE_LOG_SINK_ETW
-    & log_sink_etw
+    &log_sink_etw
 #endif // USE_LOG_SINK_ETW
 };
-const uint32_t log_sink_count = MU_COUNT_ARRAY_ITEMS(log_sinks);
+
+LOG_SINK_IF** log_sinks = all_sinks;
+uint32_t log_sink_count = MU_COUNT_ARRAY_ITEMS(all_sinks);
 
 #else // USE_LOG_SINK_CONSOLE || USE_LOG_SINK_ETW
 
-const LOG_SINK_IF** log_sinks;
-const uint32_t log_sink_count = 0;
+LOG_SINK_IF** log_sinks = NULL;
+uint32_t log_sink_count = 0;
 
 #endif // USE_LOG_SINK_CONSOLE || USE_LOG_SINK_ETW
 

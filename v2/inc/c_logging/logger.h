@@ -21,11 +21,21 @@
 extern "C" {
 #endif
 
-    extern const uint32_t log_sink_count;
-    extern const LOG_SINK_IF* log_sinks[];
+    extern uint32_t log_sink_count;
+    extern LOG_SINK_IF** log_sinks;
+
+    typedef struct LOGGER_CONFIG_TAG
+    {
+        uint32_t log_sink_count;
+        LOG_SINK_IF** log_sinks;
+    } LOGGER_CONFIG;
 
     int logger_init(void);
     void logger_deinit(void);
+
+    LOGGER_CONFIG logger_get_config(void);
+    void logger_set_config(LOGGER_CONFIG new_config);
+
     void logger_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line_no, const char* format, ...);
 
 #define LOGGER_LOG(log_level, log_context, format, ...) \

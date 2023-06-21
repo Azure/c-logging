@@ -88,6 +88,19 @@ void logger_deinit(void)
     }
 }
 
+LOGGER_CONFIG logger_get_config(void)
+{
+    LOGGER_CONFIG result = { .log_sinks = log_sinks, .log_sink_count = log_sink_count };
+
+    return result;
+}
+
+void logger_set_config(LOGGER_CONFIG new_config)
+{
+    log_sinks = new_config.log_sinks;
+    log_sink_count = new_config.log_sink_count;
+}
+
 void logger_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line_no, const char* format, ...)
 {
     va_list args;
