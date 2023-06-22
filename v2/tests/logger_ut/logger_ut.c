@@ -963,6 +963,63 @@ static void logger_deinit_after_deinit_returns(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
+// logger_get_config
+
+/* Tests_SRS_LOGGER_01_013: [ logger_get_config shall return a LOGGER_CONFIG structure with log_sink_count set to the current log sink count and log_sinks set to the array of log sink interfaces currently used. ] */
+static void logger_get_config_returns_the_current_configuration(void)
+{
+    // arrange
+    setup_mocks();
+
+    // act
+    LOGGER_CONFIG config = logger_get_config();
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+    POOR_MANS_ASSERT(config.log_sink_count == 2);
+    POOR_MANS_ASSERT(config.log_sinks[0] == &log_sink1);
+    POOR_MANS_ASSERT(config.log_sinks[1] == &log_sink2);
+}
+
+// logger_set_config
+
+/* Tests_SRS_LOGGER_01_014: [ logger_set_config set the current log sink count to new_config.log_sink_count and the array of log sink interfaces currently used to new_config.log_sinks. ] */
+static void logger_set_config_sets_a_new_configuration_to_no_sinks(void)
+{
+    // arrange
+    setup_mocks();
+
+    logger_set_config((LOGGER_CONFIG) { .log_sinks = NULL, .log_sink_count = 0 });
+
+    // act
+    LOGGER_CONFIG config = logger_get_config();
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+    POOR_MANS_ASSERT(config.log_sink_count == 0);
+}
+
+/* Tests_SRS_LOGGER_01_014: [ logger_set_config set the current log sink count to new_config.log_sink_count and the array of log sink interfaces currently used to new_config.log_sinks. ] */
+static void logger_set_config_sets_a_new_configuration_to_1_sink(void)
+{
+    // arrange
+    setup_mocks();
+
+    static const LOG_SINK_IF* new_logger_config_sinks[] = { &log_sink2 };
+    logger_set_config((LOGGER_CONFIG) { .log_sinks = new_logger_config_sinks, .log_sink_count = 1 });
+
+    // act
+    LOGGER_CONFIG config = logger_get_config();
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+    POOR_MANS_ASSERT(config.log_sink_count == 1);
+    POOR_MANS_ASSERT(config.log_sinks[0] == &log_sink2); // on purpose set to log_sink2
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
@@ -995,6 +1052,10 @@ int main(void)
 
     logger_deinit_deinitialized_all_sinks();
     logger_deinit_after_deinit_returns();
+
+    logger_get_config_returns_the_current_configuration();
+    logger_set_config_sets_a_new_configuration_to_no_sinks();
+    logger_set_config_sets_a_new_configuration_to_1_sink();
 
     return 0;
 }

@@ -90,6 +90,7 @@ void logger_deinit(void)
 
 LOGGER_CONFIG logger_get_config(void)
 {
+    /* Codes_SRS_LOGGER_01_013: [ logger_get_config shall return a LOGGER_CONFIG structure with log_sink_count set to the current log sink count and log_sinks set to the array of log sink interfaces currently used. ] */
     LOGGER_CONFIG result = { .log_sinks = log_sinks, .log_sink_count = log_sink_count };
 
     return result;
@@ -97,6 +98,7 @@ LOGGER_CONFIG logger_get_config(void)
 
 void logger_set_config(LOGGER_CONFIG new_config)
 {
+    /* Codes_SRS_LOGGER_01_014: [ logger_set_config set the current log sink count to new_config.log_sink_count and the array of log sink interfaces currently used to new_config.log_sinks. ] */
     log_sinks = new_config.log_sinks;
     log_sink_count = new_config.log_sink_count;
 }
