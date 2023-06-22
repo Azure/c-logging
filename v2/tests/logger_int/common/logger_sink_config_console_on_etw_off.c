@@ -11,5 +11,5 @@
 const LOG_SINK_IF* all_sinks[] = {
     & log_sink_console
 };
-LOG_SINK_IF** log_sinks = all_sinks;
+const LOG_SINK_IF** log_sinks = all_sinks;
 uint32_t log_sink_count = MU_COUNT_ARRAY_ITEMS(all_sinks);

@@ -7,5 +7,5 @@
 
 #include "c_logging/log_sink_if.h"
 
-LOG_SINK_IF** log_sinks;
+const LOG_SINK_IF** log_sinks;
 uint32_t log_sink_count = 0;
