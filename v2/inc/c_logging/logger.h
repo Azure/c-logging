@@ -27,7 +27,7 @@ extern "C" {
     typedef struct LOGGER_CONFIG_TAG
     {
         uint32_t log_sink_count;
-        LOG_SINK_IF** log_sinks;
+        const LOG_SINK_IF** log_sinks;
     } LOGGER_CONFIG;
 
     int logger_init(void);
