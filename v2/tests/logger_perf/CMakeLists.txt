@@ -7,8 +7,8 @@ add_executable(logger_perf
     logger_perf_v1.c
     logger_perf_v2.h
     logger_perf_v2.c
-    logger_perf_enums.h
-    logger_perf_enums.c
+    logger_perf_common.h
+    logger_perf_common.c
     timer.h
     timer_win32.c
 )
