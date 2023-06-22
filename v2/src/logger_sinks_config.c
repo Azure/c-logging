@@ -25,12 +25,12 @@ const LOG_SINK_IF* all_sinks[] = {
 #endif // USE_LOG_SINK_ETW
 };
 
-LOG_SINK_IF** log_sinks = all_sinks;
+const LOG_SINK_IF** log_sinks = all_sinks;
 uint32_t log_sink_count = MU_COUNT_ARRAY_ITEMS(all_sinks);
 
 #else // USE_LOG_SINK_CONSOLE || USE_LOG_SINK_ETW
 
-LOG_SINK_IF** log_sinks = NULL;
+const LOG_SINK_IF** log_sinks = NULL;
 uint32_t log_sink_count = 0;
 
 #endif // USE_LOG_SINK_CONSOLE || USE_LOG_SINK_ETW
