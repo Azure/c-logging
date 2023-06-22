@@ -300,13 +300,14 @@ static const LOG_SINK_IF log_sink2 =
 };
 
 // test config
-const LOG_SINK_IF* log_sinks[] =
+static const LOG_SINK_IF* test_log_sinks[] =
 {
     &log_sink1,
     &log_sink2
 };
 
-const uint32_t log_sink_count = MU_COUNT_ARRAY_ITEMS(log_sinks);
+LOG_SINK_IF** log_sinks = test_log_sinks;
+uint32_t log_sink_count = MU_COUNT_ARRAY_ITEMS(test_log_sinks);
 
 static void setup_log_sink1_init_call(void)
 {
