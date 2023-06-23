@@ -5,11 +5,21 @@
 ## Exposed API
 
 ```c
-    extern const uint32_t log_sink_count;
-    extern const LOG_SINK_IF* log_sinks[];
+    extern uint32_t log_sink_count;
+    extern LOG_SINK_IF** log_sinks;
+
+    typedef struct LOGGER_CONFIG_TAG
+    {
+        uint32_t log_sink_count;
+        LOG_SINK_IF** log_sinks;
+    } LOGGER_CONFIG;
 
     int logger_init(void);
     void logger_deinit(void);
+
+    LOGGER_CONFIG logger_get_config(void);
+    void logger_set_config(LOGGER_CONFIG new_config);
+
     void logger_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line_no, const char* format, ...);
 
 #define LOGGER_LOG(log_level, log_context, format, ...) \
@@ -50,6 +60,30 @@ Note: No other `logger` API should be called while `logger_deinit` executes.
 **SRS_LOGGER_01_006: [** If `logger` is not initialized, `logger_deinit` shall return. **]**
 
 **SRS_LOGGER_01_007: [** `logger_deinit` shall call the `deinit` function of every sink that is configured to be used. **]**
+
+### logger_get_config
+
+```c
+LOGGER_CONFIG logger_get_config(void);
+```
+
+`logger_get_config` returns the current logging sink configuration.
+
+Note: `logger_get_config` is not thread safe and should not be called when othe rlogger APIs are executing.
+
+**SRS_LOGGER_01_013: [** `logger_get_config` shall return a `LOGGER_CONFIG` structure with `log_sink_count` set to the current log sink count and `log_sinks` set to the array of log sink interfaces currently used. **]**
+
+### logger_set_config
+
+```c
+void logger_set_config(LOGGER_CONFIG new_config);
+```
+
+`logger_set_config` sets the logging sink configuration to the parameters indicated in `new_config`.
+
+Note: `logger_get_config` is not thread safe and should not be called when othe rlogger APIs are executing.
+
+**SRS_LOGGER_01_014: [** `logger_set_config` set the current log sink count to `new_config.log_sink_count` and the array of log sink interfaces currently used to `new_config.log_sinks`. **]**
 
 ### LOGGER_LOG
 

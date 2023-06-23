@@ -9,8 +9,10 @@
 #include "c_logging/log_sink_console.h"
 #include "c_logging/log_sink_etw.h"
 
-const LOG_SINK_IF* log_sinks[] = {
-    & log_sink_console,
+const LOG_SINK_IF* all_sinks[] = {
+    &log_sink_console,
     & log_sink_etw
 };
-const uint32_t log_sink_count = MU_COUNT_ARRAY_ITEMS(log_sinks);
+const LOG_SINK_IF** log_sinks = all_sinks;
+uint32_t log_sink_count = MU_COUNT_ARRAY_ITEMS(all_sinks);
+

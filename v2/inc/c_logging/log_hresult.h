@@ -14,10 +14,18 @@
 
 #include "c_logging/log_context.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int log_hresult_fill_property(void* buffer, HRESULT hresult);
 
 /* Codes_SRS_LOG_HRESULT_01_012: [ LOG_HRESULT shall expand to a LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION with name hresult, type ascii_char_ptr and value function call being log_hresult_fill_property(hresult). ] */
 #define LOG_HRESULT(the_hresult) \
     LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION(ascii_char_ptr, hresult, log_hresult_fill_property, the_hresult)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* LOG_HRESULT_H */
