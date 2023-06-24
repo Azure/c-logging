@@ -121,3 +121,34 @@ void logger_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char*
 
     va_end(args);
 }
+
+void logger_log_with_config(LOGGER_CONFIG logger_config, LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line_no, const char* format, ...)
+{
+    if (
+        (logger_config.log_sink_count > 0) &&
+        (logger_config.log_sinks == NULL)
+        )
+    {
+        /* Codes_SRS_LOGGER_01_015: [ If logger_config.log_sinks is NULL and logger_config.log_sink_count is greater than 0, LOGGER_LOG_WITH_CONFIG shall return. ] */
+        (void)printf("Invalid arguments: LOGGER_CONFIG logger_config=%" PRI_LOGGER_CONFIG ", LOG_LEVEL log_level=%" PRI_MU_ENUM ", LOG_CONTEXT_HANDLE log_context=%p, const char* file=%s, const char* func=%s, int line_no=%d, const char* format=%s",
+            LOGGER_CONFIG_VALUES(logger_config), MU_ENUM_VALUE(LOG_LEVEL, log_level), log_context, MU_P_OR_NULL(file), MU_P_OR_NULL(func), line_no, MU_P_OR_NULL(format));
+    }
+    else
+    {
+        va_list args;
+
+        va_start(args, format);
+
+        /* Codes_SRS_LOGGER_01_016: [ Otherwise, LOGGER_LOG_WITH_CONFIG shall call the log function of every sink specified in logger_config. ] */
+        for (uint32_t i = 0; i < logger_config.log_sink_count; i++)
+        {
+            va_list args_copy;
+
+            va_copy(args_copy, args);
+            log_sinks[i]->log(log_level, log_context, file, func, line_no, format, args_copy);
+            va_end(args_copy);
+        }
+
+        va_end(args);
+    }
+}

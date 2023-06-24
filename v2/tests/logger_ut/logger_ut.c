@@ -475,7 +475,7 @@ static void test_with_log_level(LOG_LEVEL log_level)
 
     // 2nd sink
     POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_log_level == log_level);
-    POOR_MANS_ASSERT(expected_calls[0].log_sink2_log_call.captured_log_context == NULL);
+    POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_log_context == NULL);
     POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_file, __FILE__) == 0);
     POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_func, __FUNCTION__) == 0);
     POOR_MANS_ASSERT(expected_calls[1].log_sink2_log_call.captured_line == expected_line);
@@ -1020,6 +1020,94 @@ static void logger_set_config_sets_a_new_configuration_to_1_sink(void)
     POOR_MANS_ASSERT(config.log_sinks[0] == &log_sink2); // on purpose set to log_sink2
 }
 
+static void test_logger_log_with_config_on_sink_with_log_level(LOG_LEVEL log_level)
+{
+    // arrange
+    setup_mocks();
+    setup_log_sink2_log_call();
+
+    const LOG_SINK_IF* only_one_sink[] =
+    {
+        &log_sink2
+    };
+
+    const LOGGER_CONFIG custom_config =
+    {
+        .log_sinks = only_one_sink,
+        .log_sink_count = 1
+    };
+
+    // act
+    // capture the line no of the error
+    int expected_line = __LINE__; LOGGER_LOG_WITH_CONFIG(custom_config, log_level, NULL, "gigi duru");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // only 2nd sink
+    POOR_MANS_ASSERT(expected_calls[0].log_sink2_log_call.captured_log_level == log_level);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink2_log_call.captured_log_context == NULL);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink2_log_call.captured_file, __FILE__) == 0);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink2_log_call.captured_func, __FUNCTION__) == 0);
+    POOR_MANS_ASSERT(expected_calls[0].log_sink2_log_call.captured_line == expected_line);
+    POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink2_log_call.captured_message, "gigi duru") == 0);
+
+    // cleanup
+    cleanup_calls();
+}
+
+/* Tests_SRS_LOGGER_01_016: [ Otherwise, LOGGER_LOG_WITH_CONFIG shall call the log function of every sink specified in logger_config. ] */
+static void LOGGER_LOG_WITH_CONFIG_with_CRITICAL_works(void)
+{
+    test_logger_log_with_config_on_sink_with_log_level(LOG_LEVEL_CRITICAL);
+}
+
+/* Tests_SRS_LOGGER_01_016: [ Otherwise, LOGGER_LOG_WITH_CONFIG shall call the log function of every sink specified in logger_config. ] */
+static void LOGGER_LOG_WITH_CONFIG_with_ERROR_works(void)
+{
+    test_logger_log_with_config_on_sink_with_log_level(LOG_LEVEL_ERROR);
+}
+
+/* Tests_SRS_LOGGER_01_016: [ Otherwise, LOGGER_LOG_WITH_CONFIG shall call the log function of every sink specified in logger_config. ] */
+static void LOGGER_LOG_WITH_CONFIG_with_INFO_works(void)
+{
+    test_logger_log_with_config_on_sink_with_log_level(LOG_LEVEL_INFO);
+}
+
+/* Tests_SRS_LOGGER_01_016: [ Otherwise, LOGGER_LOG_WITH_CONFIG shall call the log function of every sink specified in logger_config. ] */
+static void LOGGER_LOG_WITH_CONFIG_with_WARNING_works(void)
+{
+    test_logger_log_with_config_on_sink_with_log_level(LOG_LEVEL_WARNING);
+}
+
+/* Tests_SRS_LOGGER_01_016: [ Otherwise, LOGGER_LOG_WITH_CONFIG shall call the log function of every sink specified in logger_config. ] */
+static void LOGGER_LOG_WITH_CONFIG_with_VERBOSE_works(void)
+{
+    test_logger_log_with_config_on_sink_with_log_level(LOG_LEVEL_VERBOSE);
+}
+
+/* Tests_SRS_LOGGER_01_015: [ If logger_config.log_sinks is NULL and logger_config.log_sink_count is greater than 0, LOGGER_LOG_WITH_CONFIG shall return. ] */
+static void LOGGER_LOG_WITH_CONFIG_with_NULL_sinks_and_1_count_returns(void)
+{
+    // arrange
+    setup_mocks();
+
+    // act
+    // capture the line no of the error
+    LOGGER_CONFIG custom_config = {
+        .log_sinks = NULL, .log_sink_count = 1
+    };
+    LOGGER_LOG_WITH_CONFIG(custom_config, LOG_LEVEL_CRITICAL, NULL, "gigi duru");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // cleanup
+    cleanup_calls();
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
@@ -1056,6 +1144,14 @@ int main(void)
     logger_get_config_returns_the_current_configuration();
     logger_set_config_sets_a_new_configuration_to_no_sinks();
     logger_set_config_sets_a_new_configuration_to_1_sink();
+
+    LOGGER_LOG_WITH_CONFIG_with_CRITICAL_works();
+    LOGGER_LOG_WITH_CONFIG_with_ERROR_works();
+    LOGGER_LOG_WITH_CONFIG_with_INFO_works();
+    LOGGER_LOG_WITH_CONFIG_with_WARNING_works();
+    LOGGER_LOG_WITH_CONFIG_with_VERBOSE_works();
+
+    LOGGER_LOG_WITH_CONFIG_with_NULL_sinks_and_1_count_returns();
 
     return 0;
 }

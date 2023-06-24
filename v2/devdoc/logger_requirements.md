@@ -6,13 +6,22 @@
 
 ```c
     extern uint32_t log_sink_count;
-    extern LOG_SINK_IF** log_sinks;
+    extern const LOG_SINK_IF** log_sinks;
 
     typedef struct LOGGER_CONFIG_TAG
     {
         uint32_t log_sink_count;
-        LOG_SINK_IF** log_sinks;
+        const LOG_SINK_IF** log_sinks;
     } LOGGER_CONFIG;
+
+/*a format specifier that can be used in printf function family to print the values behind a LOGGER_CONFIG, like printf("logger config is %" PRI_LOGGER_CONFIG "\n", LOGGER_CONFIG_VALUES(logger_config));*/
+#define PRI_LOGGER_CONFIG "s(LOGGER_CONFIG){.log_sinks=%p, .log_sink_count=%" PRIu32 "}"
+
+/*a macro expanding to the 2 fields in the LOGGER_CONFIG structure*/
+#define LOGGER_CONFIG_VALUES(logger_config) \
+    "",                                     \
+    (logger_config).log_sinks,              \
+    (logger_config).log_sink_count          \
 
     int logger_init(void);
     void logger_deinit(void);
@@ -21,12 +30,16 @@
     void logger_set_config(LOGGER_CONFIG new_config);
 
     void logger_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line_no, const char* format, ...);
+    void logger_log_with_config(LOGGER_CONFIG logger_config, LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line_no, const char* format, ...);
 
 #define LOGGER_LOG(log_level, log_context, format, ...) \
-  // ...
+    ...
+
+#define LOGGER_LOG_WITH_CONFIG(logger_config, log_level, log_context, format, ...) \
+    ...
 
 #define LOGGER_LOG_EX(log_level, ...) \
-  // ...
+    ...
 ```
 
 ### logger_init
@@ -96,7 +109,20 @@ Note: `logger_get_config` is not thread safe and should not be called when othe 
 
 **SRS_LOGGER_01_001: [** `LOGGER_LOG` shall call the `log` function of every sink that is configured to be used. **]**
 
-### LOGGER_LOG
+### LOGGER_LOG_WITH_CONFIG
+
+```c
+#define LOGGER_LOG_WITH_CONFIG(logger_config, log_level, log_context, format, ...) \
+  // ...
+```
+
+`LOGGER_LOG_WITH_CONFIG` allows the user to log one logging event for a specific logger sink configuration.
+
+**SRS_LOGGER_01_015: [** If `logger_config.log_sinks` is `NULL` and `logger_config.log_sink_count` is greater than 0, `LOGGER_LOG_WITH_CONFIG` shall return. **]**
+
+**SRS_LOGGER_01_016: [** Otherwise, `LOGGER_LOG_WITH_CONFIG` shall call the `log` function of every sink specified in `logger_config`. **]**
+
+### LOGGER_LOG_EX
 
 ```c
 #define LOGGER_LOG_EX(log_level, ...) \
