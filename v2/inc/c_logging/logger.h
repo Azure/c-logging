@@ -15,6 +15,8 @@
 #include "c_logging/log_hresult.h" // IWYU pragma: keep
 #endif
 
+#include "c_logging/log_errno.h"
+
 #define LOG_MAX_MESSAGE_LENGTH              4096 /*in bytes - a message is not expected to exceed this size in bytes, if it does, only LOG_MAX_MESSAGE_LENGTH characters are retained*/
 
 #ifdef __cplusplus
