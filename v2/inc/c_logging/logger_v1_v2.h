@@ -11,5 +11,6 @@
 #define LogVerbose(...) LOGGER_LOG(LOG_LEVEL_VERBOSE, NULL, __VA_ARGS__)
 
 #define LogLastError(...) LOGGER_LOG_EX(LOG_LEVEL_ERROR, LOG_LASTERROR(), LOG_MESSAGE(__VA_ARGS__))
+#define LogErrorNo(...) LOGGER_LOG_EX(LOG_LEVEL_ERROR, LOG_ERRNO(), LOG_MESSAGE(__VA_ARGS__))
 
 #endif /* LOGGER_V1_V2_H */
