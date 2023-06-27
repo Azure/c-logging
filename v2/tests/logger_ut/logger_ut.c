@@ -1108,6 +1108,37 @@ static void LOGGER_LOG_WITH_CONFIG_with_NULL_sinks_and_1_count_returns(void)
     cleanup_calls();
 }
 
+/* Tests_SRS_LOGGER_01_016: [ Otherwise, LOGGER_LOG_WITH_CONFIG shall call the log function of every sink specified in logger_config. ] */
+static void LOGGER_LOG_WITH_CONFIG_with_1_sink_when_no_sinks_in_default_config(void)
+{
+    // arrange
+    setup_mocks();
+    setup_log_sink2_log_call();
+
+    const LOG_SINK_IF* only_one_sink[] =
+    {
+        &log_sink2
+    };
+
+    logger_set_config((LOGGER_CONFIG) { .log_sinks = NULL, .log_sink_count = 0 });
+
+    // act
+    // capture the line no of the error
+    const LOGGER_CONFIG custom_config =
+    {
+        .log_sinks = only_one_sink,
+        .log_sink_count = 1
+    };
+    LOGGER_LOG_WITH_CONFIG(custom_config, LOG_LEVEL_CRITICAL, NULL, "gigi duru");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // cleanup
+    cleanup_calls();
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
@@ -1152,6 +1183,7 @@ int main(void)
     LOGGER_LOG_WITH_CONFIG_with_VERBOSE_works();
 
     LOGGER_LOG_WITH_CONFIG_with_NULL_sinks_and_1_count_returns();
+    LOGGER_LOG_WITH_CONFIG_with_1_sink_when_no_sinks_in_default_config();
 
     return 0;
 }

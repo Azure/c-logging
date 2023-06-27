@@ -145,7 +145,7 @@ void logger_log_with_config(LOGGER_CONFIG logger_config, LOG_LEVEL log_level, LO
             va_list args_copy;
 
             va_copy(args_copy, args);
-            log_sinks[i]->log(log_level, log_context, file, func, line_no, format, args_copy);
+            logger_config.log_sinks[i]->log(log_level, log_context, file, func, line_no, format, args_copy);
             va_end(args_copy);
         }
 
