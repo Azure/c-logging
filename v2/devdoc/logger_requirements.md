@@ -107,6 +107,8 @@ Note: `logger_get_config` is not thread safe and should not be called when othe 
 
 `LOGGER_LOG` allows the user to log one logging event.
 
+**SRS_LOGGER_01_017: [** If `logger` is not initialized, `LOGGER_LOG` shall abort the program. **]**
+
 **SRS_LOGGER_01_001: [** `LOGGER_LOG` shall call the `log` function of every sink that is configured to be used. **]**
 
 ### LOGGER_LOG_WITH_CONFIG
@@ -119,6 +121,8 @@ Note: `logger_get_config` is not thread safe and should not be called when othe 
 `LOGGER_LOG_WITH_CONFIG` allows the user to log one logging event for a specific logger sink configuration.
 
 **SRS_LOGGER_01_015: [** If `logger_config.log_sinks` is `NULL` and `logger_config.log_sink_count` is greater than 0, `LOGGER_LOG_WITH_CONFIG` shall return. **]**
+
+**SRS_LOGGER_01_018: [** If `logger` is not initialized, `LOGGER_LOG` shall abort the program. **]**
 
 **SRS_LOGGER_01_016: [** Otherwise, `LOGGER_LOG_WITH_CONFIG` shall call the `log` function of every sink specified in `logger_config`. **]**
 

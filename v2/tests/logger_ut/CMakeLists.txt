@@ -2,7 +2,7 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 add_executable(logger_ut
-    ../../src/logger.c
+    logger_mocked.c
     logger_ut.c
 )
 
