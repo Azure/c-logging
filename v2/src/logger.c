@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <inttypes.h>                 // for PRIu32
-#include <stdio.h>
+#include <inttypes.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "macro_utils/macro_utils.h"
 
