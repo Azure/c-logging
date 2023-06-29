@@ -34,7 +34,8 @@
     MOCK_CALL_TYPE_log_sink1_log, \
     MOCK_CALL_TYPE_log_sink2_init, \
     MOCK_CALL_TYPE_log_sink2_deinit, \
-    MOCK_CALL_TYPE_log_sink2_log \
+    MOCK_CALL_TYPE_log_sink2_log, \
+    MOCK_CALL_TYPE_abort
 
 MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
 
@@ -292,6 +293,19 @@ static void log_sink2_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, c
     }
 }
 
+void mock_abort(void)
+{
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_abort))
+    {
+        actual_and_expected_match = false;
+    }
+    else
+    {
+        actual_call_count++;
+    }
+}
+
 static const LOG_SINK_IF log_sink2 =
 {
     .init = log_sink2_init,
@@ -346,6 +360,12 @@ static void setup_log_sink2_log_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_log_sink2_log;
     expected_calls[expected_call_count].log_sink2_log_call.captured_log_context = NULL;
+    expected_call_count++;
+}
+
+static void setup_abort(void)
+{
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_abort;
     expected_call_count++;
 }
 
@@ -1120,6 +1140,7 @@ static void LOGGER_LOG_WITH_CONFIG_with_1_sink_when_no_sinks_in_default_config(v
         &log_sink2
     };
 
+    LOGGER_CONFIG old_config = logger_get_config();
     logger_set_config((LOGGER_CONFIG) { .log_sinks = NULL, .log_sink_count = 0 });
 
     // act
@@ -1134,6 +1155,8 @@ static void LOGGER_LOG_WITH_CONFIG_with_1_sink_when_no_sinks_in_default_config(v
     // assert
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(actual_and_expected_match);
+
+    logger_set_config(old_config);
 
     // cleanup
     cleanup_calls();
@@ -1169,13 +1192,6 @@ int main(void)
 
     LOGGER_LOG_EX_with_message_works();
 
-    logger_deinit_deinitialized_all_sinks();
-    logger_deinit_after_deinit_returns();
-
-    logger_get_config_returns_the_current_configuration();
-    logger_set_config_sets_a_new_configuration_to_no_sinks();
-    logger_set_config_sets_a_new_configuration_to_1_sink();
-
     LOGGER_LOG_WITH_CONFIG_with_CRITICAL_works();
     LOGGER_LOG_WITH_CONFIG_with_ERROR_works();
     LOGGER_LOG_WITH_CONFIG_with_INFO_works();
@@ -1184,6 +1200,13 @@ int main(void)
 
     LOGGER_LOG_WITH_CONFIG_with_NULL_sinks_and_1_count_returns();
     LOGGER_LOG_WITH_CONFIG_with_1_sink_when_no_sinks_in_default_config();
+
+    logger_deinit_deinitialized_all_sinks();
+    logger_deinit_after_deinit_returns();
+
+    logger_get_config_returns_the_current_configuration();
+    logger_set_config_sets_a_new_configuration_to_no_sinks();
+    logger_set_config_sets_a_new_configuration_to_1_sink();
 
     return 0;
 }
