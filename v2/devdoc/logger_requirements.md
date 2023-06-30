@@ -52,13 +52,17 @@ int logger_init(void);
 
 Note: No other `logger` API should be called while `logger_init` executes.
 
-**SRS_LOGGER_01_002: [** If `logger` is already initialized, `logger_init` shall fail and return a non-zero value. **]**
+**SRS_LOGGER_01_019: [** If `logger` is not already initialized: **]**
 
-**SRS_LOGGER_01_003: [** `logger_init` shall call the `init` function of every sink that is configured to be used. **]**
+- **SRS_LOGGER_01_020: [** `logger_init` shall set the logger initialization counter to 1. **]**
+
+- **SRS_LOGGER_01_003: [** `logger_init` shall call the `init` function of every sink that is configured to be used. **]**
 
 **SRS_LOGGER_01_004: [** If `init` fails, all sinks already initialized shall have their `deinit` function called and `logger_init` shall fail and return a non-zero value. **]**
 
 **SRS_LOGGER_01_005: [** Otherwise, `logger_init` shall succeed and return 0. **]**
+
+**SRS_LOGGER_01_002: [** If `logger` is already initialized, `logger_init` shall increment the logger initialization counter, succeed and return 0. **]**
 
 ### logger_deinit
 
@@ -72,7 +76,11 @@ Note: No other `logger` API should be called while `logger_deinit` executes.
 
 **SRS_LOGGER_01_006: [** If `logger` is not initialized, `logger_deinit` shall return. **]**
 
-**SRS_LOGGER_01_007: [** `logger_deinit` shall call the `deinit` function of every sink that is configured to be used. **]**
+**SRS_LOGGER_01_021: [** Otherwise, `logger_deinit` shall decrement the initialization counter for the module. **]**
+
+**SRS_LOGGER_01_022: [** If the initilization counter reaches 0: **]**
+
+- **SRS_LOGGER_01_007: [** `logger_deinit` shall call the `deinit` function of every sink that is configured to be used. **]**
 
 ### logger_get_config
 

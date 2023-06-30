@@ -23,6 +23,7 @@ MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(LOG_LEVEL, LOG_LEVEL_VALUES);
 MU_DEFINE_ENUM(LOGGER_STATE, LOGGER_STATE_VALUES)
 MU_DEFINE_ENUM_STRINGS(LOGGER_STATE, LOGGER_STATE_VALUES)
 
+static uint32_t logger_init_count = 0;
 static LOGGER_STATE logger_state = LOGGER_STATE_NOT_INITIALIZED;
 
 int logger_init(void)
@@ -30,14 +31,27 @@ int logger_init(void)
     int result;
     uint32_t i;
 
-    if (logger_state != LOGGER_STATE_NOT_INITIALIZED)
+    switch (logger_state)
     {
-        /* Codes_SRS_LOGGER_01_002: [ If logger is already initialized, logger_init shall fail and return a non-zero value. ] */
-        (void)printf("logger_init called in state %" PRI_MU_ENUM "\r\n", MU_ENUM_VALUE(LOGGER_STATE, logger_state));
+    default:
+        (void)printf("Unexpected logger state: %" PRI_MU_ENUM "", MU_ENUM_VALUE(LOGGER_STATE, logger_state));
         result = MU_FAILURE;
-    }
-    else
+        break;
+
+    case LOGGER_STATE_INITIALIZED:
     {
+        /* Codes_SRS_LOGGER_01_002: [ If logger is already initialized, logger_init shall increment the logger initialization counter, succeed and return 0. ] */
+        logger_init_count++;
+        result = 0;
+        break;
+    }
+    case LOGGER_STATE_NOT_INITIALIZED:
+    {
+        /* Codes_SRS_LOGGER_01_019: [ If logger is not already initialized: ] */
+
+        /* Codes_SRS_LOGGER_01_020: [ logger_init shall set the logger initialization counter to 1. ] */
+        logger_init_count = 1;
+
         /* Codes_SRS_LOGGER_01_003: [ logger_init shall call the init function of every sink that is configured to be used. ] */
         for (i = 0; i < log_sink_count; i++)
         {
@@ -65,6 +79,9 @@ int logger_init(void)
             /* Codes_SRS_LOGGER_01_005: [ Otherwise, logger_init shall succeed and return 0. ] */
             result = 0;
         }
+
+        break;
+    }
     }
 
     return result;
@@ -72,20 +89,34 @@ int logger_init(void)
 
 void logger_deinit(void)
 {
-    if (logger_state != LOGGER_STATE_INITIALIZED)
+    switch (logger_state)
+    {
+    default:
+        (void)printf("Unexpected logger state: %" PRI_MU_ENUM "", MU_ENUM_VALUE(LOGGER_STATE, logger_state));
+        break;
+
+    case LOGGER_STATE_NOT_INITIALIZED:
     {
         /* Codes_SRS_LOGGER_01_006: [ If logger is not initialized, logger_deinit shall return. ] */
         (void)printf("logger_deinit called in state %" PRI_MU_ENUM "\r\n", MU_ENUM_VALUE(LOGGER_STATE, logger_state));
+        break;
     }
-    else
+    case LOGGER_STATE_INITIALIZED:
     {
-        /* Codes_SRS_LOGGER_01_007: [ logger_deinit shall call the deinit function of every sink that is configured to be used. ] */
-        for (uint32_t i = 0; i < log_sink_count; i++)
+        /* Codes_SRS_LOGGER_01_021: [ Otherwise, logger_deinit shall decrement the initialization counter for the module. ] */
+        if ((--logger_init_count) == 0)
         {
-            log_sinks[i]->deinit();
-        }
+            /* Codes_SRS_LOGGER_01_022: [ If the initilization counter reaches 0: ] */
+            /* Codes_SRS_LOGGER_01_007: [ logger_deinit shall call the deinit function of every sink that is configured to be used. ] */
+            for (uint32_t i = 0; i < log_sink_count; i++)
+            {
+                log_sinks[i]->deinit();
+            }
 
-        logger_state = LOGGER_STATE_NOT_INITIALIZED;
+            logger_state = LOGGER_STATE_NOT_INITIALIZED;
+        }
+        break;
+    }
     }
 }
 

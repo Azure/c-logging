@@ -429,6 +429,8 @@ static void when_the_2nd_sink_init_fails_logger_init_fails(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
+/* Tests_SRS_LOGGER_01_019: [ If logger is not already initialized: ] */
+/* Tests_SRS_LOGGER_01_020: [ logger_init shall set the logger initialization counter to 1. ] */
 /* Tests_SRS_LOGGER_01_003: [ logger_init shall call the init function of every sink that is configured to be used. ] */
 /* Tests_SRS_LOGGER_01_005: [ Otherwise, logger_init shall succeed and return 0. ] */
 static void logger_init_initializes_sinks(void)
@@ -447,24 +449,36 @@ static void logger_init_initializes_sinks(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    logger_deinit();
     cleanup_calls();
 }
 
-/* Tests_SRS_LOGGER_01_002: [ If logger is already initialized, logger_init shall fail and return a non-zero value. ] */
-static void logger_init_after_init_fails(void)
+static void test_logger_init(void)
+{
+    setup_mocks();
+    setup_log_sink1_init_call();
+    setup_log_sink2_init_call();
+    POOR_MANS_ASSERT(logger_init() == 0);
+}
+
+/* Tests_SRS_LOGGER_01_002: [ If logger is already initialized, logger_init shall increment the logger initialization counter, succeed and return 0. ] */
+static void logger_init_after_init_succeeds(void)
 {
     // arrange
+    test_logger_init();
     setup_mocks();
 
     // act
     int result = logger_init();
 
     // assert
-    POOR_MANS_ASSERT(result != 0);
+    POOR_MANS_ASSERT(result == 0);
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    logger_deinit();
+    logger_deinit();
     cleanup_calls();
 }
 
@@ -473,6 +487,7 @@ static void logger_init_after_init_fails(void)
 static void test_with_log_level(LOG_LEVEL log_level)
 {
     // arrange
+    test_logger_init();
     setup_mocks();
     setup_log_sink1_log_call();
     setup_log_sink2_log_call();
@@ -502,6 +517,7 @@ static void test_with_log_level(LOG_LEVEL log_level)
     POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_message, "gigi duru") == 0);
 
     // cleanup
+    logger_deinit();
     cleanup_calls();
 }
 
@@ -542,6 +558,7 @@ static void LOGGER_LOG_with_non_NULL_context(void)
     LOG_CONTEXT_HANDLE log_context;
     LOG_CONTEXT_CREATE(log_context, NULL);
 
+    test_logger_init();
     setup_mocks();
     setup_log_sink1_log_call();
     setup_log_sink2_log_call();
@@ -572,6 +589,7 @@ static void LOGGER_LOG_with_non_NULL_context(void)
 
     //cleanup
     LOG_CONTEXT_DESTROY(log_context);
+    logger_deinit();
     cleanup_calls();
 }
 
@@ -583,6 +601,8 @@ static void LOGGER_LOG_with_non_NULL_context(void)
 static void LOGGER_LOG_EX_works(void)
 {
     // arrange
+    test_logger_init();
+
     setup_mocks();
     setup_log_sink1_log_call();
     setup_log_sink2_log_call();
@@ -636,6 +656,7 @@ static void LOGGER_LOG_EX_works(void)
     POOR_MANS_ASSERT(*(int32_t*)captured_context_properties[2].value == 42);
 
     //cleanup
+    logger_deinit();
     cleanup_calls();
 }
 
@@ -645,6 +666,8 @@ static void LOGGER_LOG_EX_works(void)
 static void LOGGER_LOG_EX_works_with_2_properties(void)
 {
     // arrange
+    test_logger_init();
+
     setup_mocks();
     setup_log_sink1_log_call();
     setup_log_sink2_log_call();
@@ -704,6 +727,7 @@ static void LOGGER_LOG_EX_works_with_2_properties(void)
     POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[3].value == 43);
 
     //cleanup
+    logger_deinit();
     cleanup_calls();
 }
 
@@ -713,6 +737,7 @@ static void LOGGER_LOG_EX_works_with_2_properties(void)
 static void LOGGER_LOG_EX_twice_works(void)
 {
     // arrange
+    test_logger_init();
     setup_mocks();
     // 1st log line
     setup_log_sink1_log_call();
@@ -813,6 +838,7 @@ static void LOGGER_LOG_EX_twice_works(void)
     POOR_MANS_ASSERT(*(int8_t*)captured_context_properties[2].value == 42);
 
     //cleanup
+    logger_deinit();
     cleanup_calls();
 }
 
@@ -822,6 +848,8 @@ static void LOGGER_LOG_EX_twice_works(void)
 static void LOGGER_LOG_EX_with_string_property_works(void)
 {
     // arrange
+    test_logger_init();
+
     setup_mocks();
     // 1st log line
     setup_log_sink1_log_call();
@@ -876,6 +904,7 @@ static void LOGGER_LOG_EX_with_string_property_works(void)
     POOR_MANS_ASSERT(strcmp(captured_context_properties[2].value, "gigi duru") == 0);
 
     //cleanup
+    logger_deinit();
     cleanup_calls();
 }
 
@@ -883,6 +912,7 @@ static void LOGGER_LOG_EX_with_string_property_works(void)
 static void LOGGER_LOG_EX_with_no_properties_works(void)
 {
     // arrange
+    test_logger_init();
     setup_mocks();
     setup_log_sink1_log_call();
     setup_log_sink2_log_call();
@@ -912,6 +942,7 @@ static void LOGGER_LOG_EX_with_no_properties_works(void)
     POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_message, "") == 0);
 
     //cleanup
+    logger_deinit();
     cleanup_calls();
 }
 
@@ -919,6 +950,7 @@ static void LOGGER_LOG_EX_with_no_properties_works(void)
 static void LOGGER_LOG_EX_with_message_works(void)
 {
     // arrange
+    test_logger_init();
     setup_mocks();
     setup_log_sink1_log_call();
     setup_log_sink2_log_call();
@@ -948,6 +980,7 @@ static void LOGGER_LOG_EX_with_message_works(void)
     POOR_MANS_ASSERT(strcmp(expected_calls[1].log_sink2_log_call.captured_message, "baba cloantza 42") == 0);
 
     //cleanup
+    logger_deinit();
     cleanup_calls();
 }
 
@@ -957,6 +990,7 @@ static void LOGGER_LOG_EX_with_message_works(void)
 static void logger_deinit_deinitialized_all_sinks(void)
 {
     // arrange
+    test_logger_init();
     setup_mocks();
     setup_log_sink1_deinit_call();
     setup_log_sink2_deinit_call();
@@ -970,10 +1004,51 @@ static void logger_deinit_deinitialized_all_sinks(void)
 }
 
 /* Tests_SRS_LOGGER_01_006: [ If logger is not initialized, logger_deinit shall return. ] */
-static void logger_deinit_after_deinit_returns(void)
+static void logger_deinit_after_deinit_with_only_one_init_returns(void)
 {
     // arrange
+    test_logger_init();
+    logger_deinit();
     setup_mocks();
+
+    // act
+    logger_deinit();
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+}
+
+/* Tests_SRS_LOGGER_01_021: [ Otherwise, logger_deinit shall decrement the initialization counter for the module. ] */
+static void logger_deinit_when_initialized_twice_does_not_call_underlying_deinit(void)
+{
+    // arrange
+    test_logger_init();
+    POOR_MANS_ASSERT(logger_init() == 0);
+    setup_mocks();
+
+    // act
+    logger_deinit();
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // cleanup
+    logger_deinit();
+}
+
+/* Tests_SRS_LOGGER_01_022: [ If the initilization counter reaches 0: ] */
+/* Tests_SRS_LOGGER_01_007: [ logger_deinit shall call the deinit function of every sink that is configured to be used. ] */
+static void logger_deinit_twice_after_2_inits_calls_deinit_on_underlying_modules(void)
+{
+    // arrange
+    test_logger_init();
+    POOR_MANS_ASSERT(logger_init() == 0);
+    logger_deinit();
+    setup_mocks();
+    setup_log_sink1_deinit_call();
+    setup_log_sink2_deinit_call();
 
     // act
     logger_deinit();
@@ -1043,6 +1118,7 @@ static void logger_set_config_sets_a_new_configuration_to_1_sink(void)
 static void test_logger_log_with_config_on_sink_with_log_level(LOG_LEVEL log_level)
 {
     // arrange
+    test_logger_init();
     setup_mocks();
     setup_log_sink2_log_call();
 
@@ -1074,6 +1150,7 @@ static void test_logger_log_with_config_on_sink_with_log_level(LOG_LEVEL log_lev
     POOR_MANS_ASSERT(strcmp(expected_calls[0].log_sink2_log_call.captured_message, "gigi duru") == 0);
 
     // cleanup
+    logger_deinit();
     cleanup_calls();
 }
 
@@ -1111,6 +1188,7 @@ static void LOGGER_LOG_WITH_CONFIG_with_VERBOSE_works(void)
 static void LOGGER_LOG_WITH_CONFIG_with_NULL_sinks_and_1_count_returns(void)
 {
     // arrange
+    test_logger_init();
     setup_mocks();
 
     // act
@@ -1125,6 +1203,7 @@ static void LOGGER_LOG_WITH_CONFIG_with_NULL_sinks_and_1_count_returns(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // cleanup
+    logger_deinit();
     cleanup_calls();
 }
 
@@ -1132,6 +1211,7 @@ static void LOGGER_LOG_WITH_CONFIG_with_NULL_sinks_and_1_count_returns(void)
 static void LOGGER_LOG_WITH_CONFIG_with_1_sink_when_no_sinks_in_default_config(void)
 {
     // arrange
+    test_logger_init();
     setup_mocks();
     setup_log_sink2_log_call();
 
@@ -1159,6 +1239,7 @@ static void LOGGER_LOG_WITH_CONFIG_with_1_sink_when_no_sinks_in_default_config(v
     logger_set_config(old_config);
 
     // cleanup
+    logger_deinit();
     cleanup_calls();
 }
 
@@ -1175,7 +1256,7 @@ int main(void)
     when_the_1st_sink_init_fails_logger_init_fails();
     when_the_2nd_sink_init_fails_logger_init_fails();
     logger_init_initializes_sinks();
-    logger_init_after_init_fails();
+    logger_init_after_init_succeeds();
     
     LOGGER_LOG_with_CRITICAL_works();
     LOGGER_LOG_with_ERROR_works();
@@ -1202,7 +1283,9 @@ int main(void)
     LOGGER_LOG_WITH_CONFIG_with_1_sink_when_no_sinks_in_default_config();
 
     logger_deinit_deinitialized_all_sinks();
-    logger_deinit_after_deinit_returns();
+    logger_deinit_after_deinit_with_only_one_init_returns();
+    logger_deinit_when_initialized_twice_does_not_call_underlying_deinit();
+    logger_deinit_twice_after_2_inits_calls_deinit_on_underlying_modules();
 
     logger_get_config_returns_the_current_configuration();
     logger_set_config_sets_a_new_configuration_to_no_sinks();
