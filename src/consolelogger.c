@@ -209,7 +209,6 @@ void consolelogger_log_with_GetErrorNo(const char* file, const char* func, int l
             else
             {
                 size += snprintf_result;
-                int msg_prefix = sizeof(message) - size;
                 if (strerror_r(errno, message + size, sizeof(message) - size) != 0)
                 {
                     (void)puts("error in snprintf trying to output strerror_r's value as string");
