@@ -13,6 +13,7 @@
 #include "c_logging/log_context_property_basic_types.h"
 #include "c_logging/log_context_property_type_ascii_char_ptr.h"
 #include "c_logging/log_context_property_bool_type.h"
+#include "c_logging/log_context_property_type_wchar_t_ptr.h"
 #include "c_logging/log_level.h"
 #include "c_logging/log_sink_if.h"
 
@@ -254,6 +255,23 @@ static void log_sink_console_with_a_context_with_string_works(void)
     LOG_CONTEXT_DESTROY(test_context);
 }
 
+static void log_sink_console_with_a_context_with_wstring_works(void)
+{
+    // arrange
+    LOG_CONTEXT_HANDLE test_context;
+    LOG_CONTEXT_CREATE(test_context, NULL,
+        LOG_CONTEXT_WSTRING_PROPERTY(my_string, L"%ls is %d years old", L"Gogu", 42));
+
+    // act
+    //test_log_sink_console_log(LOG_LEVEL_VERBOSE, test_context, __FILE__, __FUNCTION__, __LINE__, "");
+
+    // assert
+    // no explicit assert, no crash expected
+
+    // cleanup
+    LOG_CONTEXT_DESTROY(test_context);
+}
+
 static void log_sink_console_with_a_context_with_boolean_true_works(void)
 {
     // arrange
@@ -316,6 +334,8 @@ int main(void)
     log_sink_console_with_a_dynamically_allocated_context_works();
 
     log_sink_console_with_a_context_with_string_works();
+
+    log_sink_console_with_a_context_with_wstring_works();
 
     log_sink_console_with_a_context_with_boolean_true_works();
     log_sink_console_with_a_context_with_boolean_false_works();

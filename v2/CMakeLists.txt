@@ -28,6 +28,7 @@ set(c_logging_v2_h_files
     ./inc/c_logging/log_context_property_type_ascii_char_ptr.h
     ./inc/c_logging/log_context_property_type_struct.h
     ./inc/c_logging/log_context_property_value_pair.h
+    ./inc/c_logging/log_context_property_type_wchar_t_ptr.h
     ./inc/c_logging/log_errno.h
     ./inc/c_logging/log_internal_error.h
     ./inc/c_logging/log_level.h
@@ -43,6 +44,7 @@ set(c_logging_v2_c_files
     ./src/log_context_property_type.c
     ./src/log_context_property_type_ascii_char_ptr.c
     ./src/log_context_property_type_struct.c
+    ./src/log_context_property_type_wchar_t_ptr.c
     ./src/log_internal_error.c
     ./src/log_sink_console.c
     )

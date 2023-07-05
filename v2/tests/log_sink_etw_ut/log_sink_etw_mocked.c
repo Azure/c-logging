@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <time.h>
+#include <wchar.h>
 
 #include "windows.h"
 #include "TraceLoggingProvider.h"
@@ -18,6 +19,7 @@
 #define TraceLoggingRegister_EventRegister_EventSetInformation mock_TraceLoggingRegister_EventRegister_EventSetInformation
 #define _get_pgmptr mock__get_pgmptr
 #define _tlgCreate1Sz_char mock__tlgCreate1Sz_char
+#define _tlgCreate1Sz_wchar_t mock__tlgCreate1Sz_wchar_t
 #define EventDataDescCreate mock_EventDataDescCreate
 #define _tlgWriteTransfer_EventWriteTransfer mock__tlgWriteTransfer_EventWriteTransfer
 #define vsnprintf mock_vsnprintf
@@ -30,6 +32,7 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* mock_log_context_get_property_value_pairs
 TLG_STATUS mock_TraceLoggingRegister_EventRegister_EventSetInformation(const struct _tlgProvider_t* hProvider);
 errno_t mock__get_pgmptr(char** pValue);
 void mock__tlgCreate1Sz_char(PEVENT_DATA_DESCRIPTOR pDesc, char const* psz);
+void mock__tlgCreate1Sz_wchar_t(PEVENT_DATA_DESCRIPTOR pDesc, wchar_t const* psz);
 void mock_EventDataDescCreate(PEVENT_DATA_DESCRIPTOR EventDataDescriptor, const VOID* DataPtr, ULONG DataSize);
 TLG_STATUS mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvider, void const* pEventMetadata, LPCGUID pActivityId, LPCGUID pRelatedActivityId, UINT32 cData, EVENT_DATA_DESCRIPTOR* pData);
 int mock_vsnprintf(char* s, size_t n, const char* format, va_list arg);

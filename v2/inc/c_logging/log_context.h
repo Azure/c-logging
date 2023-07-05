@@ -28,6 +28,7 @@ extern "C" {
 
 #define LOG_MAX_STACK_DATA_SIZE                 4096
 #define LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT 64
+#define LOG_MAX_WCHAR_STRING_LENGTH 512
 
 typedef struct LOG_CONTEXT_TAG
 {
@@ -57,6 +58,9 @@ uint32_t internal_log_context_get_values_data_length_or_zero(LOG_CONTEXT_HANDLE 
 #define EXPAND_DEFINE_PROPERTY_AS_PARAMETER_LOG_CONTEXT_STRING_PROPERTY(property_name, ...) \
     , int property_name
 
+#define EXPAND_DEFINE_PROPERTY_AS_PARAMETER_LOG_CONTEXT_WSTRING_PROPERTY(property_name, ...) \
+    , int property_name
+
 #define EXPAND_DEFINE_PROPERTY_AS_PARAMETER_LOG_CONTEXT_NAME(log_context_name) \
 
 #define EXPAND_DEFINE_PROPERTY_AS_PARAMETER_LOG_CONTEXT_PROPERTY(property_type, property_name, field_value) \
@@ -76,6 +80,8 @@ uint32_t internal_log_context_get_values_data_length_or_zero(LOG_CONTEXT_HANDLE 
 #define EXPAND_DEFINE_CONTEXT_NAME_AS_PARAMETER_LOG_MESSAGE(...) \
 
 #define EXPAND_DEFINE_CONTEXT_NAME_AS_PARAMETER_LOG_CONTEXT_STRING_PROPERTY(property_name, ...) \
+
+#define EXPAND_DEFINE_CONTEXT_NAME_AS_PARAMETER_LOG_CONTEXT_WSTRING_PROPERTY(property_name, ...) \
 
 #define EXPAND_DEFINE_CONTEXT_NAME_AS_PARAMETER_LOG_CONTEXT_NAME(log_context_name) \
     , int log_context_is_used_multiple_times
@@ -108,6 +114,15 @@ uint32_t internal_log_context_get_values_data_length_or_zero(LOG_CONTEXT_HANDLE 
     property_value_pair->type = &ascii_char_ptr##_log_context_property_type; \
     /* Codes_SRS_LOG_CONTEXT_01_008: [ LOG_CONTEXT_STRING_PROPERTY shall expand to code that stores as value a string that is constructed using printf-like formatting based on format and all the arguments in .... ]*/ \
     data_pos += sprintf(property_value_pair->value, __VA_ARGS__) + 1; \
+    property_value_pair++; \
+
+#define EXPAND_SETUP_PROPERTY_PAIR_LOG_CONTEXT_WSTRING_PROPERTY(property_name, ...) \
+    /* Codes_SRS_LOG_CONTEXT_07_001: [ LOG_CONTEXT_WSTRING_PROPERTY shall expand to code allocating a property/value pair of type wchar_t_ptr and the name property_name. ]*/ \
+    property_value_pair->value = data_pos; \
+    property_value_pair->name = MU_TOSTRING(property_name); \
+    property_value_pair->type = &wchar_t_ptr##_log_context_property_type; \
+    /* Codes_SRS_LOG_CONTEXT_07_002: [ LOG_CONTEXT_WSTRING_PROPERTY shall expand to code that stores as value a wchar string that is constructed using wprintf-like formatting based on format and all the arguments in .... ]*/ \
+    data_pos += swprintf(property_value_pair->value, LOG_MAX_WCHAR_STRING_LENGTH, __VA_ARGS__)*2 + 2; \
     property_value_pair++; \
 
 #define EXPAND_SETUP_PROPERTY_PAIR_LOG_CONTEXT_NAME(log_context_name) \
@@ -144,6 +159,9 @@ uint32_t internal_log_context_get_values_data_length_or_zero(LOG_CONTEXT_HANDLE 
 #define EXPAND_COUNT_PROPERTY_LOG_CONTEXT_STRING_PROPERTY(property_name, ...) \
     + 1
 
+#define EXPAND_COUNT_PROPERTY_LOG_CONTEXT_WSTRING_PROPERTY(property_name, ...) \
+    + 1
+
 #define EXPAND_COUNT_PROPERTY_LOG_CONTEXT_NAME(log_context_name) \
 
 #define EXPAND_COUNT_PROPERTY_LOG_CONTEXT_PROPERTY(property_type, property_name, field_value) \
@@ -162,6 +180,9 @@ uint32_t internal_log_context_get_values_data_length_or_zero(LOG_CONTEXT_HANDLE 
 // ... here is expected to be (format, ...) for a printf invocation
 #define EXPAND_COUNT_DATA_BYTES_LOG_CONTEXT_STRING_PROPERTY(property_name, ...) \
     + ascii_char_ptr_log_context_property_type_get_init_data_size(__VA_ARGS__)
+
+#define EXPAND_COUNT_DATA_BYTES_LOG_CONTEXT_WSTRING_PROPERTY(property_name, ...) \
+    + wchar_t_ptr_log_context_property_type_get_init_data_size(__VA_ARGS__)
 
 #define EXPAND_COUNT_DATA_BYTES_LOG_CONTEXT_NAME(log_context_name) \
 
