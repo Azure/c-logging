@@ -93,7 +93,7 @@ int internal_log_context_init_from_parent(LOG_CONTEXT_HANDLE dest_log_context, L
 LOG_CONTEXT_HANDLE log_context_create(LOG_CONTEXT_HANDLE parent_context, uint32_t properties_count, uint32_t data_size)
 {
     /* Codes_SRS_LOG_CONTEXT_01_001: [ LOG_CONTEXT_CREATE shall allocate memory for the log context. ]*/
-    LOG_CONTEXT_HANDLE result =  malloc(sizeof(LOG_CONTEXT) + (sizeof(LOG_CONTEXT_PROPERTY_VALUE_PAIR) * properties_count) + data_size);
+    LOG_CONTEXT_HANDLE result =  malloc(sizeof(LOG_CONTEXT) + (sizeof(LOG_CONTEXT_PROPERTY_VALUE_PAIR) * properties_count) + data_size + 512);
     if (result == NULL)
     {
         /* Codes_SRS_LOG_CONTEXT_01_002: [ If any error occurs, LOG_CONTEXT_CREATE shall fail and return NULL. ]*/
@@ -107,6 +107,7 @@ LOG_CONTEXT_HANDLE log_context_create(LOG_CONTEXT_HANDLE parent_context, uint32_
         result->values_data = (void*)(result->property_value_pairs_ptr + properties_count);
         result->values_data_length = data_size;
 
+        printf("log context created\n");
         /* Codes_SRS_LOG_CONTEXT_01_014: [ If parent_context is non-NULL, the created context shall copy all the property/value pairs of parent_context. ]*/
         internal_log_context_init_from_parent(result, parent_context);
         /* return as is */
