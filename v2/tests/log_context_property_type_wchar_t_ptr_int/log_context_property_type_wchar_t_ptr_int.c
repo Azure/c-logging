@@ -7,6 +7,7 @@
 #include <wchar.h>
 
 #include "c_logging/log_context_property_type.h"
+#include "c_logging/log_context_property_type_if.h"
 
 #include "c_logging/log_context_property_type_wchar_t_ptr.h"
 
