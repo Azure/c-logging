@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <wchar.h>
 
 #define snprintf mock_snprintf
 #define vswprintf mock_vswprintf
