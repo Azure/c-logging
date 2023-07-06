@@ -123,7 +123,7 @@ uint32_t internal_log_context_get_values_data_length_or_zero(LOG_CONTEXT_HANDLE 
     property_value_pair->name = MU_TOSTRING(property_name); \
     property_value_pair->type = &wchar_t_ptr##_log_context_property_type; \
     /* Codes_SRS_LOG_CONTEXT_07_002: [ LOG_CONTEXT_WSTRING_PROPERTY shall expand to code that stores as value a wchar string that is constructed using wprintf-like formatting based on format and all the arguments in .... ]*/ \
-    data_pos += swprintf(property_value_pair->value, LOG_MAX_WCHAR_STRING_LENGTH, __VA_ARGS__)*2 + 2; \
+    data_pos += swprintf(property_value_pair->value, LOG_MAX_WCHAR_STRING_LENGTH, __VA_ARGS__)*2 + 256; \
     property_value_pair++; \
 
 #define EXPAND_SETUP_PROPERTY_PAIR_LOG_CONTEXT_NAME(log_context_name) \
