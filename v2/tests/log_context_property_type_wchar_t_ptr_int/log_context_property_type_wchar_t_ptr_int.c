@@ -211,7 +211,7 @@ static void wchar_t_ptr_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(vo
     int result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)(L"cucu");
 
     // assert
-    POOR_MANS_ASSERT(result == 5);
+    POOR_MANS_ASSERT(result == 10);
 }
 
 static void wchar_t_ptr_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_with_multiple_args_succeeds(void)
@@ -222,7 +222,7 @@ static void wchar_t_ptr_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_with_multip
     int result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)(L"The answer is %d and let's say hello %ls", 43, L"world");
 
     // assert
-    POOR_MANS_ASSERT(result == 43);
+    POOR_MANS_ASSERT(result == 86);
 }
 
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */

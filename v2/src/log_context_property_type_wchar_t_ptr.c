@@ -5,7 +5,6 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <wchar.h>
-#include <corecrt_wstdio.h>
 
 #include "macro_utils/macro_utils.h"
 
@@ -13,6 +12,8 @@
 #include "c_logging/log_context_property_type_if.h"
 
 #include "c_logging/log_context_property_type_wchar_t_ptr.h"
+
+#define LOG_MAX_WCHAR_STRING_LENGTH 512
 
 static int wchar_t_ptr_log_context_property_type_to_string(const void* property_value, char* buffer, size_t buffer_length)
 {
@@ -122,13 +123,19 @@ int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)(const wchar_t* for
     va_list args;
     va_start(args, format);
 
+    wchar_t* buffer = malloc(sizeof(wchar_t)* LOG_MAX_WCHAR_STRING_LENGTH);
     /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_018: [ If _vsnwprintf fails, LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr) shall return a negative value. ]*/
     /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_019: [ Otherwise, on success, LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr) shall return the amount of memory needed in number of wide-chracters to store the wprintf style formatted wchar_t string given by format and the arguments in .... ]*/
-    int result = _vsnwprintf(NULL, 0, format, args) * 2;
+    int result = vswprintf(buffer, LOG_MAX_WCHAR_STRING_LENGTH, format, args)*2;
     if (result >= 0)
     {
         result+=2;
     }
+    else
+    {
+        (void)printf("wchar_t string length exceeds LOG_MAX_WCHAR_STRING_LENGTH, wchar string has been truncated");
+    }
+    free(buffer);
     va_end(args);
 
     return result;

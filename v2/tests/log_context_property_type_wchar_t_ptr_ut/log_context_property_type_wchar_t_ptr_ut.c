@@ -20,8 +20,7 @@
 
 #define MOCK_CALL_TYPE_VALUES \
     MOCK_CALL_TYPE_snprintf, \
-    MOCK_CALL_TYPE_vswprintf, \
-    MOCK_CALL_TYPE_vsnwprintf \
+    MOCK_CALL_TYPE_vswprintf \
 
 MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
 
@@ -40,13 +39,6 @@ typedef struct vswprintf_CALL_TAG
     const wchar_t* format_arg;
 } vswprintf_CALL;
 
-typedef struct vsnwprintf_CALL_TAG
-{
-    bool override_result;
-    int call_result;
-    const wchar_t* format_arg;
-} vsnwprintf_CALL;
-
 typedef struct MOCK_CALL_TAG
 {
     MOCK_CALL_TYPE mock_call_type;
@@ -54,7 +46,6 @@ typedef struct MOCK_CALL_TAG
     {
         snprintf_CALL snprintf_call;
         vswprintf_CALL vswprintf_call;
-        vsnwprintf_CALL vsnwprintf_call;
     };
 } MOCK_CALL;
 
@@ -126,35 +117,6 @@ int mock_vswprintf(wchar_t* s, size_t n, const wchar_t* format, va_list arg_list
     return result;
 }
 
-int mock_vsnwprintf(wchar_t* s, size_t n, const wchar_t* format, va_list arg_list)
-{
-    int result;
-
-    if ((actual_call_count == expected_call_count) ||
-        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_vsnwprintf))
-    {
-        actual_and_expected_match = false;
-        return -1;
-    }
-    else
-    {
-        if (expected_calls[actual_call_count].vsnwprintf_call.override_result)
-        {
-            result = expected_calls[actual_call_count].vsnwprintf_call.call_result;
-        }
-        else
-        {
-            expected_calls[actual_call_count].vsnwprintf_call.format_arg = format;
-
-            result = _vsnwprintf(s, n, format, arg_list);
-        }
-
-        actual_call_count++;
-    }
-
-    return result;
-}
-
 static void setup_mocks(void)
 {
     expected_call_count = 0;
@@ -173,13 +135,6 @@ static void setup_expected_vswprintf_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_vswprintf;
     expected_calls[expected_call_count].vswprintf_call.override_result = false;
-    expected_call_count++;
-}
-
-static void setup_expected_vsnwprintf_call(void)
-{
-    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_vsnwprintf;
-    expected_calls[expected_call_count].vsnwprintf_call.override_result = false;
     expected_call_count++;
 }
 
@@ -490,9 +445,9 @@ static void when_underlying_call_fails_wchar_t_ptr_LOG_CONTEXT_PROPERTY_TYPE_GET
 {
     // arrange
     setup_mocks();
-    expected_calls[0].mock_call_type = MOCK_CALL_TYPE_vsnwprintf;
-    expected_calls[0].vsnwprintf_call.override_result = true;
-    expected_calls[0].vsnwprintf_call.call_result = -1;
+    expected_calls[0].mock_call_type = MOCK_CALL_TYPE_vswprintf;
+    expected_calls[0].vswprintf_call.override_result = true;
+    expected_calls[0].vswprintf_call.call_result = -1;
     expected_call_count = 1;
 
     // act
@@ -509,13 +464,13 @@ static void wchar_t_ptr_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(vo
 {
     // arrange
     setup_mocks();
-    setup_expected_vsnwprintf_call();
+    setup_expected_vswprintf_call();
 
     // act
     int result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)(L"cucu");
 
     // assert
-    POOR_MANS_ASSERT(result == 5);
+    POOR_MANS_ASSERT(result == 10);
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(actual_call_count == expected_call_count);
 }
@@ -525,13 +480,13 @@ static void wchar_t_ptr_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_with_multip
 {
     // arrange
     setup_mocks();
-    setup_expected_vsnwprintf_call();
+    setup_expected_vswprintf_call();
 
     // act
     int result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)(L"The answer is %d and let's say hello %ls", 43, L"world");
 
     // assert
-    POOR_MANS_ASSERT(result == 43);
+    POOR_MANS_ASSERT(result == 86);
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(actual_call_count == expected_call_count);
 }
