@@ -20,7 +20,7 @@ static int ascii_char_ptr_log_context_property_type_to_string(const void* proper
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_001: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string shall fail and return a negative value. ]*/
         (property_value == NULL) ||
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_017: [ If buffer is NULL and buffer_length is greater than 0, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).to_string shall fail and return a negative value. ]*/
-        (buffer == NULL) && (buffer_length > 0)
+        ((buffer == NULL) && (buffer_length > 0))
         )
     {
         (void)printf("Invalid arguments: const void* property_value=%p, char* buffer=%p, size_t buffer_length=%zu\r\n",
