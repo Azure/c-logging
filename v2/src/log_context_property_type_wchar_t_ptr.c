@@ -5,6 +5,8 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <wchar.h>
+#include <wtypes.h>
+#include <corecrt_wstdio.h>
 
 #include "macro_utils/macro_utils.h"
 
