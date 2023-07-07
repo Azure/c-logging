@@ -197,24 +197,21 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
             if (log_context != NULL)
             {
                 /* Codes_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
-                size_t property_value_pair_count = log_context_get_property_value_pair_count(log_context);
+                //size_t property_value_pair_count = log_context_get_property_value_pair_count(log_context);
                 /* Codes_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
-                const LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_value_pairs = log_context_get_property_value_pairs(log_context);
+                //const LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_value_pairs = log_context_get_property_value_pairs(log_context);
                 //int log_n_properties_result =  log_n_properties(buffer, buffer_size, property_value_pairs, property_value_pair_count); // lgtm[cpp/unguardednullreturndereference] Tests and code review ensure that NULL access cannot happen
-                (void)property_value_pair_count;
-                (void)property_value_pairs;
-                int log_n_properties_result = 5;
-                if (log_n_properties_result < 0)
-                {
-                    /* Codes_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
-                    error = true;
-                }
-                else
-                {
-                    log_n_properties_result = MIN(log_n_properties_result, (int)buffer_size);
-                    buffer += log_n_properties_result;
-                    buffer_size -= log_n_properties_result;
-                }
+                //if (log_n_properties_result < 0)
+                //{
+                //    /* Codes_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
+                //    error = true;
+                //}
+                //else
+                //{
+                //    log_n_properties_result = MIN(log_n_properties_result, (int)buffer_size);
+                //    buffer += log_n_properties_result;
+                //    buffer_size -= log_n_properties_result;
+                //}
             }
 
             if (!error)
