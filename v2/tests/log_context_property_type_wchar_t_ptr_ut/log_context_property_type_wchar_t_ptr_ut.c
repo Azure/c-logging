@@ -470,7 +470,7 @@ static void wchar_t_ptr_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_succeeds(vo
     int result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)(L"cucu");
 
     // assert
-    POOR_MANS_ASSERT(result == 10);
+    POOR_MANS_ASSERT(result == 5*sizeof(wchar_t));
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(actual_call_count == expected_call_count);
 }
@@ -486,7 +486,7 @@ static void wchar_t_ptr_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_with_multip
     int result = LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)(L"The answer is %d and let's say hello %ls", 43, L"world");
 
     // assert
-    POOR_MANS_ASSERT(result == 86);
+    POOR_MANS_ASSERT(result == 43*sizeof(wchar_t));
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(actual_call_count == expected_call_count);
 }
