@@ -713,7 +713,7 @@ static void LOG_CONTEXT_CREATE_with_one_wstring_property_with_only_format_passed
     setup_free_call();
     LOG_CONTEXT_DESTROY(result);
 }
-#if 0
+
 /* Tests_SRS_LOG_CONTEXT_07_001: [ LOG_CONTEXT_WSTRING_PROPERTY shall expand to code allocating a property/value pair of type wchar_t_ptr and the name property_name. ]*/
 /* Tests_SRS_LOG_CONTEXT_07_002: [ LOG_CONTEXT_WSTRING_PROPERTY shall expand to code that stores as value a wchar string that is constructed using wprintf-like formatting based on format and all the arguments in .... ]*/
 static void LOG_CONTEXT_CREATE_with_2_wstring_properties_with_only_format_passed_to_it_succeeds(void)
@@ -862,7 +862,7 @@ static void LOG_CONTEXT_CREATE_with_a_wstring_property_preceded_by_another_int_p
     setup_free_call();
     LOG_CONTEXT_DESTROY(result);
 }
-#endif
+
 /* LOG_CONTEXT_NAME */
 
 /* Tests_SRS_LOG_CONTEXT_01_013: [ LOG_CONTEXT_CREATE shall store one property/value pair that with a property type of struct with as many fields as the total number of properties passed to LOG_CONTEXT_CREATE. ]*/
@@ -2195,10 +2195,10 @@ int main(void)
     LOG_CONTEXT_CREATE_with_a_string_property_preceded_by_another_int_property_succeeds();
 
     LOG_CONTEXT_CREATE_with_one_wstring_property_with_only_format_passed_to_it_succeeds();
-    //LOG_CONTEXT_CREATE_with_2_wstring_properties_with_only_format_passed_to_it_succeeds();
-    //LOG_CONTEXT_CREATE_with_a_wstring_property_using_printf_formatting_succeeds();
-    //LOG_CONTEXT_CREATE_with_a_wstring_property_followed_by_another_int_property_succeeds();
-    //LOG_CONTEXT_CREATE_with_a_wstring_property_preceded_by_another_int_property_succeeds();
+    LOG_CONTEXT_CREATE_with_2_wstring_properties_with_only_format_passed_to_it_succeeds();
+    LOG_CONTEXT_CREATE_with_a_wstring_property_using_printf_formatting_succeeds();
+    LOG_CONTEXT_CREATE_with_a_wstring_property_followed_by_another_int_property_succeeds();
+    LOG_CONTEXT_CREATE_with_a_wstring_property_preceded_by_another_int_property_succeeds();
 
     LOG_CONTEXT_CREATE_with_LOG_CONTEXT_NAME_uses_the_context_name();
 
