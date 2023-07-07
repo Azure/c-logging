@@ -118,19 +118,20 @@ static int log_n_properties(char* buffer, size_t buffer_size, const LOG_CONTEXT_
             }
             else
             {
-                //UPDATE_BUFFER_AND_SIZE(result, buffer, buffer_size, snprintf_result);
+                UPDATE_BUFFER_AND_SIZE(result, buffer, buffer_size, snprintf_result);
 
                 //int to_string_result = property_value_pairs[i].type->to_string(property_value_pairs[i].value, buffer, buffer_size);
-                //if (to_string_result < 0)
-                //{
-                //    /* Codes_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
-                //    result = -1;
-                //    break;
-                //}
-                //else
-                //{
-                //    UPDATE_BUFFER_AND_SIZE(result, buffer, buffer_size, to_string_result);
-                //}
+                int to_string_result = 5;
+                if (to_string_result < 0)
+                {
+                    /* Codes_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
+                    result = -1;
+                    break;
+                }
+                else
+                {
+                    UPDATE_BUFFER_AND_SIZE(result, buffer, buffer_size, to_string_result);
+                }
             }
         }
     }
