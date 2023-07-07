@@ -93,7 +93,7 @@ int internal_log_context_init_from_parent(LOG_CONTEXT_HANDLE dest_log_context, L
 LOG_CONTEXT_HANDLE log_context_create(LOG_CONTEXT_HANDLE parent_context, uint32_t properties_count, uint32_t data_size)
 {
     /* Codes_SRS_LOG_CONTEXT_01_001: [ LOG_CONTEXT_CREATE shall allocate memory for the log context. ]*/
-    LOG_CONTEXT_HANDLE result =  malloc(sizeof(LOG_CONTEXT) + (sizeof(LOG_CONTEXT_PROPERTY_VALUE_PAIR) * properties_count) + data_size + 512);
+    LOG_CONTEXT_HANDLE result =  malloc(sizeof(LOG_CONTEXT) + (sizeof(LOG_CONTEXT_PROPERTY_VALUE_PAIR) * properties_count) + data_size);
     if (result == NULL)
     {
         /* Codes_SRS_LOG_CONTEXT_01_002: [ If any error occurs, LOG_CONTEXT_CREATE shall fail and return NULL. ]*/
