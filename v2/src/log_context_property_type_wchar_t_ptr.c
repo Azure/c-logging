@@ -19,25 +19,25 @@
 static int wchar_t_ptr_log_context_property_type_to_string(const void* property_value, char* buffer, size_t buffer_length)
 {
     int result;
-    if (
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_001: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall fail and return a negative value. ]*/
-        (property_value == NULL) ||
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_002: [ If buffer is NULL and buffer_length is greater than 0, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall fail and return a negative value. ]*/
-        ((buffer == NULL) && (buffer_length > 0))
-        )
-    {
-        (void)printf("Invalid arguments: const void* property_value=%p, char* buffer=%p, size_t buffer_length=%zu\r\n",
-            property_value, buffer, buffer_length);
-        result = -1;
-    }
-    else
-    {
+    //if (
+    //    /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_001: [ If property_value is NULL, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall fail and return a negative value. ]*/
+    //    (property_value == NULL) ||
+    //    /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_002: [ If buffer is NULL and buffer_length is greater than 0, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall fail and return a negative value. ]*/
+    //    ((buffer == NULL) && (buffer_length > 0))
+    //    )
+    //{
+    //    (void)printf("Invalid arguments: const void* property_value=%p, char* buffer=%p, size_t buffer_length=%zu\r\n",
+    //        property_value, buffer, buffer_length);
+    //    result = -1;
+    //}
+    //else
+    //{
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_003: [ If buffer is NULL and buffer_length is 0, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall return the length of the wchar_t string pointed to by property_value. ]*/
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_004: [ Otherwise, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall copy the wchar_t string pointed to by property_value to buffer by using snprintf with buffer, buffer_length and format string %ls and pass in the values list the const wchar_t* value pointed to be property_value. ]*/
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_005: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall succeed and return the result of snprintf. ]*/
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_006: [ If any error is encountered (truncation is not an error), LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall fail and return a negative value. ]*/
         result = snprintf(buffer, buffer_length, "%ls", (const wchar_t*)property_value);
-    }
+    //}
     return result;
 }
 
