@@ -3,7 +3,8 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <stdlib.h>
+#include <stdlib.h>// IWYU pragma: keep
+#include <wchar.h>
 
 #define wcstombs mock_wcstombs
 #define vswprintf mock_vswprintf
