@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <stdlib.h> // IWYU pragma: keep
 #include <stdbool.h>
+#include <wchar.h>
 
 #include "macro_utils/macro_utils.h"
 
@@ -311,7 +312,7 @@ int main(void)
 {
     log_sink_console.init();
 
- /*   log_sink_console_prints_an_empty_string();
+    log_sink_console_prints_an_empty_string();
 
     log_sink_console_prints_with_CRITICAL_a_simple_log();
     log_sink_console_prints_with_ERROR_a_simple_log();
@@ -333,12 +334,12 @@ int main(void)
 
     log_sink_console_with_a_dynamically_allocated_context_works();
 
-    log_sink_console_with_a_context_with_string_works();*/
+    log_sink_console_with_a_context_with_string_works();
 
     log_sink_console_with_a_context_with_wstring_works();
 
-    /*log_sink_console_with_a_context_with_boolean_true_works();
-    log_sink_console_with_a_context_with_boolean_false_works();*/
+    log_sink_console_with_a_context_with_boolean_true_works();
+    log_sink_console_with_a_context_with_boolean_false_works();
 
     log_sink_console.deinit();
 

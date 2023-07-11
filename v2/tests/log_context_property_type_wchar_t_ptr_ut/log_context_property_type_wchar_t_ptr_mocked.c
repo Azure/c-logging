@@ -3,12 +3,12 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <wchar.h>
+#include <stdlib.h>
 
-#define snprintf mock_snprintf
+#define wcstombs mock_wcstombs
 #define vswprintf mock_vswprintf
 
-extern int mock_snprintf(char* s, size_t n, const char* format, ...);
+extern size_t mock_wcstombs(char* dest, wchar_t const* src, size_t max);
 extern int mock_vswprintf(wchar_t* s, size_t n, const wchar_t* format, va_list arg_list);
 
 #include "log_context_property_type_wchar_t_ptr.c"

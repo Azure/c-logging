@@ -26,7 +26,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(const void* property_value, c
 
 **SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_003: [** If `buffer` is `NULL` and `buffer_length` is 0, `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string` shall return the length of the `wchar_t` string pointed to by `property_value`. **]**
 
-**SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_004: [** Otherwise, `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string` shall copy the wchar_t string pointed to by `property_value` to `buffer` by using `snprintf` with `buffer`, `buffer_length` and format string `%ls` and pass in the values list the `const wchar_t*` value pointed to be `property_value`. **]**
+**SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_004: [** Otherwise, `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string` shall copy the wchar_t string pointed to by `property_value` to `buffer` by using `wcstombs` with `buffer`, `buffer_length` and pass in the values list the `const wchar_t*` value pointed to be `property_value`. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_005: [** `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string` shall succeed and return the result of `snprintf`. **]**
 

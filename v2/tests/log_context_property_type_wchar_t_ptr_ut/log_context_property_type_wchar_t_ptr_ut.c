@@ -19,18 +19,18 @@
 #define MAX_MOCK_CALL_COUNT (128)
 
 #define MOCK_CALL_TYPE_VALUES \
-    MOCK_CALL_TYPE_snprintf, \
+    MOCK_CALL_TYPE_wcstombs, \
     MOCK_CALL_TYPE_vswprintf \
 
 MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
 
 // very poor mans mocks :-(
-typedef struct snprintf_CALL_TAG
+typedef struct wcstombs_CALL_TAG
 {
     bool override_result;
     int call_result;
     const char* format_arg;
-} snprintf_CALL;
+} wcstombs_CALL;
 
 typedef struct vswprintf_CALL_TAG
 {
@@ -44,7 +44,7 @@ typedef struct MOCK_CALL_TAG
     MOCK_CALL_TYPE mock_call_type;
     union
     {
-        snprintf_CALL snprintf_call;
+        wcstombs_CALL wcstombs_call;
         vswprintf_CALL vswprintf_call;
     };
 } MOCK_CALL;
@@ -54,32 +54,27 @@ static size_t expected_call_count;
 static size_t actual_call_count;
 static bool actual_and_expected_match;
 
-int mock_snprintf(char* s, size_t n, const char* format, ...)
+size_t mock_wcstombs(char* dest, const wchar_t* src, size_t max)
 {
-    int result;
+    size_t result;
 
     if ((actual_call_count == expected_call_count) ||
-        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_snprintf))
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_wcstombs))
     {
         actual_and_expected_match = false;
-        return -1;
+        return (size_t) - 1;
     }
     else
     {
-        if (expected_calls[actual_call_count].snprintf_call.override_result)
+        if (expected_calls[actual_call_count].wcstombs_call.override_result)
         {
-            result = expected_calls[actual_call_count].snprintf_call.call_result;
+            result = expected_calls[actual_call_count].wcstombs_call.call_result;
         }
         else
         {
-            va_list args;
-            va_start(args, format);
 
-            expected_calls[actual_call_count].snprintf_call.format_arg = format;
+            result = wcstombs(dest, src, max);
 
-            result = vsnprintf(s, n, format, args);
-
-            va_end(args);
         }
 
         actual_call_count++;
@@ -124,10 +119,10 @@ static void setup_mocks(void)
     actual_and_expected_match = true;
 }
 
-static void setup_expected_snprintf_call(void)
+static void setup_expected_wcstombs_call(void)
 {
-    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_snprintf;
-    expected_calls[expected_call_count].snprintf_call.override_result = false;
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_wcstombs;
+    expected_calls[expected_call_count].wcstombs_call.override_result = false;
     expected_call_count++;
 }
 
@@ -183,7 +178,7 @@ static void wchar_t_ptr_to_string_with_NULL_buffer_and_zero_buffer_length_return
 {
     // arrange
     setup_mocks();
-    setup_expected_snprintf_call();
+    setup_expected_wcstombs_call();
 
     // act
     int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string(L"cucu", NULL, 0);
@@ -194,14 +189,14 @@ static void wchar_t_ptr_to_string_with_NULL_buffer_and_zero_buffer_length_return
     POOR_MANS_ASSERT(actual_call_count == expected_call_count);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_004: [ Otherwise, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall copy the wchar_t string pointed to by property_value to buffer by using snprintf with buffer, buffer_length and format string %ls and pass in the values list the const wchar_t* value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_004: [ Otherwise, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall copy the wchar_t string pointed to by property_value to buffer by using wcstombs with buffer, buffer_length and pass in the values list the const wchar_t* value pointed to be property_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_005: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall succeed and return the result of snprintf. ]*/
 static void wchar_t_ptr_to_string_copies_the_string(void)
 {
     // arrange
     char buffer[4];
     setup_mocks();
-    setup_expected_snprintf_call();
+    setup_expected_wcstombs_call();
 
     // act
     int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string(L"bau", buffer, sizeof(buffer));
@@ -214,14 +209,14 @@ static void wchar_t_ptr_to_string_copies_the_string(void)
 }
 
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_006: [ If any error is encountered (truncation is not an error), LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall fail and return a negative value. ]*/
-static void when_snprintf_fails_wchar_t_ptr_to_string_also_fails(void)
+static void when_wcstombs_fails_wchar_t_ptr_to_string_also_fails(void)
 {
     // arrange
     char buffer[4];
     setup_mocks();
-    expected_calls[0].mock_call_type = MOCK_CALL_TYPE_snprintf;
-    expected_calls[0].snprintf_call.override_result = true;
-    expected_calls[0].snprintf_call.call_result = -1;
+    expected_calls[0].mock_call_type = MOCK_CALL_TYPE_wcstombs;
+    expected_calls[0].wcstombs_call.override_result = true;
+    expected_calls[0].wcstombs_call.call_result = -1;
     expected_call_count = 1;
 
     // act
@@ -239,14 +234,14 @@ static void to_string_with_truncation_succeeds(void)
     // arrange
     char buffer[2];
     setup_mocks();
-    setup_expected_snprintf_call();
+    setup_expected_wcstombs_call();
 
     // act
     int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string(L"bau", buffer, sizeof(buffer));
 
     // assert
-    POOR_MANS_ASSERT(result == 3);
-    POOR_MANS_ASSERT(strcmp(buffer, "b") == 0);
+    POOR_MANS_ASSERT(result == 2);
+    POOR_MANS_ASSERT(strncmp(buffer, "ba", 2) == 0);
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(actual_call_count == expected_call_count);
 }
@@ -498,7 +493,7 @@ int main(void)
     wchar_t_ptr_to_string_with_NULL_buffer_and_non_zero_buffer_length_fails();
     wchar_t_ptr_to_string_with_NULL_buffer_and_zero_buffer_length_returns_string_length();
     wchar_t_ptr_to_string_copies_the_string();
-    when_snprintf_fails_wchar_t_ptr_to_string_also_fails();
+    when_wcstombs_fails_wchar_t_ptr_to_string_also_fails();
     to_string_with_truncation_succeeds();
 
     wchar_t_ptr_copy_with_NULL_src_value_fails();

@@ -76,8 +76,8 @@ static void to_string_with_truncation_succeeds(void)
     int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string(L"bau", buffer, sizeof(buffer));
 
     // assert
-    POOR_MANS_ASSERT(result == 3);
-    POOR_MANS_ASSERT(strcmp(buffer, "b") == 0);
+    POOR_MANS_ASSERT(result == 2);
+    POOR_MANS_ASSERT(strncmp(buffer, "ba", 2) == 0);
 }
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).copy */
