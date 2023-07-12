@@ -51,7 +51,7 @@ static void wchar_t_ptr_to_string_with_NULL_buffer_and_zero_buffer_length_return
     int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string(L"cucu", NULL, 0);
 
     // assert
-    POOR_MANS_ASSERT(result == (int)strlen("cucu"));
+    POOR_MANS_ASSERT(result == (int)wcslen(L"cucu"));
 }
 
 static void wchar_t_ptr_to_string_copies_the_string(void)
@@ -97,8 +97,8 @@ static void wchar_t_ptr_copy_with_NULL_src_value_fails(void)
 static void wchar_t_ptr_copy_with_NULL_dst_value_fails(void)
 {
     // arrange
-    wchar_t buffer[128];
-    LOG_CONTEXT_PROPERTY_TYPE_INIT(wchar_t_ptr)(buffer, wcslen(L"cucu") + 1, L"cucu");
+    wchar_t buffer[sizeof(L"cucu")];
+    LOG_CONTEXT_PROPERTY_TYPE_INIT(wchar_t_ptr)(buffer, sizeof(buffer)/sizeof(buffer[0]), L"cucu");
 
     // act
     int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).copy(NULL, buffer);
@@ -128,7 +128,7 @@ static void wchar_t_ptr_copy_succeeds(void)
 static void wchar_t_ptr_free_returns(void)
 {
     // arrange
-    wchar_t buffer[128];
+    wchar_t buffer[sizeof(L"cucu")];
     LOG_CONTEXT_PROPERTY_TYPE_INIT(wchar_t_ptr)(buffer, wcslen(L"cucu") + 1, L"cucu");
 
     // act
@@ -170,7 +170,7 @@ static void wchar_t_ptr_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_NULL_format_fails(vo
     wchar_t buffer[5];
 
     // act
-    int result = LOG_CONTEXT_PROPERTY_TYPE_INIT(wchar_t_ptr)(buffer, 1, NULL);
+    int result = LOG_CONTEXT_PROPERTY_TYPE_INIT(wchar_t_ptr)(buffer, 5, NULL);
 
     // assert
     POOR_MANS_ASSERT(result != 0);
@@ -195,7 +195,7 @@ static void wchar_t_ptr_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_multiple_args_succee
     wchar_t buffer[43];
 
     // act
-    int result = LOG_CONTEXT_PROPERTY_TYPE_INIT(wchar_t_ptr)(buffer, 50, L"The answer is %d and let's say hello %ls", 42, L"world");
+    int result = LOG_CONTEXT_PROPERTY_TYPE_INIT(wchar_t_ptr)(buffer, sizeof(buffer)/sizeof(buffer[0]), L"The answer is %d and let's say hello %ls", 42, L"world");
 
     // assert
     POOR_MANS_ASSERT(result == 0);

@@ -184,12 +184,12 @@ static void wchar_t_ptr_to_string_with_NULL_buffer_and_zero_buffer_length_return
     int result = LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string(L"cucu", NULL, 0);
 
     // assert
-    POOR_MANS_ASSERT(result == (int)strlen("cucu"));
+    POOR_MANS_ASSERT(result == (int)wcslen(L"cucu"));
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(actual_call_count == expected_call_count);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_004: [ Otherwise, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall copy the wchar_t string pointed to by property_value to buffer by using wcstombs with buffer, buffer_length and pass in the values list the const wchar_t* value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_004: [ Otherwise, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall copy the wchar_t string pointed to by property_value to buffer by using wcstombs with buffer, buffer_length and pass in the values list the const wchar_t* value pointed to by property_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_005: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall succeed and return the result of snprintf. ]*/
 static void wchar_t_ptr_to_string_copies_the_string(void)
 {
@@ -268,7 +268,7 @@ static void wchar_t_ptr_copy_with_NULL_src_value_fails(void)
 static void wchar_t_ptr_copy_with_NULL_dst_value_fails(void)
 {
     // arrange
-    wchar_t buffer[128];
+    wchar_t buffer[sizeof(L"cucu")];
     setup_mocks();
     setup_expected_vswprintf_call();
     LOG_CONTEXT_PROPERTY_TYPE_INIT(wchar_t_ptr)(buffer, wcslen(L"cucu") + 1, L"cucu");
@@ -311,7 +311,7 @@ static void wchar_t_ptr_copy_succeeds(void)
 static void wchar_t_ptr_free_returns(void)
 {
     // arrange
-    char buffer[128];
+    char buffer[sizeof(L"cucu")];
     setup_mocks();
     setup_expected_vswprintf_call();
     LOG_CONTEXT_PROPERTY_TYPE_INIT(wchar_t_ptr)(buffer, wcslen(L"cucu") + 1, L"cucu");
@@ -404,7 +404,7 @@ static void wchar_t_ptr_LOG_CONTEXT_PROPERTY_TYPE_INIT_with_multiple_args_succee
     setup_expected_vswprintf_call();
 
     // act
-    int result = LOG_CONTEXT_PROPERTY_TYPE_INIT(wchar_t_ptr)(buffer, 50, L"The answer is %d and let's say hello %ls", 42, L"world");
+    int result = LOG_CONTEXT_PROPERTY_TYPE_INIT(wchar_t_ptr)(buffer, sizeof(buffer) / sizeof(buffer[0]), L"The answer is %d and let's say hello %ls", 42, L"world");
 
     // assert
     POOR_MANS_ASSERT(result == 0);
@@ -435,7 +435,7 @@ static void when_underlying_call_fails_wchar_t_ptr_LOG_CONTEXT_PROPERTY_TYPE_INI
 
 /* LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)*/
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_018: [ If _vsnwprintf fails, LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr) shall return a negative value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_018: [ If vswprintf fails, LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr) shall return a negative value. ]*/
 static void when_underlying_call_fails_wchar_t_ptr_LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE_also_fails(void)
 {
     // arrange

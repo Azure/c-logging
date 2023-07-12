@@ -33,10 +33,10 @@ static int wchar_t_ptr_log_context_property_type_to_string(const void* property_
     else
     {
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_003: [ If buffer is NULL and buffer_length is 0, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall return the length of the wchar_t string pointed to by property_value. ]*/
-        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_004: [ Otherwise, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall copy the wchar_t string pointed to by property_value to buffer by using wcstombs with buffer, buffer_length and pass in the values list the const wchar_t* value pointed to be property_value. ]*/
+        /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_004: [ Otherwise, LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall copy the wchar_t string pointed to by property_value to buffer by using wcstombs with buffer, buffer_length and pass in the values list the const wchar_t* value pointed to by property_value. ]*/
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_005: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall succeed and return the result of snprintf. ]*/
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_006: [ If any error is encountered (truncation is not an error), LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string shall fail and return a negative value. ]*/
-        result = (int)wcstombs(buffer, (const wchar_t*)property_value, buffer_length);
+        result = (int)wcstombs(buffer, property_value, buffer_length);
     }
     return result;
 }
@@ -52,14 +52,14 @@ static int wchar_t_ptr_log_context_property_type_copy(void* dst_value, const voi
         (src_value == NULL)
         )
     {
-        (void)printf("Invalid arguments: void* dst_value=%p, void* src_value=%p\r\n",
+        (void)printf("Invalid arguments: void* dst_value=%p, const void* src_value=%p\r\n",
             dst_value, src_value);
         result = MU_FAILURE;
     }
     else
     {
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_009: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).copy shall copy the entire string (including the null terminator) from src_value to dst_value. ]*/
-        (void)wcscpy(dst_value, src_value);
+        (void)wcscpy_s(dst_value, wcslen(src_value) + 1, src_value);
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_010: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).copy shall succeed and return 0. ]*/
         result = 0;
     }
@@ -90,8 +90,8 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(wchar_t_ptr)(void* dst_value, size_t count, c
         (format == NULL)
         )
     {
-        (void)printf("Invalid arguments: void* dst_value=%p, const wchar_t* format=%p\r\n",
-            dst_value, format);
+        (void)printf("Invalid arguments: void* dst_value=%p, const wchar_t* format=%ls\r\n",
+            dst_value, MU_WP_OR_NULL(format));
         result = MU_FAILURE;
     }
     else
@@ -125,7 +125,7 @@ int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)(const wchar_t* for
     va_start(args, format);
 
     wchar_t* buffer = (wchar_t*)malloc(sizeof(wchar_t)* LOG_MAX_WCHAR_STRING_LENGTH);
-    /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_018: [ If _vsnwprintf fails, LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr) shall return a negative value. ]*/
+    /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_018: [ If vswprintf fails, LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr) shall return a negative value. ]*/
     /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_019: [ Otherwise, on success, LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr) shall return the amount of memory needed in number of wide-chracters to store the wprintf style formatted wchar_t string given by format and the arguments in .... ]*/
     int result = vswprintf(buffer, LOG_MAX_WCHAR_STRING_LENGTH, format, args) * sizeof(wchar_t);
     if (result >= 0)

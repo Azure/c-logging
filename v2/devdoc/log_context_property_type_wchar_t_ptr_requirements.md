@@ -1,6 +1,6 @@
 # `log_context_property_type_wchar_t_ptr` requirements
 
-`log_context_property_type_wchar_t_ptr` implements the code needed for handling an wchar_t string.
+`log_context_property_type_wchar_t_ptr` implements the code needed for handling a wchar_t string.
 
 ## Exposed API
 
@@ -26,7 +26,7 @@ typedef int (*LOG_CONTEXT_PROPERTY_TYPE_TO_STRING)(const void* property_value, c
 
 **SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_003: [** If `buffer` is `NULL` and `buffer_length` is 0, `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string` shall return the length of the `wchar_t` string pointed to by `property_value`. **]**
 
-**SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_004: [** Otherwise, `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string` shall copy the wchar_t string pointed to by `property_value` to `buffer` by using `wcstombs` with `buffer`, `buffer_length` and pass in the values list the `const wchar_t*` value pointed to be `property_value`. **]**
+**SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_004: [** Otherwise, `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string` shall copy the wchar_t string pointed to by `property_value` to `buffer` by using `wcstombs` with `buffer`, `buffer_length` and pass in the values list the `const wchar_t*` value pointed to by `property_value`. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_005: [** `LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).to_string` shall succeed and return the result of `snprintf`. **]**
 
@@ -85,11 +85,11 @@ int LOG_CONTEXT_PROPERTY_TYPE_INIT(wchar_t_ptr)(void* dst_value, size_t count, c
 ## LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)
 
 ```c
-int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)(const char* format, ...);
+int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)(const wchar_t* format, ...);
 ```
 
 `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)` returns the amount of memory needed in number of wide-characters to store the `printf` style formatted string given by `format` and the arguments in `...`.
 
-**SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_018: [** If `_vsnwprintf` fails, `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)` shall return a negative value. **]**
+**SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_018: [** If `vswprintf` fails, `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)` shall return a negative value. **]**
 
 **SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_019: [** Otherwise, on success, `LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)` shall return the amount of memory needed in number of wide-chracters to store the `wprintf` style formatted `wchar_t` string given by `format` and the arguments in `...`. **]**

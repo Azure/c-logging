@@ -4,6 +4,7 @@
 #ifndef LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_H
 #define LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_H
 
+#include <wchar.h>
 #include "c_logging/log_context_property_type_if.h"
 
 #ifdef __cplusplus
