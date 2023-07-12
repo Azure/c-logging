@@ -59,7 +59,7 @@ static int wchar_t_ptr_log_context_property_type_copy(void* dst_value, const voi
     else
     {
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_009: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).copy shall copy the entire string (including the null terminator) from src_value to dst_value. ]*/
-        (void)wcscpy_s(dst_value, wcslen(src_value) + 1, src_value);
+        (void)wcscpy(dst_value, wcslen(src_value) + 1, src_value);
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_010: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).copy shall succeed and return 0. ]*/
         result = 0;
     }
