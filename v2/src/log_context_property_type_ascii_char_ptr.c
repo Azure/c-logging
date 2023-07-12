@@ -56,7 +56,7 @@ static int ascii_char_ptr_log_context_property_type_copy(void* dst_value, const 
     else
     {
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_008: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).copy shall copy the entire string (including the null terminator) from src_value to dst_value. ]*/
-        (void)strcpy(dst_value, strlen(src_value) + 1, src_value);
+        (void)strcpy(dst_value, src_value);
         /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_ASCII_CHAR_PTR_01_009: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr).copy shall succeed and return 0. ]*/
         result = 0;
     }
