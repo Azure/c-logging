@@ -11,6 +11,8 @@
 extern "C" {
 #endif
 
+#define LOG_MAX_WCHAR_STRING_LENGTH 4096
+
     int LOG_CONTEXT_PROPERTY_TYPE_INIT(wchar_t_ptr)(void* dst_value, size_t count, const wchar_t* format, ...);
     int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)(const wchar_t* format, ...);
 

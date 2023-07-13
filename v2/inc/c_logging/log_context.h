@@ -30,7 +30,6 @@ extern "C" {
 
 #define LOG_MAX_STACK_DATA_SIZE                 4096
 #define LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT 64
-#define LOG_MAX_WCHAR_STRING_LENGTH 512
 
 typedef struct LOG_CONTEXT_TAG
 {
@@ -122,7 +121,7 @@ uint32_t internal_log_context_get_values_data_length_or_zero(LOG_CONTEXT_HANDLE 
     /* Codes_SRS_LOG_CONTEXT_07_001: [ LOG_CONTEXT_WSTRING_PROPERTY shall expand to code allocating a property/value pair of type wchar_t_ptr and the name property_name. ]*/ \
     property_value_pair->value = data_pos; \
     property_value_pair->name = MU_TOSTRING(property_name); \
-    property_value_pair->type = &wchar_t_ptr##_log_context_property_type; \
+    property_value_pair->type = &MU_C2A(wchar_t_ptr, _log_context_property_type); \
     /* Codes_SRS_LOG_CONTEXT_07_002: [ LOG_CONTEXT_WSTRING_PROPERTY shall expand to code that stores as value a wchar string that is constructed using wprintf-like formatting based on format and all the arguments in .... ]*/ \
     data_pos += swprintf(property_value_pair->value, LOG_MAX_WCHAR_STRING_LENGTH, __VA_ARGS__)*sizeof(wchar_t) + sizeof(wchar_t); \
     property_value_pair++; \
