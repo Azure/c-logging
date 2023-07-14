@@ -20,6 +20,7 @@ endif() #(${log_sink_etw})
 
 set(c_logging_v2_h_files
     ./inc/c_logging/logger.h
+    ./inc/c_logging/logger_v1_v2.h
     ./inc/c_logging/log_context.h
     ./inc/c_logging/log_context_property_type.h
     ./inc/c_logging/log_context_property_type_if.h

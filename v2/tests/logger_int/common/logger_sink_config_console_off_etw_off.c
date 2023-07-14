@@ -8,4 +8,4 @@
 #include "c_logging/log_sink_if.h"
 
 const LOG_SINK_IF** log_sinks;
-const uint32_t log_sink_count = 0;
+uint32_t log_sink_count = 0;

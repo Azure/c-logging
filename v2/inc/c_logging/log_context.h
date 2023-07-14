@@ -201,6 +201,7 @@ uint32_t internal_log_context_get_values_data_length_or_zero(LOG_CONTEXT_HANDLE 
 // We allocate on the stack enough space for a max payload for the context.
 #define LOG_CONTEXT_LOCAL_DEFINE(destination_context, parent_context, ...) \
     uint8_t MU_C2(values_log_data_, destination_context)[LOG_MAX_STACK_DATA_SIZE]; \
+    MU_SUPPRESS_WARNING(4815) /* warning C4815: 'local_context_3DFCB6F0_39A4_4C45_881B_A3BDA8B18CC1': zero-sized array in stack object will have no elements (unless the object is an aggregate that has been aggregate initialized) */ \
     LOG_CONTEXT destination_context; \
     MU_IF(MU_COUNT_ARG(__VA_ARGS__), LOG_CONTEXT_CHECK_VARIABLE_ARGS(__VA_ARGS__),) \
     LOG_CONTEXT_PROPERTY_VALUE_PAIR MU_C2(property_values_pair_, destination_context)[LOG_MAX_STACK_PROPERTY_VALUE_PAIR_COUNT]; \
