@@ -97,7 +97,7 @@ static void wchar_t_ptr_copy_with_NULL_src_value_fails(void)
 static void wchar_t_ptr_copy_with_NULL_dst_value_fails(void)
 {
     // arrange
-    wchar_t buffer[sizeof(L"cucu")/sizeof(wchar_t)];
+    wchar_t buffer[sizeof(L"cucu")];
     LOG_CONTEXT_PROPERTY_TYPE_INIT(wchar_t_ptr)(buffer, sizeof(buffer)/sizeof(buffer[0]), L"cucu");
 
     // act
@@ -128,7 +128,7 @@ static void wchar_t_ptr_copy_succeeds(void)
 static void wchar_t_ptr_free_returns(void)
 {
     // arrange
-    wchar_t buffer[sizeof(L"cucu")/sizeof(wchar_t)];
+    wchar_t buffer[sizeof(L"cucu")];
     LOG_CONTEXT_PROPERTY_TYPE_INIT(wchar_t_ptr)(buffer, wcslen(L"cucu") + 1, L"cucu");
 
     // act
