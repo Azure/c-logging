@@ -122,9 +122,10 @@ int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr)(const wchar_t* for
     va_list args;
     va_start(args, format);
 
+    wchar_t buffer[LOG_MAX_WCHAR_STRING_LENGTH];
     /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_018: [ If vswprintf fails, LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr) shall return a negative value. ]*/
     /* Codes_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_019: [ Otherwise, on success, LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(wchar_t_ptr) shall return the amount of memory needed in number of wide-chracters to store the wprintf style formatted wchar_t string given by format and the arguments in .... ]*/
-    int result = vswprintf(NULL, 0, format, args) * sizeof(wchar_t);
+    int result = vswprintf(buffer, LOG_MAX_WCHAR_STRING_LENGTH, format, args) * sizeof(wchar_t);
     if (result >= 0)
     {
         result += sizeof(wchar_t);
