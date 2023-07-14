@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <wchar.h>
 
 #include "macro_utils/macro_utils.h"
 
@@ -13,6 +14,7 @@
 
 #include "c_logging/log_context_property_basic_types.h"
 #include "c_logging/log_context_property_type_ascii_char_ptr.h"
+#include "c_logging/log_context_property_type_wchar_t_ptr.h"
 #include "c_logging/log_context_property_value_pair.h"
 #include "c_logging/log_context_property_type.h"
 #include "c_logging/log_context_property_type_if.h"
@@ -249,7 +251,7 @@ static void LOG_CONTEXT_CREATE_with_one_int32_t_succeeds(void)
     // act
     LOG_CONTEXT_HANDLE result;
     LOG_CONTEXT_CREATE(result, NULL, LOG_CONTEXT_PROPERTY(int32_t, test_int32_t, 42));
-    
+
     // assert
     POOR_MANS_ASSERT(result != NULL);
     POOR_MANS_ASSERT(log_context_get_property_value_pair_count(result) == 2);
@@ -670,6 +672,189 @@ static void LOG_CONTEXT_CREATE_with_a_string_property_preceded_by_another_int_pr
     POOR_MANS_ASSERT(strcmp(pairs[2].value, "The answer is 42") == 0);
     POOR_MANS_ASSERT(strcmp(pairs[2].name, "test_string") == 0);
     POOR_MANS_ASSERT(pairs[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // clean
+    setup_mocks();
+    setup_free_call();
+    LOG_CONTEXT_DESTROY(result);
+}
+
+/* LOG_CONTEXT_WSTRING_PROPERTY */
+
+/* Tests_SRS_LOG_CONTEXT_07_001: [ LOG_CONTEXT_WSTRING_PROPERTY shall expand to code allocating a property/value pair of type wchar_t_ptr and the name property_name. ]*/
+/* Tests_SRS_LOG_CONTEXT_07_002: [ LOG_CONTEXT_WSTRING_PROPERTY shall expand to code that stores as value a wchar string that is constructed using wprintf-like formatting based on format and all the arguments in .... ]*/
+static void LOG_CONTEXT_CREATE_with_one_wstring_property_with_only_format_passed_to_it_succeeds(void)
+{
+    // arrange
+    setup_mocks();
+    setup_malloc_call();
+
+    // act
+    LOG_CONTEXT_HANDLE result;
+    LOG_CONTEXT_CREATE(result, NULL, LOG_CONTEXT_WSTRING_PROPERTY(test_string, L"gogu"));
+
+    // assert
+    POOR_MANS_ASSERT(result != NULL);
+    POOR_MANS_ASSERT(log_context_get_property_value_pair_count(result) == 2);
+    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(result);
+    // context struct
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 1);
+    POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
+    POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    // string property
+    POOR_MANS_ASSERT(wcscmp(pairs[1].value, L"gogu") == 0);
+    POOR_MANS_ASSERT(strcmp(pairs[1].name, "test_string") == 0);
+    POOR_MANS_ASSERT(pairs[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // clean
+    setup_mocks();
+    setup_free_call();
+    LOG_CONTEXT_DESTROY(result);
+}
+
+/* Tests_SRS_LOG_CONTEXT_07_001: [ LOG_CONTEXT_WSTRING_PROPERTY shall expand to code allocating a property/value pair of type wchar_t_ptr and the name property_name. ]*/
+/* Tests_SRS_LOG_CONTEXT_07_002: [ LOG_CONTEXT_WSTRING_PROPERTY shall expand to code that stores as value a wchar string that is constructed using wprintf-like formatting based on format and all the arguments in .... ]*/
+static void LOG_CONTEXT_CREATE_with_2_wstring_properties_with_only_format_passed_to_it_succeeds(void)
+{
+    // arrange
+    setup_mocks();
+    setup_malloc_call();
+
+    // act
+    LOG_CONTEXT_HANDLE result;
+    LOG_CONTEXT_CREATE(result, NULL,
+        LOG_CONTEXT_WSTRING_PROPERTY(test_string_1, L"haga"),
+        LOG_CONTEXT_WSTRING_PROPERTY(test_string_2, L"uaga"));
+
+    // assert
+    POOR_MANS_ASSERT(result != NULL);
+    POOR_MANS_ASSERT(log_context_get_property_value_pair_count(result) == 3);
+    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(result);
+    // context struct
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 2);
+    POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
+    POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    // 1st string property
+    POOR_MANS_ASSERT(wcscmp(pairs[1].value, L"haga") == 0);
+    POOR_MANS_ASSERT(strcmp(pairs[1].name, "test_string_1") == 0);
+    POOR_MANS_ASSERT(pairs[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr);
+    // 2nd string property
+    POOR_MANS_ASSERT(wcscmp(pairs[2].value, L"uaga") == 0);
+    POOR_MANS_ASSERT(strcmp(pairs[2].name, "test_string_2") == 0);
+    POOR_MANS_ASSERT(pairs[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // clean
+    setup_mocks();
+    setup_free_call();
+    LOG_CONTEXT_DESTROY(result);
+}
+
+/* Tests_SRS_LOG_CONTEXT_07_001: [ LOG_CONTEXT_WSTRING_PROPERTY shall expand to code allocating a property/value pair of type wchar_t_ptr and the name property_name. ]*/
+/* Tests_SRS_LOG_CONTEXT_07_002: [ LOG_CONTEXT_WSTRING_PROPERTY shall expand to code that stores as value a wchar string that is constructed using wprintf-like formatting based on format and all the arguments in .... ]*/
+static void LOG_CONTEXT_CREATE_with_a_wstring_property_using_printf_formatting_succeeds(void)
+{
+    // arrange
+    setup_mocks();
+    setup_malloc_call();
+
+    // act
+    LOG_CONTEXT_HANDLE result;
+    LOG_CONTEXT_CREATE(result, NULL,
+        LOG_CONTEXT_WSTRING_PROPERTY(test_string, L"here we have a person named %ls %ls of age %d",
+            L"Baba", L"Cloantza", 4200));
+
+    // assert
+    POOR_MANS_ASSERT(result != NULL);
+    POOR_MANS_ASSERT(log_context_get_property_value_pair_count(result) == 2);
+    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(result);
+    // context struct
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 1);
+    POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
+    POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    // string property
+    POOR_MANS_ASSERT(wcscmp(pairs[1].value, L"here we have a person named Baba Cloantza of age 4200") == 0);
+    POOR_MANS_ASSERT(strcmp(pairs[1].name, "test_string") == 0);
+    POOR_MANS_ASSERT(pairs[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // clean
+    setup_mocks();
+    setup_free_call();
+    LOG_CONTEXT_DESTROY(result);
+}
+
+/* Tests_SRS_LOG_CONTEXT_07_001: [ LOG_CONTEXT_WSTRING_PROPERTY shall expand to code allocating a property/value pair of type wchar_t_ptr and the name property_name. ]*/
+/* Tests_SRS_LOG_CONTEXT_07_002: [ LOG_CONTEXT_WSTRING_PROPERTY shall expand to code that stores as value a wchar string that is constructed using wprintf-like formatting based on format and all the arguments in .... ]*/
+static void LOG_CONTEXT_CREATE_with_a_wstring_property_followed_by_another_int_property_succeeds(void)
+{
+    // arrange
+    setup_mocks();
+    setup_malloc_call();
+
+    // act
+    LOG_CONTEXT_HANDLE result;
+    LOG_CONTEXT_CREATE(result, NULL,
+        LOG_CONTEXT_WSTRING_PROPERTY(test_string, L"The answer is %d", 42),
+        LOG_CONTEXT_PROPERTY(int32_t, answer, 42));
+
+    // assert
+    POOR_MANS_ASSERT(result != NULL);
+    POOR_MANS_ASSERT(log_context_get_property_value_pair_count(result) == 3);
+    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(result);
+    // context struct
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 2);
+    POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
+    POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    // string property
+    POOR_MANS_ASSERT(wcscmp(pairs[1].value, L"The answer is 42") == 0);
+    POOR_MANS_ASSERT(strcmp(pairs[1].name, "test_string") == 0);
+    POOR_MANS_ASSERT(pairs[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr);
+    // int32_t property
+    POOR_MANS_ASSERT(*(int32_t*)pairs[2].value == 42);
+    POOR_MANS_ASSERT(strcmp(pairs[2].name, "answer") == 0);
+    POOR_MANS_ASSERT(pairs[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int32_t);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // clean
+    setup_mocks();
+    setup_free_call();
+    LOG_CONTEXT_DESTROY(result);
+}
+
+/* Tests_SRS_LOG_CONTEXT_07_001: [ LOG_CONTEXT_WSTRING_PROPERTY shall expand to code allocating a property/value pair of type wchar_t_ptr and the name property_name. ]*/
+/* Tests_SRS_LOG_CONTEXT_07_002: [ LOG_CONTEXT_WSTRING_PROPERTY shall expand to code that stores as value a wchar string that is constructed using wprintf-like formatting based on format and all the arguments in .... ]*/
+static void LOG_CONTEXT_CREATE_with_a_wstring_property_preceded_by_another_int_property_succeeds(void)
+{
+    // arrange
+    setup_mocks();
+    setup_malloc_call();
+
+    // act
+    LOG_CONTEXT_HANDLE result;
+    LOG_CONTEXT_CREATE(result, NULL,
+        LOG_CONTEXT_PROPERTY(int32_t, answer, 42),
+        LOG_CONTEXT_WSTRING_PROPERTY(test_string, L"The answer is %d", 42)
+    );
+
+    // assert
+    POOR_MANS_ASSERT(result != NULL);
+    POOR_MANS_ASSERT(log_context_get_property_value_pair_count(result) == 3);
+    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(result);
+    // context struct
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 2);
+    POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
+    POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
+    // int32_t property
+    POOR_MANS_ASSERT(*(int32_t*)pairs[1].value == 42);
+    POOR_MANS_ASSERT(strcmp(pairs[1].name, "answer") == 0);
+    POOR_MANS_ASSERT(pairs[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_int32_t);
+    // string property
+    POOR_MANS_ASSERT(wcscmp(pairs[2].value, L"The answer is 42") == 0);
+    POOR_MANS_ASSERT(strcmp(pairs[2].name, "test_string") == 0);
+    POOR_MANS_ASSERT(pairs[2].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr);
     POOR_MANS_ASSERT(actual_and_expected_match);
 
     // clean
@@ -1993,9 +2178,9 @@ int main(void)
 {
     LOG_CONTEXT_CREATE_with_no_properties_succeeds();
     when_malloc_fails_LOG_CONTEXT_CREATE_with_no_properties_also_fails();
-    
+
     LOG_CONTEXT_DESTROY_frees_memory();
-    
+
     LOG_CONTEXT_CREATE_with_one_int32_t_succeeds();
     LOG_CONTEXT_CREATE_with_two_properties_succeeds();
     LOG_CONTEXT_CREATE_with_all_int_property_types_succeeds();
@@ -2008,6 +2193,12 @@ int main(void)
     LOG_CONTEXT_CREATE_with_a_string_property_using_printf_formatting_succeeds();
     LOG_CONTEXT_CREATE_with_a_string_property_followed_by_another_int_property_succeeds();
     LOG_CONTEXT_CREATE_with_a_string_property_preceded_by_another_int_property_succeeds();
+
+    LOG_CONTEXT_CREATE_with_one_wstring_property_with_only_format_passed_to_it_succeeds();
+    LOG_CONTEXT_CREATE_with_2_wstring_properties_with_only_format_passed_to_it_succeeds();
+    LOG_CONTEXT_CREATE_with_a_wstring_property_using_printf_formatting_succeeds();
+    LOG_CONTEXT_CREATE_with_a_wstring_property_followed_by_another_int_property_succeeds();
+    LOG_CONTEXT_CREATE_with_a_wstring_property_preceded_by_another_int_property_succeeds();
 
     LOG_CONTEXT_CREATE_with_LOG_CONTEXT_NAME_uses_the_context_name();
 

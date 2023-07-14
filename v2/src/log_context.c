@@ -42,6 +42,7 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* log_context_get_property_value_pairs(LOG_
     {
         /* Codes_SRS_LOG_CONTEXT_01_023: [ Otherwise, log_context_get_property_value_pairs shall return the array of property/value pairs stored by the context. ]*/
         result = log_context->property_value_pairs_ptr;
+
     }
 
     return result;

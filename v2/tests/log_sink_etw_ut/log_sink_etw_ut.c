@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdlib.h>
+#include <wchar.h>
 
 #include "windows.h"
 #include "TraceLoggingProvider.h"
@@ -18,6 +19,7 @@
 #include "c_logging/log_context_property_basic_types.h"
 #include "c_logging/log_context_property_bool_type.h"
 #include "c_logging/log_context_property_type_ascii_char_ptr.h"
+#include "c_logging/log_context_property_type_wchar_t_ptr.h"
 #include "c_logging/log_context_property_value_pair.h"
 #include "c_logging/log_level.h"
 #include "c_logging/log_sink_if.h"
@@ -40,6 +42,7 @@
     MOCK_CALL_TYPE_TraceLoggingRegister_EventRegister_EventSetInformation, \
     MOCK_CALL_TYPE__get_pgmptr, \
     MOCK_CALL_TYPE__tlgCreate1Sz_char, \
+    MOCK_CALL_TYPE__tlgCreate1Sz_wchar_t, \
     MOCK_CALL_TYPE_EventDataDescCreate, \
     MOCK_CALL_TYPE__tlgWriteTransfer_EventWriteTransfer, \
     MOCK_CALL_TYPE_log_context_property_if_get_type, \
@@ -382,6 +385,22 @@ void mock__tlgCreate1Sz_char(PEVENT_DATA_DESCRIPTOR pDesc, char const* psz)
     }
 }
 
+void mock__tlgCreate1Sz_wchar_t(PEVENT_DATA_DESCRIPTOR pDesc, wchar_t const* psz)
+{
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE__tlgCreate1Sz_wchar_t))
+    {
+        actual_and_expected_match = false;
+    }
+    else
+    {
+        // call "real" function
+        _tlgCreate1Sz_wchar_t(pDesc, psz);
+
+        actual_call_count++;
+    }
+}
+
 void mock_EventDataDescCreate(PEVENT_DATA_DESCRIPTOR EventDataDescriptor, const VOID* DataPtr, ULONG DataSize)
 {
     if ((actual_call_count == expected_call_count) ||
@@ -643,6 +662,12 @@ static void setup__get_pgmptr_call(void)
 static void setup__tlgCreate1Sz_char(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE__tlgCreate1Sz_char;
+    expected_call_count++;
+}
+
+static void setup__tlgCreate1Sz_wchar_t(void)
+{
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE__tlgCreate1Sz_wchar_t;
     expected_call_count++;
 }
 
@@ -1228,6 +1253,12 @@ static void test_message_with_context_with_one_property(LOG_LEVEL log_level, uin
             *pos = TlgInANSISTRING;
             break;
         }
+        case LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr:
+        {
+            setup__tlgCreate1Sz_wchar_t();
+            *pos = TlgInUNICODESTRING;
+            break;
+        }
         case LOG_CONTEXT_PROPERTY_TYPE_bool:
         {
             setup_EventDataDescCreate();
@@ -1320,6 +1351,23 @@ static void log_sink_etw_log_with_context_with_one_ascii_property_succeeds(void)
     LOG_CONTEXT_CREATE(log_context, NULL,
         LOG_CONTEXT_STRING_PROPERTY(gigi, "duru")
         );
+
+    test_message_with_context_with_one_property(LOG_LEVEL_VERBOSE, TRACE_LEVEL_VERBOSE, "LogVerbose", log_context, "",
+        5 // expected property value size
+    );
+
+    LOG_CONTEXT_DESTROY(log_context);
+}
+
+/* Tests_SRS_LOG_SINK_ETW_07_003: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr, a byte with the value TlgInUNICODESTRING shall be added in the metadata. */
+/* Tests_SRS_LOG_SINK_ETW_07_004: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr, the event data descriptor shall be filled with the value of the property by calling _tlgCreate1Sz_wchar_t. ]*/
+static void log_sink_etw_log_with_context_with_one_wchar_t_property_succeeds(void)
+{
+    LOG_CONTEXT_HANDLE log_context;
+
+    LOG_CONTEXT_CREATE(log_context, NULL,
+        LOG_CONTEXT_WSTRING_PROPERTY(gigi, L"duru")
+    );
 
     test_message_with_context_with_one_property(LOG_LEVEL_VERBOSE, TRACE_LEVEL_VERBOSE, "LogVerbose", log_context, "",
         5 // expected property value size
@@ -3039,6 +3087,7 @@ int main(void)
 
     log_sink_etw_log_with_context_with_no_properties_succeeds();
     log_sink_etw_log_with_context_with_one_ascii_property_succeeds();
+    log_sink_etw_log_with_context_with_one_wchar_t_property_succeeds();
     log_sink_etw_log_with_context_with_one_int64_t_property_succeeds();
     log_sink_etw_log_with_context_with_one_uint64_t_property_succeeds();
     log_sink_etw_log_with_context_with_one_int32_t_property_succeeds();

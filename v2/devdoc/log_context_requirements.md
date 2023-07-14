@@ -109,6 +109,21 @@ int (*VALUE_FUNCTION)(void* buffer)
 
 **SRS_LOG_CONTEXT_01_026: [** If 2 properties have the same `property_name` for a context a compiler error shall be emitted. **]**
 
+## LOG_CONTEXT_WSTRING_PROPERTY
+
+```c
+#define LOG_CONTEXT_WSTRING_PROPERTY(property_name, format, ...) \
+    ...
+```
+
+`LOG_CONTEXT_WSTRING_PROPERTY` allows defining a property/value pair of type `wchar_t_ptr` where the value stored in the pair is constructed using `wprintf`-like formatting.
+
+**SRS_LOG_CONTEXT_07_001: [** `LOG_CONTEXT_WSTRING_PROPERTY` shall expand to code allocating a property/value pair of type `wchar_t_ptr` and the name `property_name`. **]**
+
+**SRS_LOG_CONTEXT_07_002: [** `LOG_CONTEXT_WSTRING_PROPERTY` shall expand to code that stores as value a wchar string that is constructed using `wprintf`-like formatting based on `format` and all the arguments in `...`. **]**
+
+If 2 properties have the same `property_name` for a context a compiler error shall be emitted.
+
 ## LOG_CONTEXT_NAME
 
 ```c
