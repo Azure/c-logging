@@ -297,6 +297,10 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
                     /* Codes_SRS_LOG_SINK_ETW_01_063: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr, a byte with the value TlgInANSISTRING shall be added in the metadata. ]*/
                     *pos = TlgInANSISTRING;
                     break;
+                case LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr:
+                    /* Codes_SRS_LOG_SINK_ETW_07_003: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr, a byte with the value TlgInUNICODESTRING shall be added in the metadata. */
+                    *pos = TlgInUNICODESTRING;
+                    break;
                 case LOG_CONTEXT_PROPERTY_TYPE_bool:
                     /* Codes_SRS_LOG_SINK_ETW_07_001: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_bool, a byte with the value TlgInBOOL32 shall be added in the metadata. ]*/
                     *pos = TlgInBOOL32;
@@ -528,6 +532,10 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
                         case LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr:
                             /* Codes_SRS_LOG_SINK_ETW_01_067: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr, the event data descriptor shall be filled with the value of the property by calling _tlgCreate1Sz_char. ]*/
                             _tlgCreate1Sz_char(&_tlgData[_tlgIdx], context_property_value_pairs[i].value);
+                            break;
+                        case LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr:
+                            /* Codes_SRS_LOG_SINK_ETW_07_004: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr, the event data descriptor shall be filled with the value of the property by calling _tlgCreate1Sz_wchar_t. ]*/
+                            _tlgCreate1Sz_wchar_t(&_tlgData[_tlgIdx], context_property_value_pairs[i].value);
                             break;
                         case LOG_CONTEXT_PROPERTY_TYPE_struct:
                             /* Codes_SRS_LOG_SINK_ETW_01_062: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_struct, no event data descriptor shall be used. ]*/
