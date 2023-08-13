@@ -6,6 +6,8 @@
 
 [Event Tracing For Windows](https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/event-tracing-for-windows--etw-)
 
+[GetModuleFileNameA](https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-GetModuleFileNameA)
+
 ## Exposed API
 
 ```
@@ -26,7 +28,7 @@ Note: No other APIs (`deinit`, `log`) should be called while `init` executes.
 
 **SRS_LOG_SINK_ETW_01_006: [** `log_sink_etw.init` shall register the ETW TraceLogging provider by calling `TraceLoggingRegister` (`TraceLoggingRegister_EventRegister_EventSetInformation`). **]**
 
-**SRS_LOG_SINK_ETW_01_008: [** `log_sink_etw.init` shall emit a `LOG_LEVEL_INFO` event as a self test, printing the fact that the provider was registered and from which executable (as obtained by calling `_get_pgmptr`). **]**
+**SRS_LOG_SINK_ETW_01_008: [** `log_sink_etw.init` shall emit a `LOG_LEVEL_INFO` event as a self test, printing the fact that the provider was registered and from which executable (as obtained by calling `GetModuleFileNameA`). **]**
 
 **SRS_LOG_SINK_ETW_01_084: [** `log_sink_etw.init` shall use as provider GUID `DAD29F36-0A48-4DEF-9D50-8EF9036B92B4`. **]**
 
@@ -62,9 +64,7 @@ typedef void (*LOG_SINK_LOG_FUNC)(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_co
 
 **SRS_LOG_SINK_ETW_01_001: [** If `message_format` is `NULL`, `log_sink_etw.log` shall return. **]**
 
-Note: `_get_pgmptr` is documented [here](https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/get-pgmptr?view=msvc-170).
-
-**SRS_LOG_SINK_ETW_01_083: [** If `_get_pgmptr` fails, the executable shall be printed as `UNKNOWN`. **]**
+**SRS_LOG_SINK_ETW_01_083: [** If `GetModuleFileNameA` fails, the executable shall be printed as `UNKNOWN`. **]**
 
 Note this can (and should) be improved to be configurable in a subsequent task.
 
