@@ -33,7 +33,7 @@
     MOCK_CALL_TYPE_log_context_get_property_value_pair_count, \
     MOCK_CALL_TYPE_log_context_get_property_value_pairs, \
     MOCK_CALL_TYPE_TraceLoggingRegister_EventRegister_EventSetInformation, \
-    MOCK_CALL_TYPE__get_pgmptr, \
+    MOCK_CALL_TYPE_GetModuleFileNameA, \
     MOCK_CALL_TYPE__tlgCreate1Sz_char, \
     MOCK_CALL_TYPE_EventDataDescCreate, \
     MOCK_CALL_TYPE__tlgWriteTransfer_EventWriteTransfer, \
@@ -96,11 +96,10 @@ typedef struct TraceLoggingRegister_EventRegister_EventSetInformation_CALL_TAG
     TLG_STATUS call_result;
 } TraceLoggingRegister_EventRegister_EventSetInformation_CALL;
 
-typedef struct _get_pgmptr_CALL_TAG
+typedef struct GetModuleFileNameA_CALL_TAG
 {
-    bool override_result;
-    errno_t call_result;
-} _get_pgmptr_CALL;
+    bool override_result; /*when override_result is TRUE then GetModuleFileNameA returns FALSE. Otherwise it doesn't fail and returns the current executable filename name*/
+} GetModuleFileNameA_CALL;
 
 typedef struct _tlgWriteTransfer_EventWriteTransfer_CALL_TAG
 {
@@ -139,7 +138,7 @@ typedef struct MOCK_CALL_TAG
         log_context_get_property_value_pair_count_CALL log_context_get_property_value_pair_count_call;
         log_context_get_property_value_pairs_CALL log_context_get_property_value_pairs_call;
         TraceLoggingRegister_EventRegister_EventSetInformation_CALL TraceLoggingRegister_EventRegister_EventSetInformation_call;
-        _get_pgmptr_CALL _get_pgmptr_call;
+        GetModuleFileNameA_CALL GetModuleFileNameA_call;
         _tlgWriteTransfer_EventWriteTransfer_CALL _tlgWriteTransfer_EventWriteTransfer_call;
         log_context_property_if_get_type_CALL log_context_property_if_get_type_call;
         vsnprintf_CALL vsnprintf_call;
@@ -315,25 +314,31 @@ TLG_STATUS mock_TraceLoggingRegister_EventRegister_EventSetInformation(const str
     return result;
 }
 
-errno_t mock__get_pgmptr(char** pValue)
+static char GetModuleFileNameA_value[MAX_PATH];
+
+BOOL mock_GetModuleFileNameA(HMODULE hModule, LPSTR lpFilename, DWORD nSize)
 {
+    (void)nSize;
+    (void)lpFilename;
+    (void)hModule;
     TLG_STATUS result;
 
     if ((actual_call_count == expected_call_count) ||
-        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE__get_pgmptr))
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_GetModuleFileNameA))
     {
         actual_and_expected_match = false;
-        result = E_FAIL;
+        result = FALSE;
     }
     else
     {
-        if (expected_calls[actual_call_count]._get_pgmptr_call.override_result)
+        if (expected_calls[actual_call_count].GetModuleFileNameA_call.override_result)
         {
-            result = expected_calls[actual_call_count]._get_pgmptr_call.call_result;
+            result = FALSE;
         }
         else
         {
-            result = _get_pgmptr(pValue);
+            (void)strcpy(lpFilename, GetModuleFileNameA_value);
+            result = TRUE;
         }
 
         actual_call_count++;
@@ -372,7 +377,7 @@ void mock_EventDataDescCreate(PEVENT_DATA_DESCRIPTOR EventDataDescriptor, const 
     }
 }
 
-errno_t mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvider, void const* pEventMetadata, LPCGUID pActivityId, LPCGUID pRelatedActivityId, UINT32 cData, EVENT_DATA_DESCRIPTOR* pData)
+BOOL mock__tlgWriteTransfer_EventWriteTransfer(TraceLoggingHProvider hProvider, void const* pEventMetadata, LPCGUID pActivityId, LPCGUID pRelatedActivityId, UINT32 cData, EVENT_DATA_DESCRIPTOR* pData)
 {
     TLG_STATUS result;
 
@@ -600,10 +605,10 @@ static void setup_TraceLoggingRegister_EventRegister_EventSetInformation_call(vo
     expected_call_count++;
 }
 
-static void setup__get_pgmptr_call(void)
+static void setup_GetModuleFileNameA_call(void)
 {
-    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE__get_pgmptr;
-    expected_calls[expected_call_count]._get_pgmptr_call.override_result = false;
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_GetModuleFileNameA;
+    expected_calls[expected_call_count].GetModuleFileNameA_call.override_result = false;
     expected_call_count++;
 }
 
@@ -657,6 +662,9 @@ static void when_module_is_not_initialized_deinit_returns(void)
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
+    /*suite init*/
+    POOR_MANS_ASSERT(GetModuleFileNameA(NULL, GetModuleFileNameA_value, sizeof(GetModuleFileNameA_value)));
+
     // make abort not popup
     _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 
