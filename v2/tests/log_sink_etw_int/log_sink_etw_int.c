@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <wchar.h>
 
 #include "windows.h"
 #include "TraceLoggingProvider.h"
@@ -16,6 +17,7 @@
 #include "c_logging/log_context_property_basic_types.h"
 #include "c_logging/log_context_property_bool_type.h"
 #include "c_logging/log_context_property_type_ascii_char_ptr.h"
+#include "c_logging/log_context_property_type_wchar_t_ptr.h"
 #include "c_logging/log_context_property_value_pair.h"
 #include "c_logging/log_level.h"
 #include "c_logging/log_sink_if.h"
@@ -104,6 +106,7 @@ typedef struct PARSED_EVENT_PROPERTY_TAG
     union
     {
         char ascii_char_ptr_value[MAX_STRING_VALUE_LENGTH];
+        wchar_t wchar_t_ptr_value[MAX_STRING_VALUE_LENGTH];
         uint8_t uint8_t_value;
         int8_t int8_t_value;
         uint16_t uint16_t_value;
@@ -171,6 +174,16 @@ static void copy_string(char* destination, size_t destination_size, const char* 
     }
     (void)memcpy(destination, source, source_length);
     destination[source_length] = '\0';
+}
+
+static void copy_wstring(wchar_t* destination, size_t destination_size, const wchar_t* source, size_t source_length)
+{
+    if (source_length >= destination_size)
+    {
+        source_length = destination_size - 2;
+    }
+    (void)memcpy(destination, source, source_length);
+    destination[source_length] = L'\0';
 }
 
 static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
@@ -267,6 +280,13 @@ static void WINAPI event_trace_record_callback(EVENT_RECORD* pEventRecord)
                 size_t property_string_value_length = strlen(current_user_data_field);
                 copy_string(test_context->parsed_events[current_index].properties[property_index].ascii_char_ptr_value, sizeof(test_context->parsed_events[current_index].properties[property_index].ascii_char_ptr_value), current_user_data_field, property_string_value_length);
                 current_user_data_field += property_string_value_length + 1;
+                break;
+            }
+            case TlgInUNICODESTRING:
+            {
+                size_t property_string_value_length = wcslen((wchar_t*)current_user_data_field)*2;
+                copy_wstring(test_context->parsed_events[current_index].properties[property_index].wchar_t_ptr_value, sizeof(test_context->parsed_events[current_index].properties[property_index].wchar_t_ptr_value), (wchar_t*)current_user_data_field, property_string_value_length);
+                current_user_data_field += property_string_value_length + 2;
                 break;
             }
             case TlgInUINT8:
@@ -640,7 +660,8 @@ static void log_sink_etw_log_with_context_with_properties(void)
         LOG_CONTEXT_PROPERTY(int64_t, prop7, 0x7071727374757677),
         LOG_CONTEXT_PROPERTY(uint64_t, prop8, 0x8081828384858687),
         LOG_CONTEXT_PROPERTY(bool, prop9, true),
-        LOG_CONTEXT_PROPERTY(bool, prop10, false)
+        LOG_CONTEXT_PROPERTY(bool, prop10, false),
+        LOG_CONTEXT_WSTRING_PROPERTY(wstring, L"duru")
     );
 
     start_parse_events(test_context);
@@ -662,9 +683,9 @@ static void log_sink_etw_log_with_context_with_properties(void)
     POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].func, __FUNCTION__) == 0);
     POOR_MANS_ASSERT(test_context->parsed_events[0].line == captured_line);
 
-    POOR_MANS_ASSERT(test_context->parsed_events[0].property_count == 12);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].property_count == 13);
     POOR_MANS_ASSERT(test_context->parsed_events[0].properties[0].property_type == (_TlgInSTRUCT | _TlgInChain));
-    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[0].struct_field_count == 11);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[0].struct_field_count == 12);
     POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[0].property_name, "") == 0);
 
     POOR_MANS_ASSERT(test_context->parsed_events[0].properties[1].property_type == TlgInANSISTRING);
@@ -700,6 +721,9 @@ static void log_sink_etw_log_with_context_with_properties(void)
     POOR_MANS_ASSERT(test_context->parsed_events[0].properties[11].property_type == TlgInBOOL32);
     POOR_MANS_ASSERT(test_context->parsed_events[0].properties[11].bool_value == false);
     POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[11].property_name, "prop10") == 0);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[12].property_type == TlgInUNICODESTRING);
+    POOR_MANS_ASSERT(wcscmp(test_context->parsed_events[0].properties[12].wchar_t_ptr_value, L"duru") == 0);
+    POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[12].property_name, "wstring") == 0);
 
     LOG_CONTEXT_DESTROY(log_context);
     test_context_destroy(test_context);

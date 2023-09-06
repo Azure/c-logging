@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdlib.h>
+#include <wchar.h>
 
 #include "windows.h"
 #include "TraceLoggingProvider.h"
@@ -18,6 +19,7 @@
 #include "c_logging/log_context_property_basic_types.h"
 #include "c_logging/log_context_property_bool_type.h"
 #include "c_logging/log_context_property_type_ascii_char_ptr.h"
+#include "c_logging/log_context_property_type_wchar_t_ptr.h"
 #include "c_logging/log_context_property_value_pair.h"
 #include "c_logging/log_level.h"
 #include "c_logging/log_sink_if.h"
@@ -38,8 +40,9 @@
     MOCK_CALL_TYPE_log_context_get_property_value_pair_count, \
     MOCK_CALL_TYPE_log_context_get_property_value_pairs, \
     MOCK_CALL_TYPE_TraceLoggingRegister_EventRegister_EventSetInformation, \
-    MOCK_CALL_TYPE__get_pgmptr, \
+    MOCK_CALL_TYPE_GetModuleFileNameA, \
     MOCK_CALL_TYPE__tlgCreate1Sz_char, \
+    MOCK_CALL_TYPE__tlgCreate1Sz_wchar_t, \
     MOCK_CALL_TYPE_EventDataDescCreate, \
     MOCK_CALL_TYPE__tlgWriteTransfer_EventWriteTransfer, \
     MOCK_CALL_TYPE_log_context_property_if_get_type, \
@@ -99,12 +102,10 @@ typedef struct TraceLoggingRegister_EventRegister_EventSetInformation_CALL_TAG
     const char* expected_provider_id_as_string;
 } TraceLoggingRegister_EventRegister_EventSetInformation_CALL;
 
-typedef struct _get_pgmptr_CALL_TAG
+typedef struct GetModuleFileNameA_CALL_TAG
 {
-    bool override_result;
-    char* injected_pValue;
-    errno_t call_result;
-} _get_pgmptr_CALL;
+    bool override_result; /*when override_result is TRUE then GetModuleFileNameA returns FALSE. Otherwise it doesn't fail and returns the current executable filename name*/
+} GetModuleFileNameA_CALL;
 
 typedef struct _tlgWriteTransfer_EventWriteTransfer_CALL_TAG
 {
@@ -143,7 +144,7 @@ typedef struct MOCK_CALL_TAG
         log_context_get_property_value_pair_count_CALL log_context_get_property_value_pair_count_call;
         log_context_get_property_value_pairs_CALL log_context_get_property_value_pairs_call;
         TraceLoggingRegister_EventRegister_EventSetInformation_CALL TraceLoggingRegister_EventRegister_EventSetInformation_call;
-        _get_pgmptr_CALL _get_pgmptr_call;
+        GetModuleFileNameA_CALL GetModuleFileNameA_call;
         _tlgWriteTransfer_EventWriteTransfer_CALL _tlgWriteTransfer_EventWriteTransfer_call;
         log_context_property_if_get_type_CALL log_context_property_if_get_type_call;
         vsnprintf_CALL vsnprintf_call;
@@ -337,27 +338,30 @@ TLG_STATUS mock_TraceLoggingRegister_EventRegister_EventSetInformation(const str
     return result;
 }
 
-errno_t mock__get_pgmptr(char** pValue)
+static char GetModuleFileNameA_value[MAX_PATH];
+
+BOOL mock_GetModuleFileNameA(HMODULE hModule, LPSTR lpFilename, DWORD nSize)
 {
+    (void)nSize;
+    (void)hModule;
     TLG_STATUS result;
 
     if ((actual_call_count == expected_call_count) ||
-        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE__get_pgmptr))
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_GetModuleFileNameA))
     {
         actual_and_expected_match = false;
-        result = E_FAIL;
+        result = FALSE;
     }
     else
     {
-        if (expected_calls[actual_call_count]._get_pgmptr_call.override_result)
+        if (expected_calls[actual_call_count].GetModuleFileNameA_call.override_result)
         {
-            *pValue = expected_calls[actual_call_count]._get_pgmptr_call.injected_pValue;
-            result = expected_calls[actual_call_count]._get_pgmptr_call.call_result;
+            result = FALSE;
         }
         else
         {
-            // call "real" function
-            result = _get_pgmptr(pValue);
+            (void)strcpy(lpFilename, GetModuleFileNameA_value);
+            result = TRUE;
         }
 
         actual_call_count++;
@@ -377,6 +381,22 @@ void mock__tlgCreate1Sz_char(PEVENT_DATA_DESCRIPTOR pDesc, char const* psz)
     {
         // call "real" function
         _tlgCreate1Sz_char(pDesc, psz);
+
+        actual_call_count++;
+    }
+}
+
+void mock__tlgCreate1Sz_wchar_t(PEVENT_DATA_DESCRIPTOR pDesc, wchar_t const* psz)
+{
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE__tlgCreate1Sz_wchar_t))
+    {
+        actual_and_expected_match = false;
+    }
+    else
+    {
+        // call "real" function
+        _tlgCreate1Sz_wchar_t(pDesc, psz);
 
         actual_call_count++;
     }
@@ -633,16 +653,22 @@ static void setup_TraceLoggingRegister_EventRegister_EventSetInformation_call(co
     expected_call_count++;
 }
 
-static void setup__get_pgmptr_call(void)
+static void setup_GetModuleFileNameA_call(void)
 {
-    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE__get_pgmptr;
-    expected_calls[expected_call_count]._get_pgmptr_call.override_result = false;
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_GetModuleFileNameA;
+    expected_calls[expected_call_count].GetModuleFileNameA_call.override_result = false;
     expected_call_count++;
 }
 
 static void setup__tlgCreate1Sz_char(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE__tlgCreate1Sz_char;
+    expected_call_count++;
+}
+
+static void setup__tlgCreate1Sz_wchar_t(void)
+{
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE__tlgCreate1Sz_wchar_t;
     expected_call_count++;
 }
 
@@ -724,7 +750,7 @@ static void when_TraceLoggingRegister_fails_log_sink_etw_init_fails(void)
 }
 
 /* Tests_SRS_LOG_SINK_ETW_01_006: [ log_sink_etw.init shall register the ETW TraceLogging provider by calling TraceLoggingRegister (TraceLoggingRegister_EventRegister_EventSetInformation). ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw.init shall emit a LOG_LEVEL_INFO event as a self test, printing the fact that the provider was registered and from which executable (as obtained by calling _get_pgmptr). ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw.init shall emit a LOG_LEVEL_INFO event as a self test, printing the fact that the provider was registered and from which executable (as obtained by calling GetModuleFileNameA). ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_084: [ log_sink_etw.init shall use as provider GUID DAD29F36-0A48-4DEF-9D50-8EF9036B92B4. ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_091: [ log_sink_etw.init shall succeed and return 0. ] */
 static void log_sink_etw_init_works(void)
@@ -735,7 +761,7 @@ static void log_sink_etw_init_works(void)
     setup_TraceLoggingRegister_EventRegister_EventSetInformation_call("DAD29F36-0A48-4DEF-9D50-8EF9036B92B4", TRACE_LEVEL_INFORMATION);
 
     // self test event
-    setup__get_pgmptr_call();
+    setup_GetModuleFileNameA_call();
 
     setup_vsnprintf_call(); // formatting message
     setup__tlgCreate1Sz_char(); // message
@@ -779,9 +805,7 @@ static void log_sink_etw_init_works(void)
 
     int captured_line = __LINE__;
 
-    expected_calls[1]._get_pgmptr_call.override_result = true;
-    expected_calls[1]._get_pgmptr_call.call_result = 0;
-    expected_calls[1]._get_pgmptr_call.injected_pValue = "some_test_executable.exe";
+    expected_calls[1].GetModuleFileNameA_call.override_result = true;
 
     static const char expected_event_message[] = "ETW provider was registered succesfully (self test). Executable file full path name = some_test_executable.exe";
 
@@ -1228,6 +1252,12 @@ static void test_message_with_context_with_one_property(LOG_LEVEL log_level, uin
             *pos = TlgInANSISTRING;
             break;
         }
+        case LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr:
+        {
+            setup__tlgCreate1Sz_wchar_t();
+            *pos = TlgInUNICODESTRING;
+            break;
+        }
         case LOG_CONTEXT_PROPERTY_TYPE_bool:
         {
             setup_EventDataDescCreate();
@@ -1320,6 +1350,23 @@ static void log_sink_etw_log_with_context_with_one_ascii_property_succeeds(void)
     LOG_CONTEXT_CREATE(log_context, NULL,
         LOG_CONTEXT_STRING_PROPERTY(gigi, "duru")
         );
+
+    test_message_with_context_with_one_property(LOG_LEVEL_VERBOSE, TRACE_LEVEL_VERBOSE, "LogVerbose", log_context, "",
+        5 // expected property value size
+    );
+
+    LOG_CONTEXT_DESTROY(log_context);
+}
+
+/* Tests_SRS_LOG_SINK_ETW_07_003: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr, a byte with the value TlgInUNICODESTRING shall be added in the metadata. */
+/* Tests_SRS_LOG_SINK_ETW_07_004: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr, the event data descriptor shall be filled with the value of the property by calling _tlgCreate1Sz_wchar_t. ]*/
+static void log_sink_etw_log_with_context_with_one_wchar_t_property_succeeds(void)
+{
+    LOG_CONTEXT_HANDLE log_context;
+
+    LOG_CONTEXT_CREATE(log_context, NULL,
+        LOG_CONTEXT_WSTRING_PROPERTY(gigi, L"duru")
+    );
 
     test_message_with_context_with_one_property(LOG_LEVEL_VERBOSE, TRACE_LEVEL_VERBOSE, "LogVerbose", log_context, "",
         5 // expected property value size
@@ -3020,6 +3067,9 @@ static void log_sink_etw_deinit_after_deinit_returns(void)
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
+    /*suite setup*/
+    POOR_MANS_ASSERT(GetModuleFileNameA(NULL, GetModuleFileNameA_value, sizeof(GetModuleFileNameA_value)));
+
     // make abort not popup
     _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 
@@ -3039,6 +3089,7 @@ int main(void)
 
     log_sink_etw_log_with_context_with_no_properties_succeeds();
     log_sink_etw_log_with_context_with_one_ascii_property_succeeds();
+    log_sink_etw_log_with_context_with_one_wchar_t_property_succeeds();
     log_sink_etw_log_with_context_with_one_int64_t_property_succeeds();
     log_sink_etw_log_with_context_with_one_uint64_t_property_succeeds();
     log_sink_etw_log_with_context_with_one_int32_t_property_succeeds();

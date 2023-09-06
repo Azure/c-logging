@@ -6,6 +6,8 @@
 
 [Event Tracing For Windows](https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/event-tracing-for-windows--etw-)
 
+[GetModuleFileNameA](https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-GetModuleFileNameA)
+
 ## Exposed API
 
 ```
@@ -26,7 +28,7 @@ Note: No other APIs (`deinit`, `log`) should be called while `init` executes.
 
 **SRS_LOG_SINK_ETW_01_006: [** `log_sink_etw.init` shall register the ETW TraceLogging provider by calling `TraceLoggingRegister` (`TraceLoggingRegister_EventRegister_EventSetInformation`). **]**
 
-**SRS_LOG_SINK_ETW_01_008: [** `log_sink_etw.init` shall emit a `LOG_LEVEL_INFO` event as a self test, printing the fact that the provider was registered and from which executable (as obtained by calling `_get_pgmptr`). **]**
+**SRS_LOG_SINK_ETW_01_008: [** `log_sink_etw.init` shall emit a `LOG_LEVEL_INFO` event as a self test, printing the fact that the provider was registered and from which executable (as obtained by calling `GetModuleFileNameA`). **]**
 
 **SRS_LOG_SINK_ETW_01_084: [** `log_sink_etw.init` shall use as provider GUID `DAD29F36-0A48-4DEF-9D50-8EF9036B92B4`. **]**
 
@@ -62,9 +64,7 @@ typedef void (*LOG_SINK_LOG_FUNC)(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_co
 
 **SRS_LOG_SINK_ETW_01_001: [** If `message_format` is `NULL`, `log_sink_etw.log` shall return. **]**
 
-Note: `_get_pgmptr` is documented [here](https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/get-pgmptr?view=msvc-170).
-
-**SRS_LOG_SINK_ETW_01_083: [** If `_get_pgmptr` fails, the executable shall be printed as `UNKNOWN`. **]**
+**SRS_LOG_SINK_ETW_01_083: [** If `GetModuleFileNameA` fails, the executable shall be printed as `UNKNOWN`. **]**
 
 Note this can (and should) be improved to be configurable in a subsequent task.
 
@@ -160,6 +160,8 @@ Note: `_tlgBlobTyp` represents the metadata blob type in the binary form describ
 
   - **SRS_LOG_SINK_ETW_01_063: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr`, a byte with the value `TlgInANSISTRING` shall be added in the metadata. **]**
 
+  - **SRS_LOG_SINK_ETW_07_003: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr`, a byte with the value `TlgInUNICODESTRING` shall be added in the metadata. **]**
+
   - **SRS_LOG_SINK_ETW_07_001: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_bool`, a byte with the value `TlgInBOOL32` shall be added in the metadata. **]**
 
   - **SRS_LOG_SINK_ETW_01_064: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_int64_t`, a byte with the value `TlgInINT64` shall be added in the metadata. **]**
@@ -199,6 +201,8 @@ Note: 2 entries are for the event descriptor and metadata respectively, 4 entrie
 **SRS_LOG_SINK_ETW_01_061: [** For each property in `log_context`: **]**
 
 - **SRS_LOG_SINK_ETW_01_067: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr`, the event data descriptor shall be filled with the value of the property by calling `_tlgCreate1Sz_char`. **]**
+
+- **SRS_LOG_SINK_ETW_07_004: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr`, the event data descriptor shall be filled with the value of the property by calling `_tlgCreate1Sz_wchar_t`. **]**
 
 - **SRS_LOG_SINK_ETW_07_002: [** If the property type is `LOG_CONTEXT_PROPERTY_TYPE_bool`, the event data descriptor shall be filled with the value of the property by calling `EventDataDescCreate`. **]**
 

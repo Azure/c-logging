@@ -5,7 +5,7 @@
 ## Exposed API
 
 ```
-int LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)(void* dst_value, const char* src_value);
+int LOG_CONTEXT_PROPERTY_TYPE_INIT(ascii_char_ptr)(void* dst_value, const char* format, ...);
 int LOG_CONTEXT_PROPERTY_TYPE_GET_INIT_DATA_SIZE(ascii_char_ptr)(const char* format, ...);
 
 extern const LOG_CONTEXT_PROPERTY_TYPE_IF LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(ascii_char_ptr);

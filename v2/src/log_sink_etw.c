@@ -297,6 +297,10 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
                     /* Codes_SRS_LOG_SINK_ETW_01_063: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr, a byte with the value TlgInANSISTRING shall be added in the metadata. ]*/
                     *pos = TlgInANSISTRING;
                     break;
+                case LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr:
+                    /* Codes_SRS_LOG_SINK_ETW_07_003: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr, a byte with the value TlgInUNICODESTRING shall be added in the metadata. */
+                    *pos = TlgInUNICODESTRING;
+                    break;
                 case LOG_CONTEXT_PROPERTY_TYPE_bool:
                     /* Codes_SRS_LOG_SINK_ETW_07_001: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_bool, a byte with the value TlgInBOOL32 shall be added in the metadata. ]*/
                     *pos = TlgInBOOL32;
@@ -529,6 +533,10 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
                             /* Codes_SRS_LOG_SINK_ETW_01_067: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_ascii_char_ptr, the event data descriptor shall be filled with the value of the property by calling _tlgCreate1Sz_char. ]*/
                             _tlgCreate1Sz_char(&_tlgData[_tlgIdx], context_property_value_pairs[i].value);
                             break;
+                        case LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr:
+                            /* Codes_SRS_LOG_SINK_ETW_07_004: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr, the event data descriptor shall be filled with the value of the property by calling _tlgCreate1Sz_wchar_t. ]*/
+                            _tlgCreate1Sz_wchar_t(&_tlgData[_tlgIdx], context_property_value_pairs[i].value);
+                            break;
                         case LOG_CONTEXT_PROPERTY_TYPE_struct:
                             /* Codes_SRS_LOG_SINK_ETW_01_062: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_struct, no event data descriptor shall be used. ]*/
                             _tlgIdx--;
@@ -576,12 +584,12 @@ static int log_sink_etw_init(void)
         }
         else
         {
-            char* temp_executable_full_path_name;
+            char temp_executable_full_path_name[MAX_PATH];
             const char* executable_full_path_name;
 
-            if (_get_pgmptr(&temp_executable_full_path_name) != 0)
+            if (!GetModuleFileNameA(NULL, temp_executable_full_path_name, sizeof(temp_executable_full_path_name)))
             {
-                /* Codes_SRS_LOG_SINK_ETW_01_083: [ If _get_pgmptr fails, the executable shall be printed as UNKNOWN. ]*/
+                /* Codes_SRS_LOG_SINK_ETW_01_083: [ If GetModuleFileNameA fails, the executable shall be printed as UNKNOWN. ]*/
                 executable_full_path_name = "UNKNOWN";
             }
             else
@@ -589,7 +597,7 @@ static int log_sink_etw_init(void)
                 executable_full_path_name = temp_executable_full_path_name;
             }
 
-            /* Codes_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw.init shall emit a LOG_LEVEL_INFO event as a self test, printing the fact that the provider was registered and from which executable (as obtained by calling _get_pgmptr). ]*/
+            /* Codes_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw.init shall emit a LOG_LEVEL_INFO event as a self test, printing the fact that the provider was registered and from which executable (as obtained by calling GetModuleFileNameA). ]*/
             internal_emit_self_described_event(event_name_info, sizeof(event_name_info), TRACE_LEVEL_INFORMATION, NULL, 0, __FILE__, __FUNCTION__, __LINE__, "ETW provider was registered succesfully (self test). Executable file full path name = %s", executable_full_path_name);
 
             log_sink_etw_state = LOG_SINK_ETW_STATE_INITIALIZED;

@@ -39,7 +39,7 @@ static void lazyRegisterEventProvider(void)
             if (SUCCEEDED(t))
             {
                 (void)InterlockedExchange(&isETWLoggerRegistered, 2);
-                LogInfo("block_storage_2 ETW provider was registered succesfully (self test). Executable file full path name = %s", _pgmptr); /*_pgmptr comes from https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getmodulefilenamea */
+                LogInfo("block_storage_2 ETW provider was registered succesfully (self test). Executable file full path name = %s", MU_P_OR_NULL(_pgmptr)); /*_pgmptr comes from https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-GetModuleFileNameA */
             }
             else
             {

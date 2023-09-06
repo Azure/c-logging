@@ -48,7 +48,7 @@ const char error_string[] = "Error formatting log line\r\n";
     no_of_bytes = MIN(no_of_bytes, (int)buffer_size); \
     buffer += no_of_bytes; \
     buffer_size -= no_of_bytes; \
-    result += no_of_bytes; 
+    result += no_of_bytes;
 
 static int log_n_properties(char* buffer, size_t buffer_size, const LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_value_pairs, size_t property_value_pair_count)
 {
@@ -121,6 +121,7 @@ static int log_n_properties(char* buffer, size_t buffer_size, const LOG_CONTEXT_
                 UPDATE_BUFFER_AND_SIZE(result, buffer, buffer_size, snprintf_result);
 
                 int to_string_result = property_value_pairs[i].type->to_string(property_value_pairs[i].value, buffer, buffer_size);
+
                 if (to_string_result < 0)
                 {
                     /* Codes_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
@@ -151,6 +152,7 @@ static void log_sink_console_deinit(void)
 
 static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, va_list args)
 {
+
     if (message_format == NULL)
     {
         /* Codes_SRS_LOG_SINK_CONSOLE_01_001: [ If message_format is NULL, log_sink_console.log shall print an error and return. ]*/
@@ -200,6 +202,7 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
                 size_t property_value_pair_count = log_context_get_property_value_pair_count(log_context);
                 /* Codes_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
                 const LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_value_pairs = log_context_get_property_value_pairs(log_context);
+
                 int log_n_properties_result =  log_n_properties(buffer, buffer_size, property_value_pairs, property_value_pair_count); // lgtm[cpp/unguardednullreturndereference] Tests and code review ensure that NULL access cannot happen
                 if (log_n_properties_result < 0)
                 {
