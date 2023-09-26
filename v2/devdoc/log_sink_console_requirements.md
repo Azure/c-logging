@@ -58,11 +58,11 @@ typedef void (*LOG_SINK_LOG_FUNC)(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_co
 
   **SRS_LOG_SINK_CONSOLE_01_008: [** `LOG_LEVEL_ERROR` shall be displayed with red `\x1b[31m`. **]**
 
-  **SRS_LOG_SINK_CONSOLE_01_009: [** `LOG_LEVEL_WARNING` shall be displayed with bright yellow `\x1b[33;1m`. **]**
+  **SRS_LOG_SINK_CONSOLE_01_009: [** `LOG_LEVEL_WARNING` shall be displayed with yellow `\x1b[33m`. **]**
 
-  **SRS_LOG_SINK_CONSOLE_01_010: [** `LOG_LEVEL_INFO` shall be displayed with yellow `\x1b[33m`. **]**
+  **SRS_LOG_SINK_CONSOLE_01_010: [** `LOG_LEVEL_INFO` shall be displayed with white `\x1b[37m`. **]**
 
-  **SRS_LOG_SINK_CONSOLE_01_011: [** `LOG_LEVEL_VERBOSE` shall be displayed with white `\x1b[37m`. **]**
+  **SRS_LOG_SINK_CONSOLE_01_011: [** `LOG_LEVEL_VERBOSE` shall be displayed with gray `\x1b[90m`. **]**
 
 **SRS_LOG_SINK_CONSOLE_01_012: [** At the end of each line that is printed, the color shall be reset by using the `\x1b[0m` code. **]**
 
