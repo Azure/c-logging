@@ -117,6 +117,8 @@ Note: `logger_get_config` is not thread safe and should not be called when othe 
 
 **SRS_LOGGER_01_017: [** If `logger` is not initialized, `LOGGER_LOG` shall abort the program. **]**
 
+**SRS_LOGGER_01_023: [** `LOGGER_LOG` shall generate code that verifies at compile time that `format` and `...` are suitable to be passed as arguments to `printf`. **]**
+
 **SRS_LOGGER_01_001: [** `LOGGER_LOG` shall call the `log` function of every sink that is configured to be used. **]**
 
 ### LOGGER_LOG_WITH_CONFIG
@@ -131,6 +133,8 @@ Note: `logger_get_config` is not thread safe and should not be called when othe 
 **SRS_LOGGER_01_015: [** If `logger_config.log_sinks` is `NULL` and `logger_config.log_sink_count` is greater than 0, `LOGGER_LOG_WITH_CONFIG` shall return. **]**
 
 **SRS_LOGGER_01_018: [** If `logger` is not initialized, `LOGGER_LOG` shall abort the program. **]**
+
+**SRS_LOGGER_01_024: [** `LOGGER_LOG_WITH_CONFIG` shall generate code that verifies at compile time that `format` and `...` are suitable to be passed as arguments to `printf`. **]**
 
 **SRS_LOGGER_01_016: [** Otherwise, `LOGGER_LOG_WITH_CONFIG` shall call the `log` function of every sink specified in `logger_config`. **]**
 
