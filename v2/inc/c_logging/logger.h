@@ -59,7 +59,7 @@ extern "C" {
 #define LOGGER_FORMATTING_SYNTAX_CHECK(format, ...) \
     do \
     { \
-        (0 && printf(format MU_IFCOMMALOGIC(MU_COUNT_ARG(__VA_ARGS__)) __VA_ARGS__)); \
+        (void)(0 && printf(format MU_IFCOMMALOGIC(MU_COUNT_ARG(__VA_ARGS__)) __VA_ARGS__)); \
     } while (0); \
 
 #define LOGGER_LOG(log_level, log_context, format, ...) \
