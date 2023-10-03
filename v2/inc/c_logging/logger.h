@@ -57,7 +57,10 @@ extern "C" {
     void logger_log_with_config(LOGGER_CONFIG logger_config, LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line_no, const char* format, ...);
 
 #define LOGGER_FORMATTING_SYNTAX_CHECK(format, ...) \
-    (void)(0 && printf(format MU_IFCOMMALOGIC(MU_COUNT_ARG(__VA_ARGS__)) __VA_ARGS__));
+    do \
+    { \
+        (0 && printf(format MU_IFCOMMALOGIC(MU_COUNT_ARG(__VA_ARGS__)) __VA_ARGS__)); \
+    } while (0); \
 
 #define LOGGER_LOG(log_level, log_context, format, ...) \
     /* Codes_SRS_LOGGER_01_023: [ LOGGER_LOG shall generate code that verifies at compile time that format and ... are suitable to be passed as arguments to printf. ] */ \
