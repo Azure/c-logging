@@ -60,17 +60,23 @@ extern "C" {
     do \
     { \
         (void)(0 && printf(format MU_IFCOMMALOGIC(MU_COUNT_ARG(__VA_ARGS__)) __VA_ARGS__)); \
-    } while (0); \
+    } while (0) \
 
 #define LOGGER_LOG(log_level, log_context, format, ...) \
-    /* Codes_SRS_LOGGER_01_023: [ LOGGER_LOG shall generate code that verifies at compile time that format and ... are suitable to be passed as arguments to printf. ] */ \
-    LOGGER_FORMATTING_SYNTAX_CHECK(format, __VA_ARGS__) \
-    logger_log(log_level, log_context, __FILE__, __FUNCTION__, __LINE__, format MU_IFCOMMALOGIC(MU_COUNT_ARG(__VA_ARGS__)) __VA_ARGS__)
+    do \
+    { \
+        /* Codes_SRS_LOGGER_01_023: [ LOGGER_LOG shall generate code that verifies at compile time that format and ... are suitable to be passed as arguments to printf. ] */ \
+        LOGGER_FORMATTING_SYNTAX_CHECK(format, __VA_ARGS__); \
+        logger_log(log_level, log_context, __FILE__, __FUNCTION__, __LINE__, format MU_IFCOMMALOGIC(MU_COUNT_ARG(__VA_ARGS__)) __VA_ARGS__); \
+    } while (0)
 
 #define LOGGER_LOG_WITH_CONFIG(logger_config, log_level, log_context, format, ...) \
-    /* Codes_SRS_LOGGER_01_024: [ LOGGER_LOG_WITH_CONFIG shall generate code that verifies at compile time that format and ... are suitable to be passed as arguments to printf. ] */ \
-    LOGGER_FORMATTING_SYNTAX_CHECK(format, __VA_ARGS__) \
-    logger_log_with_config((logger_config), log_level, log_context, __FILE__, __FUNCTION__, __LINE__, format MU_IFCOMMALOGIC(MU_COUNT_ARG(__VA_ARGS__)) __VA_ARGS__)
+    do \
+    { \
+        /* Codes_SRS_LOGGER_01_024: [ LOGGER_LOG_WITH_CONFIG shall generate code that verifies at compile time that format and ... are suitable to be passed as arguments to printf. ] */ \
+        LOGGER_FORMATTING_SYNTAX_CHECK(format, __VA_ARGS__); \
+        logger_log_with_config((logger_config), log_level, log_context, __FILE__, __FUNCTION__, __LINE__, format MU_IFCOMMALOGIC(MU_COUNT_ARG(__VA_ARGS__)) __VA_ARGS__); \
+    } while (0)
 
 /* Codes_SRS_LOGGER_01_012: [ If LOG_CONTEXT_MESSAGE is specified in ..., message_format shall be passed to the log call together with a argument list made out of the ... portion of the LOG_CONTEXT_MESSAGE macro. ] */
 #define EXPAND_MESSAGE_LOG_MESSAGE(...) \
