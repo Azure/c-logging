@@ -409,7 +409,7 @@ jobs:
 
 - job: includecheck_linux
   pool:
-    name: Azure-MsgStore-Linux2204BuildMachinePool
+    name: Azure-MessagingStore-LinuxBuildMachinePool
     demands:
       - linux
 
