@@ -10,8 +10,10 @@
 #include <stddef.h>
 #endif
 
-#if defined(_MSC_VER) && defined(_WIN64)
+#if defined(_MSC_VER)
 #include "windows.h" /*needed for HANDLE*/
+#else
+#error no other platform supported
 #endif
 
 #ifdef __cplusplus

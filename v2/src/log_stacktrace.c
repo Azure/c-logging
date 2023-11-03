@@ -71,7 +71,7 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
     va_end(args);
 }
 
-#if defined(_MSC_VER) && defined(_WIN64)
+#if defined(_MSC_VER)
 /*this function only exists for Windows machines*/
 /*the function does the following
 1) parameter validation
@@ -184,7 +184,7 @@ void getThreadStackAsString(HANDLE hThread, char* destination, size_t destinatio
 
                     if (thisIsFirstFrame)
                     {
-                        thisIsFirstFrame = false; /*no printing for the top of the stack, which is "us"*/
+                        thisIsFirstFrame = false; /*no printing for the top of the stack, which is "us". us = getThreadStackAsString*/
                         continue;
                     }
 
