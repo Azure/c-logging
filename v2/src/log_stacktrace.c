@@ -84,6 +84,21 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
     4.2) determine the file name and line number
     4.3) append the function name, file name and line number to the destination
 */
+
+#if defined(_WIN64)
+    #define INSTRUCTION_POINTER_REGISTER Rip
+    #define FRAME_POINTER_REGISTER Rbp
+    #define STACK_POINTER_REGISTER Rsp
+#else
+    #if defined(_WIN32)
+        #define INSTRUCTION_POINTER_REGISTER Eip
+        #define FRAME_POINTER_REGISTER Ebp
+        #define STACK_POINTER_REGISTER Esp
+    #else
+        #error unknown version of windows
+    #endif
+#endif
+
 void getThreadStackAsString(HANDLE hThread, char* destination, size_t destinationSize)
 {
 
@@ -160,11 +175,11 @@ void getThreadStackAsString(HANDLE hThread, char* destination, size_t destinatio
             AcquireSRWLockExclusive(&lockOverSymCalls);
             {
                 STACKFRAME64 stackFrame = { 0 };
-                stackFrame.AddrPC.Offset = context.Rip;
+                stackFrame.AddrPC.Offset = context.INSTRUCTION_POINTER_REGISTER;
                 stackFrame.AddrPC.Mode = AddrModeFlat;
-                stackFrame.AddrFrame.Offset = context.Rbp;
+                stackFrame.AddrFrame.Offset = context.FRAME_POINTER_REGISTER;
                 stackFrame.AddrFrame.Mode = AddrModeFlat;
-                stackFrame.AddrStack.Offset = context.Rsp;
+                stackFrame.AddrStack.Offset = context.STACK_POINTER_REGISTER;
                 stackFrame.AddrStack.Mode = AddrModeFlat;
 
                 bool thisIsFirstFrame = true; /*used to skip the first frame, which is "us", that is don't display information about "getThreadStackAsString"*/
