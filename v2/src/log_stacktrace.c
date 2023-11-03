@@ -358,6 +358,7 @@ void getThreadStackAsString(HANDLE hThread, char* destination, size_t destinatio
                 return;
             }
         }
+        destination[destinationSize - 1] = '\0';
     }
 }
 #else /*defined(_MSC_VER) && defined(_WIN64)*/
