@@ -54,7 +54,7 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
     snprintfResult = vsnprintf(*destination, *destination_size, format, args);
     if (!(
         (snprintfResult >= 0) && /*the returned value is nonnegative [...]*/
-        (snprintfResult < (*destination_size)) /*[...] and less than n.*/
+        (snprintfResult < (int)(*destination_size)) /*[...] and less than n.*/
         ))
     {
         /*complain about not being able to complain*/
