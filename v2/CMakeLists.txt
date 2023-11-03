@@ -57,6 +57,7 @@ set(c_logging_v2_h_files
     ./inc/c_logging/log_sink_etw.h
     ./inc/c_logging/log_lasterror.h
     ./inc/c_logging/log_hresult.h
+    ./inc/c_logging/log_stacktrace.h
     )
 
 set(c_logging_v2_c_files
@@ -66,6 +67,7 @@ set(c_logging_v2_c_files
     ./src/log_lasterror.c
     ./src/log_hresult.c
     ./src/log_errno_win32.c
+    ./src/log_stacktrace.c
     )
 else()
 set(c_logging_v2_c_files
@@ -79,6 +81,10 @@ SOURCE_GROUP(devdoc FILES ${c_logging_v2_md_files})
 
 #this is the product (a logging library)
 add_library(c_logging_v2_core ${c_logging_v2_c_files} ${c_logging_v2_h_files})
+if(WIN32)
+    target_link_libraries(c_logging_v2_core dbghelp) #dbghelp is needed for stack tracing
+endif()
+
 add_library(c_logging_v2 ${c_logging_v2_c_files} ${c_logging_v2_h_files} ${c_logging_v2_md_files} ./src/logger_sinks_config.c)
 
 target_include_directories(c_logging_v2 PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/inc>)
