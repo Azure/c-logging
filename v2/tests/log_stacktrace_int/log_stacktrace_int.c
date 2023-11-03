@@ -58,7 +58,7 @@ static DWORD WINAPI some_thread(
 
     while (InterlockedAdd(&g.thread_should_exit, 0) == 0)
     {
-        Sleep(10);
+        Sleep(1);
     }
 
     return 0;
@@ -86,7 +86,7 @@ static void test_another_thread(void)
 
     while (InterlockedAdd(&g.thread_running, 0) != 1)
     {
-        Sleep(10);
+        Sleep(1);
     }
 
     compute_stack(t, g.stack, sizeof(g.stack));
@@ -127,12 +127,12 @@ static void test_another_thread_insufficient_memory(void)
 !RtlUserThreadStart failure in SymGetLineFromAddr64:0
 */
 
-    for (size_t i = 1; i < 288 * 2; i++)
+    for (size_t stack_string_size = 1; stack_string_size < 288 * 2; stack_string_size++)
     {
-        char* stack = malloc(i);
+        char* stack = malloc(stack_string_size);
         POOR_MANS_ASSERT(stack != NULL);
 
-        (void)memset(stack, '3', i); /*intentionally not passing a 0 initialized array*/
+        (void)memset(stack, '3', stack_string_size); /*intentionally not passing a 0 initialized array*/
 
         (void)InterlockedExchange(&g.thread_running, 0);
         (void)InterlockedExchange(&g.thread_should_exit, 0);
@@ -143,12 +143,12 @@ static void test_another_thread_insufficient_memory(void)
 
         while (InterlockedAdd(&g.thread_running, 0) != 1)
         {
-            Sleep(10);
+            Sleep(1);
         }
 
-        compute_stack(t, stack, i); /*must not crash*/
+        compute_stack(t, stack, stack_string_size); /*must not crash*/
 
-        (void)printf("stack i=%zu\n%s\n", i, stack);
+        (void)printf("stack i=%zu\n%s\n", stack_string_size, stack);
 
         (void)InterlockedExchange(&g.thread_should_exit, 1);
 
