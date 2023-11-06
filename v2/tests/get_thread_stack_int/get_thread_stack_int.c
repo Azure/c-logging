@@ -27,22 +27,18 @@ static struct
     char stack[4096];
     volatile LONG thread_running;
     volatile LONG  thread_should_exit;
-    volatile int* do_not_optimize_the_stack;
-
 }g;
 
 static void compute_stack(HANDLE hThread, char* destination, size_t destination_size)
 {
-    volatile int do_not_optimize_the_stack = 0;
-    g.do_not_optimize_the_stack = &do_not_optimize_the_stack;
+    (void)memset(destination, '3', destination_size); /*memset works against optimizing the stack where "compute_stack" frame is optimized out AND against assumeing destination has any '\0' characters in it anywhere*/
 
     get_thread_stack(hThread, destination, destination_size);
 }
 
 static void calls_end_frame(HANDLE hThread, char* destination, size_t destination_size)
 {
-    volatile int do_not_optimize_the_stack = 0;
-    g.do_not_optimize_the_stack = &do_not_optimize_the_stack;
+    (void)memset(destination, '3', destination_size); /*memset works against optimizing the stack where "compute_stack" frame is optimized out AND against assumeing destination has any '\0' characters in it anywhere*/
 
     compute_stack(hThread, destination, destination_size);
 }

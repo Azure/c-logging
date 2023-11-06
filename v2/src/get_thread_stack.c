@@ -101,11 +101,13 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
 #define INSTRUCTION_POINTER_REGISTER Rip
 #define FRAME_POINTER_REGISTER Rbp
 #define STACK_POINTER_REGISTER Rsp
+#define STACK_WALK_IMAGE_TYPE IMAGE_FILE_MACHINE_AMD64
 #else
 #if defined(_WIN32)
 #define INSTRUCTION_POINTER_REGISTER Eip
 #define FRAME_POINTER_REGISTER Ebp
 #define STACK_POINTER_REGISTER Esp
+#define STACK_WALK_IMAGE_TYPE IMAGE_FILE_MACHINE_I386
 #else
 #error unknown version of windows
 #endif
@@ -149,7 +151,7 @@ void get_thread_stack(HANDLE hThread, char* destination, size_t destinationSize)
         bool wasContextAcquired = false;
 
         CONTEXT context = { 0 };
-        context.ContextFlags = CONTEXT_FULL;
+        context.ContextFlags = CONTEXT_CONTROL;
 
         if (hThread == currentThread)
         {
@@ -199,7 +201,7 @@ void get_thread_stack(HANDLE hThread, char* destination, size_t destinationSize)
 
                 /*4) once the context has been acquired, call StackWalk64 to get the stack frames. For every frame:*/
                 while (StackWalk64(
-                    IMAGE_FILE_MACHINE_AMD64,
+                    STACK_WALK_IMAGE_TYPE,
                     hProcess,
                     hThread,
                     &stackFrame,
@@ -263,7 +265,6 @@ void get_thread_stack(HANDLE hThread, char* destination, size_t destinationSize)
             }
         }
 
-
         if (wasThreadSuspended)
         {
             if (ResumeThread(hThread) == (DWORD)-1)
@@ -276,8 +277,8 @@ void get_thread_stack(HANDLE hThread, char* destination, size_t destinationSize)
         destination[destinationSize - 1] = '\0';
     }
 }
-#else /*defined(_MSC_VER) && defined(_WIN64)*/
-/*for all the other platforms we don't provide a way to inspect another thread's call stack (yet).*/
+#else /*defined(_MSC_VER)*/
+/*for all the others we don't provide a way to inspect another thread's call stack (yet).*/
 void get_thread_stack(HANDLE thread, char* destination, size_t destinationSize)
 {
     (void)thread;
