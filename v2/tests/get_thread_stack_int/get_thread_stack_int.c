@@ -31,16 +31,44 @@ static struct
 
 static void compute_stack(HANDLE hThread, char* destination, size_t destination_size)
 {
-    (void)memset(destination, '3', destination_size); /*memset works against optimizing the stack where "compute_stack" frame is optimized out AND against assumeing destination has any '\0' characters in it anywhere*/
+    /*works against optimization of this stack frame AND against having some predetermined characters in the destination.
+    This code was experimentally determined and MIGHT fail with future compilers. To see the failure, put a breakpoint in get_thread_stack and examine the stack in Visual Studio debugger.
+    If compute_stack does not appear... then modify this code to trick the compiler into actually emitting the code for this function.*/
+    for (size_t i = 0; i < destination_size; i++)
+    {
+        destination[i] = rand() % 256;
+    }
 
     get_thread_stack(hThread, destination, destination_size);
+
+    /*works against optimization of this stack frame AND against having some predetermined characters in the destination.
+    This code was experimentally determined and MIGHT fail with future compilers. To see the failure, put a breakpoint in get_thread_stack and examine the stack in Visual Studio debugger.
+    If compute_stack does not appear... then modify this code to trick the compiler into actually emitting the code for this function.*/
+    for (size_t i = 0; i < destination_size; i++)
+    {
+        destination[i] = destination[i];
+    }
 }
 
 static void calls_end_frame(HANDLE hThread, char* destination, size_t destination_size)
 {
-    (void)memset(destination, '3', destination_size); /*memset works against optimizing the stack where "compute_stack" frame is optimized out AND against assumeing destination has any '\0' characters in it anywhere*/
+    /*works against optimization of this stack frame AND against having some predetermined characters in the destination.
+    This code was experimentally determined and MIGHT fail with future compilers. To see the failure, put a breakpoint in get_thread_stack and examine the stack in Visual Studio debugger.
+    If compute_stack does not appear... then modify this code to trick the compiler into actually emitting the code for this function.*/
+    for (size_t i = 0; i < destination_size; i++)
+    {
+        destination[i]=rand() % 256;
+    }
 
     compute_stack(hThread, destination, destination_size);
+
+    /*works against optimization of this stack frame AND against having some predetermined characters in the destination.
+    This code was experimentally determined and MIGHT fail with future compilers. To see the failure, put a breakpoint in get_thread_stack and examine the stack in Visual Studio debugger.
+    If compute_stack does not appear... then modify this code to trick the compiler into actually emitting the code for this function.*/
+    for (size_t i = 0; i < destination_size; i++)
+    {
+        destination[i] = destination[i];
+    }
 }
 
 static DWORD WINAPI some_thread(
@@ -62,11 +90,17 @@ static DWORD WINAPI some_thread(
 
 static void test_current_thread(void)
 {
-    (void)memset(g.stack, '3', sizeof(g.stack)); /*intentionally not passing a 0 initialized array*/
+    for (size_t i = 0; i < sizeof(g.stack); i++)
+    {
+        g.stack[i] = rand() % 256; /*works against optimization of this stack frame AND against having some predetermined characters in the destination*/
+    }
     compute_stack(GetCurrentThread(), g.stack, sizeof(g.stack));
     POOR_MANS_ASSERT(strstr(g.stack, "compute_stack") != NULL); /*assert that the stack contains "compute_stack"*/
 
-    (void)memset(g.stack, '3', sizeof(g.stack)); /*intentionally not passing a 0 initialized array*/
+    for (size_t i = 0; i < sizeof(g.stack); i++)
+    {
+        g.stack[i] = rand() % 256; /*works against optimization of this stack frame AND against having some predetermined characters in the destination*/
+    }
     calls_end_frame(GetCurrentThread(), g.stack, sizeof(g.stack));
     POOR_MANS_ASSERT(strstr(g.stack, "calls_end_frame") != NULL); /*assert that the stack contains "calls_end_frame", even when the stack is not snapshotted in "calls_end_frame" */
 }
