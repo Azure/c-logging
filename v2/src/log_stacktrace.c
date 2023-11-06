@@ -11,7 +11,7 @@
 #include "winnt.h"
 #include "dbghelp.h"
 
-#include "c_logging/logging_stacktrace.h"
+#include "c_logging/log_stacktrace.h"
 
 static volatile LONG doSymInit = 0; /*0 = not initialized, 1 = initializing, 2= initialized*/
 
