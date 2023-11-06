@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef LOG_STACKTRACE_H
-#define LOG_STACKTRACE_H
+#ifndef GET_STACKTRACE_H
+#define GET_STACKTRACE_H
 
 #ifdef __cplusplus
 #include <cstddef>
@@ -26,4 +26,4 @@ extern "C" {
 }
 #endif
 
-#endif /*LOG_STACKTRACE_H*/
+#endif /*GET_STACKTRACE_H*/

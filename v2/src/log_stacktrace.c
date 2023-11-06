@@ -99,7 +99,7 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
     #endif
 #endif
 
-void getThreadStackAsString(HANDLE hThread, char* destination, size_t destinationSize)
+void get_thread_stack(HANDLE hThread, char* destination, size_t destinationSize)
 {
 
     /*1) parameter validation*/
