@@ -29,47 +29,38 @@ static struct
     volatile LONG  thread_should_exit;
 }g;
 
-static void compute_stack(HANDLE hThread, char* destination, size_t destination_size)
+#define RECURSION_SIZE 5
+
+static void compute_stack(HANDLE hThread, char* destination, size_t destination_size, int recursion)
 {
     /*works against optimization of this stack frame AND against having some predetermined characters in the destination.
     This code was experimentally determined and MIGHT fail with future compilers. To see the failure, put a breakpoint in get_thread_stack and examine the stack in Visual Studio debugger.
     If compute_stack does not appear... then modify this code to trick the compiler into actually emitting the code for this function.*/
-    for (size_t i = 0; i < destination_size; i++)
+    if (recursion == 0)
     {
-        destination[i] = rand() % 256;
+        get_thread_stack(hThread, destination, destination_size);
     }
-
-    get_thread_stack(hThread, destination, destination_size);
-
-    /*works against optimization of this stack frame AND against having some predetermined characters in the destination.
-    This code was experimentally determined and MIGHT fail with future compilers. To see the failure, put a breakpoint in get_thread_stack and examine the stack in Visual Studio debugger.
-    If compute_stack does not appear... then modify this code to trick the compiler into actually emitting the code for this function.*/
-    for (size_t i = 0; i < destination_size; i++)
+    else
     {
-        destination[i] = destination[i];
+        compute_stack(hThread, destination, destination_size, recursion -1);
     }
 }
 
-static void calls_end_frame(HANDLE hThread, char* destination, size_t destination_size)
+static void calls_end_frame(HANDLE hThread, char* destination, size_t destination_size, int recursion)
 {
     /*works against optimization of this stack frame AND against having some predetermined characters in the destination.
     This code was experimentally determined and MIGHT fail with future compilers. To see the failure, put a breakpoint in get_thread_stack and examine the stack in Visual Studio debugger.
     If compute_stack does not appear... then modify this code to trick the compiler into actually emitting the code for this function.*/
-    for (size_t i = 0; i < destination_size; i++)
+    if (recursion == 0)
     {
-        destination[i]=rand() % 256;
+        get_thread_stack(hThread, destination, destination_size);
     }
-
-    compute_stack(hThread, destination, destination_size);
-
-    /*works against optimization of this stack frame AND against having some predetermined characters in the destination.
-    This code was experimentally determined and MIGHT fail with future compilers. To see the failure, put a breakpoint in get_thread_stack and examine the stack in Visual Studio debugger.
-    If compute_stack does not appear... then modify this code to trick the compiler into actually emitting the code for this function.*/
-    for (size_t i = 0; i < destination_size; i++)
+    else
     {
-        destination[i] = destination[i];
+        compute_stack(hThread, destination, destination_size, recursion - 1);
     }
 }
+
 
 static DWORD WINAPI some_thread(
     LPVOID lpThreadParameter
@@ -94,14 +85,14 @@ static void test_current_thread(void)
     {
         g.stack[i] = rand() % 256; /*works against optimization of this stack frame AND against having some predetermined characters in the destination*/
     }
-    compute_stack(GetCurrentThread(), g.stack, sizeof(g.stack));
+    compute_stack(GetCurrentThread(), g.stack, sizeof(g.stack), RECURSION_SIZE);
     POOR_MANS_ASSERT(strstr(g.stack, "compute_stack") != NULL); /*assert that the stack contains "compute_stack"*/
 
     for (size_t i = 0; i < sizeof(g.stack); i++)
     {
         g.stack[i] = rand() % 256; /*works against optimization of this stack frame AND against having some predetermined characters in the destination*/
     }
-    calls_end_frame(GetCurrentThread(), g.stack, sizeof(g.stack));
+    calls_end_frame(GetCurrentThread(), g.stack, sizeof(g.stack), RECURSION_SIZE);
     POOR_MANS_ASSERT(strstr(g.stack, "calls_end_frame") != NULL); /*assert that the stack contains "calls_end_frame", even when the stack is not snapshotted in "calls_end_frame" */
 }
 
@@ -119,7 +110,7 @@ static void test_another_thread(void)
         Sleep(1);
     }
 
-    compute_stack(t, g.stack, sizeof(g.stack));
+    compute_stack(t, g.stack, sizeof(g.stack), RECURSION_SIZE);
 
     POOR_MANS_ASSERT(strstr(g.stack, "some_thread") != NULL); /*assert that the stack contains "calls_end_frame", even when the stack is not snapshotted in "calls_end_frame" */
 
@@ -139,7 +130,7 @@ static void test_current_thread_insufficient_memory(void) /*doesn't really check
 
         (void)memset(stack, '3', i); /*intentionally not passing a 0 initialized array*/
 
-        compute_stack(GetCurrentThread(), stack, i);
+        compute_stack(GetCurrentThread(), stack, i, RECURSION_SIZE);
         /*no assert, but must not crash*/
 
         free(stack);
@@ -176,7 +167,7 @@ static void test_another_thread_insufficient_memory(void)
             Sleep(1);
         }
 
-        compute_stack(t, stack, stack_string_size); /*must not crash*/
+        compute_stack(t, stack, stack_string_size, RECURSION_SIZE); /*must not crash*/
 
         (void)printf("stack i=%zu\n%s\n", stack_string_size, stack);
 
