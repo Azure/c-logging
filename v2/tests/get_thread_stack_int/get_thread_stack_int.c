@@ -24,42 +24,32 @@
 
 static struct
 {
-    char stack[4096];
+    //char stack[4096];
     volatile LONG thread_running;
     volatile LONG  thread_should_exit;
 }g;
 
-#define RECURSION_SIZE 5
+static volatile int antioptimization;
+static char antioptimization2[4096];
 
-static void compute_stack(HANDLE hThread, char* destination, size_t destination_size, int recursion)
+/*the below function has been found to be optimized away with different x86/x64 flavors. #pragma optimize will prevent that from happening*/
+#pragma optimize( "", off ) /*disable optimization*/
+static void compute_stack(HANDLE hThread, char* destination, size_t destination_size)
+{
+    get_thread_stack(hThread, destination, destination_size);
+}
+#pragma optimize( "", on ) /*restore optimization*/
+
+/*the below function has been found to be optimized away with different x86/x64 flavors. #pragma optimize will prevent that from happening*/
+#pragma optimize( "", off ) /*disable optimization*/
+static void calls_end_frame(HANDLE hThread, char* destination, size_t destination_size)
 {
     /*works against optimization of this stack frame AND against having some predetermined characters in the destination.
     This code was experimentally determined and MIGHT fail with future compilers. To see the failure, put a breakpoint in get_thread_stack and examine the stack in Visual Studio debugger.
-    If compute_stack does not appear... then modify this code to trick the compiler into actually emitting the code for this function.*/
-    if (recursion == 0)
-    {
-        get_thread_stack(hThread, destination, destination_size);
-    }
-    else
-    {
-        compute_stack(hThread, destination, destination_size, recursion -1);
-    }
+    If calls_end_frame does not appear... then modify this code to trick the compiler into actually emitting the code for this function.*/
+    get_thread_stack(hThread, destination, destination_size);
 }
-
-static void calls_end_frame(HANDLE hThread, char* destination, size_t destination_size, int recursion)
-{
-    /*works against optimization of this stack frame AND against having some predetermined characters in the destination.
-    This code was experimentally determined and MIGHT fail with future compilers. To see the failure, put a breakpoint in get_thread_stack and examine the stack in Visual Studio debugger.
-    If compute_stack does not appear... then modify this code to trick the compiler into actually emitting the code for this function.*/
-    if (recursion == 0)
-    {
-        get_thread_stack(hThread, destination, destination_size);
-    }
-    else
-    {
-        compute_stack(hThread, destination, destination_size, recursion - 1);
-    }
-}
+#pragma optimize( "", on ) /*restore optimization*/
 
 
 static DWORD WINAPI some_thread(
@@ -81,23 +71,20 @@ static DWORD WINAPI some_thread(
 
 static void test_current_thread(void)
 {
-    for (size_t i = 0; i < sizeof(g.stack); i++)
-    {
-        g.stack[i] = rand() % 256; /*works against optimization of this stack frame AND against having some predetermined characters in the destination*/
-    }
-    compute_stack(GetCurrentThread(), g.stack, sizeof(g.stack), RECURSION_SIZE);
-    POOR_MANS_ASSERT(strstr(g.stack, "compute_stack") != NULL); /*assert that the stack contains "compute_stack"*/
+    char stack[4096];
 
-    for (size_t i = 0; i < sizeof(g.stack); i++)
-    {
-        g.stack[i] = rand() % 256; /*works against optimization of this stack frame AND against having some predetermined characters in the destination*/
-    }
-    calls_end_frame(GetCurrentThread(), g.stack, sizeof(g.stack), RECURSION_SIZE);
-    POOR_MANS_ASSERT(strstr(g.stack, "calls_end_frame") != NULL); /*assert that the stack contains "calls_end_frame", even when the stack is not snapshotted in "calls_end_frame" */
+    compute_stack(GetCurrentThread(), stack, sizeof(stack));
+    POOR_MANS_ASSERT(strstr(stack, "!compute_stack") != NULL); /*assert that the stack contains "compute_stack"*/
+    POOR_MANS_ASSERT(strstr(stack, "!get_thread_stack") == NULL); /*assert that the stack doesn't contain "get_thread_stack"*/
+
+    calls_end_frame(GetCurrentThread(), stack, sizeof(stack));
+    POOR_MANS_ASSERT(strstr(stack, "!calls_end_frame") != NULL); /*assert that the stack contains "calls_end_frame", even when the stack is not snapshotted in "calls_end_frame" */
+    POOR_MANS_ASSERT(strstr(stack, "!get_thread_stack") == NULL); /*assert that the stack doesn't contain "get_thread_stack"*/
 }
 
 static void test_another_thread(void)
 {
+    char stack[4096];
     (void)InterlockedExchange(&g.thread_running, 0);
     (void)InterlockedExchange(&g.thread_should_exit, 0);
 
@@ -110,9 +97,10 @@ static void test_another_thread(void)
         Sleep(1);
     }
 
-    compute_stack(t, g.stack, sizeof(g.stack), RECURSION_SIZE);
+    compute_stack(t, stack, sizeof(stack));
 
-    POOR_MANS_ASSERT(strstr(g.stack, "some_thread") != NULL); /*assert that the stack contains "calls_end_frame", even when the stack is not snapshotted in "calls_end_frame" */
+    POOR_MANS_ASSERT(strstr(stack, "!some_thread") != NULL); /*assert that the stack contains "calls_end_frame", even when the stack is not snapshotted in "calls_end_frame" */
+    POOR_MANS_ASSERT(strstr(stack, "!get_thread_stack") == NULL); /*assert that the stack doesn't contain "get_thread_stack"*/
 
     (void)InterlockedExchange(&g.thread_should_exit, 1);
 
@@ -130,7 +118,7 @@ static void test_current_thread_insufficient_memory(void) /*doesn't really check
 
         (void)memset(stack, '3', i); /*intentionally not passing a 0 initialized array*/
 
-        compute_stack(GetCurrentThread(), stack, i, RECURSION_SIZE);
+        compute_stack(GetCurrentThread(), stack, i);
         /*no assert, but must not crash*/
 
         free(stack);
@@ -143,7 +131,7 @@ static void test_another_thread_insufficient_memory(void)
 
 !RtlDelayExecution failure in SymGetLineFromAddr64:0
 !SleepEx failure in SymGetLineFromAddr64:0
-!some_thread D:\r\c-logging\v2\tests\get_thread_stack_int\get_thread_stack_int.c:58
+!some_thread D:\r\c-logging\v2\tests\get_thread_stack_int\get_thread_stack_int.c:70
 !BaseThreadInitThunk failure in SymGetLineFromAddr64:0
 !RtlUserThreadStart failure in SymGetLineFromAddr64:0
 */
@@ -167,7 +155,7 @@ static void test_another_thread_insufficient_memory(void)
             Sleep(1);
         }
 
-        compute_stack(t, stack, stack_string_size, RECURSION_SIZE); /*must not crash*/
+        compute_stack(t, stack, stack_string_size); /*must not crash*/
 
         (void)printf("stack i=%zu\n%s\n", stack_string_size, stack);
 

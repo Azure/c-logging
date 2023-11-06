@@ -102,12 +102,14 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
 #define FRAME_POINTER_REGISTER Rbp
 #define STACK_POINTER_REGISTER Rsp
 #define STACK_WALK_IMAGE_TYPE IMAGE_FILE_MACHINE_AMD64
+#define CAPTURE_TOP_OF_STACK true
 #else
 #if defined(_WIN32)
 #define INSTRUCTION_POINTER_REGISTER Eip
 #define FRAME_POINTER_REGISTER Ebp
 #define STACK_POINTER_REGISTER Esp
 #define STACK_WALK_IMAGE_TYPE IMAGE_FILE_MACHINE_I386
+#define CAPTURE_TOP_OF_STACK false
 #else
 #error unknown version of windows
 #endif
@@ -211,8 +213,7 @@ void get_thread_stack(HANDLE hThread, char* destination, size_t destinationSize)
                     SymGetModuleBase64,
                     NULL))
                 {
-
-                    if (thisIsFirstFrame)
+                    if (thisIsFirstFrame && CAPTURE_TOP_OF_STACK) /*x64 does capture the current frame, x86 apparently does not... ?! really weird frankly. this CAPTURE_TOP_OF_STACK helps with not capturin the top of the stack*/
                     {
                         thisIsFirstFrame = false; /*no printing for the top of the stack, which is "us". us = get_thread_stack*/
                         continue;
