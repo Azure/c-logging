@@ -24,7 +24,7 @@
 MU_DEFINE_ENUM(SYM_INIT, SYM_INIT_VALUES);
 MU_DEFINE_ENUM_STRINGS(SYM_INIT, SYM_INIT_VALUES);
 
-static char check_that_LONG_and_enum_hsave_the_same_size[sizeof(volatile LONG) == sizeof(SYM_INIT)];
+static char check_that_LONG_and_enum_have_the_same_size[sizeof(volatile LONG) == sizeof(SYM_INIT)];
 
 typedef union SYM_INIT_STATE_TAG
 {
@@ -42,12 +42,12 @@ typedef union SYMBOL_INFO_EXTENDED_TAG
 
 static SRWLOCK lockOverSymCalls = SRWLOCK_INIT;
 
-static const char snprintfFailed[] = "snprintf failed\n";
+static const char snprintfFailed[] = "\nsnprintf failed";
 
 #define snprintf_fallback(destination,destination_size, fallback_string, fallbackstring_size, format, ... )                      \
 {                                                                                                                                \
-    0 && printf(format, __VA_ARGS__); /*this is a no-op, but it will force the compiler to check the format string*/             \
     snprintf_fallback_impl(destination,destination_size, fallback_string, fallbackstring_size, format, __VA_ARGS__);             \
+    0 && printf(format, __VA_ARGS__); /*this is a no-op, but it will force the compiler to check the format string*/             \
 }                                                                                                                                \
 
 /*in all context where this is called, destination is non-NULL*/
@@ -172,7 +172,7 @@ void get_thread_stack(HANDLE hThread, char* destination, size_t destinationSize)
             {
                 if (!GetThreadContext(hThread, &context))
                 {
-                    snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "%sfailure (GetLastError=%" PRIu32 ") in GetThreadContext\n", firstLine ? (firstLine = false, "") : "\n", GetLastError());
+                    snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "%sfailure (GetLastError=%" PRIu32 ") in GetThreadContext", firstLine ? (firstLine = false, "") : "\n", GetLastError());
                 }
                 else
                 {
