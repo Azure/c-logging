@@ -24,13 +24,9 @@
 
 static struct
 {
-    //char stack[4096];
     volatile LONG thread_running;
     volatile LONG  thread_should_exit;
 }g;
-
-static volatile int antioptimization;
-static char antioptimization2[4096];
 
 /*the below function has been found to be optimized away with different x86/x64 flavors. #pragma optimize will prevent that from happening*/
 #pragma optimize( "", off ) /*disable optimization*/
