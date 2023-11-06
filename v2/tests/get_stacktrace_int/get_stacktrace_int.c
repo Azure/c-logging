@@ -12,7 +12,7 @@
 
 #include "macro_utils/macro_utils.h"
 
-#include "c_logging/get_stacktrace.h"
+#include "c_logging/get_thread_stack.h"
 
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 #define POOR_MANS_ASSERT(cond) \
@@ -36,7 +36,7 @@ static void compute_stack(HANDLE hThread, char* destination, size_t destination_
     volatile int do_not_optimize_the_stack = 0;
     g.do_not_optimize_the_stack = &do_not_optimize_the_stack;
 
-    getThreadStackAsString(hThread, destination, destination_size);
+    get_thread_stack(hThread, destination, destination_size);
 }
 
 static void calls_end_frame(HANDLE hThread, char* destination, size_t destination_size)
@@ -122,7 +122,7 @@ static void test_another_thread_insufficient_memory(void)
 
 !RtlDelayExecution failure in SymGetLineFromAddr64:0
 !SleepEx failure in SymGetLineFromAddr64:0
-!some_thread D:\r\c-logging\v2\tests\get_stacktrace_int\get_stacktrace_int.c:58
+!some_thread D:\r\c-logging\v2\tests\get_thread_stack_int\get_thread_stack_int.c:58
 !BaseThreadInitThunk failure in SymGetLineFromAddr64:0
 !RtlUserThreadStart failure in SymGetLineFromAddr64:0
 */

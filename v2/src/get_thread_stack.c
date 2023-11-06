@@ -11,9 +11,28 @@
 #include "winnt.h"
 #include "dbghelp.h"
 
-#include "c_logging/get_stacktrace.h"
+#include "macro_utils/macro_utils.h"
 
-static volatile LONG doSymInit = 0; /*0 = not initialized, 1 = initializing, 2= initialized*/
+#include "c_logging/get_thread_stack.h"
+
+
+#define SYM_INIT_VALUES  \
+    SYM_INIT_INITIALIZED,   \
+    SYM_INIT_INITIALIZING,  \
+    SYM_INIT_NOT_INITIALIZED
+
+MU_DEFINE_ENUM(SYM_INIT, SYM_INIT_VALUES);
+MU_DEFINE_ENUM_STRINGS(SYM_INIT, SYM_INIT_VALUES);
+
+static char check_that_LONG_and_enum_hsave_the_same_size[sizeof(volatile LONG) == sizeof(SYM_INIT)];
+
+typedef union SYM_INIT_STATE_TAG
+{
+    volatile LONG state;
+    volatile SYM_INIT state_enum;
+} SYM_INIT_STATE;
+
+static SYM_INIT_STATE doSymInit = { .state_enum = SYM_INIT_NOT_INITIALIZED };
 
 typedef union SYMBOL_INFO_EXTENDED_TAG
 {
@@ -22,14 +41,6 @@ typedef union SYMBOL_INFO_EXTENDED_TAG
 }SYMBOL_INFO_EXTENDED;
 
 static SRWLOCK lockOverSymCalls = SRWLOCK_INIT;
-
-/*returns number of characters copied into destination*/
-static size_t memcat(char* destination, size_t destinationSize, const char* source, size_t sourceSize)
-{
-    size_t sizeToCpy = destinationSize<sourceSize?destinationSize:sourceSize;
-    (void)memcpy(destination, source, sizeToCpy);
-    return sizeToCpy;
-}
 
 static const char snprintfFailed[] = "snprintf failed\n";
 
@@ -46,8 +57,6 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
     va_list args;
     va_start(args, format);
 
-    size_t copied;
-
     int snprintfResult;
 
     /*trying to complain*/
@@ -57,10 +66,13 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
         (snprintfResult < (int)(*destination_size)) /*[...] and less than n.*/
         ))
     {
-        /*complain about not being able to complain*/
-        copied = memcat(*destination, *destination_size, fallback_string, fallbackstring_size - 1);
-        (*destination) += copied;
-        (*destination_size) -= copied;
+        /*complain about not being able to complain - only copy the part of the fallback string that fits*/
+
+        size_t size_to_copy = *destination_size < fallbackstring_size ? *destination_size : fallbackstring_size - 1;
+        (void)memcpy(*destination, fallback_string, size_to_copy);
+
+        (*destination) += size_to_copy;
+        (*destination_size) -= size_to_copy;
     }
     else
     {
@@ -86,20 +98,20 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
 */
 
 #if defined(_WIN64)
-    #define INSTRUCTION_POINTER_REGISTER Rip
-    #define FRAME_POINTER_REGISTER Rbp
-    #define STACK_POINTER_REGISTER Rsp
+#define INSTRUCTION_POINTER_REGISTER Rip
+#define FRAME_POINTER_REGISTER Rbp
+#define STACK_POINTER_REGISTER Rsp
 #else
-    #if defined(_WIN32)
-        #define INSTRUCTION_POINTER_REGISTER Eip
-        #define FRAME_POINTER_REGISTER Ebp
-        #define STACK_POINTER_REGISTER Esp
-    #else
-        #error unknown version of windows
-    #endif
+#if defined(_WIN32)
+#define INSTRUCTION_POINTER_REGISTER Eip
+#define FRAME_POINTER_REGISTER Ebp
+#define STACK_POINTER_REGISTER Esp
+#else
+#error unknown version of windows
+#endif
 #endif
 
-void getThreadStackAsString(HANDLE hThread, char* destination, size_t destinationSize)
+void get_thread_stack(HANDLE hThread, char* destination, size_t destinationSize)
 {
 
     /*1) parameter validation*/
@@ -119,12 +131,13 @@ void getThreadStackAsString(HANDLE hThread, char* destination, size_t destinatio
         /*2) call SymInitialize for the current process*/
         /*lazily call once SymInitialize*/
         LONG state;
-        while ((state = InterlockedCompareExchange(&doSymInit, 1, 0)) != 2)
+
+        while ((state = InterlockedCompareExchange(&doSymInit.state, SYM_INIT_INITIALIZING, SYM_INIT_NOT_INITIALIZED)) != SYM_INIT_INITIALIZED)
         {
-            if (state == 0)
+            if (state == SYM_INIT_NOT_INITIALIZED)
             {
                 (void)SymInitialize(hProcess, NULL, TRUE); /*this is a process-wide initialization, and will leak because we don't know when to call SymCleanup. It is a good candidate for platform_init*/
-                (void)InterlockedExchange(&doSymInit, 2);
+                (void)InterlockedExchange(&doSymInit.state, SYM_INIT_INITIALIZED);
             }
         }
 
@@ -182,7 +195,7 @@ void getThreadStackAsString(HANDLE hThread, char* destination, size_t destinatio
                 stackFrame.AddrStack.Offset = context.STACK_POINTER_REGISTER;
                 stackFrame.AddrStack.Mode = AddrModeFlat;
 
-                bool thisIsFirstFrame = true; /*used to skip the first frame, which is "us", that is don't display information about "getThreadStackAsString"*/
+                bool thisIsFirstFrame = true; /*used to skip the first frame, which is "us", that is don't display information about "get_thread_stack"*/
 
                 /*4) once the context has been acquired, call StackWalk64 to get the stack frames. For every frame:*/
                 while (StackWalk64(
@@ -199,7 +212,7 @@ void getThreadStackAsString(HANDLE hThread, char* destination, size_t destinatio
 
                     if (thisIsFirstFrame)
                     {
-                        thisIsFirstFrame = false; /*no printing for the top of the stack, which is "us". us = getThreadStackAsString*/
+                        thisIsFirstFrame = false; /*no printing for the top of the stack, which is "us". us = get_thread_stack*/
                         continue;
                     }
 
@@ -265,7 +278,7 @@ void getThreadStackAsString(HANDLE hThread, char* destination, size_t destinatio
 }
 #else /*defined(_MSC_VER) && defined(_WIN64)*/
 /*for all the other platforms we don't provide a way to inspect another thread's call stack (yet).*/
-void getThreadStackAsString(HANDLE thread, char* destination, size_t destinationSize)
+void get_thread_stack(HANDLE thread, char* destination, size_t destinationSize)
 {
     (void)thread;
 

@@ -20,7 +20,7 @@
 extern "C" {
 #endif
 
-    void getThreadStackAsString(HANDLE thread, char* destination, size_t destinationSize);
+    void get_thread_stack(HANDLE thread, char* destination, size_t destinationSize);
 
 #ifdef __cplusplus
 }
