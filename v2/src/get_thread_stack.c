@@ -115,7 +115,7 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
 #endif
 #endif
 
-void get_thread_stack(HANDLE hThread, char* destination, size_t destinationSize)
+void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
 {
 
     /*1) parameter validation*/
@@ -146,135 +146,151 @@ void get_thread_stack(HANDLE hThread, char* destination, size_t destinationSize)
         }
 
         /*3) get hThread's context.*/
-        HANDLE currentThread = GetCurrentThread();
+        DWORD currentThreadId = GetCurrentThreadId();
 
-        bool wasThreadSuspended = false; /*only suspend threads that are not "current" thread to capture their stack frame*/
-
+bool wasThreadSuspended = false; /*only suspend threads that are not "current" thread to capture their stack frame*/
         bool wasContextAcquired = false;
 
         CONTEXT context = { 0 };
         context.ContextFlags = CONTEXT_CONTROL;
 
-        if (hThread == currentThread)
+        HANDLE hThread = OpenThread(THREAD_GET_CONTEXT | THREAD_SUSPEND_RESUME, FALSE, threadId);
+        if (hThread == NULL)
         {
-            /*3.1) if the current thread is hThread, call RtlCaptureContext*/
-            RtlCaptureContext(&context); /*this is GetThreadContext for current thread*/
-            wasContextAcquired = true;
+            /*falling back to console*/
+            (void)printf("failure (%" PRIu32 ") in OpenThread(THREAD_GET_CONTEXT, FALSE, threadId=%" PRIx32 ");", GetLastError(), threadId);
         }
         else
         {
-            /*3.2) if the current thread is not hThread, call SuspendThread and GetThreadContext*/
-            if (SuspendThread(hThread) == (DWORD)-1)
+            if (currentThreadId == threadId)
             {
-                snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "%sfailure (GetLastError=%" PRIu32 ") in SuspendThread", firstLine ? (firstLine = false, "") : "\n", GetLastError());
+                /*3.1) if the current thread is hThread, call RtlCaptureContext*/
+                RtlCaptureContext(&context); /*this is GetThreadContext for current thread*/
+                wasContextAcquired = true;
             }
             else
             {
-                if (!GetThreadContext(hThread, &context))
+                /*3.2) if the current thread is not hThread, call SuspendThread and GetThreadContext*/
+                if (SuspendThread(hThread) == (DWORD)-1)
                 {
-                    snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "%sfailure (GetLastError=%" PRIu32 ") in GetThreadContext", firstLine ? (firstLine = false, "") : "\n", GetLastError());
+                    snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "%sfailure (GetLastError=%" PRIu32 ") in SuspendThread", firstLine ? (firstLine = false, "") : "\n", GetLastError());
                 }
                 else
                 {
-                    wasContextAcquired = true;
+                    if (!GetThreadContext(hThread, &context))
+                    {
+                        snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "%sfailure (GetLastError=%" PRIu32 ") in GetThreadContext", firstLine ? (firstLine = false, "") : "\n", GetLastError());
+                    }
+                    else
+                    {
+                        wasContextAcquired = true;
+                    }
+                    wasThreadSuspended = true;
                 }
-                wasThreadSuspended = true;
             }
-        }
 
-        if (!wasContextAcquired)
-        {
-            /*not much to do without the thread context*/
-        }
-        else
-        {
-            /*all following function calls are protected by the same SRW*/
-            AcquireSRWLockExclusive(&lockOverSymCalls);
+
+            if (!wasContextAcquired)
             {
-                STACKFRAME64 stackFrame = { 0 };
-                stackFrame.AddrPC.Offset = context.INSTRUCTION_POINTER_REGISTER;
-                stackFrame.AddrPC.Mode = AddrModeFlat;
-                stackFrame.AddrFrame.Offset = context.FRAME_POINTER_REGISTER;
-                stackFrame.AddrFrame.Mode = AddrModeFlat;
-                stackFrame.AddrStack.Offset = context.STACK_POINTER_REGISTER;
-                stackFrame.AddrStack.Mode = AddrModeFlat;
-
-                bool thisIsFirstFrame = true; /*used to skip the first frame, which is "us", that is don't display information about "get_thread_stack"*/
-
-                /*4) once the context has been acquired, call StackWalk64 to get the stack frames. For every frame:*/
-                while (StackWalk64(
-                    STACK_WALK_IMAGE_TYPE,
-                    hProcess,
-                    hThread,
-                    &stackFrame,
-                    &context,
-                    NULL,
-                    SymFunctionTableAccess64,
-                    SymGetModuleBase64,
-                    NULL))
-                {
-                    if (thisIsFirstFrame && CAPTURE_TOP_OF_STACK) /*x64 does capture the current frame, x86 apparently does not... ?! really weird frankly. this CAPTURE_TOP_OF_STACK helps with not capturin the top of the stack*/
-                    {
-                        thisIsFirstFrame = false; /*no printing for the top of the stack, which is "us". us = get_thread_stack*/
-                        continue;
-                    }
-
-                    DWORD64 displacement = 0;
-
-                    SYMBOL_INFO_EXTENDED buffer;
-
-                    PSYMBOL_INFO pSymbol = &buffer.symbol;
-
-                    pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-                    pSymbol->MaxNameLen = MAX_SYM_NAME;
-
-                    const char* function_name;
-
-                    /*4.1) determine the function name*/
-                    if (!SymFromAddr(hProcess, stackFrame.AddrPC.Offset, &displacement, pSymbol))
-                    {
-                        function_name = "failure in SymFromAddr";
-                    }
-                    else
-                    {
-                        function_name = pSymbol->Name;
-                    }
-
-                    IMAGEHLP_LINE64 line;
-                    line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
-                    DWORD lineDisplacement;
-                    const char* file_name;
-                    uint32_t line_number;
-
-                    /*4.2) determine the file name and line number*/
-                    if (!SymGetLineFromAddr64(hProcess, stackFrame.AddrPC.Offset, &lineDisplacement, &line))
-                    {
-                        file_name = "failure in SymGetLineFromAddr64";
-                        line_number = 0;
-                    }
-                    else
-                    {
-                        file_name = line.FileName;
-                        line_number = line.LineNumber;
-                    }
-
-                    /*4.3) append the function name, file name and line number to the destination*/
-                    snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "%s!%s %s:%" PRIu32 "", firstLine ? (firstLine = false, "") : "\n", function_name, file_name, line_number);
-                }
-
-                ReleaseSRWLockExclusive(&lockOverSymCalls);
+                /*not much to do without the thread context*/
             }
-        }
+            else
+            {
+                /*all following function calls are protected by the same SRW*/
+                AcquireSRWLockExclusive(&lockOverSymCalls);
+                {
+                    STACKFRAME64 stackFrame = { 0 };
+                    stackFrame.AddrPC.Offset = context.INSTRUCTION_POINTER_REGISTER;
+                    stackFrame.AddrPC.Mode = AddrModeFlat;
+                    stackFrame.AddrFrame.Offset = context.FRAME_POINTER_REGISTER;
+                    stackFrame.AddrFrame.Mode = AddrModeFlat;
+                    stackFrame.AddrStack.Offset = context.STACK_POINTER_REGISTER;
+                    stackFrame.AddrStack.Mode = AddrModeFlat;
 
-        if (wasThreadSuspended)
-        {
-            if (ResumeThread(hThread) == (DWORD)-1)
+                    bool thisIsFirstFrame = true; /*used to skip the first frame, which is "us", that is don't display information about "get_thread_stack"*/
+
+                    /*4) once the context has been acquired, call StackWalk64 to get the stack frames. For every frame:*/
+                    while (StackWalk64(
+                        STACK_WALK_IMAGE_TYPE,
+                        hProcess,
+                        hThread,
+                        &stackFrame,
+                        &context,
+                        NULL,
+                        SymFunctionTableAccess64,
+                        SymGetModuleBase64,
+                        NULL))
+                    {
+                        if (thisIsFirstFrame && CAPTURE_TOP_OF_STACK) /*x64 does capture the current frame, x86 apparently does not... ?! really weird frankly. this CAPTURE_TOP_OF_STACK helps with not capturin the top of the stack*/
+                        {
+                            thisIsFirstFrame = false; /*no printing for the top of the stack, which is "us". us = get_thread_stack*/
+                            continue;
+                        }
+
+                        DWORD64 displacement = 0;
+
+                        SYMBOL_INFO_EXTENDED buffer;
+
+                        PSYMBOL_INFO pSymbol = &buffer.symbol;
+
+                        pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+                        pSymbol->MaxNameLen = MAX_SYM_NAME;
+
+                        const char* function_name;
+
+                        /*4.1) determine the function name*/
+                        if (!SymFromAddr(hProcess, stackFrame.AddrPC.Offset, &displacement, pSymbol))
+                        {
+                            function_name = "failure in SymFromAddr";
+                        }
+                        else
+                        {
+                            function_name = pSymbol->Name;
+                        }
+
+                        IMAGEHLP_LINE64 line;
+                        line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+                        DWORD lineDisplacement;
+                        const char* file_name;
+                        uint32_t line_number;
+
+                        /*4.2) determine the file name and line number*/
+                        if (!SymGetLineFromAddr64(hProcess, stackFrame.AddrPC.Offset, &lineDisplacement, &line))
+                        {
+                            file_name = "failure in SymGetLineFromAddr64";
+                            line_number = 0;
+                        }
+                        else
+                        {
+                            file_name = line.FileName;
+                            line_number = line.LineNumber;
+                        }
+
+                        /*4.3) append the function name, file name and line number to the destination*/
+                        snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "%s!%s %s:%" PRIu32 "", firstLine ? (firstLine = false, "") : "\n", function_name, file_name, line_number);
+                    }
+
+                    ReleaseSRWLockExclusive(&lockOverSymCalls);
+                }
+            }
+
+            if (wasThreadSuspended)
+            {
+                if (ResumeThread(hThread) == (DWORD)-1)
+                {
+                    /*falling back to console*/
+                    (void)printf("failure (%" PRIu32 ") in ResumeThread", GetLastError());
+                    return;
+                }
+            }
+
+            if (!CloseHandle(hThread))
             {
                 /*falling back to console*/
-                (void)printf("failure (%" PRIu32 ") in ResumeThread", GetLastError());
-                return;
+                (void)printf("failure (%" PRIu32 ") in CloseHandle(currentThreadHandle=%p)", GetLastError(), hThread);
             }
         }
+
         destination[destinationSize - 1] = '\0';
     }
 }
