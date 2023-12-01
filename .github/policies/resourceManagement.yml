@@ -11,9 +11,8 @@ configuration:
     eventResponderTasks:
     - if:
       - payloadType: Pull_Request
-      - includesModifiedFiles:
-          files:
-          - deps/
+      - filesMatchPattern:
+          pattern: deps/*
       - isOpen
       then:
       - approvePullRequest:
@@ -49,17 +48,8 @@ configuration:
           reviewer: ACKPaul
       - requestReview:
           reviewer: M-iceberg
-      description: 
-    - if:
-      - payloadType: Pull_Request
-      - not:
-          includesModifiedFiles:
-            files:
-            - deps/
-      - isOpen
-      then:
-      - dismissPullRequestReview:
-          message: Files outside deps detected, disengaging auto approval!
+      - requestReview:
+          reviewer: BertKleewein
       description: 
 onFailure: 
 onSuccess: 

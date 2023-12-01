@@ -25,21 +25,21 @@
 #define LOG_SINK_CONSOLE_ANSI_COLOR_BRIGHT_RED      "\x1b[31;1m"
 /* Codes_SRS_LOG_SINK_CONSOLE_01_008: [ LOG_LEVEL_ERROR shall be displayed with red \x1b[31m. ]*/
 #define LOG_SINK_CONSOLE_ANSI_COLOR_RED             "\x1b[31m"
-/* Codes_SRS_LOG_SINK_CONSOLE_01_009: [ LOG_LEVEL_WARNING shall be displayed with bright yellow \x1b[33;1m. ]*/
-#define LOG_SINK_CONSOLE_ANSI_COLOR_BRIGHT_YELLOW   "\x1b[33;1m"
-/* Codes_SRS_LOG_SINK_CONSOLE_01_010: [ LOG_LEVEL_INFO shall be displayed with yellow \x1b[33m. ]*/
+/* Codes_SRS_LOG_SINK_CONSOLE_01_009: [ LOG_LEVEL_WARNING shall be displayed with yellow \x1b[33m. ]*/
 #define LOG_SINK_CONSOLE_ANSI_COLOR_YELLOW          "\x1b[33m"
-/* Codes_SRS_LOG_SINK_CONSOLE_01_011: [ LOG_LEVEL_VERBOSE shall be displayed with white \x1b[37m. ]*/
+/* Codes_SRS_LOG_SINK_CONSOLE_01_010: [ LOG_LEVEL_INFO shall be displayed with white \x1b[37m. ]*/
 #define LOG_SINK_CONSOLE_ANSI_COLOR_WHITE           "\x1b[37m"
+/* Codes_SRS_LOG_SINK_CONSOLE_01_011: [ LOG_LEVEL_VERBOSE shall be displayed with gray \x1b[90m. ]*/
+#define LOG_SINK_CONSOLE_ANSI_COLOR_GRAY            "\x1b[90m"
 #define LOG_SINK_CONSOLE_ANSI_COLOR_RESET           "\x1b[0m"
 
 static const char* level_colors[] =
 {
     LOG_SINK_CONSOLE_ANSI_COLOR_BRIGHT_RED,     // LOG_LEVEL_CRITICAL
     LOG_SINK_CONSOLE_ANSI_COLOR_RED,            // LOG_LEVEL_ERROR
-    LOG_SINK_CONSOLE_ANSI_COLOR_BRIGHT_YELLOW,  // LOG_LEVEL_WARNING
-    LOG_SINK_CONSOLE_ANSI_COLOR_YELLOW,         // LOG_LEVEL_INFO
-    LOG_SINK_CONSOLE_ANSI_COLOR_WHITE,          // LOG_LEVEL_VERBOSE
+    LOG_SINK_CONSOLE_ANSI_COLOR_YELLOW,         // LOG_LEVEL_WARNING
+    LOG_SINK_CONSOLE_ANSI_COLOR_WHITE,          // LOG_LEVEL_INFO
+    LOG_SINK_CONSOLE_ANSI_COLOR_GRAY,           // LOG_LEVEL_VERBOSE
 };
 
 const char error_string[] = "Error formatting log line\r\n";
