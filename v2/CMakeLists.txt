@@ -92,6 +92,8 @@ target_include_directories(c_logging_v2_core PUBLIC $<BUILD_INTERFACE:${CMAKE_CU
 
 target_link_libraries(c_logging_v2 c_logging_v2_core)
 
+install_library_with_prefix(c_logging_v2 c_logging/v2/c_logging ${c_logging_v2_h_files})
+
 if((CMAKE_GENERATOR MATCHES "Visual Studio") AND (${run_traceability}))
     #add traceability custom target
     add_custom_target(c_logging_v2_traceability ALL
