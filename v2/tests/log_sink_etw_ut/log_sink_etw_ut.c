@@ -2971,7 +2971,7 @@ static void when_a_parent_context_is_used_all_properties_are_emitted(void)
     pos += strlen("") + 1;
     *pos = _TlgInSTRUCT | _TlgInChain;
     pos++;
-    *pos = 3;
+    *pos = 2;
     pos++;
 
     // content field for log_context_1

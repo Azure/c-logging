@@ -1115,7 +1115,7 @@ static void LOG_CONTEXT_CREATE_with_a_parent_that_has_one_int_property_succeeds(
     POOR_MANS_ASSERT(log_context_get_property_value_pair_count(result) == 3);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(result);
     // context struct
-    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 2);
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 1);
     POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
     POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
     // parent context struct
@@ -1153,7 +1153,7 @@ static void LOG_CONTEXT_CREATE_with_a_parent_that_has_2_int_properties_succeeds(
     POOR_MANS_ASSERT(log_context_get_property_value_pair_count(result) == 4);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(result);
     // context struct
-    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 3);
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 1);
     POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
     POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
     // parent context struct
@@ -1195,7 +1195,7 @@ static void LOG_CONTEXT_CREATE_with_a_parent_that_has_a_string_property_succeeds
     POOR_MANS_ASSERT(log_context_get_property_value_pair_count(result) == 3);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(result);
     // context struct
-    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 2);
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 1);
     POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
     POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
     // parent context struct
@@ -1233,7 +1233,7 @@ static void LOG_CONTEXT_CREATE_with_a_parent_that_has_2_string_properties_succee
     POOR_MANS_ASSERT(log_context_get_property_value_pair_count(result) == 4);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(result);
     // context struct
-    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 3);
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 1);
     POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
     POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
     // parent context struct
@@ -1275,7 +1275,7 @@ static void LOG_CONTEXT_CREATE_with_a_parent_that_has_a_context_name_succeeds(vo
     POOR_MANS_ASSERT(log_context_get_property_value_pair_count(result) == 6);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(result);
     // context struct
-    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 5);
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 1);
     POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
     POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
     // parent context struct
@@ -1568,7 +1568,7 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_one_int_property_suc
     POOR_MANS_ASSERT(log_context_get_property_value_pair_count(&result) == 3);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(&result);
     // context struct
-    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 2);
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 1);
     POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
     POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
     // parent context struct
@@ -1601,7 +1601,7 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_2_int_properties_suc
     POOR_MANS_ASSERT(log_context_get_property_value_pair_count(&result) == 4);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(&result);
     // context struct
-    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 3);
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 1);
     POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
     POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
     // parent context struct
@@ -1638,7 +1638,7 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_a_string_property_su
     POOR_MANS_ASSERT(log_context_get_property_value_pair_count(&result) == 3);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(&result);
     // context struct
-    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 2);
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 1);
     POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
     POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
     // parent context struct
@@ -1671,7 +1671,7 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_2_string_properties_
     POOR_MANS_ASSERT(log_context_get_property_value_pair_count(&result) == 4);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(&result);
     // context struct
-    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 3);
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 1);
     POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
     POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
     // parent context struct
@@ -1708,7 +1708,7 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_parent_that_has_a_context_name_succe
     POOR_MANS_ASSERT(log_context_get_property_value_pair_count(&result) == 6);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(&result);
     // context struct
-    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 5);
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 1);
     POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
     POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
     // parent context struct
@@ -1758,7 +1758,7 @@ static void LOG_CONTEXT_LOCAL_DEFINE_with_a_stack_log_context_succeeds(void)
     POOR_MANS_ASSERT(log_context_get_property_value_pair_count(&local_context_2) == 4);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(&local_context_2);
     // context struct
-    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 3);
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 2);
     POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
     POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
     // parent context struct
@@ -1797,7 +1797,7 @@ static void LOG_CONTEXT_CREATE_with_a_stack_log_context_succeeds(void)
     POOR_MANS_ASSERT(log_context_get_property_value_pair_count(context_2) == 4);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* pairs = log_context_get_property_value_pairs(context_2);
     // context struct
-    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 3);
+    POOR_MANS_ASSERT(*(uint8_t*)pairs[0].value == 2);
     POOR_MANS_ASSERT(strcmp(pairs[0].name, "") == 0);
     POOR_MANS_ASSERT(pairs[0].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
     // parent context struct

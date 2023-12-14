@@ -234,7 +234,7 @@ uint32_t internal_log_context_get_values_data_length_or_zero(LOG_CONTEXT_HANDLE 
             LOG_CONTEXT_PROPERTY_VALUE_PAIR* first_property_value_pair = destination_context.property_value_pairs_ptr; \
             (void)property_value_pair; \
             uint8_t* data_pos = destination_context.values_data; \
-            *data_pos = (uint8_t)(log_context_get_property_value_pair_count(parent_context) MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(COUNT_PROPERTY, __VA_ARGS__),)); \
+            *data_pos = (uint8_t)((parent_context != NULL ? 1 : 0) MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(COUNT_PROPERTY, __VA_ARGS__),)); \
             /* Codes_SRS_LOG_CONTEXT_01_015: [ LOG_CONTEXT_LOCAL_DEFINE shall store one property/value pair that with a property type of struct with as many fields as the total number of properties passed to LOG_CONTEXT_LOCAL_DEFINE in the ... arguments. ]*/ \
             first_property_value_pair->value = data_pos; \
             first_property_value_pair->name = ""; \
@@ -260,7 +260,7 @@ void log_context_destroy(LOG_CONTEXT_HANDLE log_context);
             LOG_CONTEXT_PROPERTY_VALUE_PAIR* first_property_value_pair = destination_context->property_value_pairs_ptr; \
             (void)property_value_pair; \
             uint8_t* data_pos = destination_context->values_data; \
-            *data_pos = (uint8_t)(log_context_get_property_value_pair_count(parent_context) MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(COUNT_PROPERTY, __VA_ARGS__),)); \
+            *data_pos = (uint8_t)((parent_context != NULL ? 1 : 0) MU_IF(MU_COUNT_ARG(__VA_ARGS__), MU_FOR_EACH_1(COUNT_PROPERTY, __VA_ARGS__),)); \
             /* Codes_SRS_LOG_CONTEXT_01_013: [ LOG_CONTEXT_CREATE shall store one property/value pair that with a property type of struct with as many fields as the total number of properties passed to LOG_CONTEXT_CREATE. ]*/ \
             first_property_value_pair->value = data_pos; \
             /* Codes_SRS_LOG_CONTEXT_01_009: [ LOG_CONTEXT_NAME shall be optional. ]*/ \

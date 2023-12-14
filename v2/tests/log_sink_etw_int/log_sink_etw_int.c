@@ -770,12 +770,12 @@ static void log_sink_etw_log_with_context_with_nested_structs(void)
 
     POOR_MANS_ASSERT(test_context->parsed_events[0].property_count == 4);
     POOR_MANS_ASSERT(test_context->parsed_events[0].properties[0].property_type == (_TlgInSTRUCT | _TlgInChain));
-    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[0].struct_field_count == 3);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[0].struct_field_count == 2); // First struct is the struct that contains the nested struct and prop2
     POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[0].property_name, "") == 0);
 
     // log_context_1 properties
     POOR_MANS_ASSERT(test_context->parsed_events[0].properties[1].property_type == (_TlgInSTRUCT | _TlgInChain));
-    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[1].struct_field_count == 1);
+    POOR_MANS_ASSERT(test_context->parsed_events[0].properties[1].struct_field_count == 1); // Second struct is the nested struct that contains only prop1
     POOR_MANS_ASSERT(strcmp(test_context->parsed_events[0].properties[1].property_name, "") == 0);
 
     POOR_MANS_ASSERT(test_context->parsed_events[0].properties[2].property_type == TlgInINT8);
