@@ -1,8 +1,14 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 
 resources:
-- repo: self
-  clean: true
+  repositories:
+  - repository: self
+    clean: true
+  - repository: c_build_tools
+    type: github
+    name: azure/c-build-tools
+    endpoint: github.com_azure
+    ref: refs/heads/master
 
 jobs:
 - job: windowsx64debug
@@ -267,6 +273,8 @@ jobs:
       parallel: true
     condition: failed()
 
+- template: /pipeline_templates/codeql3000_default.yml@c_build_tools
+
 - job: linuxubuntu
   displayName: 'Build Linux Ubuntu'
   pool:
@@ -342,70 +350,6 @@ jobs:
 #      script: |
 #          cmake --build . | tee build.log
 #          if ((Select-String -Path "./build.log" -Pattern "Warning:") -ne $null) { throw "include check failed" }
-
-- job: Traceability
-  pool:
-    name: Azure-MessagingStore-WinBuildPoolVS2022
-    demands:
-    - Build
-    - Cmd
-    - msbuild
-    - cmake
-    - visualstudio
-
-  steps:
-  - task: BatchScript@1
-    displayName: 'Git submodule update'
-    inputs:
-      filename: 'C:\Program Files\Git\bin\git.exe'
-      arguments: 'submodule update --init --force'
-
-  - task: BatchScript@1
-    displayName: 'Git submodule clean'
-    inputs:
-      filename: 'C:\Program Files\Git\bin\git.exe'
-      arguments: 'submodule foreach --recursive "git clean -xdff"'
-
-  - task: BatchScript@1
-    displayName: 'Git clean'
-    inputs:
-      filename: 'C:\Program Files\Git\bin\git.exe'
-      arguments: 'clean -xdff'
-
-  - task: BatchScript@1
-    displayName: 'Setup VS Vars'
-    inputs:
-      filename: '"c:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"'
-      modifyEnvironment: true
-
-  - task: NuGetCommand@2
-    displayName: 'NuGet restore'
-    inputs:
-      restoreSolution: deps/c-build-tools/traceabilitytool/traceabilitytool.sln
-
-  - task: CMake@1
-    displayName: 'CMake .. -Ax64'
-    inputs:
-      workingDirectory: 'build'
-      cmakeArgs: '.. -Ax64'
-
-  - task: VSBuild@1
-    displayName: 'Build traceabilitytool only'
-    inputs:
-      solution: 'build\c_logging.sln'
-      platform: x64
-      configuration: RelWithDebInfo
-      msbuildArgs: '/t:restore /t:build /t:traceabilitytool'
-      clean: true
-      maximumCpuCount: true
-
-  - task: BatchScript@1
-    displayName: 'Run traceability tool'
-    inputs:
-      filename: 'build/deps/c-build-tools/traceabilitytool/RelWithDebInfo/traceabilitytool.exe'
-      arguments: '-i $(Build.SourcesDirectory) -buildcheck -e deps'
-      modifyEnvironment: false
-      workingFolder: '$(Build.SourcesDirectory)'
 
 - job: includecheck_linux
   pool:
