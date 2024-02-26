@@ -6,7 +6,6 @@
 #include <time.h>
 
 #include "c_logging/log_context.h"
-#include "c_logging/log_context_property_to_string.h"
 #include "c_logging/log_context_property_value_pair.h"
 
 #define printf mock_printf

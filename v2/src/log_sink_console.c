@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdint.h>
 #include <stdarg.h>
 #include <time.h>
 
@@ -12,8 +11,6 @@
 #include "c_logging/log_level.h"
 #include "c_logging/log_context.h"
 #include "c_logging/log_context_property_to_string.h"
-#include "c_logging/log_context_property_type.h"
-#include "c_logging/log_context_property_type_if.h"
 #include "c_logging/log_context_property_value_pair.h"
 #include "c_logging/log_sink_if.h"
 #include "c_logging/logger.h"
