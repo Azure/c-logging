@@ -12,6 +12,7 @@
 #include "macro_utils/macro_utils.h"
 
 #include "c_logging/log_context_property_basic_types.h"
+#include "c_logging/log_context_property_to_string.h"
 #include "c_logging/log_context_property_type_ascii_char_ptr.h"
 #include "c_logging/log_context_property_value_pair.h"
 #include "c_logging/log_level.h"
@@ -31,7 +32,8 @@
     MOCK_CALL_TYPE_vsnprintf, \
     MOCK_CALL_TYPE_snprintf, \
     MOCK_CALL_TYPE_log_context_get_property_value_pair_count, \
-    MOCK_CALL_TYPE_log_context_get_property_value_pairs \
+    MOCK_CALL_TYPE_log_context_get_property_value_pairs, \
+    MOCK_CALL_TYPE_log_context_property_to_string \
 
 MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
 
@@ -88,6 +90,16 @@ typedef struct log_context_get_property_value_pairs_CALL_TAG
     LOG_CONTEXT_HANDLE captured_log_context;
 } log_context_get_property_value_pairs_CALL;
 
+typedef struct log_context_property_to_string_CALL_TAG
+{
+    bool override_result;
+    int call_result;
+    char* captured_buffer;
+    size_t captured_buffer_size;
+    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* captured_property_value_pairs;
+    size_t captured_property_value_pair_count;
+} log_context_property_to_string_CALL;
+
 typedef struct MOCK_CALL_TAG
 {
     MOCK_CALL_TYPE mock_call_type;
@@ -100,6 +112,7 @@ typedef struct MOCK_CALL_TAG
         snprintf_CALL snprintf_call;
         log_context_get_property_value_pair_count_CALL log_context_get_property_value_pair_count_call;
         log_context_get_property_value_pairs_CALL log_context_get_property_value_pairs_call;
+        log_context_property_to_string_CALL log_context_property_to_string_call;
     };
 } MOCK_CALL;
 
@@ -330,6 +343,38 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* mock_log_context_get_property_value_pairs
     return result;
 }
 
+int mock_log_context_property_to_string(char* buffer, size_t buffer_size, const LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_value_pairs, size_t property_value_pair_count)
+{
+    int result;
+
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_log_context_property_to_string))
+    {
+        actual_and_expected_match = false;
+        result = -1;
+    }
+    else
+    {
+        if (expected_calls[actual_call_count].log_context_property_to_string_call.override_result)
+        {
+            result = expected_calls[actual_call_count].log_context_property_to_string_call.call_result;
+        }
+        else
+        {
+            expected_calls[actual_call_count].log_context_property_to_string_call.captured_buffer = buffer;
+            expected_calls[actual_call_count].log_context_property_to_string_call.captured_buffer_size = buffer_size;
+            expected_calls[actual_call_count].log_context_property_to_string_call.captured_property_value_pairs = property_value_pairs;
+            expected_calls[actual_call_count].log_context_property_to_string_call.captured_property_value_pair_count = property_value_pair_count;
+
+            result = log_context_property_to_string(buffer, buffer_size, property_value_pairs, property_value_pair_count);
+        }
+
+        actual_call_count++;
+    }
+
+    return result;
+}
+
 #define POOR_MANS_ASSERT(cond) \
     if (!(cond)) \
     { \
@@ -383,6 +428,13 @@ static void setup_log_context_get_property_value_pairs_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_log_context_get_property_value_pairs;
     expected_calls[expected_call_count].log_context_get_property_value_pairs_call.override_result = false;
+    expected_call_count++;
+}
+
+static void setup_log_context_property_to_string_call(void)
+{
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_log_context_property_to_string;
+    expected_calls[expected_call_count].log_context_property_to_string_call.override_result = false;
     expected_call_count++;
 }
 
@@ -717,13 +769,7 @@ static void when_ctime_returns_NULL_log_sink_console_log_prints_time_as_NULL(voi
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_016: [ For each property: ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_017: [ If the property type is struct (used as a container for context properties): ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log shall print the struct property name and an opening brace. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log shall obtain the number of fields in the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_019: [ log_sink_console.log shall print the next n properties as being the fields that are part of the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log shall print a closing brace as end of the struct. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log shall call to_string for the property and print its name and value. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_42_001: [ log_sink_console.log shall call log_context_property_to_string to print the properties to the string buffer. ]*/
 static void log_sink_console_log_with_non_NULL_context_prints_one_property(void)
 {
     // arrange
@@ -733,10 +779,8 @@ static void log_sink_console_log_with_non_NULL_context_prints_one_property(void)
     setup_snprintf_call();
     setup_log_context_get_property_value_pair_count_call();
     setup_log_context_get_property_value_pairs_call();
-    
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // property
-    setup_snprintf_call(); // context closing
+
+    setup_log_context_property_to_string_call();
 
     setup_vsnprintf_call();
     setup_printf_call();
@@ -757,13 +801,7 @@ static void log_sink_console_log_with_non_NULL_context_prints_one_property(void)
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_016: [ For each property: ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_017: [ If the property type is struct (used as a container for context properties): ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log shall print the struct property name and an opening brace. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log shall obtain the number of fields in the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_019: [ log_sink_console.log shall print the next n properties as being the fields that are part of the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log shall print a closing brace as end of the struct. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log shall call to_string for the property and print its name and value. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_42_001: [ log_sink_console.log shall call log_context_property_to_string to print the properties to the string buffer. ]*/
 static void log_sink_console_log_with_non_NULL_context_prints_2_properties(void)
 {
     // arrange
@@ -774,10 +812,7 @@ static void log_sink_console_log_with_non_NULL_context_prints_2_properties(void)
     setup_log_context_get_property_value_pair_count_call();
     setup_log_context_get_property_value_pairs_call();
 
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // property
-    setup_snprintf_call(); // property
-    setup_snprintf_call(); // context closing
+    setup_log_context_property_to_string_call();
 
     setup_vsnprintf_call();
     setup_printf_call();
@@ -798,13 +833,7 @@ static void log_sink_console_log_with_non_NULL_context_prints_2_properties(void)
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_016: [ For each property: ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_017: [ If the property type is struct (used as a container for context properties): ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log shall print the struct property name and an opening brace. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log shall obtain the number of fields in the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_019: [ log_sink_console.log shall print the next n properties as being the fields that are part of the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log shall print a closing brace as end of the struct. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log shall call to_string for the property and print its name and value. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_42_001: [ log_sink_console.log shall call log_context_property_to_string to print the properties to the string buffer. ]*/
 static void log_sink_console_log_with_non_NULL_context_with_2_levels_works(void)
 {
     // arrange
@@ -815,12 +844,7 @@ static void log_sink_console_log_with_non_NULL_context_with_2_levels_works(void)
     setup_log_context_get_property_value_pair_count_call();
     setup_log_context_get_property_value_pairs_call();
 
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // property
-    setup_snprintf_call(); // context closing
-    setup_snprintf_call(); // property
-    setup_snprintf_call(); // context closing
+    setup_log_context_property_to_string_call();
 
     setup_vsnprintf_call();
     setup_printf_call();
@@ -842,13 +866,7 @@ static void log_sink_console_log_with_non_NULL_context_with_2_levels_works(void)
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_016: [ For each property: ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_017: [ If the property type is struct (used as a container for context properties): ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log shall print the struct property name and an opening brace. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log shall obtain the number of fields in the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_019: [ log_sink_console.log shall print the next n properties as being the fields that are part of the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log shall print a closing brace as end of the struct. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log shall call to_string for the property and print its name and value. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_42_001: [ log_sink_console.log shall call log_context_property_to_string to print the properties to the string buffer. ]*/
 static void log_sink_console_log_with_non_NULL_named_contexts_with_2_levels_works(void)
 {
     // arrange
@@ -859,12 +877,7 @@ static void log_sink_console_log_with_non_NULL_named_contexts_with_2_levels_work
     setup_log_context_get_property_value_pair_count_call();
     setup_log_context_get_property_value_pairs_call();
 
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // property
-    setup_snprintf_call(); // context closing
-    setup_snprintf_call(); // property
-    setup_snprintf_call(); // context closing
+    setup_log_context_property_to_string_call();
 
     setup_vsnprintf_call();
     setup_printf_call();
@@ -886,12 +899,7 @@ static void log_sink_console_log_with_non_NULL_named_contexts_with_2_levels_work
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_016: [ For each property: ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_017: [ If the property type is struct (used as a container for context properties): ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log shall print the struct property name and an opening brace. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log shall obtain the number of fields in the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log shall print a closing brace as end of the struct. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log shall call to_string for the property and print its name and value. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_42_001: [ log_sink_console.log shall call log_context_property_to_string to print the properties to the string buffer. ]*/
 static void log_sink_console_log_with_non_NULL_empty_context_works(void)
 {
     // arrange
@@ -902,8 +910,7 @@ static void log_sink_console_log_with_non_NULL_empty_context_works(void)
     setup_log_context_get_property_value_pair_count_call();
     setup_log_context_get_property_value_pairs_call();
 
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // context closing
+    setup_log_context_property_to_string_call();
 
     setup_vsnprintf_call();
     setup_printf_call();
@@ -924,13 +931,7 @@ static void log_sink_console_log_with_non_NULL_empty_context_works(void)
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_014: [ log_sink_console.log shall call log_context_get_property_value_pair_count to obtain the count of properties to print. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_015: [ log_sink_console.log shall call log_context_get_property_value_pairs to obtain the properties to print. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_016: [ For each property: ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_017: [ If the property type is struct (used as a container for context properties): ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_025: [ log_sink_console.log shall print the struct property name and an opening brace. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_018: [ log_sink_console.log shall obtain the number of fields in the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_019: [ log_sink_console.log shall print the next n properties as being the fields that are part of the struct. ]*/
-  /* Tests_SRS_LOG_SINK_CONSOLE_01_026: [ log_sink_console.log shall print a closing brace as end of the struct. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_020: [ Otherwise log_sink_console.log shall call to_string for the property and print its name and value. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_42_001: [ log_sink_console.log shall call log_context_property_to_string to print the properties to the string buffer. ]*/
 static void log_sink_console_log_with_non_NULL_dynamically_allocated_context(void)
 {
     // arrange
@@ -941,12 +942,7 @@ static void log_sink_console_log_with_non_NULL_dynamically_allocated_context(voi
     setup_log_context_get_property_value_pair_count_call();
     setup_log_context_get_property_value_pairs_call();
 
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // property
-    setup_snprintf_call(); // context closing
-    setup_snprintf_call(); // property
-    setup_snprintf_call(); // context closing
+    setup_log_context_property_to_string_call();
 
     setup_vsnprintf_call();
     setup_printf_call();
@@ -982,181 +978,11 @@ static void when_snprintf_fails_for_context_open_brace_log_sink_console_log_prin
     setup_log_context_get_property_value_pair_count_call();
     setup_log_context_get_property_value_pairs_call();
 
-    setup_snprintf_call(); // context opening
+    setup_log_context_property_to_string_call();
     setup_printf_call();
 
-    expected_calls[5].snprintf_call.override_result = true;
-    expected_calls[5].snprintf_call.call_result = -1;
-
-    LOG_CONTEXT_LOCAL_DEFINE(context_1, NULL, LOG_CONTEXT_PROPERTY(int32_t, x, 42));
-    LOG_CONTEXT_LOCAL_DEFINE(context_2, &context_1, LOG_CONTEXT_PROPERTY(uint32_t, y, 1));
-
-    // act
-    int line_no = __LINE__;
-    test_log_sink_console_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
-
-    // assert
-    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
-    POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].printf_call.captured_output, "Error formatting log line\r\n") == 0);
-}
-
-/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
-static void when_snprintf_fails_for_inner_context_open_brace_log_sink_console_log_prints_error_formatting(void)
-{
-    // arrange
-    setup_mocks();
-    setup_time_call();
-    setup_ctime_call();
-    setup_snprintf_call();
-    setup_log_context_get_property_value_pair_count_call();
-    setup_log_context_get_property_value_pairs_call();
-
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // context opening
-    setup_printf_call();
-
-    expected_calls[6].snprintf_call.override_result = true;
-    expected_calls[6].snprintf_call.call_result = -1;
-
-    LOG_CONTEXT_LOCAL_DEFINE(context_1, NULL, LOG_CONTEXT_PROPERTY(int32_t, x, 42));
-    LOG_CONTEXT_LOCAL_DEFINE(context_2, &context_1, LOG_CONTEXT_PROPERTY(uint32_t, y, 1));
-
-    // act
-    int line_no = __LINE__;
-    test_log_sink_console_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
-
-    // assert
-    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
-    POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].printf_call.captured_output, "Error formatting log line\r\n") == 0);
-}
-
-/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
-static void when_snprintf_fails_for_property_in_inner_context_log_sink_console_log_prints_error_formatting(void)
-{
-    // arrange
-    setup_mocks();
-    setup_time_call();
-    setup_ctime_call();
-    setup_snprintf_call();
-    setup_log_context_get_property_value_pair_count_call();
-    setup_log_context_get_property_value_pairs_call();
-
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // property
-    setup_printf_call();
-
-    expected_calls[7].snprintf_call.override_result = true;
-    expected_calls[7].snprintf_call.call_result = -1;
-
-    LOG_CONTEXT_LOCAL_DEFINE(context_1, NULL, LOG_CONTEXT_PROPERTY(int32_t, x, 42));
-    LOG_CONTEXT_LOCAL_DEFINE(context_2, &context_1, LOG_CONTEXT_PROPERTY(uint32_t, y, 1));
-
-    // act
-    int line_no = __LINE__;
-    test_log_sink_console_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
-
-    // assert
-    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
-    POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].printf_call.captured_output, "Error formatting log line\r\n") == 0);
-}
-
-/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
-static void when_snprintf_fails_for_closing_of_inner_context_log_sink_console_log_prints_error_formatting(void)
-{
-    // arrange
-    setup_mocks();
-    setup_time_call();
-    setup_ctime_call();
-    setup_snprintf_call();
-    setup_log_context_get_property_value_pair_count_call();
-    setup_log_context_get_property_value_pairs_call();
-
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // property
-    setup_snprintf_call(); // context closing
-    setup_printf_call();
-
-    expected_calls[8].snprintf_call.override_result = true;
-    expected_calls[8].snprintf_call.call_result = -1;
-
-    LOG_CONTEXT_LOCAL_DEFINE(context_1, NULL, LOG_CONTEXT_PROPERTY(int32_t, x, 42));
-    LOG_CONTEXT_LOCAL_DEFINE(context_2, &context_1, LOG_CONTEXT_PROPERTY(uint32_t, y, 1));
-
-    // act
-    int line_no = __LINE__;
-    test_log_sink_console_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
-
-    // assert
-    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
-    POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].printf_call.captured_output, "Error formatting log line\r\n") == 0);
-}
-
-/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
-static void when_snprintf_fails_for_property_in_outer_context_log_sink_console_log_prints_error_formatting(void)
-{
-    // arrange
-    setup_mocks();
-    setup_time_call();
-    setup_ctime_call();
-    setup_snprintf_call();
-    setup_log_context_get_property_value_pair_count_call();
-    setup_log_context_get_property_value_pairs_call();
-
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // property
-    setup_snprintf_call(); // context closing
-    setup_snprintf_call(); // property
-    setup_printf_call();
-
-    expected_calls[9].snprintf_call.override_result = true;
-    expected_calls[9].snprintf_call.call_result = -1;
-
-    LOG_CONTEXT_LOCAL_DEFINE(context_1, NULL, LOG_CONTEXT_PROPERTY(int32_t, x, 42));
-    LOG_CONTEXT_LOCAL_DEFINE(context_2, &context_1, LOG_CONTEXT_PROPERTY(uint32_t, y, 1));
-
-    // act
-    int line_no = __LINE__;
-    test_log_sink_console_log(LOG_LEVEL_VERBOSE, &context_2, __FILE__, __FUNCTION__, line_no, "test");
-
-    // assert
-    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
-    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
-    POOR_MANS_ASSERT(actual_and_expected_match);
-    POOR_MANS_ASSERT(strcmp(expected_calls[actual_call_count - 1].printf_call.captured_output, "Error formatting log line\r\n") == 0);
-}
-
-/* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
-static void when_snprintf_fails_for_closing_of_outer_context_log_sink_console_log_prints_error_formatting(void)
-{
-    // arrange
-    setup_mocks();
-    setup_time_call();
-    setup_ctime_call();
-    setup_snprintf_call();
-    setup_log_context_get_property_value_pair_count_call();
-    setup_log_context_get_property_value_pairs_call();
-
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // property
-    setup_snprintf_call(); // context closing
-    setup_snprintf_call(); // property
-    setup_snprintf_call(); // context closing
-    setup_printf_call();
-
-    expected_calls[10].snprintf_call.override_result = true;
-    expected_calls[10].snprintf_call.call_result = -1;
+    expected_calls[5].log_context_property_to_string_call.override_result = true;
+    expected_calls[5].log_context_property_to_string_call.call_result = -1;
 
     LOG_CONTEXT_LOCAL_DEFINE(context_1, NULL, LOG_CONTEXT_PROPERTY(int32_t, x, 42));
     LOG_CONTEXT_LOCAL_DEFINE(context_2, &context_1, LOG_CONTEXT_PROPERTY(uint32_t, y, 1));
@@ -1259,9 +1085,7 @@ static void when_printing_a_property_value_exceeds_log_line_size_it_is_truncated
     setup_log_context_get_property_value_pair_count_call();
     setup_log_context_get_property_value_pairs_call();
 
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // property
+    setup_log_context_property_to_string_call();
     setup_printf_call();
 
     expected_calls[0].time_call.override_result = true;
@@ -1307,9 +1131,7 @@ static void when_printing_a_property_name_exceeds_log_line_size_it_is_truncated(
     setup_log_context_get_property_value_pair_count_call();
     setup_log_context_get_property_value_pairs_call();
 
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // context opening
-    setup_snprintf_call(); // property
+    setup_log_context_property_to_string_call();
     setup_printf_call();
 
     expected_calls[0].time_call.override_result = true;
@@ -1362,29 +1184,24 @@ int main(void)
     log_sink_console_log_prints_one_WARNING_log_line();
     log_sink_console_log_prints_one_INFO_log_line();
     log_sink_console_log_prints_one_VERBOSE_log_line();
-    
+
     when_snprintf_fails_log_sink_console_log_prints_error_formatting();
     when_vsnprintf_fails_log_sink_console_log_prints_error_formatting();
     when_time_fails_log_sink_console_log_prints_time_as_NULL();
     when_ctime_returns_NULL_log_sink_console_log_prints_time_as_NULL();
-    
+
     log_sink_console_log_with_non_NULL_context_prints_one_property();
     log_sink_console_log_with_non_NULL_context_prints_2_properties();
     log_sink_console_log_with_non_NULL_context_with_2_levels_works();
-    
+
     log_sink_console_log_with_non_NULL_named_contexts_with_2_levels_works();
-    
+
     log_sink_console_log_with_non_NULL_empty_context_works();
-    
+
     log_sink_console_log_with_non_NULL_dynamically_allocated_context();
-    
+
     when_snprintf_fails_for_context_open_brace_log_sink_console_log_prints_error_formatting();
-    when_snprintf_fails_for_inner_context_open_brace_log_sink_console_log_prints_error_formatting();
-    when_snprintf_fails_for_property_in_inner_context_log_sink_console_log_prints_error_formatting();
-    when_snprintf_fails_for_closing_of_inner_context_log_sink_console_log_prints_error_formatting();
-    when_snprintf_fails_for_property_in_outer_context_log_sink_console_log_prints_error_formatting();
-    when_snprintf_fails_for_closing_of_outer_context_log_sink_console_log_prints_error_formatting();
-    
+
     when_printing_the_message_exceeds_log_line_size_it_is_truncated();
     when_printing_the_file_exceeds_log_line_size_it_is_truncated();
     when_printing_a_property_value_exceeds_log_line_size_it_is_truncated();

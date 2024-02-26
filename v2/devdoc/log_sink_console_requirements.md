@@ -68,23 +68,11 @@ typedef void (*LOG_SINK_LOG_FUNC)(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_co
 
 **SRS_LOG_SINK_CONSOLE_01_013: [** If `log_context` is non-`NULL`: **]**
 
-  **SRS_LOG_SINK_CONSOLE_01_014: [** `log_sink_console.log` shall call `log_context_get_property_value_pair_count` to obtain the count of properties to print. **]**
+ - **SRS_LOG_SINK_CONSOLE_01_014: [** `log_sink_console.log` shall call `log_context_get_property_value_pair_count` to obtain the count of properties to print. **]**
 
-  **SRS_LOG_SINK_CONSOLE_01_015: [** `log_sink_console.log` shall call `log_context_get_property_value_pairs` to obtain the properties to print. **]**
+ - **SRS_LOG_SINK_CONSOLE_01_015: [** `log_sink_console.log` shall call `log_context_get_property_value_pairs` to obtain the properties to print. **]**
 
-  **SRS_LOG_SINK_CONSOLE_01_016: [** For each property: **]**
-
-   **SRS_LOG_SINK_CONSOLE_01_017: [** If the property type is `struct` (used as a container for context properties): **]**
-
-   **SRS_LOG_SINK_CONSOLE_01_025: [** `log_sink_console.log` shall print the `struct` property name and an opening brace. **]**
-
-   **SRS_LOG_SINK_CONSOLE_01_018: [** `log_sink_console.log` shall obtain the number of fields in the `struct`. **]**
-
-   **SRS_LOG_SINK_CONSOLE_01_019: [** `log_sink_console.log` shall print the next `n` properties as being the fields that are part of the `struct`. **]**
-
-   **SRS_LOG_SINK_CONSOLE_01_026: [** `log_sink_console.log` shall print a closing brace as end of the `struct`. **]**
-
-   **SRS_LOG_SINK_CONSOLE_01_020: [** Otherwise `log_sink_console.log` shall call `to_string` for the property and print its name and value. **]**
+ - **SRS_LOG_SINK_CONSOLE_42_001: [** `log_sink_console.log` shall call `log_context_property_to_string` to print the properties to the string buffer. **]**
 
 **SRS_LOG_SINK_CONSOLE_01_021: [** `log_sink_console.log` shall print at most `LOG_MAX_MESSAGE_LENGTH` characters including the null terminator (the rest of the context shall be truncated). **]**
 
