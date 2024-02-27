@@ -5,6 +5,7 @@
 if(${run_unittests})
    add_subdirectory(log_context_property_basic_types_ut)
    add_subdirectory(log_context_property_bool_type_ut)
+   add_subdirectory(log_context_property_to_string_ut)
    add_subdirectory(log_context_property_type_ascii_char_ptr_ut)
    add_subdirectory(log_context_property_type_if_ut)
    add_subdirectory(log_context_property_type_struct_ut)
