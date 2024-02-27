@@ -40,7 +40,7 @@ static const char* level_colors[] =
     LOG_SINK_CONSOLE_ANSI_COLOR_GRAY,           // LOG_LEVEL_VERBOSE
 };
 
-const char error_string[] = "Error formatting log line\r\n";
+static const char error_string[] = "Error formatting log line\r\n";
 
 static int log_sink_console_init(void)
 {

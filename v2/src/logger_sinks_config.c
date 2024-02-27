@@ -11,15 +11,22 @@
 #include "c_logging/log_sink_console.h"
 #endif // USE_LOG_SINK_CONSOLE
 
+#ifdef USE_LOG_SINK_CALLBACK
+#include "c_logging/log_sink_callback.h"
+#endif // USE_LOG_SINK_CALLBACK
+
 #ifdef USE_LOG_SINK_ETW
 #include "c_logging/log_sink_etw.h"
 #endif // USE_LOG_SINK_ETW
 
-#if USE_LOG_SINK_CONSOLE || USE_LOG_SINK_ETW
+#if defined(USE_LOG_SINK_CONSOLE) || defined(USE_LOG_SINK_CALLBACK) || defined(USE_LOG_SINK_ETW)
 const LOG_SINK_IF* all_sinks[] = {
 #ifdef USE_LOG_SINK_CONSOLE
     &log_sink_console,
 #endif // USE_LOG_SINK_CONSOLE
+#ifdef USE_LOG_SINK_CALLBACK
+    &log_sink_callback,
+#endif // USE_LOG_SINK_CALLBACK
 #ifdef USE_LOG_SINK_ETW
     &log_sink_etw
 #endif // USE_LOG_SINK_ETW

@@ -4,6 +4,7 @@
 #the following variables are project-wide and can be used with cmake-gui
 option(log_abort_on_error "set log_abort_on_error to ON abort in case an error is encountered while using stack contexts (default is OFF)" OFF)
 option(log_sink_console "Use the log console sink (send logs to console). Default is ON" ON)
+option(log_sink_callback "Use the log callback sink (send logs to a custom callback function). Code must call log_sink_callback_set_callback. Default is OFF" OFF)
 option(log_sink_etw "Use the TraceLogging sink. Default is OFF" OFF)
 
 if(${log_abort_on_error})
@@ -13,6 +14,10 @@ endif() #(${log_abort_on_error})
 if(${log_sink_console})
     add_definitions(-DUSE_LOG_SINK_CONSOLE)
 endif() #(${log_sink_console})
+
+if(${log_sink_callback})
+    add_definitions(-DUSE_LOG_SINK_CALLBACK)
+endif() #(${log_sink_callback})
 
 if(${log_sink_etw})
     add_definitions(-DUSE_LOG_SINK_ETW)
@@ -36,6 +41,7 @@ set(c_logging_v2_h_files
     ./inc/c_logging/log_level.h
     ./inc/c_logging/log_sink_if.h
     ./inc/c_logging/log_sink_console.h
+    ./inc/c_logging/log_sink_callback.h
     )
 
 set(c_logging_v2_c_files
@@ -50,6 +56,7 @@ set(c_logging_v2_c_files
     ./src/log_context_property_type_wchar_t_ptr.c
     ./src/log_internal_error.c
     ./src/log_sink_console.c
+    ./src/log_sink_callback.c
     )
 
 if(WIN32)

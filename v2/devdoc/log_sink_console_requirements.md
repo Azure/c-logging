@@ -4,7 +4,7 @@
 
 ## Exposed API
 
-```
+```c
     extern const LOG_SINK_IF log_sink_console;
 ```
 
