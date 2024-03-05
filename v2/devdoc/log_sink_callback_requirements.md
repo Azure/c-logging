@@ -9,6 +9,7 @@ Note that this assumes the other logging system cares about only the level and t
 ```c
     typedef void (*LOG_SINK_CALLBACK_LOG)(void* context, LOG_LEVEL log_level, const char* message);
     int log_sink_callback_set_callback(LOG_SINK_CALLBACK_LOG log_callback, void* context);
+    void log_sink_callback_set_max_level(LOG_LEVEL log_level);
 
     extern const LOG_SINK_IF log_sink_callback;
 ```
@@ -49,6 +50,16 @@ int log_sink_callback_set_callback(LOG_SINK_CALLBACK_LOG log_callback, void* con
 
 **SRS_LOG_SINK_CALLBACK_42_005: [** `log_sink_callback_set_callback` shall return 0. **]**
 
+### log_sink_callback_set_max_level
+
+```c
+void log_sink_callback_set_max_level(LOG_LEVEL log_level);
+```
+
+`log_sink_callback_set_max_level` sets the maximum log level that will be passed to the callback. Log messages with a level higher than this (more verbose) will be dropped. This avoids additional string processing on the log messages that will be dropped. This function is not thread-safe. If called during normal operation to change the log level, some threads may continue to log messages at the old level for some time.
+
+**SRS_LOG_SINK_CALLBACK_42_019: [** `log_sink_callback_set_max_level` shall store `log_level` so that it is used by all future calls to `log_sink_callback.log`. **]**
+
 ### log_sink_callback.log
 
 The signature of `log_sink_callback.log` is:
@@ -60,6 +71,8 @@ typedef void (*LOG_SINK_LOG_FUNC)(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_co
 `log_sink_callback.log` implements logging to a string which is passed to a callback function. The setup function `log_sink_callback_set_callback` must be called or the callback will just be a no-op.
 
 **SRS_LOG_SINK_CALLBACK_42_006: [** If `message_format` is `NULL`, `log_sink_callback.log` shall call the `log_callback` with an error message and return. **]**
+
+**SRS_LOG_SINK_CALLBACK_42_020: [** If `log_level` is greater than the maximum level set by `log_sink_callback_set_max_level`, then `log_sink_callback.log` shall return without calling the `log_callback`. **]**
 
 **SRS_LOG_SINK_CALLBACK_42_007: [** `log_sink_callback.log` shall obtain the time by calling `time`. **]**
 

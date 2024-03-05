@@ -12,6 +12,7 @@ extern "C" {
 
     typedef void (*LOG_SINK_CALLBACK_LOG)(void* context, LOG_LEVEL log_level, const char* message);
     int log_sink_callback_set_callback(LOG_SINK_CALLBACK_LOG log_callback, void* context);
+    void log_sink_callback_set_max_level(LOG_LEVEL log_level);
 
     extern const LOG_SINK_IF log_sink_callback;
 
