@@ -1446,6 +1446,7 @@ int main(void)
     when_printing_a_property_value_exceeds_log_line_size_it_is_truncated();
     when_printing_a_property_name_exceeds_log_line_size_it_is_truncated();
 
+
     log_sink_callback_log_calls_callback_for_all_log_levels_when_max_level_is_VERBOSE();
     log_sink_callback_log_calls_callback_for_all_log_levels_INFO_and_lower_when_max_level_is_INFO();
     log_sink_callback_log_calls_callback_for_all_log_levels_WARNING_and_lower_when_max_level_is_WARNING();
