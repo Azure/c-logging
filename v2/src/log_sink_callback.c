@@ -31,7 +31,7 @@ void log_sink_callback_noop_callback(void* context, LOG_LEVEL log_level, const c
 
 static LOG_SINK_CALLBACK_LOG log_sink_callback_callback = log_sink_callback_noop_callback;
 static void* log_sink_callback_context = NULL;
-
+static LOG_LEVEL log_sink_callback_max_level = LOG_LEVEL_VERBOSE;
 
 static int log_sink_callback_init(void)
 {
@@ -64,6 +64,12 @@ int log_sink_callback_set_callback(LOG_SINK_CALLBACK_LOG log_callback, void* con
     return result;
 }
 
+void log_sink_callback_set_max_level(LOG_LEVEL log_level)
+{
+    /*Codes_SRS_LOG_SINK_CALLBACK_42_019: [ log_sink_callback_set_max_level shall store log_level so that it is used by all future calls to log_sink_callback.log. ]*/
+    log_sink_callback_max_level = log_level;
+}
+
 static void log_sink_callback_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_context, const char* file, const char* func, int line, const char* message_format, va_list args)
 {
 
@@ -74,89 +80,96 @@ static void log_sink_callback_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_co
     }
     else
     {
-        /* Codes_SRS_LOG_SINK_CALLBACK_42_016: [ log_sink_callback.log shall include at most LOG_MAX_MESSAGE_LENGTH characters including the null terminator in the callback argument (the rest of the context shall be truncated). ]*/
-        char temp[LOG_MAX_MESSAGE_LENGTH];
-        char* buffer = temp;
-        size_t buffer_size = sizeof(temp);
-
-        /* Codes_SRS_LOG_SINK_CALLBACK_42_007: [ log_sink_callback.log shall obtain the time by calling time. ]*/
-        time_t t = time(NULL);
-        /* Codes_SRS_LOG_SINK_CALLBACK_42_008: [ log_sink_callback.log shall write the time to string by calling ctime. ]*/
-        /* Codes_SRS_LOG_SINK_CALLBACK_42_010: [ If the call to time fails then log_sink_callback.log shall format the time as NULL. ]*/
-        char* ctime_result = (t == (time_t)-1) ? NULL : ctime(&t);
-
-        /* Codes_SRS_LOG_SINK_CALLBACK_42_009: [ log_sink_callback.log shall create a line in the format: Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message}. ]*/
-        int snprintf_result = snprintf(buffer, buffer_size, "Time:%.24s File:%s:%d Func:%s",
-            /* Codes_SRS_LOG_SINK_CALLBACK_42_011: [ If the call to ctime fails then log_sink_callback.log shall format the time as NULL. ]*/
-            MU_P_OR_NULL(ctime_result),
-            MU_P_OR_NULL(file),
-            line,
-            MU_P_OR_NULL(func));
-        if (snprintf_result < 0)
+        if (log_level > log_sink_callback_max_level)
         {
-            /* Codes_SRS_LOG_SINK_CALLBACK_42_017: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_callback.log shall call the log_callback with Error formatting log line and return. ]*/
-            log_sink_callback_callback(log_sink_callback_context, LOG_LEVEL_CRITICAL, error_string);
+            /* Codes_SRS_LOG_SINK_CALLBACK_42_020: [ If log_level is greater than the maximum level set by log_sink_callback_set_max_level, then log_sink_callback.log shall return without calling the log_callback. ]*/
         }
         else
         {
-            bool error = false;
+            /* Codes_SRS_LOG_SINK_CALLBACK_42_016: [ log_sink_callback.log shall include at most LOG_MAX_MESSAGE_LENGTH characters including the null terminator in the callback argument (the rest of the context shall be truncated). ]*/
+            char temp[LOG_MAX_MESSAGE_LENGTH];
+            char* buffer = temp;
+            size_t buffer_size = sizeof(temp);
 
-            snprintf_result = MIN(snprintf_result, (int)buffer_size);
-            buffer += snprintf_result;
-            buffer_size -= snprintf_result;
+            /* Codes_SRS_LOG_SINK_CALLBACK_42_007: [ log_sink_callback.log shall obtain the time by calling time. ]*/
+            time_t t = time(NULL);
+            /* Codes_SRS_LOG_SINK_CALLBACK_42_008: [ log_sink_callback.log shall write the time to string by calling ctime. ]*/
+            /* Codes_SRS_LOG_SINK_CALLBACK_42_010: [ If the call to time fails then log_sink_callback.log shall format the time as NULL. ]*/
+            char* ctime_result = (t == (time_t)-1) ? NULL : ctime(&t);
 
-            /* Codes_SRS_LOG_SINK_CALLBACK_42_012: [ If log_context is non-NULL: ]*/
-            if (log_context != NULL)
+            /* Codes_SRS_LOG_SINK_CALLBACK_42_009: [ log_sink_callback.log shall create a line in the format: Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message}. ]*/
+            int snprintf_result = snprintf(buffer, buffer_size, "Time:%.24s File:%s:%d Func:%s",
+                /* Codes_SRS_LOG_SINK_CALLBACK_42_011: [ If the call to ctime fails then log_sink_callback.log shall format the time as NULL. ]*/
+                MU_P_OR_NULL(ctime_result),
+                MU_P_OR_NULL(file),
+                line,
+                MU_P_OR_NULL(func));
+            if (snprintf_result < 0)
             {
-                /* Codes_SRS_LOG_SINK_CALLBACK_42_013: [ log_sink_callback.log shall call log_context_get_property_value_pair_count to obtain the count of properties. ]*/
-                size_t property_value_pair_count = log_context_get_property_value_pair_count(log_context);
-                /* Codes_SRS_LOG_SINK_CALLBACK_42_014: [ log_sink_callback.log shall call log_context_get_property_value_pairs to obtain the properties. ]*/
-                const LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_value_pairs = log_context_get_property_value_pairs(log_context);
-
-                /* Codes_SRS_LOG_SINK_CALLBACK_42_015: [ log_sink_callback.log shall call log_context_property_to_string to write the properties to the string buffer. ]*/
-                int log_n_properties_result = log_context_property_to_string(buffer, buffer_size, property_value_pairs, property_value_pair_count); // lgtm[cpp/unguardednullreturndereference] Tests and code review ensure that NULL access cannot happen
-                if (log_n_properties_result < 0)
-                {
-                    /* Codes_SRS_LOG_SINK_CALLBACK_42_017: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_callback.log shall call the log_callback with Error formatting log line and return. ]*/
-                    error = true;
-                }
-                else
-                {
-                    log_n_properties_result = MIN(log_n_properties_result, (int)buffer_size);
-                    buffer += log_n_properties_result;
-                    buffer_size -= log_n_properties_result;
-                }
+                /* Codes_SRS_LOG_SINK_CALLBACK_42_017: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_callback.log shall call the log_callback with Error formatting log line and return. ]*/
+                log_sink_callback_callback(log_sink_callback_context, LOG_LEVEL_CRITICAL, error_string);
             }
-
-            if (!error)
+            else
             {
-                if (buffer_size > 1)
-                {
-                    *buffer = ' ';
-                    buffer++;
-                    buffer_size--;
+                bool error = false;
 
-                    int vsnprintf_result = vsnprintf(buffer, buffer_size, message_format, args);
-                    if (vsnprintf_result < 0)
+                snprintf_result = MIN(snprintf_result, (int)buffer_size);
+                buffer += snprintf_result;
+                buffer_size -= snprintf_result;
+
+                /* Codes_SRS_LOG_SINK_CALLBACK_42_012: [ If log_context is non-NULL: ]*/
+                if (log_context != NULL)
+                {
+                    /* Codes_SRS_LOG_SINK_CALLBACK_42_013: [ log_sink_callback.log shall call log_context_get_property_value_pair_count to obtain the count of properties. ]*/
+                    size_t property_value_pair_count = log_context_get_property_value_pair_count(log_context);
+                    /* Codes_SRS_LOG_SINK_CALLBACK_42_014: [ log_sink_callback.log shall call log_context_get_property_value_pairs to obtain the properties. ]*/
+                    const LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_value_pairs = log_context_get_property_value_pairs(log_context);
+
+                    /* Codes_SRS_LOG_SINK_CALLBACK_42_015: [ log_sink_callback.log shall call log_context_property_to_string to write the properties to the string buffer. ]*/
+                    int log_n_properties_result = log_context_property_to_string(buffer, buffer_size, property_value_pairs, property_value_pair_count); // lgtm[cpp/unguardednullreturndereference] Tests and code review ensure that NULL access cannot happen
+                    if (log_n_properties_result < 0)
                     {
                         /* Codes_SRS_LOG_SINK_CALLBACK_42_017: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_callback.log shall call the log_callback with Error formatting log line and return. ]*/
                         error = true;
                     }
                     else
                     {
-                        // all ok
+                        log_n_properties_result = MIN(log_n_properties_result, (int)buffer_size);
+                        buffer += log_n_properties_result;
+                        buffer_size -= log_n_properties_result;
                     }
                 }
-            }
 
-            if (error)
-            {
-                log_sink_callback_callback(log_sink_callback_context, LOG_LEVEL_CRITICAL, error_string);
-            }
-            else
-            {
-                /* Codes_SRS_LOG_SINK_CALLBACK_42_018: [ log_sink_callback.log shall call log_callback with its context, log_level, and the formatted message. ]*/
-                log_sink_callback_callback(log_sink_callback_context, log_level, temp);
+                if (!error)
+                {
+                    if (buffer_size > 1)
+                    {
+                        *buffer = ' ';
+                        buffer++;
+                        buffer_size--;
+
+                        int vsnprintf_result = vsnprintf(buffer, buffer_size, message_format, args);
+                        if (vsnprintf_result < 0)
+                        {
+                            /* Codes_SRS_LOG_SINK_CALLBACK_42_017: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_callback.log shall call the log_callback with Error formatting log line and return. ]*/
+                            error = true;
+                        }
+                        else
+                        {
+                            // all ok
+                        }
+                    }
+                }
+
+                if (error)
+                {
+                    log_sink_callback_callback(log_sink_callback_context, LOG_LEVEL_CRITICAL, error_string);
+                }
+                else
+                {
+                    /* Codes_SRS_LOG_SINK_CALLBACK_42_018: [ log_sink_callback.log shall call log_callback with its context, log_level, and the formatted message. ]*/
+                    log_sink_callback_callback(log_sink_callback_context, log_level, temp);
+                }
             }
         }
     }

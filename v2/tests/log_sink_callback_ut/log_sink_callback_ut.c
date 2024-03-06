@@ -413,6 +413,7 @@ static void test_init(void)
     log_sink_callback.init();
     int result = log_sink_callback_set_callback(mock_log_callback, (void*)0x42);
     POOR_MANS_ASSERT(result == 0);
+    log_sink_callback_set_max_level(LOG_LEVEL_VERBOSE);
 }
 
 static void setup_printf_call(void)
@@ -1294,6 +1295,125 @@ static void when_printing_a_property_name_exceeds_log_line_size_it_is_truncated(
     LOG_CONTEXT_DESTROY(context_1);
 }
 
+static void test_case_log_sink_callback_log_with_max_level_does_call_callback(LOG_LEVEL log_level, LOG_LEVEL max_log_level)
+{
+    // arrange
+    test_init();
+    log_sink_callback_set_max_level(max_log_level);
+    setup_mocks();
+
+    setup_time_call();
+    setup_ctime_call();
+    setup_snprintf_call();
+    setup_vsnprintf_call();
+    setup_log_callback_call();
+
+    // act
+    int line_no = __LINE__;
+    test_log_sink_callback_log(log_level, NULL, __FILE__, __FUNCTION__, line_no, "test");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+    POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_context == (void*)0x42);
+    POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_log_level == log_level);
+    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, "Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %%[^\r\n]", __FILE__, line_no, __FUNCTION__, "test");
+}
+
+static void test_case_log_sink_callback_log_with_max_level_does_not_call_callback(LOG_LEVEL log_level, LOG_LEVEL max_log_level)
+{
+    // arrange
+    test_init();
+    log_sink_callback_set_max_level(max_log_level);
+    setup_mocks();
+
+    // act
+    int line_no = __LINE__;
+    test_log_sink_callback_log(log_level, NULL, __FILE__, __FUNCTION__, line_no, "test");
+
+    // assert
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+}
+
+/*Tests_SRS_LOG_SINK_CALLBACK_42_019: [ log_sink_callback_set_max_level shall store log_level so that it is used by all future calls to log_sink_callback.log. ]*/
+/*Tests_SRS_LOG_SINK_CALLBACK_42_020: [ If log_level is greater than the maximum level set by log_sink_callback_set_max_level, then log_sink_callback.log shall return without calling the log_callback. ]*/
+static void log_sink_callback_log_calls_callback_for_all_log_levels_when_max_level_is_VERBOSE(void)
+{
+    for (LOG_LEVEL log_level = LOG_LEVEL_CRITICAL; log_level <= LOG_LEVEL_VERBOSE; log_level++)
+    {
+        test_case_log_sink_callback_log_with_max_level_does_call_callback(log_level, LOG_LEVEL_VERBOSE);
+    }
+}
+
+/*Tests_SRS_LOG_SINK_CALLBACK_42_019: [ log_sink_callback_set_max_level shall store log_level so that it is used by all future calls to log_sink_callback.log. ]*/
+/*Tests_SRS_LOG_SINK_CALLBACK_42_020: [ If log_level is greater than the maximum level set by log_sink_callback_set_max_level, then log_sink_callback.log shall return without calling the log_callback. ]*/
+static void log_sink_callback_log_calls_callback_for_all_log_levels_INFO_and_lower_when_max_level_is_INFO(void)
+{
+    for (LOG_LEVEL log_level = LOG_LEVEL_CRITICAL; log_level <= LOG_LEVEL_VERBOSE; log_level++)
+    {
+        if (log_level > LOG_LEVEL_INFO)
+        {
+            test_case_log_sink_callback_log_with_max_level_does_not_call_callback(log_level, LOG_LEVEL_INFO);
+        }
+        else
+        {
+            test_case_log_sink_callback_log_with_max_level_does_call_callback(log_level, LOG_LEVEL_INFO);
+        }
+    }
+}
+
+/*Tests_SRS_LOG_SINK_CALLBACK_42_019: [ log_sink_callback_set_max_level shall store log_level so that it is used by all future calls to log_sink_callback.log. ]*/
+/*Tests_SRS_LOG_SINK_CALLBACK_42_020: [ If log_level is greater than the maximum level set by log_sink_callback_set_max_level, then log_sink_callback.log shall return without calling the log_callback. ]*/
+static void log_sink_callback_log_calls_callback_for_all_log_levels_WARNING_and_lower_when_max_level_is_WARNING(void)
+{
+    for (LOG_LEVEL log_level = LOG_LEVEL_CRITICAL; log_level <= LOG_LEVEL_VERBOSE; log_level++)
+    {
+        if (log_level > LOG_LEVEL_WARNING)
+        {
+            test_case_log_sink_callback_log_with_max_level_does_not_call_callback(log_level, LOG_LEVEL_WARNING);
+        }
+        else
+        {
+            test_case_log_sink_callback_log_with_max_level_does_call_callback(log_level, LOG_LEVEL_WARNING);
+        }
+    }
+}
+
+/*Tests_SRS_LOG_SINK_CALLBACK_42_019: [ log_sink_callback_set_max_level shall store log_level so that it is used by all future calls to log_sink_callback.log. ]*/
+/*Tests_SRS_LOG_SINK_CALLBACK_42_020: [ If log_level is greater than the maximum level set by log_sink_callback_set_max_level, then log_sink_callback.log shall return without calling the log_callback. ]*/
+static void log_sink_callback_log_calls_callback_for_all_log_levels_ERROR_and_lower_when_max_level_is_ERROR(void)
+{
+    for (LOG_LEVEL log_level = LOG_LEVEL_CRITICAL; log_level <= LOG_LEVEL_VERBOSE; log_level++)
+    {
+        if (log_level > LOG_LEVEL_ERROR)
+        {
+            test_case_log_sink_callback_log_with_max_level_does_not_call_callback(log_level, LOG_LEVEL_ERROR);
+        }
+        else
+        {
+            test_case_log_sink_callback_log_with_max_level_does_call_callback(log_level, LOG_LEVEL_ERROR);
+        }
+    }
+}
+
+/*Tests_SRS_LOG_SINK_CALLBACK_42_019: [ log_sink_callback_set_max_level shall store log_level so that it is used by all future calls to log_sink_callback.log. ]*/
+/*Tests_SRS_LOG_SINK_CALLBACK_42_020: [ If log_level is greater than the maximum level set by log_sink_callback_set_max_level, then log_sink_callback.log shall return without calling the log_callback. ]*/
+static void log_sink_callback_log_calls_callback_for_log_level_CRITICAL_when_max_level_is_CRITICAL(void)
+{
+    for (LOG_LEVEL log_level = LOG_LEVEL_CRITICAL; log_level <= LOG_LEVEL_VERBOSE; log_level++)
+    {
+        if (log_level > LOG_LEVEL_CRITICAL)
+        {
+            test_case_log_sink_callback_log_with_max_level_does_not_call_callback(log_level, LOG_LEVEL_CRITICAL);
+        }
+        else
+        {
+            test_case_log_sink_callback_log_with_max_level_does_call_callback(log_level, LOG_LEVEL_CRITICAL);
+        }
+    }
+}
+
 /* very "poor man's" way of testing, as no test harness and mocking framework are available */
 int main(void)
 {
@@ -1325,6 +1445,12 @@ int main(void)
     when_printing_the_file_exceeds_log_line_size_it_is_truncated();
     when_printing_a_property_value_exceeds_log_line_size_it_is_truncated();
     when_printing_a_property_name_exceeds_log_line_size_it_is_truncated();
+
+    log_sink_callback_log_calls_callback_for_all_log_levels_when_max_level_is_VERBOSE();
+    log_sink_callback_log_calls_callback_for_all_log_levels_INFO_and_lower_when_max_level_is_INFO();
+    log_sink_callback_log_calls_callback_for_all_log_levels_WARNING_and_lower_when_max_level_is_WARNING();
+    log_sink_callback_log_calls_callback_for_all_log_levels_ERROR_and_lower_when_max_level_is_ERROR();
+    log_sink_callback_log_calls_callback_for_log_level_CRITICAL_when_max_level_is_CRITICAL();
 
     return 0;
 }
