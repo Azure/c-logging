@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// This test suite exists for the sole purpose of testing that we initialize the provider id to something else
+// than the default provider (the DAD provider)
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdarg.h>
