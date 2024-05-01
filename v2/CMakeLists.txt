@@ -6,6 +6,16 @@ option(log_abort_on_error "set log_abort_on_error to ON abort in case an error i
 option(log_sink_console "Use the log console sink (send logs to console). Default is ON" ON)
 option(log_sink_callback "Use the log callback sink (send logs to a custom callback function). Code must call log_sink_callback_set_callback. Default is OFF" OFF)
 option(log_sink_etw "Use the TraceLogging sink. Default is OFF" OFF)
+#log_sink_etw_provider_guid allows overriding the provider dd to use in order to be able to separate logs for various projects
+#no smarts are built to parse the provider id and check it at cmake level (this is why it looks so ugly). Improvements in this area might be made in the future
+#but right now this should be usable as is
+#by default this option is set to "", if log_sink_etw_provider_guid is not set a non empty string value, the ETW sink will use the Dad provider,
+# which has been used since the beginnings of time for the MessagingStore team: DAD29F36-0A48-4DEF-9D50-8EF9036B92B4
+set(log_sink_etw_provider_guid "" CACHE STRING "Provider GUID in the form (0xDAD29F36, 0x0A48, 0x4DEF, 0x9D, 0x50, 0x8E, 0xF9, 0x03, 0x6B, 0x92, 0xB4)")
+
+if(NOT "${log_sink_etw_provider_guid}" STREQUAL "")
+    add_definitions(-DLOG_SINK_ETW_PROVIDER_GUID=${log_sink_etw_provider_guid})
+endif()
 
 if(${log_abort_on_error})
     add_definitions(-DLOG_ABORT_ON_ERROR)
