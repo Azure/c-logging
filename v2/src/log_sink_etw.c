@@ -171,17 +171,15 @@ static const char event_name_unknown[] = "Unknown";
 
 /* Codes_SRS_LOG_SINK_ETW_01_094: [ If LOG_SINK_ETW_PROVIDER_GUID is defined, its value should be used directly to initialize the provider GUID. ]*/
 #ifndef LOG_SINK_ETW_PROVIDER_GUID
+/*By default use DAD29F36-0A48-4DEF-9D50-8EF9036B92B4*/
+/* Codes_SRS_LOG_SINK_ETW_01_084: [ If LOG_SINK_ETW_PROVIDER_GUID is not defined, log_sink_etw.init shall use as provider GUID DAD29F36-0A48-4DEF-9D50-8EF9036B92B4. ]*/
 #define LOG_SINK_ETW_PROVIDER_GUID (0xDAD29F36, 0x0A48, 0x4DEF, 0x9D, 0x50, 0x8E, 0xF9, 0x03, 0x6B, 0x92, 0xB4)
 #endif
 
-// ID Work Item Type Title State Assigned To Effort Remaining Work Original Estimate Value Area Iteration Path Tags
-// 17751591 Task Have configurable provider To Do           One\Custom\AzureMessaging\Gallium\GaM2
-/* Codes_SRS_LOG_SINK_ETW_01_084: [ If LOG_SINK_ETW_PROVIDER_GUID is not defined, log_sink_etw.init shall use as provider GUID DAD29F36-0A48-4DEF-9D50-8EF9036B92B4. ]*/
 TRACELOGGING_DEFINE_PROVIDER(
     log_sink_etw_provider,
     "block_storage_2",
     LOG_SINK_ETW_PROVIDER_GUID);
-/*DAD29F36-0A48-4DEF-9D50-8EF9036B92B4*/
 
 #define LOG_SINK_ETW_STATE_VALUES \
     LOG_SINK_ETW_STATE_NOT_INITIALIZED, \
