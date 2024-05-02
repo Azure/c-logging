@@ -751,7 +751,7 @@ static void when_TraceLoggingRegister_fails_log_sink_etw_init_fails(void)
 
 /* Tests_SRS_LOG_SINK_ETW_01_006: [ log_sink_etw.init shall register the ETW TraceLogging provider by calling TraceLoggingRegister (TraceLoggingRegister_EventRegister_EventSetInformation). ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_008: [ log_sink_etw.init shall emit a LOG_LEVEL_INFO event as a self test, printing the fact that the provider was registered and from which executable (as obtained by calling GetModuleFileNameA). ]*/
-/* Tests_SRS_LOG_SINK_ETW_01_084: [ log_sink_etw.init shall use as provider GUID DAD29F36-0A48-4DEF-9D50-8EF9036B92B4. ]*/
+/* Tests_SRS_LOG_SINK_ETW_01_084: [ If LOG_SINK_ETW_PROVIDER_GUID is not defined, log_sink_etw.init shall use as provider GUID DAD29F36-0A48-4DEF-9D50-8EF9036B92B4. ]*/
 /* Tests_SRS_LOG_SINK_ETW_01_091: [ log_sink_etw.init shall succeed and return 0. ] */
 static void log_sink_etw_init_works(void)
 {

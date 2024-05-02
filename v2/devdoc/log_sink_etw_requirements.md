@@ -30,7 +30,15 @@ Note: No other APIs (`deinit`, `log`) should be called while `init` executes.
 
 **SRS_LOG_SINK_ETW_01_008: [** `log_sink_etw.init` shall emit a `LOG_LEVEL_INFO` event as a self test, printing the fact that the provider was registered and from which executable (as obtained by calling `GetModuleFileNameA`). **]**
 
-**SRS_LOG_SINK_ETW_01_084: [** `log_sink_etw.init` shall use as provider GUID `DAD29F36-0A48-4DEF-9D50-8EF9036B92B4`. **]**
+**SRS_LOG_SINK_ETW_01_094: [** If `LOG_SINK_ETW_PROVIDER_GUID` is defined, its value should be used directly to initialize the provider GUID. **]**
+
+Note that the format for the contents of `LOG_SINK_ETW_PROVIDER_GUID` is the the format used by TraceLogging to initialize its provider `GUID`. It requires the paranthesis as in the below example:
+
+```c
+(0xDAD29F36, 0x0A48, 0x4DEF, 0x9D, 0x50, 0x8E, 0xF9, 0x03, 0x6B, 0x92, 0xB4)
+```
+
+**SRS_LOG_SINK_ETW_01_084: [** If `LOG_SINK_ETW_PROVIDER_GUID` is not defined, `log_sink_etw.init` shall use as provider GUID `DAD29F36-0A48-4DEF-9D50-8EF9036B92B4`. **]**
 
 **SRS_LOG_SINK_ETW_01_091: [** `log_sink_etw.init` shall succeed and return 0. **]**
 
