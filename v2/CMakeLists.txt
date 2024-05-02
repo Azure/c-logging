@@ -34,7 +34,7 @@ macro(ConvertGuid guid result_var)
     string(SUBSTRING ${last_part} 10 2 eleventh_part)
 
     # Convert to the desired format
-    set(${result_var} "0x${first_part}, 0x${second_part}, 0x${third_part}, 0x${fourth_part}, 0x${fifth_part}, 0x${sixth_part}, 0x${seventh_part}, 0x${eighth_part}, 0x${ninth_part}, 0x${tenth_part}, 0x${eleventh_part}")
+    set(${result_var} "(0x${first_part}, 0x${second_part}, 0x${third_part}, 0x${fourth_part}, 0x${fifth_part}, 0x${sixth_part}, 0x${seventh_part}, 0x${eighth_part}, 0x${ninth_part}, 0x${tenth_part}, 0x${eleventh_part})")
 endmacro()
 
 if(${log_abort_on_error})
