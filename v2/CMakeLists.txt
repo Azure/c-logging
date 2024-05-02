@@ -8,7 +8,7 @@ option(log_sink_callback "Use the log callback sink (send logs to a custom callb
 option(log_sink_etw "Use the TraceLogging sink. Default is OFF" OFF)
 
 if(${log_sink_etw_provider_guid})
-    #log_sink_etw_provider_guid allows overriding the provider dd to use in order to be able to separate logs for various projects
+    #log_sink_etw_provider_guid allows overriding the provider id to use in order to be able to separate logs for various projects
     #by default this option is set to "", if log_sink_etw_provider_guid is not set a non empty string value, the ETW sink will use the Dad provider,
     #which has been used since the beginnings of time for the MessagingStore team: DAD29F36-0A48-4DEF-9D50-8EF9036B92B4
     set(log_sink_etw_provider_guid "" CACHE STRING "Provider GUID in the form DAD29F36-0A48-4DEF-9D50-8EF9036B92B4")
