@@ -32,7 +32,7 @@ Note: No other APIs (`deinit`, `log`) should be called while `init` executes.
 
 **SRS_LOG_SINK_ETW_01_094: [** If `LOG_SINK_ETW_PROVIDER_GUID` is defined, its value should be used directly to initialize the provider GUID. **]**
 
-Note that the format for the contents of `LOG_SINK_ETW_PROVIDER_GUID` is the the format used to initialize a `GUID` struct. Example:
+Note that the format for the contents of `LOG_SINK_ETW_PROVIDER_GUID` is the the format used by TraceLogging to initialize its provider `GUID`. It requires the paranthesis as in the below example:
 
 ```c
 (0xDAD29F36, 0x0A48, 0x4DEF, 0x9D, 0x50, 0x8E, 0xF9, 0x03, 0x6B, 0x92, 0xB4)
