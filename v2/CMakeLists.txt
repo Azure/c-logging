@@ -9,16 +9,33 @@ option(log_sink_etw "Use the TraceLogging sink. Default is OFF" OFF)
 
 if(${log_sink_etw_provider_guid})
     #log_sink_etw_provider_guid allows overriding the provider dd to use in order to be able to separate logs for various projects
-    #no smarts are built to parse the provider id and check it at cmake level (this is why it looks so ugly). Improvements in this area might be made in the future
-    #but right now this should be usable as is
     #by default this option is set to "", if log_sink_etw_provider_guid is not set a non empty string value, the ETW sink will use the Dad provider,
-    # which has been used since the beginnings of time for the MessagingStore team: DAD29F36-0A48-4DEF-9D50-8EF9036B92B4
-    set(log_sink_etw_provider_guid "" CACHE STRING "Provider GUID in the form (0xDAD29F36, 0x0A48, 0x4DEF, 0x9D, 0x50, 0x8E, 0xF9, 0x03, 0x6B, 0x92, 0xB4)")
+    #which has been used since the beginnings of time for the MessagingStore team: DAD29F36-0A48-4DEF-9D50-8EF9036B92B4
+    set(log_sink_etw_provider_guid "" CACHE STRING "Provider GUID in the form DAD29F36-0A48-4DEF-9D50-8EF9036B92B4")
 endif()
 
-if(NOT "${log_sink_etw_provider_guid}" STREQUAL "")
-    add_definitions(-DLOG_SINK_ETW_PROVIDER_GUID=${log_sink_etw_provider_guid})
-endif()
+macro(ConvertGuid guid result_var)
+    # Split the GUID string by '-'
+    string(REPLACE "-" ";" guid_list ${guid})
+    list(GET guid_list 0 first_part)
+    list(GET guid_list 1 second_part)
+    list(GET guid_list 2 third_part)
+    list(GET guid_list 3 second_to_last_part)
+    list(GET guid_list 4 last_part)
+
+    # Split the last part into two-byte chunks
+    string(SUBSTRING ${second_to_last_part} 0 2 fourth_part)
+    string(SUBSTRING ${second_to_last_part} 2 2 fifth_part)
+    string(SUBSTRING ${last_part} 0 2 sixth_part)
+    string(SUBSTRING ${last_part} 2 2 seventh_part)
+    string(SUBSTRING ${last_part} 4 2 eighth_part)
+    string(SUBSTRING ${last_part} 6 2 ninth_part)
+    string(SUBSTRING ${last_part} 8 2 tenth_part)
+    string(SUBSTRING ${last_part} 10 2 eleventh_part)
+
+    # Convert to the desired format
+    set(${result_var} "0x${first_part}, 0x${second_part}, 0x${third_part}, 0x${fourth_part}, 0x${fifth_part}, 0x${sixth_part}, 0x${seventh_part}, 0x${eighth_part}, 0x${ninth_part}, 0x${tenth_part}, 0x${eleventh_part}")
+endmacro()
 
 if(${log_abort_on_error})
     add_definitions(-DLOG_ABORT_ON_ERROR)
@@ -34,6 +51,14 @@ endif() #(${log_sink_callback})
 
 if(${log_sink_etw})
     add_definitions(-DUSE_LOG_SINK_ETW)
+
+    if(NOT "${log_sink_etw_provider_guid}" STREQUAL "")
+        message(STATUS "Setting ETW provider GUID : ${log_sink_etw_provider_guid}")
+
+        ConvertGuid(${log_sink_etw_provider_guid} converted_log_sink_etw_provider_guid)
+
+        add_definitions(-DLOG_SINK_ETW_PROVIDER_GUID=${converted_log_sink_etw_provider_guid})
+    endif()
 endif() #(${log_sink_etw})
 
 set(c_logging_v2_h_files
