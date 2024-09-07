@@ -18,7 +18,7 @@ jobs:
 - job: windowsx64etwperf
   displayName: 'Run Windows x64 RelWithDebInfo ETW Perf tests'
   pool:
-    name: Azure-MessagingStore-WinBuildPoolVS2022
+    name: Azure-MessagingStore-WinBuildPoolVS2022_0
     demands:
     - Cmd
     - msbuild
