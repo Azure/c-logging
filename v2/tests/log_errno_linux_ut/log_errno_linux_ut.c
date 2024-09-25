@@ -9,6 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef USE_VLD
+#include "vld.h"
+#endif
+
 #ifndef errno_t
 typedef int errno_t;
 #endif

@@ -5,6 +5,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifdef USE_VLD
+#include "vld.h"
+#endif
+
 #include "c_logging/log_context_property_type.h"
 #include "c_logging/log_context_property_type_if.h"
 

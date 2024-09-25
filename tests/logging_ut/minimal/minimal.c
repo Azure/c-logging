@@ -7,6 +7,10 @@
 #include <errno.h>
 #endif
 
+#ifdef USE_VLD
+#include "vld.h"
+#endif
+
 #include "c_logging/xlogging.h"
 
 int main(void)

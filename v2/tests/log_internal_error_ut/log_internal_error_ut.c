@@ -5,6 +5,10 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#ifdef USE_VLD
+#include "vld.h"
+#endif
+
 #include "macro_utils/macro_utils.h"
 #include "c_logging/log_internal_error.h"
 

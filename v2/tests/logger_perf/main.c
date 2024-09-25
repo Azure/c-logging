@@ -3,6 +3,10 @@
 
 #include "windows.h"
 
+#ifdef USE_VLD
+#include "vld.h"
+#endif
+
 #include "logger_perf_v1.h"
 #include "logger_perf_v2.h"
 

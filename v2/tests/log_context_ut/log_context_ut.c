@@ -8,6 +8,10 @@
 #include <stdint.h>
 #include <wchar.h>
 
+#ifdef USE_VLD
+#include "vld.h"
+#endif
+
 #include "macro_utils/macro_utils.h"
 
 #define log_internal_error_report mock_log_internal_error_report

@@ -4,6 +4,10 @@
 #include <string.h>
 #include <stdbool.h>
 
+#ifdef USE_VLD
+#include "vld.h"
+#endif
+
 #include "macro_utils/macro_utils.h"
 
 #include "c_logging/xlogging.h"

@@ -6,6 +6,10 @@
 #include <stdlib.h>
 #include <inttypes.h>
 
+#ifdef USE_VLD
+#include "vld.h"
+#endif
+
 #include "c_logging/log_context_property_type.h"
 #include "c_logging/log_context_property_type_if.h"
 #include "c_logging/log_context_property_type_struct.h"
