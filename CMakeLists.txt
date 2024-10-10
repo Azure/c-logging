@@ -57,7 +57,6 @@ endif()
 
 if ((NOT TARGET macro_utils_c) AND (EXISTS ${CMAKE_CURRENT_LIST_DIR}/deps/macro-utils-c/CMakeLists.txt))
     add_subdirectory(deps/macro-utils-c)
-    include_directories(${MACRO_UTILS_INC_FOLDER})
 endif()
 
 set(run_e2e_tests ${original_run_e2e_tests})
@@ -67,7 +66,6 @@ set(run_unittests ${original_run_unittests})
 set(run_traceability ${original_run_traceability})
 set(run_reals_check ${original_run_reals_check})
 
-include_directories(${UMOCK_C_INC_FOLDER})
 include_directories(${CMAKE_CURRENT_LIST_DIR}/inc)
 
 include(CTest)
