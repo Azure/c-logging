@@ -137,6 +137,9 @@ add_library(c_logging_v2 ${c_logging_v2_c_files} ${c_logging_v2_h_files} ${c_log
 target_include_directories(c_logging_v2 PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/inc>)
 target_include_directories(c_logging_v2_core PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/inc>)
 
+target_link_libraries(c_logging_v2_core macro_utils_c)
+target_link_libraries(c_logging_v2 macro_utils_c)
+
 target_link_libraries(c_logging_v2 c_logging_v2_core)
 
 install_library_with_prefix(c_logging_v2 c_logging/v2/c_logging ${c_logging_v2_h_files})

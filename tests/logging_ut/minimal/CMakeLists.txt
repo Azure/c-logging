@@ -59,6 +59,8 @@ add_executable(${exeName}
     ${LOGGING_RC_FILE}
     minimal.c)
 
+target_link_libraries(${exeName} macro_utils_c)
+
 if(${logerror_captures_stack_traces_value})
     target_link_libraries(${exeName} Dbghelp.lib)
 endif()

@@ -138,8 +138,8 @@ SOURCE_GROUP(devdoc FILES ${c_logging_md_files})
 
 #this is the product (a logging library)
 add_library(c_logging ${c_logging_c_files} ${c_logging_h_files} ${c_logging_md_files})
-
 target_include_directories(c_logging PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/inc>)
+target_link_libraries(c_logging macro_utils_c)
 
 set(c_logging_target_libs)
 
