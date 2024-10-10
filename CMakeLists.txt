@@ -9,7 +9,6 @@ endif()
 
 #if ((NOT TARGET c_logging) AND (EXISTS ${CMAKE_CURRENT_LIST_DIR}/deps/c-logging/CMakeLists.txt))
 #    add_subdirectory(deps/c-logging)
-#    include_directories(deps/c-logging/v2/inc)
 #endif()
 
 if (TARGET c_logging)
@@ -65,8 +64,6 @@ set(run_perf_tests ${original_run_perf_tests})
 set(run_unittests ${original_run_unittests})
 set(run_traceability ${original_run_traceability})
 set(run_reals_check ${original_run_reals_check})
-
-include_directories(${CMAKE_CURRENT_LIST_DIR}/inc)
 
 include(CTest)
 enable_testing()
