@@ -6,11 +6,19 @@
 
 #include "macro_utils/macro_utils.h"
 
-#include "c_logging/xlogging.h"
+#include "c_logging/logger.h"
+
+#define LOG_SIZE_REGULAR 4096 /*in bytes - a message is not expected to exceed this size in bytes, if it does, only LOG_SIZE_REGULAR characters are retained*/
 
 /*not much in the way of testing, but "should not crash" */
 int main(void)
 {
+
+    if (!logger_init())
+    {
+        return MU_FAILURE;
+    }
+
     char really_big_string_fits[LOG_SIZE_REGULAR / 2]; /*expecting the string on the screen, even when it is big*/
     (void)memset(really_big_string_fits, '3', sizeof(really_big_string_fits));
     really_big_string_fits[sizeof(really_big_string_fits)-1] = '\0';
@@ -77,5 +85,7 @@ int main(void)
     LogVerbose("LogCritical: does PRI_BOOL work? %" PRI_BOOL "", MU_BOOL_VALUE(true) /*answer is yes, it works*/);
     LogVerbose("LogCritical: does PRI_BOOL work with amazingly out of bounds value? %" PRI_BOOL "", MU_BOOL_VALUE(42));
     LogVerbose("LogCritical: does PRI_BOOL works with false? %" PRI_BOOL "", MU_BOOL_VALUE(false));
+
+    logger_deinit();
 }
 
