@@ -4,6 +4,12 @@
 #ifndef LOG_SINK_IF_H
 #define LOG_SINK_IF_H
 
+#ifdef __cplusplus
+#include <cstdarg>
+#else
+#include <stdarg.h>
+#endif
+
 #include "c_logging/log_context.h"
 #include "c_logging/log_level.h"
 
