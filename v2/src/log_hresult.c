@@ -20,7 +20,7 @@
 static const char snprintf_failure_message[] = "snprintf failed";
 
 // This array is not used for anything, but rather just to emit a compiler error
-static const char test_message_to_trigger_a_compiler_error[1 * (MESSAGE_BUFFER_SIZE >= sizeof(snprintf_failure_message))] = { 0 }; /*this construct will generate a compile time error (array of size 0) when MESSAGE_BUFFER_SIZE is not enough to hold even the failure message*/
+static const char test_message_to_trigger_a_compiler_error_log_hresult[1 * (MESSAGE_BUFFER_SIZE >= sizeof(snprintf_failure_message))] = { 0 }; /*this construct will generate a compile time error (array of size 0) when MESSAGE_BUFFER_SIZE is not enough to hold even the failure message*/
 
 
 int log_hresult_fill_property(void* buffer, HRESULT hresult)

@@ -144,6 +144,12 @@ target_link_libraries(c_logging_v2 c_logging_v2_core)
 
 install_library_with_prefix(c_logging_v2 c_logging/v2/c_logging ${c_logging_v2_h_files})
 
+set_property(TARGET c_logging_v2 PROPERTY UNITY_BUILD ON)
+get_target_property(target_unity c_logging_v2 UNITY_BUILD)
+message("c_logging_v2: UNITY_BUILD is set to ${target_unity}")
+get_target_property(target_type c_logging_v2 TYPE)
+message("c_logging_v2: type is target_type=${target_type}")
+
 if((CMAKE_GENERATOR MATCHES "Visual Studio") AND (${run_traceability}))
     #add traceability custom target
     add_custom_target(c_logging_v2_traceability ALL

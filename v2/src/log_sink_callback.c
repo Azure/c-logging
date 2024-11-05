@@ -20,7 +20,7 @@
 #define MIN(a, b) ((a) < (b)) ? (a) : (b)
 
 static const char error_string_invalid_args[] = "Error logging: invalid arguments";
-static const char error_string[] = "Error formatting log line";
+static const char error_string_sink_callback[] = "Error formatting log line";
 
 void log_sink_callback_noop_callback(void* context, LOG_LEVEL log_level, const char* message)
 {
@@ -107,7 +107,7 @@ static void log_sink_callback_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_co
             if (snprintf_result < 0)
             {
                 /* Codes_SRS_LOG_SINK_CALLBACK_42_017: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_callback.log shall call the log_callback with Error formatting log line and return. ]*/
-                log_sink_callback_callback(log_sink_callback_context, LOG_LEVEL_CRITICAL, error_string);
+                log_sink_callback_callback(log_sink_callback_context, LOG_LEVEL_CRITICAL, error_string_sink_callback);
             }
             else
             {
@@ -163,7 +163,7 @@ static void log_sink_callback_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_co
 
                 if (error)
                 {
-                    log_sink_callback_callback(log_sink_callback_context, LOG_LEVEL_CRITICAL, error_string);
+                    log_sink_callback_callback(log_sink_callback_context, LOG_LEVEL_CRITICAL, error_string_sink_callback);
                 }
                 else
                 {

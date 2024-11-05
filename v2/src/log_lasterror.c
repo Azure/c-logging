@@ -3,11 +3,12 @@
 
 #include <inttypes.h>
 
-#include "macro_utils/macro_utils.h"
-
 #include "windows.h"
 
+#include "macro_utils/macro_utils.h"
+
 #include "c_logging/format_message_no_newline.h"
+
 #include "c_logging/log_lasterror.h"
 
 static const char FormatMessageA_failure_message[] = "failure in FormatMessageA";
