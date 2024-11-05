@@ -20,7 +20,7 @@ endforeach()
 
 add_executable(log_sink_property_to_string_ut
     log_sink_property_to_string_ut.c
-    log_sink_property_to_string_mocked.c
+    log_context_property_to_string_mocked.c
     ${c_logging_v2_sources_full_path}
 )
 
