@@ -2,8 +2,6 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 add_executable(log_hresult_int
-    ../../src/logger.c
-    ../../src/log_hresult.c
     log_hresult_int.c
 )
 

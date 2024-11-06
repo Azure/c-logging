@@ -11,3 +11,7 @@ extern void mock_free(void* ptr);
 #define log_internal_error_report mock_log_internal_error_report
 
 #include "log_context.c"
+
+#undef malloc
+#undef free
+#undef log_internal_error_report

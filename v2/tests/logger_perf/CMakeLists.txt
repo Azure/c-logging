@@ -13,5 +13,8 @@ add_executable(logger_perf
     timer_win32.c
 )
 
+#due to LOGGER_V1_V2_H we skip completely here building with UNITY
+set_target_properties(logger_perf PROPERTIES UNITY_BUILD OFF)
+
 target_link_libraries(logger_perf c_logging c_logging_v2 rpcrt4)
 add_test(NAME logger_perf COMMAND logger_perf)

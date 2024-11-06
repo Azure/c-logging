@@ -10,3 +10,6 @@ DWORD mock_FormatMessageA_no_newline(DWORD dwFlags, LPCVOID lpSource, DWORD dwMe
 #define FormatMessageA_no_newline mock_FormatMessageA_no_newline
 
 #include "log_lasterror.c"
+
+#undef GetLastError
+#undef FormatMessageA_no_newline 

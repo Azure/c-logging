@@ -14,7 +14,7 @@
 int main(void)
 {
 
-    if (!logger_init())
+    if (logger_init()!=0)
     {
         return MU_FAILURE;
     }

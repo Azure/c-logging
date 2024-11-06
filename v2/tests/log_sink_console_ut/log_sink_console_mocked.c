@@ -27,3 +27,12 @@ const LOG_CONTEXT_PROPERTY_VALUE_PAIR* mock_log_context_get_property_value_pairs
 int mock_log_context_property_to_string(char* buffer, size_t buffer_size, const LOG_CONTEXT_PROPERTY_VALUE_PAIR* property_value_pairs, size_t property_value_pair_count);
 
 #include "log_sink_console.c"
+
+#undef printf
+#undef time
+#undef ctime
+#undef vsnprintf
+#undef snprintf
+#undef log_context_get_property_value_pair_count
+#undef log_context_get_property_value_pairs
+#undef log_context_property_to_string

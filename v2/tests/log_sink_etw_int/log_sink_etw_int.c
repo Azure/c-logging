@@ -74,8 +74,6 @@ static void read_bool(const void* source, int32_t* destination)
 
 static GUID provider_guid = { 0xDAD29F36, 0x0A48, 0x4DEF, { 0x9D, 0x50, 0x8E, 0xF9, 0x03, 0x6B, 0x92, 0xB4 } };
 
-MU_DEFINE_ENUM_STRINGS(LOG_CONTEXT_PROPERTY_TYPE, LOG_CONTEXT_PROPERTY_TYPE_VALUES)
-
 #define POOR_MANS_ASSERT(cond) \
     if (!(cond)) \
     { \

@@ -8,3 +8,5 @@
 void mock_abort(void);
 
 #include "logger.c"
+
+#undef abort
