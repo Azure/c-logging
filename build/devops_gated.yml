@@ -54,10 +54,10 @@ jobs:
       modifyEnvironment: true
 
   - task: CMake@1
-    displayName: 'CMake .. -Drun_perf_tests:bool=ON -Dlog_sink_etw:bool=ON -Dlog_sink_console:bool=OFF -Duse_etw:string=TRACELOGGING -G "Visual Studio 17 2022" -A x64'
+    displayName: 'CMake .. -Drun_perf_tests:bool=ON -Dlog_sink_etw:bool=ON -Dlog_sink_console:bool=OFF -Duse_etw:string=TRACELOGGING -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=100 -G "Visual Studio 17 2022" -A x64'
     inputs:
       workingDirectory: 'build_x64'
-      cmakeArgs: '.. -Drun_perf_tests:bool=ON -Dlog_sink_etw:bool=ON -Dlog_sink_console:bool=OFF -Duse_etw:string=TRACELOGGING -G "Visual Studio 17 2022" -A x64'
+      cmakeArgs: '.. -Drun_perf_tests:bool=ON -Dlog_sink_etw:bool=ON -Dlog_sink_console:bool=OFF -Duse_etw:string=TRACELOGGING -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=100 -G "Visual Studio 17 2022" -A x64'
 
   - task: VSBuild@1
     displayName: 'Build solution build_x64\*.sln'
@@ -82,7 +82,7 @@ jobs:
       artifactName: 'x64_RelWithDebInfo_perf'
       parallel: true
     condition: failed()
-    
+
 - job: linuxubuntu
   displayName: 'Build Linux Ubuntu'
   pool:
