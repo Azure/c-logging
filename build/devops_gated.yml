@@ -68,12 +68,11 @@ jobs:
       configuration: RelWithDebInfo
       maximumCpuCount: true
 
-  - task: CmdLine@1
+  - task: CmdLine@2
     displayName: 'Run ctest'
     inputs:
-      filename: ctest
-      arguments: '-C "RelWithDebInfo" -V --output-on-failure'
-      workingFolder: 'build_x64'
+      script: 'ctest -C "RelWithDebInfo" -V --output-on-failure'
+      workingDirectory: 'build_x64'
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish artifacts'
