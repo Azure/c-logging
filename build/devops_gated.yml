@@ -82,7 +82,7 @@ jobs:
       parallel: true
     condition: failed()
 
-  - template : clean_ado_folders.yml@c_build_tools
+  - template : /pipeline_templates/clean_ado_folders.yml@c_build_tools
 
 - job: linuxubuntu
   displayName: 'Build Linux Ubuntu'
