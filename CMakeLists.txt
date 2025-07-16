@@ -57,8 +57,6 @@ set(run_unittests ${original_run_unittests})
 set(run_traceability ${original_run_traceability})
 set(run_reals_check ${original_run_reals_check})
 
-include_directories(${CMAKE_CURRENT_LIST_DIR}/inc)
-
 include(CTest)
 enable_testing()
 
