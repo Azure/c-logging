@@ -8,10 +8,10 @@
 
 #ifdef WIN32
 #include "windows.h"
+#include "c_logging/get_thread_stack.h"
 #endif
 
 #include "c_logging/logging_stacktrace.h"
-#include "c_logging/get_thread_stack.h"
 
 // Thread-local storage for stack strings (compatibility with v1)
 XLOGGING_THREAD_LOCAL char stackAsString[STACK_MAX_CHARACTERS];
