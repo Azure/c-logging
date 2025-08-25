@@ -3,7 +3,6 @@
 
 #include "windows.h"
 
-#include "logger_perf_v1.h"
 #include "logger_perf_v2.h"
 
 int main(void)
@@ -11,7 +10,6 @@ int main(void)
     // make abort not popup
     _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 
-    logger_perf_v1_run_tests();
     logger_perf_v2_run_tests();
 
     return 0;

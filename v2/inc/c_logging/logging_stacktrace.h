@@ -16,7 +16,6 @@
 #define XLOGGING_THREAD_LOCAL _Thread_local
 #endif
 
-
 #define STACK_PRINT_FORMAT "\nStack:\n%s"
 #define STACK_MAX_CHARACTERS 2048 /*whatever we get from stack cannot exceed this size*/
 #define FORMAT_MAX_CHARACTERS 1024 /*user format + STACK_PRINT_FORMAT in a string cannot exceed this size*/
@@ -25,8 +24,8 @@
 extern "C" {
 #endif
 
-extern  XLOGGING_THREAD_LOCAL char stackAsString[STACK_MAX_CHARACTERS];
-extern  XLOGGING_THREAD_LOCAL char formatWithStack[FORMAT_MAX_CHARACTERS];
+extern XLOGGING_THREAD_LOCAL char stackAsString[STACK_MAX_CHARACTERS];
+extern XLOGGING_THREAD_LOCAL char formatWithStack[FORMAT_MAX_CHARACTERS];
 
 void getStackAsString(char* destination, size_t destinationSize);
 

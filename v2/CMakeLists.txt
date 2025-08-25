@@ -80,6 +80,7 @@ set(c_logging_v2_h_files
     ./inc/c_logging/log_sink_if.h
     ./inc/c_logging/log_sink_console.h
     ./inc/c_logging/log_sink_callback.h
+    ./inc/c_logging/logging_stacktrace.h
     )
 
 set(c_logging_v2_c_files
@@ -95,6 +96,7 @@ set(c_logging_v2_c_files
     ./src/log_internal_error.c
     ./src/log_sink_console.c
     ./src/log_sink_callback.c
+    ./src/logging_stacktrace.c
     )
 
 if(WIN32)
@@ -147,7 +149,7 @@ install_library_with_prefix(c_logging_v2 c_logging/v2/c_logging ${c_logging_v2_h
 if((CMAKE_GENERATOR MATCHES "Visual Studio") AND (${run_traceability}))
     #add traceability custom target
     add_custom_target(c_logging_v2_traceability ALL
-        COMMAND traceabilitytool -buildcheck -e ${CMAKE_CURRENT_LIST_DIR}/deps -i ${CMAKE_CURRENT_LIST_DIR})
+        COMMAND traceabilitytool -buildcheck -e ${CMAKE_CURRENT_LIST_DIR}/../deps -i ${CMAKE_CURRENT_LIST_DIR})
     add_dependencies(c_logging_v2_traceability traceabilitytool)
 endif()
 
