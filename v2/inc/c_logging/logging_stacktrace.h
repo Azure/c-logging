@@ -24,8 +24,8 @@
 extern "C" {
 #endif
 
-XLOGGING_THREAD_LOCAL char stackAsString[STACK_MAX_CHARACTERS];
-XLOGGING_THREAD_LOCAL char formatWithStack[FORMAT_MAX_CHARACTERS];
+extern XLOGGING_THREAD_LOCAL char stackAsString[STACK_MAX_CHARACTERS];
+extern XLOGGING_THREAD_LOCAL char formatWithStack[FORMAT_MAX_CHARACTERS];
 
 void getStackAsString(char* destination, size_t destinationSize);
 
