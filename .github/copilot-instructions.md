@@ -1,16 +1,42 @@
 # Azure C Logging Framework - Copilot Instructions
 
 ## Project Overview
-This is `c-logging`, a high-performance structured logging framework designed for Azure C libraries and applications. The library provides thread-safe, cross-platform logging with support for multiple output sinks, hierarchical contexts, and zero-allocation stack-based contexts for optimal performance.
+This c-logging framework is designed to be a foundational component for Azure C libraries, providing consistent, high-performance logging across all Azure services. When using this library, prioritize correctness, thread safety, and performance optimization for production scenarios while maintaining comprehensive logging for debugging and observability.
+
+## c-build-tools Integration
+
+This project follows Azure C library standards established in the `c-build-tools` dependency:
+
+### Build System Standards
+- **Pipeline Templates**: Uses `c-build-tools` pipeline templates for CI/CD (`build/devops_gated.yml` references `/pipeline_templates/build_all_flavors.yml@c_build_tools`)
+- **CMake Conventions**: Follows Azure C library CMake patterns including dependency management and target configuration
+- **Testing Integration**: Supports standard Azure C library test execution patterns with `run_unittests`, `run_int_tests`, and `run_perf_tests` options
+
+### Quality Assurance
+- **Traceability**: All code must have requirements traceability using `SRS_MODULE_##_###` format
+- **Include What You Use (IWYU)**: Build pipeline includes header dependency validation
+- **CodeQL**: Security analysis through c-build-tools pipeline integration
+- **Cross-Platform**: Validation on both Windows and Linux platforms
+
+**Note**: When contributing to this project, ensure your changes align with both c-logging-specific patterns documented above and the broader Azure C library standards maintained in the `c-build-tools` repository.
+
+````
 
 ## Key Architecture Components
 
 ### Core Technology Stack
 - **Language**: C99 standard with cross-platform compatibility
-- **Build System**: CMake with Azure C library conventions
-- **Dependencies**: macro-utils-c for metaprogramming utilities
-- **Testing**: umock-c for mocking, ctest for test execution
+- **Build System**: CMake with Azure C library conventions following `c-build-tools` standards
+- **Dependencies**: macro-utils-c for metaprogramming utilities  
+- **Testing**: Custom mock framework (not umock-c), ctest for test execution
 - **Platforms**: Windows (ETW support) and Linux
+- **Tooling**: Uses `c-build-tools` pipeline templates and build standards
+
+### Code Organization Principles
+- **v2 Architecture**: Current implementation in `v2/` directory (legacy v1 deprecated)
+- **Separation of Concerns**: Core library (`c_logging_v2_core`) vs configured library (`c_logging_v2`)
+- **Platform Abstraction**: Conditional compilation for Windows-specific features (ETW, HRESULT, GetLastError)
+- **Zero-Allocation Design**: Stack-based contexts avoid heap allocation in hot paths
 
 ### Major Components
 1. **v2/src/logger.c** - Core logging engine and sink management
@@ -61,36 +87,45 @@ cmake --build cmake --config Debug -Dlog_sink_console=ON -Dlog_sink_etw=ON
 ```
 
 ### Testing Strategy
-- **Unit Tests**: Per-component testing using umock_c framework
+- **Unit Tests**: Per-component testing using custom mock framework (not umock-c)
 - **Integration Tests**: End-to-end logging scenarios with multiple sinks
 - **Performance Tests**: Latency and throughput benchmarking
 - **Cross-Platform Tests**: Verify functionality on Windows and Linux
+- **Build Pipeline**: Uses `c-build-tools` templates for CI/CD automation
 
-### umock_c Mocking Patterns
-**Function Declaration**: Use `MOCKABLE_FUNCTION` for testable functions:
+### Custom Mock Framework Patterns
+**Function Declaration**: Use standard C functions for testability:
 ```c
-MOCKABLE_FUNCTION(, int, log_sink_init, LOG_SINK_HANDLE, handle);
+int log_sink_init(LOG_SINK_HANDLE handle);
 ```
 
-**Test Setup**: Enable mocks before including headers:
+**Test Setup**: Define mock call types and structures:
 ```c
-#define ENABLE_MOCKS
-#include "c_logging/log_sink_if.h"
-#include "c_pal/gballoc_hl.h"
-#undef ENABLE_MOCKS
+#define MOCK_CALL_TYPE_VALUES \
+    MOCK_CALL_TYPE_log_sink1_init, \
+    MOCK_CALL_TYPE_log_sink1_log
+
+typedef struct log_sink1_log_CALL_TAG
+{
+    LOG_LEVEL captured_log_level;
+    LOG_CONTEXT_HANDLE captured_log_context;
+    char captured_file[MAX_FILE_STRING_LENGTH];
+    char captured_message[MAX_MESSAGE_STRING_LENGTH];
+} log_sink1_log_CALL;
 ```
 
-**Expected Calls**: Set up expectations for logging calls:
+**Expected Calls**: Verify behavior through custom mock validation:
 ```c
-STRICT_EXPECTED_CALL(log_sink_log(IGNORED_ARG, LOG_LEVEL_ERROR, IGNORED_ARG, IGNORED_ARG))
-    .SetReturn(0);
+// Verify call was made with expected parameters
+ASSERT_ARE_EQUAL(MOCK_CALL_TYPE, MOCK_CALL_TYPE_log_sink1_log, mock_calls[0].mock_call_type);
+ASSERT_ARE_EQUAL(LOG_LEVEL, LOG_LEVEL_ERROR, mock_calls[0].log_sink1_log_call.captured_log_level);
 ```
 
 **Context Validation**: Verify context properties in tests:
 ```c
 // Verify context contains expected properties
-STRICT_EXPECTED_CALL(log_context_get_property_value_pair_count(IGNORED_ARG))
-    .SetReturn(2);
+ASSERT_ARE_EQUAL(size_t, 2, test_context.property_count);
+ASSERT_IS_NOT_NULL(test_context.property_value_pairs);
 ```
 
 ## API Design and Usage Patterns
@@ -646,3 +681,15 @@ int main()
 ```
 
 This c-logging framework is designed to be a foundational component for Azure C libraries, providing consistent, high-performance logging across all Azure services. When using this library, prioritize correctness, thread safety, and performance optimization for production scenarios while maintaining comprehensive logging for debugging and observability.
+
+## External Dependencies
+For build/test/pipeline conventions, refer to `deps/c-build-tools/.github/copilot-instructions.md`. This project inherits all build infrastructure from c-build-tools.
+
+**IMPORTANT**: All code changes must follow the comprehensive coding standards defined in `deps/c-build-tools/.github/general_coding_instructions.md`, including:
+- Function naming conventions (snake_case, module prefixes, internal function patterns)
+- Parameter validation rules and error handling patterns  
+- Variable naming and result variable conventions
+- Header inclusion order and memory management requirements
+- Requirements traceability system (SRS/Codes_SRS/Tests_SRS patterns)
+- Async callback patterns and goto usage rules
+- Indentation, formatting, and code structure guidelines
