@@ -19,6 +19,7 @@ project(c_logging)
 
 #the following variables are project-wide and can be used with cmake-gui
 option(run_unittests "set run_unittests to ON to run unittests (default is OFF)" OFF)
+option(run_repo_validation "run repository validation" OFF)
 option(run_int_tests "set run_int_tests to ON to run integration tests (default is OFF)." OFF)
 option(run_e2e_tests "set run_e2e_tests to ON to run e2e tests (default is OFF)." OFF)
 option(use_cppunittest "set use_cppunittest to ON to build CppUnitTest tests on Windows (default is ON)" ON)
