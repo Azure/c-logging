@@ -537,8 +537,8 @@ static void log_sink_console_log_with_NULL_message_format_returns(void)
 /* Tests_SRS_LOG_SINK_CONSOLE_01_004: [ log_sink_console.log shall print a line in the format: {log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message} ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, log_sink_console.log shall print the line in such a way that only one printf call is made. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_006: [ log_sink_console.log shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_007: [ LOG_LEVEL_CRITICAL shall be displayed with bright red \x1b[31;1m. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the \x1b[0m code. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_007: [ LOG_LEVEL_CRITICAL shall be displayed with bright red x1b[31;1m. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the x1b[0m code. ]*/
 static void log_sink_console_log_prints_one_CRITICAL_log_line(void)
 {
     // arrange
@@ -565,8 +565,8 @@ static void log_sink_console_log_prints_one_CRITICAL_log_line(void)
 /* Tests_SRS_LOG_SINK_CONSOLE_01_004: [ log_sink_console.log shall print a line in the format: {log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message} ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, log_sink_console.log shall print the line in such a way that only one printf call is made. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_006: [ log_sink_console.log shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_008: [ LOG_LEVEL_ERROR shall be displayed with red \x1b[31m. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the \x1b[0m code. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_008: [ LOG_LEVEL_ERROR shall be displayed with red x1b[31m. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the x1b[0m code. ]*/
 static void log_sink_console_log_prints_one_ERROR_log_line(void)
 {
     // arrange
@@ -593,8 +593,8 @@ static void log_sink_console_log_prints_one_ERROR_log_line(void)
 /* Tests_SRS_LOG_SINK_CONSOLE_01_004: [ log_sink_console.log shall print a line in the format: {log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message} ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, log_sink_console.log shall print the line in such a way that only one printf call is made. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_006: [ log_sink_console.log shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_009: [ LOG_LEVEL_WARNING shall be displayed with yellow \x1b[33m. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the \x1b[0m code. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_009: [ LOG_LEVEL_WARNING shall be displayed with yellow x1b[33m. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the x1b[0m code. ]*/
 static void log_sink_console_log_prints_one_WARNING_log_line(void)
 {
     // arrange
@@ -621,8 +621,8 @@ static void log_sink_console_log_prints_one_WARNING_log_line(void)
 /* Tests_SRS_LOG_SINK_CONSOLE_01_004: [ log_sink_console.log shall print a line in the format: {log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message} ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, log_sink_console.log shall print the line in such a way that only one printf call is made. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_006: [ log_sink_console.log shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_010: [ LOG_LEVEL_INFO shall be displayed with white \x1b[37m. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the \x1b[0m code. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_010: [ LOG_LEVEL_INFO shall be displayed with white x1b[37m. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the x1b[0m code. ]*/
 static void log_sink_console_log_prints_one_INFO_log_line(void)
 {
     // arrange
@@ -649,8 +649,8 @@ static void log_sink_console_log_prints_one_INFO_log_line(void)
 /* Tests_SRS_LOG_SINK_CONSOLE_01_004: [ log_sink_console.log shall print a line in the format: {log_level} Time: {formatted time} File:{file}:{line} Func:{func} {optional context information} {formatted message} ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, log_sink_console.log shall print the line in such a way that only one printf call is made. ]*/
 /* Tests_SRS_LOG_SINK_CONSOLE_01_006: [ log_sink_console.log shall color the lines using ANSI color codes (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors), as follows: ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_011: [ LOG_LEVEL_VERBOSE shall be displayed with gray \x1b[90m. ]*/
-/* Tests_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the \x1b[0m code. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_011: [ LOG_LEVEL_VERBOSE shall be displayed with gray x1b[90m. ]*/
+/* Tests_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the x1b[0m code. ]*/
 static void log_sink_console_log_prints_one_VERBOSE_log_line(void)
 {
     // arrange

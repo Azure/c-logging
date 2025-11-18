@@ -1079,7 +1079,7 @@ static void uint32_t_to_string_with_NULL_value_fails(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_032: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu32 and pass in the values list the uint32_t_t value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_032: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu32 and pass in the values list the uint32_t value pointed to be property_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_033: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).to_string shall succeed and return the result of snprintf. ]*/
 static void uint32_t_to_string_succeeds(void)
 {
@@ -1100,7 +1100,7 @@ static void uint32_t_to_string_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_032: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu32 and pass in the values list the uint32_t_t value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_032: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu32 and pass in the values list the uint32_t value pointed to be property_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_033: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).to_string shall succeed and return the result of snprintf. ]*/
 static void uint32_t_to_string_UINT32_MAX_succeeds(void)
 {
@@ -1121,7 +1121,7 @@ static void uint32_t_to_string_UINT32_MAX_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_032: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu32 and pass in the values list the uint32_t_t value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_032: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu32 and pass in the values list the uint32_t value pointed to be property_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_033: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).to_string shall succeed and return the result of snprintf. ]*/
 static void uint32_t_to_string_with_truncation_succeeds(void)
 {
@@ -1142,7 +1142,7 @@ static void uint32_t_to_string_with_truncation_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_032: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu32 and pass in the values list the uint32_t_t value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_032: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu32 and pass in the values list the uint32_t value pointed to be property_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_033: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).to_string shall succeed and return the result of snprintf. ]*/
 static void uint32_t_to_string_with_just_enough_big_buffer_succeeds(void)
 {
@@ -1218,7 +1218,7 @@ static void uint32_t_copy_called_with_NULL_src_value_fails(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_037: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).copy shall copy the bytes of the uint32_t_t value from the address pointed by src_value to dst_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_037: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).copy shall copy the bytes of the uint32_t value from the address pointed by src_value to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_038: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).copy shall succeed and return 0. ]*/
 static void uint32_t_copy_succeeds(void)
 {
@@ -1237,7 +1237,7 @@ static void uint32_t_copy_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_037: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).copy shall copy the bytes of the uint32_t_t value from the address pointed by src_value to dst_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_037: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).copy shall copy the bytes of the uint32_t value from the address pointed by src_value to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_038: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).copy shall succeed and return 0. ]*/
 static void uint32_t_copy_succeeds_2(void)
 {
@@ -1275,7 +1275,7 @@ static void uint32_t_free_returns(void)
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).get_type */
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_040: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).get_type shall return the property type LOG_CONTEXT_PROPERTY_TYPE_uint32_t_t. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_040: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint32_t).get_type shall return the property type LOG_CONTEXT_PROPERTY_TYPE_uint32_t. ]*/
 static void uint32_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_uint32_t(void)
 {
     // arrange
@@ -1707,7 +1707,7 @@ static void uint16_t_to_string_with_NULL_value_fails(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_052: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu16 and pass in the values list the uint16_t_t value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_052: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu16 and pass in the values list the uint16_t value pointed to be property_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_053: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).to_string shall succeed and return the result of snprintf. ]*/
 static void uint16_t_to_string_succeeds(void)
 {
@@ -1728,7 +1728,7 @@ static void uint16_t_to_string_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_052: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu16 and pass in the values list the uint16_t_t value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_052: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu16 and pass in the values list the uint16_t value pointed to be property_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_053: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).to_string shall succeed and return the result of snprintf. ]*/
 static void uint16_t_to_string_UINT16_MAX_succeeds(void)
 {
@@ -1749,7 +1749,7 @@ static void uint16_t_to_string_UINT16_MAX_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_052: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu16 and pass in the values list the uint16_t_t value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_052: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu16 and pass in the values list the uint16_t value pointed to be property_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_053: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).to_string shall succeed and return the result of snprintf. ]*/
 static void uint16_t_to_string_with_truncation_succeeds(void)
 {
@@ -1770,7 +1770,7 @@ static void uint16_t_to_string_with_truncation_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_052: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu16 and pass in the values list the uint16_t_t value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_052: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu16 and pass in the values list the uint16_t value pointed to be property_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_053: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).to_string shall succeed and return the result of snprintf. ]*/
 static void uint16_t_to_string_with_just_enough_big_buffer_succeeds(void)
 {
@@ -1846,7 +1846,7 @@ static void uint16_t_copy_called_with_NULL_src_value_fails(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_057: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).copy shall copy the bytes of the uint16_t_t value from the address pointed by src_value to dst_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_057: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).copy shall copy the bytes of the uint16_t value from the address pointed by src_value to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_058: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).copy shall succeed and return 0. ]*/
 static void uint16_t_copy_succeeds(void)
 {
@@ -1865,7 +1865,7 @@ static void uint16_t_copy_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_057: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).copy shall copy the bytes of the uint16_t_t value from the address pointed by src_value to dst_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_057: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).copy shall copy the bytes of the uint16_t value from the address pointed by src_value to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_058: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).copy shall succeed and return 0. ]*/
 static void uint16_t_copy_succeeds_2(void)
 {
@@ -1903,7 +1903,7 @@ static void uint16_t_free_returns(void)
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).get_type */
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_060: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).get_type shall return the property type LOG_CONTEXT_PROPERTY_TYPE_uint16_t_t. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_060: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint16_t).get_type shall return the property type LOG_CONTEXT_PROPERTY_TYPE_uint16_t. ]*/
 static void uint16_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_uint16_t(void)
 {
     // arrange
@@ -2335,7 +2335,7 @@ static void uint8_t_to_string_with_NULL_value_fails(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_072: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu8 and pass in the values list the uint8_t_t value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_072: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu8 and pass in the values list the uint8_t value pointed to be property_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_073: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).to_string shall succeed and return the result of snprintf. ]*/
 static void uint8_t_to_string_succeeds(void)
 {
@@ -2356,7 +2356,7 @@ static void uint8_t_to_string_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_072: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu8 and pass in the values list the uint8_t_t value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_072: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu8 and pass in the values list the uint8_t value pointed to be property_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_073: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).to_string shall succeed and return the result of snprintf. ]*/
 static void uint8_t_to_string_UINT8_MAX_succeeds(void)
 {
@@ -2377,7 +2377,7 @@ static void uint8_t_to_string_UINT8_MAX_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_072: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu8 and pass in the values list the uint8_t_t value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_072: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu8 and pass in the values list the uint8_t value pointed to be property_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_073: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).to_string shall succeed and return the result of snprintf. ]*/
 static void uint8_t_to_string_with_truncation_succeeds(void)
 {
@@ -2398,7 +2398,7 @@ static void uint8_t_to_string_with_truncation_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_072: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu8 and pass in the values list the uint8_t_t value pointed to be property_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_072: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).to_string shall call snprintf with buffer, buffer_length and format string PRIu8 and pass in the values list the uint8_t value pointed to be property_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_073: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).to_string shall succeed and return the result of snprintf. ]*/
 static void uint8_t_to_string_with_just_enough_big_buffer_succeeds(void)
 {
@@ -2474,7 +2474,7 @@ static void uint8_t_copy_called_with_NULL_src_value_fails(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_077: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).copy shall copy the byte of the uint8_t_t value from the address pointed by src_value to dst_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_077: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).copy shall copy the byte of the uint8_t value from the address pointed by src_value to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_078: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).copy shall succeed and return 0. ]*/
 static void uint8_t_copy_succeeds(void)
 {
@@ -2493,7 +2493,7 @@ static void uint8_t_copy_succeeds(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_077: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).copy shall copy the byte of the uint8_t_t value from the address pointed by src_value to dst_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_077: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).copy shall copy the byte of the uint8_t value from the address pointed by src_value to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_078: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).copy shall succeed and return 0. ]*/
 static void uint8_t_copy_succeeds_2(void)
 {
@@ -2531,7 +2531,7 @@ static void uint8_t_free_returns(void)
 
 /* LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).get_type */
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_080: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).get_type shall return the property type LOG_CONTEXT_PROPERTY_TYPE_uint8_t_t. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_BASIC_TYPES_01_080: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(uint8_t).get_type shall return the property type LOG_CONTEXT_PROPERTY_TYPE_uint8_t. ]*/
 static void uint8_t_get_type_returns_LOG_CONTEXT_PROPERTY_TYPE_uint8_t(void)
 {
     // arrange
