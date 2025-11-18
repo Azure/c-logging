@@ -728,7 +728,7 @@ static void when_none_of_2_FormatMessageA_no_newline_formats_it_log_hresult_fill
 
 /* LOG_HRESULT */
 
-/* Tests_SRS_LOG_HRESULT_01_012: [ LOG_HRESULT shall expand to a LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION with name hresult, type ascii_char_ptr and value function call being log_hresult_fill_property(hresult). ] */
+/* Tests_SRS_LOG_HRESULT_01_012: [ LOG_HRESULT shall expand to a LOG_CONTEXT_PROPERTY_CUSTOM_FUNCTION with name hresult, type ascii_char_ptr and value function call being log_hresult_fill_property(the_hresult). ] */
 static void LOG_HRESULT_emits_the_underlying_property(void)
 {
     // arrange

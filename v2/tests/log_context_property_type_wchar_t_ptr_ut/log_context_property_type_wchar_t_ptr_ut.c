@@ -283,7 +283,7 @@ static void wchar_t_ptr_copy_with_NULL_dst_value_fails(void)
     POOR_MANS_ASSERT(actual_call_count == expected_call_count);
 }
 
-/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_009: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).copy shall copy the entire string(including the null terminator) from src_value to dst_value. ]*/
+/* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_009: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).copy shall copy the entire string (including the null terminator) from src_value to dst_value. ]*/
 /* Tests_SRS_LOG_CONTEXT_PROPERTY_TYPE_WCHAR_T_PTR_07_010: [ LOG_CONTEXT_PROPERTY_TYPE_IF_IMPL(wchar_t_ptr).copy shall succeed and return 0. ]*/
 static void wchar_t_ptr_copy_succeeds(void)
 {

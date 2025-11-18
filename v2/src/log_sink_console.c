@@ -19,15 +19,15 @@
 
 #define MIN(a, b) ((a) < (b)) ? (a) : (b)
 
-/* Codes_SRS_LOG_SINK_CONSOLE_01_007: [ LOG_LEVEL_CRITICAL shall be displayed with bright red \x1b[31;1m. ]*/
+/* Codes_SRS_LOG_SINK_CONSOLE_01_007: [ LOG_LEVEL_CRITICAL shall be displayed with bright red x1b[31;1m. ]*/
 #define LOG_SINK_CONSOLE_ANSI_COLOR_BRIGHT_RED      "\x1b[31;1m"
-/* Codes_SRS_LOG_SINK_CONSOLE_01_008: [ LOG_LEVEL_ERROR shall be displayed with red \x1b[31m. ]*/
+/* Codes_SRS_LOG_SINK_CONSOLE_01_008: [ LOG_LEVEL_ERROR shall be displayed with red x1b[31m. ]*/
 #define LOG_SINK_CONSOLE_ANSI_COLOR_RED             "\x1b[31m"
-/* Codes_SRS_LOG_SINK_CONSOLE_01_009: [ LOG_LEVEL_WARNING shall be displayed with yellow \x1b[33m. ]*/
+/* Codes_SRS_LOG_SINK_CONSOLE_01_009: [ LOG_LEVEL_WARNING shall be displayed with yellow x1b[33m. ]*/
 #define LOG_SINK_CONSOLE_ANSI_COLOR_YELLOW          "\x1b[33m"
-/* Codes_SRS_LOG_SINK_CONSOLE_01_010: [ LOG_LEVEL_INFO shall be displayed with white \x1b[37m. ]*/
+/* Codes_SRS_LOG_SINK_CONSOLE_01_010: [ LOG_LEVEL_INFO shall be displayed with white x1b[37m. ]*/
 #define LOG_SINK_CONSOLE_ANSI_COLOR_WHITE           "\x1b[37m"
-/* Codes_SRS_LOG_SINK_CONSOLE_01_011: [ LOG_LEVEL_VERBOSE shall be displayed with gray \x1b[90m. ]*/
+/* Codes_SRS_LOG_SINK_CONSOLE_01_011: [ LOG_LEVEL_VERBOSE shall be displayed with gray x1b[90m. ]*/
 #define LOG_SINK_CONSOLE_ANSI_COLOR_GRAY            "\x1b[90m"
 #define LOG_SINK_CONSOLE_ANSI_COLOR_RESET           "\x1b[0m"
 
@@ -149,7 +149,7 @@ static void log_sink_console_log(LOG_LEVEL log_level, LOG_CONTEXT_HANDLE log_con
             else
             {
                 /* Codes_SRS_LOG_SINK_CONSOLE_01_005: [ In order to not break the line in multiple parts when displayed on the console, log_sink_console.log shall print the line in such a way that only one printf call is made. ]*/
-                /* Codes_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the \x1b[0m code. ]*/
+                /* Codes_SRS_LOG_SINK_CONSOLE_01_012: [ At the end of each line that is printed, the color shall be reset by using the x1b[0m code. ]*/
                 (void)printf("%s%s\r\n", temp, LOG_SINK_CONSOLE_ANSI_COLOR_RESET);
             }
         }
