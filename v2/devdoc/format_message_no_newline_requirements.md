@@ -20,4 +20,4 @@ DWORD FormatMessageA_no_newline(DWORD dwFlags, LPCVOID lpSource, DWORD dwMessage
 
 **SRS_FORMATMESSAGE_NO_NEWLINE_01_002: [** If `FormatMessageA` returns 0, `FormatMessageA_no_newline` shall return 0. **]**
 
-**SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [** Otherwise, `FormatMessageA_no_newline` shall remove any `\r` or `\n` characters that have been placed at the end of the formatted output by `FormatMessageA` and return the number of `CHAR`s left in `lpBuffer`. **]**
+**SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [** Otherwise, `FormatMessageA_no_newline` shall remove any `"\r"` or `"\n"` characters that have been placed at the end of the formatted output by `FormatMessageA` and return the number of `CHAR`s left in `lpBuffer`. **]**
