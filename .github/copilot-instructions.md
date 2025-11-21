@@ -3,6 +3,12 @@
 ## Project Overview
 This c-logging framework is designed to be a foundational component for Azure C libraries, providing consistent, high-performance logging across all Azure services. When using this library, prioritize correctness, thread safety, and performance optimization for production scenarios while maintaining comprehensive logging for debugging and observability.
 
+## External Dependencies and Standards
+All code must follow the comprehensive coding standards defined in #file:../deps/c-build-tools/.github/general_coding_instructions.md. For detailed patterns and conventions, refer to dependency-specific instructions:
+
+- **Build Infrastructure**: #file:../deps/c-build-tools/.github/copilot-instructions.md
+- **Macro Utilities**: #file:../deps/macro-utils-c/.github/copilot-instructions.md
+
 ## c-build-tools Integration
 
 This project follows Azure C library standards established in the `c-build-tools` dependency:
@@ -683,9 +689,9 @@ int main()
 This c-logging framework is designed to be a foundational component for Azure C libraries, providing consistent, high-performance logging across all Azure services. When using this library, prioritize correctness, thread safety, and performance optimization for production scenarios while maintaining comprehensive logging for debugging and observability.
 
 ## External Dependencies
-For build/test/pipeline conventions, refer to `deps/c-build-tools/.github/copilot-instructions.md`. This project inherits all build infrastructure from c-build-tools.
+For build/test/pipeline conventions, refer to #file:../deps/c-build-tools/.github/copilot-instructions.md. This project inherits all build infrastructure from c-build-tools.
 
-**IMPORTANT**: All code changes must follow the comprehensive coding standards defined in `deps/c-build-tools/.github/general_coding_instructions.md`, including:
+**IMPORTANT**: All code changes must follow the comprehensive coding standards defined in #file:../deps/c-build-tools/.github/general_coding_instructions.md, including:
 - Function naming conventions (snake_case, module prefixes, internal function patterns)
 - Parameter validation rules and error handling patterns  
 - Variable naming and result variable conventions
