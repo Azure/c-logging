@@ -19,7 +19,7 @@ DWORD FormatMessageA_no_newline(DWORD dwFlags, LPCVOID lpSource, DWORD dwMessage
     }
     else
     {
-        /* Codes_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer. ] */
+        /* Codes_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any "r" or "n" characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer.] */
         char* where_is_last_char = (char*)lpBuffer + result - 1;
         while (where_is_last_char >= (char*)lpBuffer)
         {

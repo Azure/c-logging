@@ -137,7 +137,7 @@ static void setup_FormatMessageA_call(void)
 #define TEST_VA_LIST_2      ((va_list*)0x43)
 
 /* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_001: [ FormatMessageA_no_newline shall call FormatMessageA with the same arguments. ] */
-/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer. ] */
+/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any "r" or "n" characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer.] */
 static void FormatMessageA_no_newline_calls_FormatMessageA_and_succeeds(void)
 {
     // arrange
@@ -194,43 +194,43 @@ static void test_with_crlf(const char* returned_formatted_string, const char* ex
     POOR_MANS_ASSERT(strcmp(buffer, expected_string) == 0);
 }
 
-/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer. ] */
+/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any "r" or "n" characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer.] */
 static void FormatMessageA_no_newline_removes_one_newline(void)
 {
     test_with_crlf("A dummy LE\n", "A dummy LE");
 }
 
-/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer. ] */
+/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any "r" or "n" characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer.] */
 static void FormatMessageA_no_newline_removes_2_newlines(void)
 {
     test_with_crlf("A dummy LE\n\n", "A dummy LE");
 }
 
-/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer. ] */
+/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any "r" or "n" characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer.] */
 static void FormatMessageA_no_newline_removes_1_CR(void)
 {
     test_with_crlf("A dummy LE\r", "A dummy LE");
 }
 
-/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer. ] */
+/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any "r" or "n" characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer.] */
 static void FormatMessageA_no_newline_removes_2_CR(void)
 {
     test_with_crlf("A dummy LE\r\r", "A dummy LE");
 }
 
-/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer. ] */
+/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any "r" or "n" characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer.] */
 static void FormatMessageA_no_newline_removes_2_pairs(void)
 {
     test_with_crlf("A dummy LE\r\n\r\n", "A dummy LE");
 }
 
-/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer. ] */
+/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any "r" or "n" characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer.] */
 static void FormatMessageA_no_newline_removes_2_pairs_reverse(void)
 {
     test_with_crlf("A dummy LE\n\r\n\r", "A dummy LE");
 }
 
-/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer. ] */
+/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any "r" or "n" characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer.] */
 static void FormatMessageA_no_newline_removes_only_end_crlf(void)
 {
     test_with_crlf("A dummy LE\n\r\n\rx", "A dummy LE\n\r\n\rx");
@@ -238,7 +238,7 @@ static void FormatMessageA_no_newline_removes_only_end_crlf(void)
 
 static const char TEST_NEWLINES_ONLY[] = "\r\n";
 
-/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any \r or \n characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer. ] */
+/* Tests_SRS_FORMATMESSAGE_NO_NEWLINE_01_003: [ Otherwise, FormatMessageA_no_newline shall remove any "r" or "n" characters that have been placed at the end of the formatted output by FormatMessageA and return the number of CHARs left in lpBuffer.] */
 static void when_string_only_contains_newlines_FormatMessageA_no_newline_returns_0(void)
 {
     // arrange
