@@ -1358,7 +1358,7 @@ static void log_sink_etw_log_with_context_with_one_ascii_property_succeeds(void)
     LOG_CONTEXT_DESTROY(log_context);
 }
 
-/* Tests_SRS_LOG_SINK_ETW_07_003: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr, a byte with the value TlgInUNICODESTRING shall be added in the metadata. */
+/* Tests_SRS_LOG_SINK_ETW_07_003: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr, a byte with the value TlgInUNICODESTRING shall be added in the metadata. ] */
 /* Tests_SRS_LOG_SINK_ETW_07_004: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr, the event data descriptor shall be filled with the value of the property by calling _tlgCreate1Sz_wchar_t. ]*/
 static void log_sink_etw_log_with_context_with_one_wchar_t_property_succeeds(void)
 {

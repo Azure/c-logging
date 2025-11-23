@@ -300,7 +300,7 @@ static void internal_emit_self_described_event_va(const char* event_name, uint16
                     *pos = TlgInANSISTRING;
                     break;
                 case LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr:
-                    /* Codes_SRS_LOG_SINK_ETW_07_003: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr, a byte with the value TlgInUNICODESTRING shall be added in the metadata. */
+                    /* Codes_SRS_LOG_SINK_ETW_07_003: [ If the property type is LOG_CONTEXT_PROPERTY_TYPE_wchar_t_ptr, a byte with the value TlgInUNICODESTRING shall be added in the metadata. ] */
                     *pos = TlgInUNICODESTRING;
                     break;
                 case LOG_CONTEXT_PROPERTY_TYPE_bool:
