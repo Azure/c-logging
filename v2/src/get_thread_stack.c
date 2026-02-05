@@ -121,6 +121,7 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
 
 void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
 {
+    (void)threadId;
 
     /*1) parameter validation*/
     if ((destination == NULL) || (destinationSize == 0))
@@ -128,8 +129,14 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
         /*cannot compute if the output space is not sufficient (invalid args)*/
         return;
     }
-    else
+
+#if defined(_M_ARM64)
+    /*ARM64 stack walking is not implemented due to issues with StackWalk64 and symbol resolution*/
+    (void)strncpy(destination, "NOT IMPLEMENTED", destinationSize - 1);
+    destination[destinationSize - 1] = '\0';
+#else
     {
+
         destination[0] = '\0';
 
         bool firstLine = true; /*only used to insert a \n between stack frames*/
@@ -297,6 +304,7 @@ bool wasThreadSuspended = false; /*only suspend threads that are not "current" t
 
         destination[destinationSize - 1] = '\0';
     }
+#endif /* !_M_ARM64 */
 }
 #else /*defined(_MSC_VER)*/
 /*for all the others we don't provide a way to inspect another thread's call stack (yet).*/
