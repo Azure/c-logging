@@ -97,14 +97,19 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
     4.3) append the function name, file name and line number to the destination
 */
 
-#if defined(_WIN64)
+#if defined(_M_ARM64)
+#define INSTRUCTION_POINTER_REGISTER Pc
+#define FRAME_POINTER_REGISTER Fp
+#define STACK_POINTER_REGISTER Sp
+#define STACK_WALK_IMAGE_TYPE IMAGE_FILE_MACHINE_ARM64
+#define CAPTURE_TOP_OF_STACK true
+#elif defined(_WIN64)
 #define INSTRUCTION_POINTER_REGISTER Rip
 #define FRAME_POINTER_REGISTER Rbp
 #define STACK_POINTER_REGISTER Rsp
 #define STACK_WALK_IMAGE_TYPE IMAGE_FILE_MACHINE_AMD64
 #define CAPTURE_TOP_OF_STACK true
-#else
-#if defined(_WIN32)
+#elif defined(_WIN32)
 #define INSTRUCTION_POINTER_REGISTER Eip
 #define FRAME_POINTER_REGISTER Ebp
 #define STACK_POINTER_REGISTER Esp
@@ -112,7 +117,6 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
 #define CAPTURE_TOP_OF_STACK false
 #else
 #error unknown version of windows
-#endif
 #endif
 
 void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
