@@ -97,14 +97,19 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
     4.3) append the function name, file name and line number to the destination
 */
 
-#if defined(_WIN64)
+#if defined(_M_ARM64)
+#define INSTRUCTION_POINTER_REGISTER Pc
+#define FRAME_POINTER_REGISTER Fp
+#define STACK_POINTER_REGISTER Sp
+#define STACK_WALK_IMAGE_TYPE IMAGE_FILE_MACHINE_ARM64
+#define CAPTURE_TOP_OF_STACK true
+#elif defined(_WIN64)
 #define INSTRUCTION_POINTER_REGISTER Rip
 #define FRAME_POINTER_REGISTER Rbp
 #define STACK_POINTER_REGISTER Rsp
 #define STACK_WALK_IMAGE_TYPE IMAGE_FILE_MACHINE_AMD64
 #define CAPTURE_TOP_OF_STACK true
-#else
-#if defined(_WIN32)
+#elif defined(_WIN32)
 #define INSTRUCTION_POINTER_REGISTER Eip
 #define FRAME_POINTER_REGISTER Ebp
 #define STACK_POINTER_REGISTER Esp
@@ -113,10 +118,10 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
 #else
 #error unknown version of windows
 #endif
-#endif
 
 void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
 {
+    (void)threadId;
 
     /*1) parameter validation*/
     if ((destination == NULL) || (destinationSize == 0))
@@ -124,8 +129,14 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
         /*cannot compute if the output space is not sufficient (invalid args)*/
         return;
     }
-    else
+
+#if defined(_M_ARM64)
+    /*ARM64 stack walking is not implemented due to issues with StackWalk64 and symbol resolution*/
+    (void)strncpy(destination, "NOT IMPLEMENTED", destinationSize - 1);
+    destination[destinationSize - 1] = '\0';
+#else
     {
+
         destination[0] = '\0';
 
         bool firstLine = true; /*only used to insert a \n between stack frames*/
@@ -293,6 +304,7 @@ bool wasThreadSuspended = false; /*only suspend threads that are not "current" t
 
         destination[destinationSize - 1] = '\0';
     }
+#endif /* !_M_ARM64 */
 }
 #else /*defined(_MSC_VER)*/
 /*for all the others we don't provide a way to inspect another thread's call stack (yet).*/
