@@ -44,13 +44,23 @@ jobs:
   pool:
     name: ${{ parameters.pool_name_windows_x64 }}
     demands:
-    - Cmd
     - msbuild
-    - cmake
     - visualstudio
-    - vstest
+
+  workspace:
+    clean: all
 
   steps:
+  - template: /pipeline_templates/get_machine_information.yml@c_build_tools
+
+  - checkout: self
+    submodules: true
+    clean: false
+
+  - template: /pipeline_templates/discover_native_tools.yml@c_build_tools
+    parameters:
+      architecture: 'x64'
+
   - task: BatchScript@1
     displayName: 'Git submodule update'
     inputs:
@@ -69,42 +79,62 @@ jobs:
       filename: 'C:\Program Files\Git\bin\git.exe'
       arguments: 'clean -xdff'
 
-  - task: BatchScript@1
+  - task: PowerShell@2
     displayName: 'Setup VS Vars'
     inputs:
-      filename: '"c:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"'
-      modifyEnvironment: true
+      targetType: 'inline'
+      script: |
+        $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+        if (Test-Path $vswhere) {
+          $vsPath = & $vswhere -latest -products * -property installationPath
+          if ($vsPath) {
+            $vsDevCmd = Join-Path $vsPath "Common7\Tools\VsDevCmd.bat"
+            if (Test-Path $vsDevCmd) {
+              $archArgs = "-arch=amd64"
+              Write-Host "Running VsDevCmd with x64 architecture: $vsDevCmd $archArgs"
+              cmd /c "`"$vsDevCmd`" $archArgs && set" | ForEach-Object {
+                if ($_ -match "^([^=]+)=(.*)$") {
+                  [Environment]::SetEnvironmentVariable($matches[1], $matches[2], "Process")
+                }
+              }
+            } else {
+              Write-Host "##[warning]VsDevCmd.bat not found at $vsDevCmd"
+            }
+          }
+        } else {
+          Write-Host "##[warning]vswhere not found"
+        }
 
-  - task: CMake@1
-    displayName: 'CMake .. -Drun_perf_tests:bool=ON -Dlog_sink_etw:bool=ON -Dlog_sink_console:bool=OFF -Duse_etw:string=TRACELOGGING -G "Visual Studio 17 2022" -A x64'
-    inputs:
-      workingDirectory: 'build_x64'
-      cmakeArgs: '.. -Drun_perf_tests:bool=ON -Dlog_sink_etw:bool=ON -Dlog_sink_console:bool=OFF -Duse_etw:string=TRACELOGGING -G "Visual Studio 17 2022" -A x64'
+  - template: /pipeline_templates/tasks/cmake.yml@c_build_tools
+    parameters:
+      architecture: 'x64'
+      sourceDirectory: '$(Build.SourcesDirectory)'
+      buildDirectory: '$(Build.BinariesDirectory)/build_x64'
+      cmakeArgs: '-Drun_perf_tests:bool=ON -Dlog_sink_etw:bool=ON -Dlog_sink_console:bool=OFF -Duse_etw:string=TRACELOGGING'
 
-  - task: VSBuild@1
-    displayName: 'Build solution build_x64\*.sln'
-    inputs:
-      solution: 'build_x64\*.sln'
-      platform: x64
+  - template: /pipeline_templates/tasks/vsbuild.yml@c_build_tools
+    parameters:
+      architecture: 'x64'
+      solution: '$(Build.BinariesDirectory)/build_x64/*.sln'
+      configuration: 'RelWithDebInfo'
       msbuildArgs: '/t:restore /t:build'
-      configuration: RelWithDebInfo
-      maximumCpuCount: true
 
-  - task: CmdLine@2
-    displayName: 'Run ctest'
-    inputs:
-      script: 'ctest -C "RelWithDebInfo" -V --output-on-failure'
-      workingDirectory: 'build_x64'
+  - template: /pipeline_templates/tasks/ctest.yml@c_build_tools
+    parameters:
+      architecture: 'x64'
+      workingDirectory: '$(Build.BinariesDirectory)/build_x64'
+      configuration: 'RelWithDebInfo'
+      additionalArgs: '-V'
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@1
     displayName: 'Publish artifacts'
     inputs:
-      pathtoPublish: 'build_x64'
+      targetPath: '$(Build.BinariesDirectory)/build_x64'
       artifactName: 'x64_RelWithDebInfo_perf'
       parallel: true
     condition: failed()
 
-  - template : /pipeline_templates/clean_ado_folders.yml@c_build_tools
+  - template: /pipeline_templates/clean_ado_folders.yml@c_build_tools
 
 - template: /pipeline_templates/build_linux.yml@c_build_tools
   parameters:
