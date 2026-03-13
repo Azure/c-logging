@@ -4,11 +4,11 @@ parameters:
   - name: pool_name_windows_x64
     displayName: 'Windows x64 Pool'
     type: string
-    default: 'Azure-MessagingStore-WinBuildPoolVS2022_0'
+    default: 'Azure-MessagingStore-Win-x64-Dadsv5-v19'
   - name: pool_name_windows_arm64
     displayName: 'Windows ARM64 Pool'
     type: string
-    default: 'Azure-MessagingStore-WinBuildPool-ARM64-v24'
+    default: 'Azure-MessagingStore-Win-ARM64-Dpldsv6-v28'
   - name: pool_name_linux
     displayName: 'Linux Pool'
     type: string
@@ -44,67 +44,59 @@ jobs:
   pool:
     name: ${{ parameters.pool_name_windows_x64 }}
     demands:
-    - Cmd
     - msbuild
-    - cmake
     - visualstudio
-    - vstest
+
+  workspace:
+    clean: all
 
   steps:
-  - task: BatchScript@1
-    displayName: 'Git submodule update'
-    inputs:
-      filename: 'C:\Program Files\Git\bin\git.exe'
-      arguments: 'submodule update --init --force'
+  - template: /pipeline_templates/get_machine_information.yml@c_build_tools
 
-  - task: BatchScript@1
-    displayName: 'Git submodule clean'
-    inputs:
-      filename: 'C:\Program Files\Git\bin\git.exe'
-      arguments: 'submodule foreach --recursive "git clean -xdff"'
+  # Shallow clone - only need the code at this commit, not full history
+  - checkout: self
+    submodules: false
+    clean: false
+    fetchDepth: 1
 
-  - task: BatchScript@1
-    displayName: 'Git clean'
-    inputs:
-      filename: 'C:\Program Files\Git\bin\git.exe'
-      arguments: 'clean -xdff'
+  # Shallow submodules - only need the pinned commit, not full history
+  - script: git submodule update --init --recursive --depth 1
+    displayName: 'Shallow checkout submodules'
 
-  - task: BatchScript@1
-    displayName: 'Setup VS Vars'
-    inputs:
-      filename: '"c:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"'
-      modifyEnvironment: true
+  - template: /pipeline_templates/discover_native_tools.yml@c_build_tools
+    parameters:
+      architecture: 'x64'
 
-  - task: CMake@1
-    displayName: 'CMake .. -Drun_perf_tests:bool=ON -Dlog_sink_etw:bool=ON -Dlog_sink_console:bool=OFF -Duse_etw:string=TRACELOGGING -G "Visual Studio 17 2022" -A x64'
-    inputs:
-      workingDirectory: 'build_x64'
-      cmakeArgs: '.. -Drun_perf_tests:bool=ON -Dlog_sink_etw:bool=ON -Dlog_sink_console:bool=OFF -Duse_etw:string=TRACELOGGING -G "Visual Studio 17 2022" -A x64'
+  - template: /pipeline_templates/tasks/cmake.yml@c_build_tools
+    parameters:
+      architecture: 'x64'
+      sourceDirectory: '$(Build.SourcesDirectory)'
+      buildDirectory: '$(Build.BinariesDirectory)/build_x64'
+      cmakeArgs: '-Drun_perf_tests:bool=ON -Dlog_sink_etw:bool=ON -Dlog_sink_console:bool=OFF -Duse_etw:string=TRACELOGGING'
 
-  - task: VSBuild@1
-    displayName: 'Build solution build_x64\*.sln'
-    inputs:
-      solution: 'build_x64\*.sln'
-      platform: x64
+  - template: /pipeline_templates/tasks/vsbuild.yml@c_build_tools
+    parameters:
+      architecture: 'x64'
+      solution: '$(Build.BinariesDirectory)/build_x64/*.sln'
+      configuration: 'RelWithDebInfo'
       msbuildArgs: '/t:restore /t:build'
-      configuration: RelWithDebInfo
-      maximumCpuCount: true
 
-  - task: CmdLine@2
-    displayName: 'Run ctest'
-    inputs:
-      script: 'ctest -C "RelWithDebInfo" -V --output-on-failure'
-      workingDirectory: 'build_x64'
+  - template: /pipeline_templates/tasks/ctest.yml@c_build_tools
+    parameters:
+      architecture: 'x64'
+      workingDirectory: '$(Build.BinariesDirectory)/build_x64'
+      configuration: 'RelWithDebInfo'
+      additionalArgs: '-V'
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@1
     displayName: 'Publish artifacts'
     inputs:
-      pathtoPublish: 'build_x64'
+      targetPath: '$(Build.BinariesDirectory)/build_x64'
       artifactName: 'x64_RelWithDebInfo_perf'
       parallel: true
     condition: failed()
 
-  - template : /pipeline_templates/clean_ado_folders.yml@c_build_tools
+  - template: /pipeline_templates/clean_ado_folders.yml@c_build_tools
 
 - template: /pipeline_templates/build_linux.yml@c_build_tools
   parameters:
