@@ -60,7 +60,7 @@ jobs:
     fetchDepth: 1
 
   # Shallow submodules - only need the pinned commit, not full history
-  - script: git submodule update --init --recursive --depth 1
+  - script: git submodule update --init --depth 1
     displayName: 'Shallow checkout submodules'
 
   - template: /pipeline_templates/discover_native_tools.yml@c_build_tools
