@@ -79,32 +79,6 @@ jobs:
       filename: 'C:\Program Files\Git\bin\git.exe'
       arguments: 'clean -xdff'
 
-  - task: PowerShell@2
-    displayName: 'Setup VS Vars'
-    inputs:
-      targetType: 'inline'
-      script: |
-        $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-        if (Test-Path $vswhere) {
-          $vsPath = & $vswhere -latest -products * -property installationPath
-          if ($vsPath) {
-            $vsDevCmd = Join-Path $vsPath "Common7\Tools\VsDevCmd.bat"
-            if (Test-Path $vsDevCmd) {
-              $archArgs = "-arch=amd64"
-              Write-Host "Running VsDevCmd with x64 architecture: $vsDevCmd $archArgs"
-              cmd /c "`"$vsDevCmd`" $archArgs && set" | ForEach-Object {
-                if ($_ -match "^([^=]+)=(.*)$") {
-                  [Environment]::SetEnvironmentVariable($matches[1], $matches[2], "Process")
-                }
-              }
-            } else {
-              Write-Host "##[warning]VsDevCmd.bat not found at $vsDevCmd"
-            }
-          }
-        } else {
-          Write-Host "##[warning]vswhere not found"
-        }
-
   - template: /pipeline_templates/tasks/cmake.yml@c_build_tools
     parameters:
       architecture: 'x64'
