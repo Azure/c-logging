@@ -4,3 +4,6 @@
 [submodule "deps/macro-utils-c"]
 	path = deps/macro-utils-c
 	url = https://github.com/Azure/macro-utils-c
+[submodule "deps/azure-messaging-ai-context"]
+	path = deps/azure-messaging-ai-context
+	url = https://github.com/Azure/azure-messaging-ai-context.git
