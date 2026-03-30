@@ -151,13 +151,14 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
         {
             if (state == SYM_INIT_NOT_INITIALIZED)
             {
-                HANDLE processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId());
-                if (processHandle == NULL)
+                /*duplicating the pseudo-handle to get a unique real handle for our own dbghelp symbol context*/
+                /*mimics the implementation from https://learn.microsoft.com/en-us/windows/win32/debug/initializing-the-symbol-handler*/
+                HANDLE hCurrentProcess = GetCurrentProcess();
+                if (!DuplicateHandle(hCurrentProcess, hCurrentProcess, hCurrentProcess, &g_symProcess, 0, FALSE, DUPLICATE_SAME_ACCESS))
                 {
                     /*fallback - will share symbol context with anyone else using GetCurrentProcess()*/
-                    processHandle = GetCurrentProcess();
+                    g_symProcess = hCurrentProcess;
                 }
-                g_symProcess = processHandle;
                 (void)SymInitialize(g_symProcess, NULL, TRUE);
                 (void)atexit(sym_cleanup_at_exit);
                 (void)InterlockedExchange(&doSymInit.state, SYM_INIT_INITIALIZED);
