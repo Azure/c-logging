@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
@@ -39,6 +40,14 @@ typedef union SYMBOL_INFO_EXTENDED_TAG
     SYMBOL_INFO symbol;
     unsigned char extendsUnion[sizeof(SYMBOL_INFO) + MAX_SYM_NAME - 1]; /*this field only exists to extend the size of the union to encompass "CHAR    Name[1];" of the SYMBOL_INFO to be as big as TRACE_MAX_SYMBOL_SIZE - 1 */ /*and the reason why it is not malloc'd is to exactly avoid a malloc that cannot be LogError'd (how does one log errors in a log function?!)*/
 }SYMBOL_INFO_EXTENDED;
+
+static HANDLE g_symProcess = NULL;
+
+static void sym_cleanup_at_exit(void)
+{
+    (void)SymCleanup(g_symProcess);
+    (void)CloseHandle(g_symProcess);
+}
 
 static SRWLOCK lockOverSymCalls = SRWLOCK_INIT;
 
@@ -134,8 +143,6 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
 
         bool firstLine = true; /*only used to insert a \n between stack frames*/
 
-        HANDLE hProcess = GetCurrentProcess();
-
         /*2) call SymInitialize for the current process*/
         /*lazily call once SymInitialize*/
         LONG state;
@@ -144,7 +151,15 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
         {
             if (state == SYM_INIT_NOT_INITIALIZED)
             {
-                (void)SymInitialize(hProcess, NULL, TRUE); /*this is a process-wide initialization, and will leak because we don't know when to call SymCleanup. It is a good candidate for platform_init*/
+                HANDLE processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId());
+                if (processHandle == NULL)
+                {
+                    /*fallback - will share symbol context with anyone else using GetCurrentProcess()*/
+                    processHandle = GetCurrentProcess();
+                }
+                g_symProcess = processHandle;
+                (void)SymInitialize(g_symProcess, NULL, TRUE);
+                (void)atexit(sym_cleanup_at_exit);
                 (void)InterlockedExchange(&doSymInit.state, SYM_INIT_INITIALIZED);
             }
         }
@@ -216,7 +231,7 @@ bool wasThreadSuspended = false; /*only suspend threads that are not "current" t
                     /*4) once the context has been acquired, call StackWalk64 to get the stack frames. For every frame:*/
                     while (StackWalk64(
                         STACK_WALK_IMAGE_TYPE,
-                        hProcess,
+                        g_symProcess,
                         hThread,
                         &stackFrame,
                         &context,
@@ -243,7 +258,7 @@ bool wasThreadSuspended = false; /*only suspend threads that are not "current" t
                         const char* function_name;
 
                         /*4.1) determine the function name*/
-                        if (!SymFromAddr(hProcess, stackFrame.AddrPC.Offset, &displacement, pSymbol))
+                        if (!SymFromAddr(g_symProcess, stackFrame.AddrPC.Offset, &displacement, pSymbol))
                         {
                             function_name = "failure in SymFromAddr";
                         }
@@ -259,7 +274,7 @@ bool wasThreadSuspended = false; /*only suspend threads that are not "current" t
                         uint32_t line_number;
 
                         /*4.2) determine the file name and line number*/
-                        if (!SymGetLineFromAddr64(hProcess, stackFrame.AddrPC.Offset, &lineDisplacement, &line))
+                        if (!SymGetLineFromAddr64(g_symProcess, stackFrame.AddrPC.Offset, &lineDisplacement, &line))
                         {
                             file_name = "failure in SymGetLineFromAddr64";
                             line_number = 0;
