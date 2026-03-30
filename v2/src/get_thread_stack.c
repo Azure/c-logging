@@ -45,8 +45,16 @@ static HANDLE g_symProcess = NULL;
 
 static void sym_cleanup_at_exit(void)
 {
-    (void)SymCleanup(g_symProcess);
-    (void)CloseHandle(g_symProcess);
+    if (!SymCleanup(g_symProcess))
+    {
+        (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymCleanup(g_symProcess=%p)",
+            GetLastError(), g_symProcess);
+    }
+    if (!CloseHandle(g_symProcess))
+    {
+        (void)printf("failure (GetLastError()=0x%" PRIx32 ") in CloseHandle(g_symProcess=%p)",
+            GetLastError(), g_symProcess);
+    }
 }
 
 static SRWLOCK lockOverSymCalls = SRWLOCK_INIT;
@@ -55,7 +63,7 @@ static const char snprintfFailed[] = "\nsnprintf failed";
 
 #define snprintf_fallback(destination,destination_size, fallback_string, fallbackstring_size, format, ... )                      \
 {                                                                                                                                \
-    snprintf_fallback_impl(destination,destination_size, fallback_string, fallbackstring_size, format, __VA_ARGS__);             \
+    snprintf_fallback_impl(destination, destination_size, fallback_string, fallbackstring_size, format, __VA_ARGS__);            \
     0 && printf(format, __VA_ARGS__); /*this is a no-op, but it will force the compiler to check the format string*/             \
 }                                                                                                                                \
 
@@ -134,11 +142,9 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
     if ((destination == NULL) || (destinationSize == 0))
     {
         /*cannot compute if the output space is not sufficient (invalid args)*/
-        return;
     }
-
+    else
     {
-
         destination[0] = '\0';
 
         bool firstLine = true; /*only used to insert a \n between stack frames*/
@@ -152,15 +158,25 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
             if (state == SYM_INIT_NOT_INITIALIZED)
             {
                 /*duplicating the pseudo-handle to get a unique real handle for our own dbghelp symbol context*/
-                /*mimics the implementation from https://learn.microsoft.com/en-us/windows/win32/debug/initializing-the-symbol-handler*/
+                /*mimics the implementation from https://learn.microsoft.com/en-us/windows/win32/debug/initializing-the-symbol-handler */
                 HANDLE hCurrentProcess = GetCurrentProcess();
                 if (!DuplicateHandle(hCurrentProcess, hCurrentProcess, hCurrentProcess, &g_symProcess, 0, FALSE, DUPLICATE_SAME_ACCESS))
                 {
+                    (void)printf("failure (GetLastError()=0x%" PRIx32 ") in DuplicateHandle(hCurrentProcess=%p, hCurrentProcess=%p, hCurrentProcess=%p, &g_symProcess=%p, 0, FALSE, DUPLICATE_SAME_ACCESS), will use hCurrentProcess=%p",
+                        GetLastError(), hCurrentProcess, hCurrentProcess, hCurrentProcess, &g_symProcess, hCurrentProcess);
                     /*fallback - will share symbol context with anyone else using GetCurrentProcess()*/
                     g_symProcess = hCurrentProcess;
                 }
-                (void)SymInitialize(g_symProcess, NULL, TRUE);
-                (void)atexit(sym_cleanup_at_exit);
+
+                if (!SymInitialize(g_symProcess, NULL, TRUE))
+                {
+                    (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymInitialize(g_symProcess=%p, NULL, TRUE)",
+                        GetLastError(), g_symProcess);
+                }
+                else
+                {
+                    (void)atexit(sym_cleanup_at_exit);
+                }
                 (void)InterlockedExchange(&doSymInit.state, SYM_INIT_INITIALIZED);
             }
         }
@@ -168,7 +184,7 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
         /*3) get hThread's context.*/
         DWORD currentThreadId = GetCurrentThreadId();
 
-bool wasThreadSuspended = false; /*only suspend threads that are not "current" thread to capture their stack frame*/
+        bool wasThreadSuspended = false; /*only suspend threads that are not "current" thread to capture their stack frame*/
         bool wasContextAcquired = false;
 
         CONTEXT context = { 0 };
