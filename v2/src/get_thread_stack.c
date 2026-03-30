@@ -175,6 +175,7 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                 }
                 else
                 {
+                    /*register some cleanup - this is instead of de-init*/
                     (void)atexit(sym_cleanup_at_exit);
                 }
                 (void)InterlockedExchange(&doSymInit.state, SYM_INIT_INITIALIZED);
