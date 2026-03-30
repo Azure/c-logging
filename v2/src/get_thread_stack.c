@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
 #include <stddef.h>
@@ -40,11 +39,6 @@ typedef union SYMBOL_INFO_EXTENDED_TAG
     SYMBOL_INFO symbol;
     unsigned char extendsUnion[sizeof(SYMBOL_INFO) + MAX_SYM_NAME - 1]; /*this field only exists to extend the size of the union to encompass "CHAR    Name[1];" of the SYMBOL_INFO to be as big as TRACE_MAX_SYMBOL_SIZE - 1 */ /*and the reason why it is not malloc'd is to exactly avoid a malloc that cannot be LogError'd (how does one log errors in a log function?!)*/
 }SYMBOL_INFO_EXTENDED;
-
-static void sym_cleanup_at_exit(void)
-{
-    SymCleanup(GetCurrentProcess());
-}
 
 static SRWLOCK lockOverSymCalls = SRWLOCK_INIT;
 
@@ -150,8 +144,7 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
         {
             if (state == SYM_INIT_NOT_INITIALIZED)
             {
-                (void)SymInitialize(hProcess, NULL, TRUE);
-                (void)atexit(sym_cleanup_at_exit);
+                (void)SymInitialize(hProcess, NULL, TRUE); /*this is a process-wide initialization, and will leak because we don't know when to call SymCleanup. It is a good candidate for platform_init*/
                 (void)InterlockedExchange(&doSymInit.state, SYM_INIT_INITIALIZED);
             }
         }
