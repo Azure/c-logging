@@ -149,7 +149,7 @@ static void cleanup_calls(void)
 static int log_sink1_init(void)
 {
     int result;
-    
+
     if ((actual_call_count == expected_call_count) ||
         (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_log_sink1_init))
     {
@@ -166,10 +166,10 @@ static int log_sink1_init(void)
         {
             result = 0;
         }
-    
+
         actual_call_count++;
     }
-    
+
     return result;
 }
 
@@ -627,7 +627,7 @@ static void LOGGER_LOG_EX_works(void)
     uint32_t captured_context_property_count = log_context_get_property_value_pair_count(expected_calls[0].log_sink1_log_call.captured_log_context);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* captured_context_properties = log_context_get_property_value_pairs(expected_calls[0].log_sink1_log_call.captured_log_context);
     // we expect one extra property as we're "copying" the context by creating a parent one
-    POOR_MANS_ASSERT(captured_context_property_count == 3); 
+    POOR_MANS_ASSERT(captured_context_property_count == 3);
     POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "") == 0);
     POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
     POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[1].value == 1);
@@ -1305,7 +1305,7 @@ int main(void)
     when_the_2nd_sink_init_fails_logger_init_fails();
     logger_init_initializes_sinks();
     logger_init_after_init_succeeds();
-    
+
     LOGGER_LOG_with_CRITICAL_works();
     LOGGER_LOG_with_ERROR_works();
     LOGGER_LOG_with_INFO_works();

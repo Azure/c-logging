@@ -11,7 +11,7 @@
 #endif
 
 #if defined(_MSC_VER)
-#include "windows.h" /*needed for HANDLE*/
+#include "windows.h" /*needed for DWORD*/
 #else
 #error no other platform supported
 #endif

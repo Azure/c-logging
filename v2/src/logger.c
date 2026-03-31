@@ -11,6 +11,7 @@
 #include "c_logging/log_level.h"
 #include "c_logging/log_context.h"
 #include "c_logging/log_sink_if.h"
+#include "c_logging/get_thread_stack.h"
 
 #include "c_logging/logger.h"
 
@@ -49,41 +50,55 @@ int logger_init(void)
     {
         /* Codes_SRS_LOGGER_01_019: [ If logger is not already initialized: ] */
 
-        /* Codes_SRS_LOGGER_01_020: [ logger_init shall set the logger initialization counter to 1. ] */
-        logger_init_count = 1;
-
-        /* Codes_SRS_LOGGER_01_003: [ logger_init shall call the init function of every sink that is configured to be used. ] */
-        for (i = 0; i < log_sink_count; i++)
+        /* Codes_SRS_LOGGER_02_001: [ logger_init shall call get_thread_stack_init. ] */
+        if (get_thread_stack_init() != 0)
         {
-            if (log_sinks[i]->init() != 0)
-            {
-                (void)printf("init of sink at index %" PRIu32 " failed\r\n", i);
-                break;
-            }
-        }
-
-        if (i < log_sink_count)
-        {
-            /* Codes_SRS_LOGGER_01_004: [ If init fails, all sinks already initialized shall have their deinit function called and logger_init shall fail and return a non-zero value. ] */
-            for (uint32_t j = 0; j < i; j++)
-            {
-                log_sinks[j]->deinit();
-            }
-
+            (void)printf("Failure in get_thread_stack_init()");
             result = MU_FAILURE;
         }
         else
         {
-            logger_state = LOGGER_STATE_INITIALIZED;
 
-            /* Codes_SRS_LOGGER_01_005: [ Otherwise, logger_init shall succeed and return 0. ] */
-            result = 0;
+            /* Codes_SRS_LOGGER_01_020: [ logger_init shall set the logger initialization counter to 1. ] */
+            logger_init_count = 1;
+
+            /* Codes_SRS_LOGGER_01_003: [ logger_init shall call the init function of every sink that is configured to be used. ] */
+            for (i = 0; i < log_sink_count; i++)
+            {
+                if (log_sinks[i]->init() != 0)
+                {
+                    (void)printf("init of sink at index %" PRIu32 " failed\r\n", i);
+                    break;
+                }
+            }
+
+            if (i < log_sink_count)
+            {
+                /* Codes_SRS_LOGGER_01_004: [ If init fails, all sinks already initialized shall have their deinit function called and logger_init shall fail and return a non-zero value. ] */
+                for (uint32_t j = 0; j < i; j++)
+                {
+                    log_sinks[j]->deinit();
+                }
+
+                result = MU_FAILURE;
+            }
+            else
+            {
+                logger_state = LOGGER_STATE_INITIALIZED;
+
+                /* Codes_SRS_LOGGER_01_005: [ Otherwise, logger_init shall succeed and return 0. ] */
+                result = 0;
+                goto allok;
+            }
+
+            get_thread_stack_deinit();
         }
 
         break;
     }
     }
 
+allok:;
     return result;
 }
 
@@ -112,6 +127,9 @@ void logger_deinit(void)
             {
                 log_sinks[i]->deinit();
             }
+
+            /* Codes_SRS_LOGGER_02_002: [ logger_deinit shall call get_thread_stack_deinit. ] */
+            get_thread_stack_deinit();
 
             logger_state = LOGGER_STATE_NOT_INITIALIZED;
         }
