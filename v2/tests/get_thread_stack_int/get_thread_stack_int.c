@@ -171,13 +171,17 @@ int main(void)
     // make abort not popup
     _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 
+    POOR_MANS_ASSERT(get_thread_stack_init() == 0);
+
     test_current_thread();
 
     test_another_thread();
-    
+
     test_current_thread_insufficient_memory();
-    
+
     test_another_thread_insufficient_memory();
+
+    get_thread_stack_deinit();
 
     return 0;
 }

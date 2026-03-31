@@ -20,7 +20,11 @@
 extern "C" {
 #endif
 
+	int get_thread_stack_init(void);
+
     void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize);
+
+	void get_thread_stack_deinit(void);
 
 #ifdef __cplusplus
 }
