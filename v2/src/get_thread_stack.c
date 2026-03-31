@@ -180,7 +180,7 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
     }
     else if (g.symbolsState != SYM_INIT_INITIALIZED)
     {
-        /* cannot comput if we are not initialized*/
+        /* cannot compute if we are not initialized*/
 		snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "failure: get_thread_stack is not initialized, g.doSymInit=%" PRI_MU_ENUM "", MU_ENUM_VALUE(SYM_INIT, g.symbolsState));
     }
 	else
@@ -189,7 +189,7 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
 
         bool firstLine = true; /*only used to insert a \n between stack frames*/
 
-        /*2) has been replaced by init/denit */
+        /*2) has been replaced by init/deinit */
 
         /*3) get hThread's context.*/
         DWORD currentThreadId = GetCurrentThreadId();
