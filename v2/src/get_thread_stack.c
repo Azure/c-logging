@@ -58,7 +58,7 @@ int get_thread_stack_init(void)
         HANDLE hCurrentProcess = GetCurrentProcess(); /*The pseudo handle need not be closed when it is no longer needed. Source: https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getcurrentprocess*/
         if (!DuplicateHandle(hCurrentProcess, hCurrentProcess, hCurrentProcess, &g.processHandle, 0, FALSE, DUPLICATE_SAME_ACCESS))
         {
-            (void)printf("failure (GetLastError()=0x%" PRIx32 ") in DuplicateHandle(hCurrentProcess=%p, hCurrentProcess=%p, hCurrentProcess=%p, &g.g_symProcess=%p, 0, FALSE, DUPLICATE_SAME_ACCESS), will use hCurrentProcess=%p",
+            (void)printf("failure (GetLastError()=0x%" PRIx32 ") in DuplicateHandle(hCurrentProcess=%p, hCurrentProcess=%p, hCurrentProcess=%p, &g.processHandle=%p, 0, FALSE, DUPLICATE_SAME_ACCESS), will use hCurrentProcess=%p",
                 GetLastError(), hCurrentProcess, hCurrentProcess, hCurrentProcess, &g.processHandle, hCurrentProcess);
             result = MU_FAILURE;
         }
