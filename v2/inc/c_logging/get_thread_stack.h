@@ -20,10 +20,12 @@
 extern "C" {
 #endif
 
+	/*initializes statics needed to get a thread stack - not thred safe in itself*/
 	int get_thread_stack_init(void);
 
     void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize);
 
+	/*deinitializes statics - not thread safe*/
 	void get_thread_stack_deinit(void);
 
 #ifdef __cplusplus

@@ -19,18 +19,10 @@
 
 #define SYM_INIT_VALUES  \
     SYM_INIT_INITIALIZED,   \
-    SYM_INIT_INITIALIZING,  \
     SYM_INIT_NOT_INITIALIZED
 
 MU_DEFINE_ENUM(SYM_INIT, SYM_INIT_VALUES);
 MU_DEFINE_ENUM_STRINGS(SYM_INIT, SYM_INIT_VALUES);
-
-typedef union SYM_INIT_STATE_TAG
-{
-    volatile SYM_INIT state_enum;
-} SYM_INIT_STATE;
-
-static SYM_INIT doSymInit = SYM_INIT_NOT_INITIALIZED;
 
 typedef union SYMBOL_INFO_EXTENDED_TAG
 {
@@ -38,7 +30,18 @@ typedef union SYMBOL_INFO_EXTENDED_TAG
     unsigned char extendsUnion[sizeof(SYMBOL_INFO) + MAX_SYM_NAME - 1]; /*this field only exists to extend the size of the union to encompass "CHAR    Name[1];" of the SYMBOL_INFO to be as big as TRACE_MAX_SYMBOL_SIZE - 1 */ /*and the reason why it is not malloc'd is to exactly avoid a malloc that cannot be LogError'd (how does one log errors in a log function?!)*/
 }SYMBOL_INFO_EXTENDED;
 
-static HANDLE g_symProcess = NULL; /*one global set by get_thread_stack_init */
+static struct {
+    SYM_INIT symbolsState; /*holds the state of the module.*/
+    HANDLE processHandle; /*self-process handle*/
+    SRWLOCK lockOverSymCalls;
+} g = /*g comes from "global" because this is a singleton*/
+{
+    .symbolsState = SYM_INIT_NOT_INITIALIZED,
+    .processHandle = NULL,
+    .lockOverSymCalls = SRWLOCK_INIT
+};
+
+
 
 /*note: the APIs in here cannot use LogError+friends because it would result in a stack overflow. Here's why.
 Assume get_thread_stack fails the call to OpenThread. The next line would be LogLastError. If logLastError captures the stack it would end up back in get_thread_stack...
@@ -48,38 +51,38 @@ Assume get_thread_stack fails the call to OpenThread. The next line would be Log
 int get_thread_stack_init(void)
 {
     int result;
-    if (doSymInit == SYM_INIT_NOT_INITIALIZED)
+    if (g.symbolsState == SYM_INIT_NOT_INITIALIZED)
     {
         /*duplicating the pseudo-handle to get a unique real handle for our own dbghelp symbol context*/
         /*mimics the implementation from https://learn.microsoft.com/en-us/windows/win32/debug/initializing-the-symbol-handler */
         HANDLE hCurrentProcess = GetCurrentProcess(); /*The pseudo handle need not be closed when it is no longer needed. Source: https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getcurrentprocess*/
-        if (!DuplicateHandle(hCurrentProcess, hCurrentProcess, hCurrentProcess, &g_symProcess, 0, FALSE, DUPLICATE_SAME_ACCESS))
+        if (!DuplicateHandle(hCurrentProcess, hCurrentProcess, hCurrentProcess, &g.processHandle, 0, FALSE, DUPLICATE_SAME_ACCESS))
         {
-            (void)printf("failure (GetLastError()=0x%" PRIx32 ") in DuplicateHandle(hCurrentProcess=%p, hCurrentProcess=%p, hCurrentProcess=%p, &g_symProcess=%p, 0, FALSE, DUPLICATE_SAME_ACCESS), will use hCurrentProcess=%p",
-                GetLastError(), hCurrentProcess, hCurrentProcess, hCurrentProcess, &g_symProcess, hCurrentProcess);
+            (void)printf("failure (GetLastError()=0x%" PRIx32 ") in DuplicateHandle(hCurrentProcess=%p, hCurrentProcess=%p, hCurrentProcess=%p, &g.g_symProcess=%p, 0, FALSE, DUPLICATE_SAME_ACCESS), will use hCurrentProcess=%p",
+                GetLastError(), hCurrentProcess, hCurrentProcess, hCurrentProcess, &g.processHandle, hCurrentProcess);
             result = MU_FAILURE;
         }
         else
         {
-            if (!SymInitialize(g_symProcess, NULL, TRUE))
+            if (!SymInitialize(g.processHandle, NULL, TRUE))
             {
-                (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymInitialize(g_symProcess=%p, NULL, TRUE)",
-                    GetLastError(), g_symProcess);
+                (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymInitialize(g.g_symProcess=%p, NULL, TRUE)",
+                    GetLastError(), g.processHandle);
                 result = MU_FAILURE;
             }
             else
             {
-				doSymInit = SYM_INIT_INITIALIZED;
+				g.symbolsState = SYM_INIT_INITIALIZED;
                 result = 0;
                 goto allok;
             }
 
-            if (!CloseHandle(g_symProcess))
+            if (!CloseHandle(g.processHandle))
             {
-                (void)printf("failure (GetLastError()=0x%" PRIx32 ") in CloseHandle(g_symProcess=%p)",
-					GetLastError(), g_symProcess);
+                (void)printf("failure (GetLastError()=0x%" PRIx32 ") in CloseHandle(g.g_symProcess=%p)",
+					GetLastError(), g.processHandle);
             }
-            g_symProcess = NULL;
+            g.processHandle = NULL;
         }
     }
     else
@@ -91,36 +94,13 @@ allok:
 	return result;
 }
 
-void get_thread_stack_deinit(void)
-{
-    if (doSymInit== SYM_INIT_INITIALIZED)
-    {
-        if (!SymCleanup(g_symProcess))
-        {
-            (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymCleanup(g_symProcess=%p)",
-                GetLastError(), g_symProcess);
-        }
-
-        if (!CloseHandle(g_symProcess))
-        {
-            (void)printf("failure (GetLastError()=0x%" PRIx32 ") in CloseHandle(g_symProcess=%p)",
-                GetLastError(), g_symProcess);
-        }
-        g_symProcess = NULL;
-
-		doSymInit= SYM_INIT_NOT_INITIALIZED;
-    }
-}
-
-static SRWLOCK lockOverSymCalls = SRWLOCK_INIT;
-
 static const char snprintfFailed[] = "\nsnprintf failed";
 
-#define snprintf_fallback(destination,destination_size, fallback_string, fallbackstring_size, format, ... )                      \
-{                                                                                                                                \
-    snprintf_fallback_impl(destination, destination_size, fallback_string, fallbackstring_size, format, __VA_ARGS__);            \
-    0 && printf(format, __VA_ARGS__); /*this is a no-op, but it will force the compiler to check the format string*/             \
-}                                                                                                                                \
+#define snprintf_fallback(destination, destination_size, fallback_string, fallbackstring_size, format, ... )                        \
+{                                                                                                                                   \
+    snprintf_fallback_impl(destination, destination_size, fallback_string, fallbackstring_size, format __VA_OPT__(,) __VA_ARGS__);  \
+    0 && printf(format __VA_OPT__(,)  __VA_ARGS__); /*this is a no-op, but it will force the compiler to check the format string*/  \
+}                                                                                                                                   \
 
 /*in all context where this is called, destination is non-NULL*/
 /*function will try to snprintf into destination/destination size and if it fails, then tries to put there the fallback string*/
@@ -194,14 +174,17 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
 void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
 {
     /*1) parameter validation*/
-    if ((destination == NULL) || (destinationSize == 0))
+	if ((destination == NULL) || (destinationSize == 0))
     {
         /*cannot compute if the output space is not sufficient (invalid args)*/
     }
-    else
+    else if (g.symbolsState != SYM_INIT_INITIALIZED)
     {
-        destination[0] = '\0';
-
+        /* cannot comput if we are not initialized*/
+		snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "failure: get_thread_stack is not initialized, g.doSymInit=%" PRI_MU_ENUM "", MU_ENUM_VALUE(SYM_INIT, g.symbolsState));
+    }
+	else
+    {
         bool firstLine = true; /*only used to insert a \n between stack frames*/
 
         /*2) has been replaced by init/denit */
@@ -258,7 +241,7 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
             else
             {
                 /*all following function calls are protected by the same SRW*/
-                AcquireSRWLockExclusive(&lockOverSymCalls);
+                AcquireSRWLockExclusive(&g.lockOverSymCalls);
                 {
                     STACKFRAME64 stackFrame = { 0 };
                     stackFrame.AddrPC.Offset = context.INSTRUCTION_POINTER_REGISTER;
@@ -273,7 +256,7 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                     /*4) once the context has been acquired, call StackWalk64 to get the stack frames. For every frame:*/
                     while (StackWalk64(
                         STACK_WALK_IMAGE_TYPE,
-                        g_symProcess,
+                        g.processHandle,
                         hThread,
                         &stackFrame,
                         &context,
@@ -300,7 +283,7 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                         const char* function_name;
 
                         /*4.1) determine the function name*/
-                        if (!SymFromAddr(g_symProcess, stackFrame.AddrPC.Offset, &displacement, pSymbol))
+                        if (!SymFromAddr(g.processHandle, stackFrame.AddrPC.Offset, &displacement, pSymbol))
                         {
                             function_name = "failure in SymFromAddr";
                         }
@@ -316,7 +299,7 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                         uint32_t line_number;
 
                         /*4.2) determine the file name and line number*/
-                        if (!SymGetLineFromAddr64(g_symProcess, stackFrame.AddrPC.Offset, &lineDisplacement, &line))
+                        if (!SymGetLineFromAddr64(g.processHandle, stackFrame.AddrPC.Offset, &lineDisplacement, &line))
                         {
                             file_name = "failure in SymGetLineFromAddr64";
                             line_number = 0;
@@ -331,7 +314,7 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                         snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "%s!%s %s:%" PRIu32 "", firstLine ? (firstLine = false, "") : "\n", function_name, file_name, line_number);
                     }
 
-                    ReleaseSRWLockExclusive(&lockOverSymCalls);
+                    ReleaseSRWLockExclusive(&g.lockOverSymCalls);
                 }
             }
 
@@ -355,17 +338,56 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
         destination[destinationSize - 1] = '\0';
     }
 }
+
+/*void get_thread_stack_deinit(void)
+ is not thread safe. There should not be 2 threads that call this function - ever. Canon place to have it is: platform_deinit() -> logger_deinit() -> get_thread_stack_deinit() */
+void get_thread_stack_deinit(void)
+{
+    if (g.symbolsState == SYM_INIT_INITIALIZED)
+    {
+        if (!SymCleanup(g.processHandle))
+        {
+            (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymCleanup(g.g_symProcess=%p)",
+                GetLastError(), g.processHandle);
+        }
+
+        if (!CloseHandle(g.processHandle))
+        {
+            (void)printf("failure (GetLastError()=0x%" PRIx32 ") in CloseHandle(g.g_symProcess=%p)",
+                GetLastError(), g.processHandle);
+        }
+        g.processHandle = NULL;
+
+        g.symbolsState = SYM_INIT_NOT_INITIALIZED;
+    }
+    else
+    {
+        /*do nothing*/
+    }
+}
+
 #else /*defined(_MSC_VER)*/
 /*for all the others we don't provide a way to inspect another thread's call stack (yet).*/
+
+int get_thread_stack_init(void)
+{
+	return 0;
+}
+
 void get_thread_stack(HANDLE thread, char* destination, size_t destinationSize)
 {
     (void)thread;
 
-    /*just return empty string to caller if possible*/
+    /*just inform this is not supported*/
 
     if ((destination != NULL) && (destinationSize > 0))
     {
-        destination[0] = '\0';
+        snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "currently running platform not supported.");
     }
+}
+
+void get_thread_stack_deinit(void)
+{
+    /*do nothing*/
 }
 #endif
