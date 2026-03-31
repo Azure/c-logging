@@ -66,7 +66,7 @@ int get_thread_stack_init(void)
         {
             if (!SymInitialize(g.processHandle, NULL, TRUE))
             {
-                (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymInitialize(g.g_symProcess=%p, NULL, TRUE)",
+                (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymInitialize(g.processHandle=%p, NULL, TRUE)",
                     GetLastError(), g.processHandle);
                 result = MU_FAILURE;
             }
@@ -79,7 +79,7 @@ int get_thread_stack_init(void)
 
             if (!CloseHandle(g.processHandle))
             {
-                (void)printf("failure (GetLastError()=0x%" PRIx32 ") in CloseHandle(g.g_symProcess=%p)",
+                (void)printf("failure (GetLastError()=0x%" PRIx32 ") in CloseHandle(g.processHandle=%p)",
 					GetLastError(), g.processHandle);
             }
             g.processHandle = NULL;
@@ -185,6 +185,8 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
     }
 	else
     {
+		destination[0] = '\0';
+
         bool firstLine = true; /*only used to insert a \n between stack frames*/
 
         /*2) has been replaced by init/denit */
@@ -347,13 +349,13 @@ void get_thread_stack_deinit(void)
     {
         if (!SymCleanup(g.processHandle))
         {
-            (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymCleanup(g.g_symProcess=%p)",
+            (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymCleanup(g.processHandle=%p)",
                 GetLastError(), g.processHandle);
         }
 
         if (!CloseHandle(g.processHandle))
         {
-            (void)printf("failure (GetLastError()=0x%" PRIx32 ") in CloseHandle(g.g_symProcess=%p)",
+            (void)printf("failure (GetLastError()=0x%" PRIx32 ") in CloseHandle(g.processHandle=%p)",
                 GetLastError(), g.processHandle);
         }
         g.processHandle = NULL;
