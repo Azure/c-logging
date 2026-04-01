@@ -72,7 +72,7 @@ int get_thread_stack_init(void)
             }
             else
             {
-				g.symbolsState = SYM_INIT_INITIALIZED;
+                g.symbolsState = SYM_INIT_INITIALIZED;
                 result = 0;
                 goto allok;
             }
@@ -80,7 +80,7 @@ int get_thread_stack_init(void)
             if (!CloseHandle(g.processHandle))
             {
                 (void)printf("failure (GetLastError()=0x%" PRIx32 ") in CloseHandle(g.processHandle=%p)",
-					GetLastError(), g.processHandle);
+                    GetLastError(), g.processHandle);
             }
             g.processHandle = NULL;
         }
@@ -88,10 +88,10 @@ int get_thread_stack_init(void)
     else
     {
         /*already initialized, nothing to do*/
-		result = 0;
+        result = 0;
     }
 allok:
-	return result;
+    return result;
 }
 
 static const char snprintfFailed[] = "\nsnprintf failed";
@@ -174,18 +174,18 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
 void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
 {
     /*1) parameter validation*/
-	if ((destination == NULL) || (destinationSize == 0))
+    if ((destination == NULL) || (destinationSize == 0))
     {
         /*cannot compute if the output space is not sufficient (invalid args)*/
     }
     else if (g.symbolsState != SYM_INIT_INITIALIZED)
     {
         /* cannot compute if we are not initialized*/
-		snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "failure: get_thread_stack is not initialized, g.doSymInit=%" PRI_MU_ENUM "", MU_ENUM_VALUE(SYM_INIT, g.symbolsState));
+        snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "failure: get_thread_stack is not initialized, g.doSymInit=%" PRI_MU_ENUM "", MU_ENUM_VALUE(SYM_INIT, g.symbolsState));
     }
-	else
+    else
     {
-		destination[0] = '\0';
+        destination[0] = '\0';
 
         bool firstLine = true; /*only used to insert a \n between stack frames*/
 
@@ -373,7 +373,7 @@ void get_thread_stack_deinit(void)
 
 int get_thread_stack_init(void)
 {
-	return 0;
+    return 0;
 }
 
 void get_thread_stack(HANDLE thread, char* destination, size_t destinationSize)
