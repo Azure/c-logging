@@ -216,7 +216,7 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
         bool wasContextAcquired = false;
 
         CONTEXT context = { 0 };
-        context.ContextFlags = CONTEXT_CONTROL;
+        context.ContextFlags = CONTEXT_FULL; /*ARM64 unwinding needs integer registers (x19-x28) to restore non-volatile register values during stack walk*/
 
         HANDLE hThread = OpenThread(THREAD_GET_CONTEXT | THREAD_SUSPEND_RESUME, FALSE, threadId);
         if (hThread == NULL)
