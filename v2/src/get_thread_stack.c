@@ -271,7 +271,11 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                     stackFrame.AddrStack.Offset = context.STACK_POINTER_REGISTER;
                     stackFrame.AddrStack.Mode = AddrModeFlat;
 
-                    bool thisIsFirstFrame = true; /*used to skip the first frame, which is "us", that is don't display information about "get_thread_stack"*/
+                    /*skip the first frame only when capturing the current thread's stack,
+                    because in that case the top frame is get_thread_stack itself.
+                    For another thread the top frame is whatever that thread was executing,
+                    so skipping it would lose real call-stack information.*/
+                    bool skipFirstFrame = (currentThreadId == threadId) && CAPTURE_TOP_OF_STACK;
 
                     /*4) once the context has been acquired, call StackWalk64 to get the stack frames. For every frame:*/
                     while (StackWalk64(
@@ -285,9 +289,9 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                         SymGetModuleBase64,
                         NULL))
                     {
-                        if (thisIsFirstFrame && CAPTURE_TOP_OF_STACK) /*x64 does capture the current frame, x86 apparently does not... ?! really weird frankly. this CAPTURE_TOP_OF_STACK helps with not capturin the top of the stack*/
+                        if (skipFirstFrame)
                         {
-                            thisIsFirstFrame = false; /*no printing for the top of the stack, which is "us". us = get_thread_stack*/
+                            skipFirstFrame = false; /*no printing for the top of the stack, which is "us". us = get_thread_stack*/
                             continue;
                         }
 
