@@ -248,6 +248,12 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                     else
                     {
                         wasContextAcquired = true;
+#if defined(_M_ARM64)
+                        /*TEMP DIAG: print ARM64 context registers to verify GetThreadContext filled them correctly*/
+                        (void)printf("[DIAG] GetThreadContext ARM64: Pc=0x%016" PRIX64 " Sp=0x%016" PRIX64 " Fp=0x%016" PRIX64 " Lr=0x%016" PRIX64 "\n",
+                            (uint64_t)context.Pc, (uint64_t)context.Sp, (uint64_t)context.Fp, (uint64_t)context.Lr);
+                        (void)fflush(stdout);
+#endif
                     }
                     wasThreadSuspended = true;
                 }
@@ -278,6 +284,7 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                     bool skipFirstFrame = (currentThreadId == threadId) && CAPTURE_TOP_OF_STACK;
 
                     /*4) once the context has been acquired, call StackWalk64 to get the stack frames. For every frame:*/
+                    int frameIndex = 0;
                     while (StackWalk64(
                         STACK_WALK_IMAGE_TYPE,
                         g.processHandle,
@@ -289,6 +296,11 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                         SymGetModuleBase64,
                         NULL))
                     {
+                        /*TEMP DIAG: print raw hex address for each frame*/
+                        (void)printf("[DIAG] frame[%d]: AddrPC=0x%016" PRIX64 " AddrFrame=0x%016" PRIX64 " AddrReturn=0x%016" PRIX64 "\n",
+                            frameIndex, (uint64_t)stackFrame.AddrPC.Offset, (uint64_t)stackFrame.AddrFrame.Offset, (uint64_t)stackFrame.AddrReturn.Offset);
+                        (void)fflush(stdout);
+                        frameIndex++;
                         if (skipFirstFrame)
                         {
                             skipFirstFrame = false; /*no printing for the top of the stack, which is "us". us = get_thread_stack*/
@@ -337,6 +349,10 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                         /*4.3) append the function name, file name and line number to the destination*/
                         snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "%s!%s %s:%" PRIu32 "", firstLine ? (firstLine = false, "") : "\n", function_name, file_name, line_number);
                     }
+
+                    /*TEMP DIAG: print why StackWalk64 stopped*/
+                    (void)printf("[DIAG] StackWalk64 stopped after %d frames, GetLastError=%" PRIu32 "\n", frameIndex, GetLastError());
+                    (void)fflush(stdout);
 
                     ReleaseSRWLockExclusive(&g.lockOverSymCalls);
                 }

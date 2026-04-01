@@ -48,6 +48,8 @@ static void calls_end_frame(DWORD threadId, char* destination, size_t destinatio
 #pragma optimize( "", on ) /*restore optimization*/
 
 
+/*the below function has been found to be optimized away with different x86/x64 flavors. #pragma optimize will prevent that from happening*/
+#pragma optimize( "", off ) /*disable optimization*/
 static DWORD WINAPI some_thread(
     LPVOID lpThreadParameter
 )
@@ -64,6 +66,7 @@ static DWORD WINAPI some_thread(
 
     return 0;
 }
+#pragma optimize( "", on ) /*restore optimization*/
 
 static void test_current_thread(void)
 {
