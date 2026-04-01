@@ -142,10 +142,26 @@ int get_thread_stack_init(void)
         }
         else
         {
-            if (!SymInitialize(g.processHandle, NULL, TRUE))
+            // Per MSDN, the directory containing the executable is not automatically part of the symbol search path.
+            // Use GetModuleFileName to obtain the exe path and extract its directory so that PDBs co-located with
+            // the executable are found by SymInitialize.
+            char exePath[MAX_PATH];
+            char* userSearchPath = NULL;
+            DWORD pathLen = GetModuleFileName(NULL, exePath, MAX_PATH);
+            if (pathLen != 0 && pathLen < MAX_PATH)
             {
-                (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymInitialize(g.processHandle=%p, NULL, TRUE)",
-                    GetLastError(), g.processHandle);
+                char* lastBackslash = strrchr(exePath, '\\');
+                if (lastBackslash != NULL)
+                {
+                    *lastBackslash = '\0';
+                    userSearchPath = exePath;
+                }
+            }
+
+            if (!SymInitialize(g.processHandle, userSearchPath, TRUE))
+            {
+                (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymInitialize(g.processHandle=%p, userSearchPath=%s, TRUE)",
+                    GetLastError(), g.processHandle, MU_P_OR_NULL(userSearchPath));
                 result = MU_FAILURE;
             }
             else
