@@ -368,7 +368,7 @@ void get_thread_stack_deinit(void)
     }
 }
 
-#else /*defined(_MSC_VER)*/
+#elif defined(__linux__)
 /*for all the others we don't provide a way to inspect another thread's call stack (yet).*/
 
 int get_thread_stack_init(void)
@@ -376,7 +376,7 @@ int get_thread_stack_init(void)
     return 0;
 }
 
-void get_thread_stack(HANDLE thread, char* destination, size_t destinationSize)
+void get_thread_stack(pthread_t thread, char* destination, size_t destinationSize)
 {
     (void)thread;
 
@@ -392,4 +392,6 @@ void get_thread_stack_deinit(void)
 {
     /*do nothing*/
 }
+#else
+#error "get_thread_stack is not implemented for this platform yet."
 #endif
