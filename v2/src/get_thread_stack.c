@@ -8,91 +8,20 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#if defined(_MSC_VER)
 #include "windows.h"
 #include "winnt.h"
 #include "dbghelp.h"
+#endif
 
 #include "macro_utils/macro_utils.h"
 
 #include "c_logging/get_thread_stack.h"
 
 
-#define SYM_INIT_VALUES  \
-    SYM_INIT_INITIALIZED,   \
-    SYM_INIT_NOT_INITIALIZED
-
-MU_DEFINE_ENUM(SYM_INIT, SYM_INIT_VALUES);
-MU_DEFINE_ENUM_STRINGS(SYM_INIT, SYM_INIT_VALUES);
-
-typedef union SYMBOL_INFO_EXTENDED_TAG
-{
-    SYMBOL_INFO symbol;
-    unsigned char extendsUnion[sizeof(SYMBOL_INFO) + MAX_SYM_NAME - 1]; /*this field only exists to extend the size of the union to encompass "CHAR    Name[1];" of the SYMBOL_INFO to be as big as TRACE_MAX_SYMBOL_SIZE - 1 */ /*and the reason why it is not malloc'd is to exactly avoid a malloc that cannot be LogError'd (how does one log errors in a log function?!)*/
-}SYMBOL_INFO_EXTENDED;
-
-static struct {
-    SYM_INIT symbolsState; /*holds the state of the module.*/
-    HANDLE processHandle; /*self-process handle*/
-    SRWLOCK lockOverSymCalls;
-} g = /*g comes from "global" because this is a singleton*/
-{
-    .symbolsState = SYM_INIT_NOT_INITIALIZED,
-    .processHandle = NULL,
-    .lockOverSymCalls = SRWLOCK_INIT
-};
-
-
-
 /*note: the APIs in here cannot use LogError+friends because it would result in a stack overflow. Here's why.
 Assume get_thread_stack fails the call to OpenThread. The next line would be LogLastError. If logLastError captures the stack it would end up back in get_thread_stack...
 ... which would fail the call to OpenThread... which would call again LogLastError... etc => STACK OVERFLOW*/
-
-/*get_thread_stack_init is not thread safe. There should not be 2 threads that call this function - ever. Canon place to have it is: platform_init() -> logger_init() -> get_thread_stack_init() */
-int get_thread_stack_init(void)
-{
-    int result;
-    if (g.symbolsState == SYM_INIT_NOT_INITIALIZED)
-    {
-        /*duplicating the pseudo-handle to get a unique real handle for our own dbghelp symbol context*/
-        /*mimics the implementation from https://learn.microsoft.com/en-us/windows/win32/debug/initializing-the-symbol-handler */
-        HANDLE hCurrentProcess = GetCurrentProcess(); /*The pseudo handle need not be closed when it is no longer needed. Source: https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getcurrentprocess*/
-        if (!DuplicateHandle(hCurrentProcess, hCurrentProcess, hCurrentProcess, &g.processHandle, 0, FALSE, DUPLICATE_SAME_ACCESS))
-        {
-            (void)printf("failure (GetLastError()=0x%" PRIx32 ") in DuplicateHandle(hCurrentProcess=%p, hCurrentProcess=%p, hCurrentProcess=%p, &g.processHandle=%p, 0, FALSE, DUPLICATE_SAME_ACCESS), will use hCurrentProcess=%p",
-                GetLastError(), hCurrentProcess, hCurrentProcess, hCurrentProcess, &g.processHandle, hCurrentProcess);
-            result = MU_FAILURE;
-        }
-        else
-        {
-            if (!SymInitialize(g.processHandle, NULL, TRUE))
-            {
-                (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymInitialize(g.processHandle=%p, NULL, TRUE)",
-                    GetLastError(), g.processHandle);
-                result = MU_FAILURE;
-            }
-            else
-            {
-                g.symbolsState = SYM_INIT_INITIALIZED;
-                result = 0;
-                goto allok;
-            }
-
-            if (!CloseHandle(g.processHandle))
-            {
-                (void)printf("failure (GetLastError()=0x%" PRIx32 ") in CloseHandle(g.processHandle=%p)",
-                    GetLastError(), g.processHandle);
-            }
-            g.processHandle = NULL;
-        }
-    }
-    else
-    {
-        /*already initialized, nothing to do*/
-        result = 0;
-    }
-allok:
-    return result;
-}
 
 static const char snprintfFailed[] = "\nsnprintf failed";
 
@@ -170,6 +99,78 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
 #else
 #error unknown version of windows
 #endif
+
+#define SYM_INIT_VALUES  \
+    SYM_INIT_INITIALIZED,   \
+    SYM_INIT_NOT_INITIALIZED
+
+MU_DEFINE_ENUM(SYM_INIT, SYM_INIT_VALUES);
+MU_DEFINE_ENUM_STRINGS(SYM_INIT, SYM_INIT_VALUES);
+
+typedef union SYMBOL_INFO_EXTENDED_TAG
+{
+    SYMBOL_INFO symbol;
+    unsigned char extendsUnion[sizeof(SYMBOL_INFO) + MAX_SYM_NAME - 1]; /*this field only exists to extend the size of the union to encompass "CHAR    Name[1];" of the SYMBOL_INFO to be as big as TRACE_MAX_SYMBOL_SIZE - 1 */ /*and the reason why it is not malloc'd is to exactly avoid a malloc that cannot be LogError'd (how does one log errors in a log function?!)*/
+}SYMBOL_INFO_EXTENDED;
+
+static struct {
+    SYM_INIT symbolsState; /*holds the state of the module.*/
+    HANDLE processHandle; /*self-process handle*/
+    SRWLOCK lockOverSymCalls;
+} g = /*g comes from "global" because this is a singleton*/
+{
+    .symbolsState = SYM_INIT_NOT_INITIALIZED,
+    .processHandle = NULL,
+    .lockOverSymCalls = SRWLOCK_INIT
+};
+
+/*get_thread_stack_init is not thread safe. There should not be 2 threads that call this function - ever. Canon place to have it is: platform_init() -> logger_init() -> get_thread_stack_init() */
+int get_thread_stack_init(void)
+{
+    int result;
+    if (g.symbolsState == SYM_INIT_NOT_INITIALIZED)
+    {
+        /*duplicating the pseudo-handle to get a unique real handle for our own dbghelp symbol context*/
+        /*mimics the implementation from https://learn.microsoft.com/en-us/windows/win32/debug/initializing-the-symbol-handler */
+        HANDLE hCurrentProcess = GetCurrentProcess(); /*The pseudo handle need not be closed when it is no longer needed. Source: https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getcurrentprocess*/
+        if (!DuplicateHandle(hCurrentProcess, hCurrentProcess, hCurrentProcess, &g.processHandle, 0, FALSE, DUPLICATE_SAME_ACCESS))
+        {
+            (void)printf("failure (GetLastError()=0x%" PRIx32 ") in DuplicateHandle(hCurrentProcess=%p, hCurrentProcess=%p, hCurrentProcess=%p, &g.processHandle=%p, 0, FALSE, DUPLICATE_SAME_ACCESS), will use hCurrentProcess=%p",
+                GetLastError(), hCurrentProcess, hCurrentProcess, hCurrentProcess, &g.processHandle, hCurrentProcess);
+            result = MU_FAILURE;
+        }
+        else
+        {
+            if (!SymInitialize(g.processHandle, NULL, TRUE))
+            {
+                (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymInitialize(g.processHandle=%p, NULL, TRUE)",
+                    GetLastError(), g.processHandle);
+                result = MU_FAILURE;
+            }
+            else
+            {
+                g.symbolsState = SYM_INIT_INITIALIZED;
+                result = 0;
+                goto allok;
+            }
+
+            if (!CloseHandle(g.processHandle))
+            {
+                (void)printf("failure (GetLastError()=0x%" PRIx32 ") in CloseHandle(g.processHandle=%p)",
+                    GetLastError(), g.processHandle);
+            }
+            g.processHandle = NULL;
+        }
+    }
+    else
+    {
+        /*already initialized, nothing to do*/
+        result = 0;
+    }
+allok:
+    return result;
+}
+
 
 void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
 {
