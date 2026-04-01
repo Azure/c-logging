@@ -70,10 +70,14 @@ static void test_current_thread(void)
     char stack[4096];
 
     compute_stack(GetCurrentThreadId(), stack, sizeof(stack));
+    (void)printf("test_current_thread (compute_stack): stack=\n%s\n", stack);
+    (void)fflush(stdout);
     POOR_MANS_ASSERT(strstr(stack, "!compute_stack") != NULL); /*assert that the stack contains "compute_stack"*/
     POOR_MANS_ASSERT(strstr(stack, "!get_thread_stack") == NULL); /*assert that the stack doesn't contain "get_thread_stack"*/
 
     calls_end_frame(GetCurrentThreadId(), stack, sizeof(stack));
+    (void)printf("test_current_thread (calls_end_frame): stack=\n%s\n", stack);
+    (void)fflush(stdout);
     POOR_MANS_ASSERT(strstr(stack, "!calls_end_frame") != NULL); /*assert that the stack contains "calls_end_frame", even when the stack is not snapshotted in "calls_end_frame" */
     POOR_MANS_ASSERT(strstr(stack, "!get_thread_stack") == NULL); /*assert that the stack doesn't contain "get_thread_stack"*/
 }
@@ -96,6 +100,8 @@ static void test_another_thread(void)
 
     compute_stack(threadId, stack, sizeof(stack));
 
+    (void)printf("test_another_thread: stack=\n%s\n", stack);
+    (void)fflush(stdout);
     POOR_MANS_ASSERT(strstr(stack, "!some_thread") != NULL); /*assert that the stack contains "calls_end_frame", even when the stack is not snapshotted in "calls_end_frame" */
     POOR_MANS_ASSERT(strstr(stack, "!get_thread_stack") == NULL); /*assert that the stack doesn't contain "get_thread_stack"*/
 
