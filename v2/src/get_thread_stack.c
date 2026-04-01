@@ -7,6 +7,7 @@
 #include <inttypes.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdarg.h>
 
 #if defined(_MSC_VER)
 #include "windows.h"
@@ -25,11 +26,11 @@ Assume get_thread_stack fails the call to OpenThread. The next line would be Log
 
 static const char snprintfFailed[] = "\nsnprintf failed";
 
-#define snprintf_fallback(destination, destination_size, fallback_string, fallbackstring_size, format, ... )                        \
-{                                                                                                                                   \
-    snprintf_fallback_impl(destination, destination_size, fallback_string, fallbackstring_size, format __VA_OPT__(,) __VA_ARGS__);  \
-    0 && printf(format __VA_OPT__(,)  __VA_ARGS__); /*this is a no-op, but it will force the compiler to check the format string*/  \
-}                                                                                                                                   \
+#define snprintf_fallback(destination, destination_size, fallback_string, fallbackstring_size, format, ... )                                \
+{                                                                                                                                           \
+    snprintf_fallback_impl(destination, destination_size, fallback_string, fallbackstring_size, format __VA_OPT__(,) __VA_ARGS__);          \
+    (void)(0 && printf(format __VA_OPT__(,)  __VA_ARGS__)); /*this is a no-op, but it will force the compiler to check the format string*/  \
+}                                                                                                                                           \
 
 /*in all context where this is called, destination is non-NULL*/
 /*function will try to snprintf into destination/destination size and if it fails, then tries to put there the fallback string*/

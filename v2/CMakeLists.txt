@@ -122,6 +122,7 @@ else()
 set(c_logging_v2_c_files
     ${c_logging_v2_c_files}
     ./src/log_errno_linux.c
+    ./src/get_thread_stack.c
     )
 endif()
 
