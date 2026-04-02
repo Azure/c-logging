@@ -360,6 +360,57 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
 
                         while (currentPc != 0)
                         {
+                            /*TEMP DIAG*/
+                            (void)printf("[DIAG] frame[%d]: Pc=0x%016" PRIX64 "\n", frameIndex, (uint64_t)currentPc);
+                            (void)fflush(stdout);
+                            frameIndex++;
+
+                            if (skipFirstFrame)
+                            {
+                                skipFirstFrame = false;
+                            }
+                            else
+                            {
+                                DWORD64 displacement = 0;
+                                SYMBOL_INFO_EXTENDED buffer;
+                                PSYMBOL_INFO pSymbol = &buffer.symbol;
+                                pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+                                pSymbol->MaxNameLen = MAX_SYM_NAME;
+                                const char* function_name;
+
+                                /*4.1) determine the function name*/
+                                if (!SymFromAddr(g.processHandle, currentPc, &displacement, pSymbol))
+                                {
+                                    function_name = "failure in SymFromAddr";
+                                }
+                                else
+                                {
+                                    function_name = pSymbol->Name;
+                                }
+
+                                IMAGEHLP_LINE64 line;
+                                line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+                                DWORD lineDisplacement;
+                                const char* file_name;
+                                uint32_t line_number;
+
+                                /*4.2) determine the file name and line number*/
+                                if (!SymGetLineFromAddr64(g.processHandle, currentPc, &lineDisplacement, &line))
+                                {
+                                    file_name = "failure in SymGetLineFromAddr64";
+                                    line_number = 0;
+                                }
+                                else
+                                {
+                                    file_name = line.FileName;
+                                    line_number = line.LineNumber;
+                                }
+
+                                /*4.3) append the function name, file name and line number to the destination*/
+                                snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "%s!%s %s:%" PRIu32 "", firstLine ? (firstLine = false, "") : "\n", function_name, file_name, line_number);
+                            }
+
+                            /*unwind one frame to get the caller's PC*/
                             DWORD64 imageBase = 0;
                             PRUNTIME_FUNCTION pFunctionEntry = RtlLookupFunctionEntry(currentPc, &imageBase, NULL);
 
@@ -378,60 +429,6 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                                     pFunctionEntry, &context, &handlerData, &establisherFrame, NULL);
                                 currentPc = context.Pc & g.addressMask;
                             }
-
-                            /*TEMP DIAG*/
-                            (void)printf("[DIAG] frame[%d]: Pc=0x%016" PRIX64 "\n", frameIndex, (uint64_t)currentPc);
-                            (void)fflush(stdout);
-                            frameIndex++;
-
-                            if (skipFirstFrame)
-                            {
-                                skipFirstFrame = false;
-                                continue;
-                            }
-
-                            if (currentPc == 0)
-                            {
-                                break;
-                            }
-
-                            DWORD64 displacement = 0;
-                            SYMBOL_INFO_EXTENDED buffer;
-                            PSYMBOL_INFO pSymbol = &buffer.symbol;
-                            pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-                            pSymbol->MaxNameLen = MAX_SYM_NAME;
-                            const char* function_name;
-
-                            /*4.1) determine the function name*/
-                            if (!SymFromAddr(g.processHandle, currentPc, &displacement, pSymbol))
-                            {
-                                function_name = "failure in SymFromAddr";
-                            }
-                            else
-                            {
-                                function_name = pSymbol->Name;
-                            }
-
-                            IMAGEHLP_LINE64 line;
-                            line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
-                            DWORD lineDisplacement;
-                            const char* file_name;
-                            uint32_t line_number;
-
-                            /*4.2) determine the file name and line number*/
-                            if (!SymGetLineFromAddr64(g.processHandle, currentPc, &lineDisplacement, &line))
-                            {
-                                file_name = "failure in SymGetLineFromAddr64";
-                                line_number = 0;
-                            }
-                            else
-                            {
-                                file_name = line.FileName;
-                                line_number = line.LineNumber;
-                            }
-
-                            /*4.3) append the function name, file name and line number to the destination*/
-                            snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "%s!%s %s:%" PRIu32 "", firstLine ? (firstLine = false, "") : "\n", function_name, file_name, line_number);
                         }
                     }
 
