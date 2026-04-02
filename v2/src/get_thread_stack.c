@@ -119,7 +119,8 @@ static struct {
     HANDLE processHandle; /*self-process handle*/
     SRWLOCK lockOverSymCalls;
 #if defined(_M_ARM64)
-    DWORD64 addressMask; /*mask to strip ARM64 Pointer Authentication Code (PAC) bits from addresses*/
+    /*ARM64 Pointer Authentication Code (PAC) address mask - see detailed explanation below in init.*/
+    DWORD64 addressMask;
 #endif
 } g = /*g comes from "global" because this is a singleton*/
 {
@@ -174,16 +175,42 @@ int get_thread_stack_init(void)
             {
                 g.symbolsState = SYM_INIT_INITIALIZED;
 #if defined(_M_ARM64)
-                /*ARM64 processors with Pointer Authentication (PAC) sign return addresses
-                stored on the stack with authentication bits in the upper bits of the address.
-                StackWalk64 does not strip these PAC bits, which causes it to fail when looking
-                up unwind info for the next frame. Compute a bitmask from the maximum user-mode
-                address so we can strip PAC bits during stack walks.*/
+                /*ARM64 Pointer Authentication Code (PAC) - why we need an address mask:
+
+                ARM64 processors (ARMv8.3+) have a security feature called Pointer Authentication.
+                When a function is called, the CPU signs the return address (LR register) using a
+                cryptographic key before saving it on the stack. This places authentication bits in
+                the upper unused bits of the 64-bit address. For example, a valid return address like
+                0x00007FF64DB43D24 becomes 0xD327FFF64DB43D24 when PAC-signed on the stack.
+
+                When StackWalk64 reads return addresses from the stack, it gets these PAC-signed values.
+                Unfortunately StackWalk64 does not strip the PAC bits, so it tries to look up unwind info
+                for address 0xD327FFF64DB43D24 which is not a valid address - causing it to fail to find
+                the function table entry and stop walking prematurely (typically after only 2-3 frames
+                for cross-thread captures).
+
+                Microsoft documents this problem in the DIA SDK via
+                IDiaStackWalkHelper2::GetPointerAuthenticationMask (see
+                https://learn.microsoft.com/en-us/visualstudio/debugger/debug-interface-access/idiastackwalkhelper2-getpointerauthenticationmask)
+                which provides a mask for stripping PAC bits. However that API is part of the DIA SDK
+                (Visual Studio debugger infrastructure), not dbghelp.
+
+                Our fix: derive the mask from GetSystemInfo().lpMaximumApplicationAddress. This gives
+                the highest valid user-mode address (e.g. 0x00007FFFFFFEFFFF for 47-bit VA). We round
+                it up to an all-ones mask (0x00007FFFFFFFFFFF) covering all valid address bits. Any bits
+                above this mask are PAC authentication bits that must be stripped.
+
+                For more background see Raymond Chen's blog post on ARM64 return address protection:
+                https://devblogs.microsoft.com/oldnewthing/20220819-00/?p=107020
+
+                Note: processors without PAC (e.g. Ampere Altra) do not sign return addresses, so the
+                mask has no effect - all upper bits are already zero. This only matters on PAC-enabled
+                processors like Microsoft Cobalt (Neoverse N2).*/
                 {
                     SYSTEM_INFO si;
                     GetSystemInfo(&si);
                     DWORD64 maxAddr = (DWORD64)(ULONG_PTR)si.lpMaximumApplicationAddress;
-                    /*round up to a mask covering all valid address bits*/
+                    /*round up to a mask covering all valid address bits (fill all bits below the MSB)*/
                     g.addressMask = maxAddr;
                     g.addressMask |= g.addressMask >> 1;
                     g.addressMask |= g.addressMask >> 2;
@@ -323,10 +350,12 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                         NULL))
                     {
 #if defined(_M_ARM64)
-                        /*strip Pointer Authentication Code (PAC) bits from addresses.
-                        ARM64 PAC-enabled processors sign return addresses on the stack,
-                        and StackWalk64 does not strip these bits, causing lookup failures
-                        for the current frame and preventing the walk from continuing.*/
+                        /*strip PAC authentication bits from addresses (see detailed explanation in init).
+                        Without this, StackWalk64 returns PAC-signed return addresses that cannot be
+                        resolved by SymFromAddr and prevent the walk from continuing to the next frame.
+                        Stripping AddrPC fixes symbol lookup for the current frame.
+                        Stripping AddrReturn fixes the next iteration of StackWalk64 which uses it as
+                        the next frame's PC to find unwind info.*/
                         stackFrame.AddrPC.Offset &= g.addressMask;
                         stackFrame.AddrReturn.Offset &= g.addressMask;
 #endif
