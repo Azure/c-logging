@@ -73,7 +73,7 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
 3) get hThread's context.
     3.1) if the current thread is hThread, call RtlCaptureContext
     3.2) if the current thread is not hThread, call SuspendThread and GetThreadContext
-4) once the context has been acquired, call StackWalk64 to get the stack frames. For every frame:
+4) once the context has been acquired, walk the stack using RtlVirtualUnwind. For every frame:
     4.1) determine the function name
     4.2) determine the file name and line number
     4.3) append the function name, file name and line number to the destination
@@ -83,22 +83,14 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
 #define INSTRUCTION_POINTER_REGISTER Pc
 #define FRAME_POINTER_REGISTER Fp
 #define STACK_POINTER_REGISTER Sp
-#define STACK_WALK_IMAGE_TYPE IMAGE_FILE_MACHINE_ARM64
 #define CAPTURE_TOP_OF_STACK true
 #elif defined(_WIN64)
 #define INSTRUCTION_POINTER_REGISTER Rip
 #define FRAME_POINTER_REGISTER Rbp
 #define STACK_POINTER_REGISTER Rsp
-#define STACK_WALK_IMAGE_TYPE IMAGE_FILE_MACHINE_AMD64
 #define CAPTURE_TOP_OF_STACK true
-#elif defined(_WIN32)
-#define INSTRUCTION_POINTER_REGISTER Eip
-#define FRAME_POINTER_REGISTER Ebp
-#define STACK_POINTER_REGISTER Esp
-#define STACK_WALK_IMAGE_TYPE IMAGE_FILE_MACHINE_I386
-#define CAPTURE_TOP_OF_STACK false
 #else
-#error unknown version of windows
+#error unsupported architecture
 #endif
 
 #define SYM_INIT_VALUES  \
@@ -131,6 +123,16 @@ static struct {
     .addressMask = ~(DWORD64)0 /*default: no masking until init computes the real mask*/
 #endif
 };
+
+/*strips PAC bits on ARM64, no-op on x64*/
+static DWORD64 strip_pac(DWORD64 address)
+{
+#if defined(_M_ARM64)
+    return address & g.addressMask;
+#else
+    return address;
+#endif
+}
 
 /*get_thread_stack_init is not thread safe. There should not be 2 threads that call this function - ever. Canon place to have it is: platform_init() -> logger_init() -> get_thread_stack_init() */
 int get_thread_stack_init(void)
@@ -301,12 +303,6 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                     else
                     {
                         wasContextAcquired = true;
-#if defined(_M_ARM64)
-                        /*TEMP DIAG: print ARM64 context registers to verify GetThreadContext filled them correctly*/
-                        (void)printf("[DIAG] GetThreadContext ARM64: Pc=0x%016" PRIX64 " Sp=0x%016" PRIX64 " Fp=0x%016" PRIX64 " Lr=0x%016" PRIX64 "\n",
-                            (uint64_t)context.Pc, (uint64_t)context.Sp, (uint64_t)context.Fp, (uint64_t)context.Lr);
-                        (void)fflush(stdout);
-#endif
                     }
                     wasThreadSuspended = true;
                 }
@@ -328,42 +324,36 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                     so skipping it would lose real call-stack information.*/
                     bool skipFirstFrame = (currentThreadId == threadId) && CAPTURE_TOP_OF_STACK;
 
-#if defined(_M_ARM64)
-                    /*ARM64: use RtlVirtualUnwind for manual stack walking instead of StackWalk64.
+                    /*use RtlVirtualUnwind for manual stack walking instead of StackWalk64.
 
-                    StackWalk64 cannot handle ARM64 Pointer Authentication Code (PAC). When PAC is
-                    enabled (e.g. on Microsoft Cobalt / Neoverse N2 processors), return addresses
-                    stored on the stack are cryptographically signed with authentication bits in the
-                    upper bits of the address. StackWalk64 reads these PAC-signed values internally
-                    and cannot find function unwind info for them, causing it to stop walking after
-                    only a few frames.
+                    On ARM64, StackWalk64 cannot handle Pointer Authentication Code (PAC).
+                    PAC-enabled processors (e.g. Microsoft Cobalt / Neoverse N2) sign return
+                    addresses stored on the stack with authentication bits in the upper bits.
+                    StackWalk64 reads these PAC-signed values internally and cannot find function
+                    unwind info for them, causing it to stop walking after only a few frames.
 
                     RtlVirtualUnwind gives us control over each unwind step: after each frame is
-                    unwound, we strip the PAC bits from context.Pc before looking up the next
-                    function. This allows the walk to continue through the full call stack.
+                    unwound, we strip the PAC bits from context.Pc (via strip_pac) before looking
+                    up the next function. On x64, strip_pac is a no-op since there is no PAC.
 
                     The loop:
-                    1. Look up the RUNTIME_FUNCTION for the current PC (RtlLookupFunctionEntry)
-                    2. If found: unwind one frame (RtlVirtualUnwind), which updates the context
-                       to represent the caller's register state, including setting context.Pc to
-                       the return address (which may have PAC bits)
-                    3. If not found: this is a leaf function that did not push LR; the return
-                       address is still in context.Lr
-                    4. Strip PAC bits from the new context.Pc
-                    5. Use the PC for symbol lookup and output
-                    6. Repeat until PC is 0 (bottom of call stack)*/
+                    1. Output the current frame (symbol lookup for currentPc)
+                    2. Look up the RUNTIME_FUNCTION for the current PC (RtlLookupFunctionEntry)
+                    3. If found: unwind one frame (RtlVirtualUnwind), which updates the context
+                       to represent the caller's register state
+                    4. If not found: this is a leaf function; on ARM64 the return address is in Lr,
+                       on x64 the return address is at [Rsp]
+                    5. Strip PAC bits from the new PC (no-op on x64)
+                    6. Repeat until PC is 0 (bottom of call stack)
+
+                    For more background on ARM64 PAC see the detailed comment in get_thread_stack_init
+                    and Raymond Chen's blog post:
+                    https://devblogs.microsoft.com/oldnewthing/20220819-00/?p=107020 */
                     {
-                        DWORD64 currentPc = context.Pc;
-                        /*TEMP DIAG*/
-                        int frameIndex = 0;
+                        DWORD64 currentPc = context.INSTRUCTION_POINTER_REGISTER;
 
                         while (currentPc != 0)
                         {
-                            /*TEMP DIAG*/
-                            (void)printf("[DIAG] frame[%d]: Pc=0x%016" PRIX64 "\n", frameIndex, (uint64_t)currentPc);
-                            (void)fflush(stdout);
-                            frameIndex++;
-
                             if (skipFirstFrame)
                             {
                                 skipFirstFrame = false;
@@ -415,10 +405,24 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
 
                             if (pFunctionEntry == NULL)
                             {
-                                /*leaf function: did not save LR on the stack, return address is in Lr*/
-                                currentPc = context.Lr & g.addressMask;
-                                /*clear Lr to avoid looping on the same leaf frame forever*/
-                                context.Lr = 0;
+                                /*leaf function: did not save the return address on the stack.
+                                On ARM64, the return address is in the Lr register.
+                                On x64, the return address is at [Rsp] (the function has not
+                                modified Rsp since it has no prologue).*/
+#if defined(_M_ARM64)
+                                currentPc = strip_pac(context.Lr);
+                                context.Lr = 0; /*prevent looping on the same leaf frame*/
+#else
+                                currentPc = 0;
+                                if (!ReadProcessMemory(g.processHandle, (LPCVOID)(ULONG_PTR)context.Rsp, &currentPc, sizeof(currentPc), NULL))
+                                {
+                                    currentPc = 0;
+                                }
+                                else
+                                {
+                                    context.Rsp += sizeof(DWORD64);
+                                }
+#endif
                             }
                             else
                             {
@@ -426,87 +430,10 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                                 DWORD64 establisherFrame = 0;
                                 RtlVirtualUnwind(UNW_FLAG_NHANDLER, imageBase, currentPc,
                                     pFunctionEntry, &context, &handlerData, &establisherFrame, NULL);
-                                currentPc = context.Pc & g.addressMask;
+                                currentPc = strip_pac(context.INSTRUCTION_POINTER_REGISTER);
                             }
                         }
                     }
-
-                    /*TEMP DIAG*/
-                    (void)printf("[DIAG] RtlVirtualUnwind walk stopped after %d frames\n", frameIndex);
-                    (void)fflush(stdout);
-#else
-                    /*x86/x64: use StackWalk64 which works correctly on these architectures*/
-                    {
-                        STACKFRAME64 stackFrame = { 0 };
-                        stackFrame.AddrPC.Offset = context.INSTRUCTION_POINTER_REGISTER;
-                        stackFrame.AddrPC.Mode = AddrModeFlat;
-                        stackFrame.AddrFrame.Offset = context.FRAME_POINTER_REGISTER;
-                        stackFrame.AddrFrame.Mode = AddrModeFlat;
-                        stackFrame.AddrStack.Offset = context.STACK_POINTER_REGISTER;
-                        stackFrame.AddrStack.Mode = AddrModeFlat;
-
-                        /*4) once the context has been acquired, call StackWalk64 to get the stack frames. For every frame:*/
-                        while (StackWalk64(
-                            STACK_WALK_IMAGE_TYPE,
-                            g.processHandle,
-                            hThread,
-                            &stackFrame,
-                            &context,
-                            NULL,
-                            SymFunctionTableAccess64,
-                            SymGetModuleBase64,
-                            NULL))
-                        {
-                            if (skipFirstFrame)
-                            {
-                                skipFirstFrame = false; /*no printing for the top of the stack, which is "us". us = get_thread_stack*/
-                                continue;
-                            }
-
-                            DWORD64 displacement = 0;
-
-                            SYMBOL_INFO_EXTENDED buffer;
-
-                            PSYMBOL_INFO pSymbol = &buffer.symbol;
-
-                            pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-                            pSymbol->MaxNameLen = MAX_SYM_NAME;
-
-                            const char* function_name;
-
-                            /*4.1) determine the function name*/
-                            if (!SymFromAddr(g.processHandle, stackFrame.AddrPC.Offset, &displacement, pSymbol))
-                            {
-                                function_name = "failure in SymFromAddr";
-                            }
-                            else
-                            {
-                                function_name = pSymbol->Name;
-                            }
-
-                            IMAGEHLP_LINE64 line;
-                            line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
-                            DWORD lineDisplacement;
-                            const char* file_name;
-                            uint32_t line_number;
-
-                            /*4.2) determine the file name and line number*/
-                            if (!SymGetLineFromAddr64(g.processHandle, stackFrame.AddrPC.Offset, &lineDisplacement, &line))
-                            {
-                                file_name = "failure in SymGetLineFromAddr64";
-                                line_number = 0;
-                            }
-                            else
-                            {
-                                file_name = line.FileName;
-                                line_number = line.LineNumber;
-                            }
-
-                            /*4.3) append the function name, file name and line number to the destination*/
-                            snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "%s!%s %s:%" PRIu32 "", firstLine ? (firstLine = false, "") : "\n", function_name, file_name, line_number);
-                        }
-                    }
-#endif
 
                     ReleaseSRWLockExclusive(&g.lockOverSymCalls);
                 }
