@@ -118,11 +118,17 @@ static struct {
     SYM_INIT symbolsState; /*holds the state of the module.*/
     HANDLE processHandle; /*self-process handle*/
     SRWLOCK lockOverSymCalls;
+#if defined(_M_ARM64)
+    DWORD64 addressMask; /*mask to strip ARM64 Pointer Authentication Code (PAC) bits from addresses*/
+#endif
 } g = /*g comes from "global" because this is a singleton*/
 {
     .symbolsState = SYM_INIT_NOT_INITIALIZED,
     .processHandle = NULL,
-    .lockOverSymCalls = SRWLOCK_INIT
+    .lockOverSymCalls = SRWLOCK_INIT,
+#if defined(_M_ARM64)
+    .addressMask = ~(DWORD64)0 /*default: no masking until init computes the real mask*/
+#endif
 };
 
 /*get_thread_stack_init is not thread safe. There should not be 2 threads that call this function - ever. Canon place to have it is: platform_init() -> logger_init() -> get_thread_stack_init() */
@@ -167,6 +173,26 @@ int get_thread_stack_init(void)
             else
             {
                 g.symbolsState = SYM_INIT_INITIALIZED;
+#if defined(_M_ARM64)
+                /*ARM64 processors with Pointer Authentication (PAC) sign return addresses
+                stored on the stack with authentication bits in the upper bits of the address.
+                StackWalk64 does not strip these PAC bits, which causes it to fail when looking
+                up unwind info for the next frame. Compute a bitmask from the maximum user-mode
+                address so we can strip PAC bits during stack walks.*/
+                {
+                    SYSTEM_INFO si;
+                    GetSystemInfo(&si);
+                    DWORD64 maxAddr = (DWORD64)(ULONG_PTR)si.lpMaximumApplicationAddress;
+                    /*round up to a mask covering all valid address bits*/
+                    g.addressMask = maxAddr;
+                    g.addressMask |= g.addressMask >> 1;
+                    g.addressMask |= g.addressMask >> 2;
+                    g.addressMask |= g.addressMask >> 4;
+                    g.addressMask |= g.addressMask >> 8;
+                    g.addressMask |= g.addressMask >> 16;
+                    g.addressMask |= g.addressMask >> 32;
+                }
+#endif
                 result = 0;
                 goto allok;
             }
@@ -296,6 +322,14 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                         SymGetModuleBase64,
                         NULL))
                     {
+#if defined(_M_ARM64)
+                        /*strip Pointer Authentication Code (PAC) bits from addresses.
+                        ARM64 PAC-enabled processors sign return addresses on the stack,
+                        and StackWalk64 does not strip these bits, causing lookup failures
+                        for the current frame and preventing the walk from continuing.*/
+                        stackFrame.AddrPC.Offset &= g.addressMask;
+                        stackFrame.AddrReturn.Offset &= g.addressMask;
+#endif
                         /*TEMP DIAG: print raw hex address for each frame*/
                         (void)printf("[DIAG] frame[%d]: AddrPC=0x%016" PRIX64 " AddrFrame=0x%016" PRIX64 " AddrReturn=0x%016" PRIX64 "\n",
                             frameIndex, (uint64_t)stackFrame.AddrPC.Offset, (uint64_t)stackFrame.AddrFrame.Offset, (uint64_t)stackFrame.AddrReturn.Offset);
