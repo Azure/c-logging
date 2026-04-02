@@ -12,4 +12,6 @@ add_executable(logger_perf
 )
 
 target_link_libraries(logger_perf c_logging_v2 rpcrt4)
+
 add_test(NAME logger_perf COMMAND logger_perf)
+set_tests_properties(logger_perf PROPERTIES RUN_SERIAL TRUE)

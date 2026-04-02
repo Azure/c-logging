@@ -48,6 +48,8 @@ static void calls_end_frame(DWORD threadId, char* destination, size_t destinatio
 #pragma optimize( "", on ) /*restore optimization*/
 
 
+/*the below function has been found to be optimized away with different x86/x64 flavors. #pragma optimize will prevent that from happening*/
+#pragma optimize( "", off ) /*disable optimization*/
 static DWORD WINAPI some_thread(
     LPVOID lpThreadParameter
 )
@@ -64,16 +66,21 @@ static DWORD WINAPI some_thread(
 
     return 0;
 }
+#pragma optimize( "", on ) /*restore optimization*/
 
 static void test_current_thread(void)
 {
     char stack[4096];
 
     compute_stack(GetCurrentThreadId(), stack, sizeof(stack));
+    (void)printf("test_current_thread (compute_stack): stack=\n%s\n", stack);
+    (void)fflush(stdout);
     POOR_MANS_ASSERT(strstr(stack, "!compute_stack") != NULL); /*assert that the stack contains "compute_stack"*/
     POOR_MANS_ASSERT(strstr(stack, "!get_thread_stack") == NULL); /*assert that the stack doesn't contain "get_thread_stack"*/
 
     calls_end_frame(GetCurrentThreadId(), stack, sizeof(stack));
+    (void)printf("test_current_thread (calls_end_frame): stack=\n%s\n", stack);
+    (void)fflush(stdout);
     POOR_MANS_ASSERT(strstr(stack, "!calls_end_frame") != NULL); /*assert that the stack contains "calls_end_frame", even when the stack is not snapshotted in "calls_end_frame" */
     POOR_MANS_ASSERT(strstr(stack, "!get_thread_stack") == NULL); /*assert that the stack doesn't contain "get_thread_stack"*/
 }
@@ -96,6 +103,8 @@ static void test_another_thread(void)
 
     compute_stack(threadId, stack, sizeof(stack));
 
+    (void)printf("test_another_thread: stack=\n%s\n", stack);
+    (void)fflush(stdout);
     POOR_MANS_ASSERT(strstr(stack, "!some_thread") != NULL); /*assert that the stack contains "calls_end_frame", even when the stack is not snapshotted in "calls_end_frame" */
     POOR_MANS_ASSERT(strstr(stack, "!get_thread_stack") == NULL); /*assert that the stack doesn't contain "get_thread_stack"*/
 
@@ -171,6 +180,8 @@ int main(void)
     // make abort not popup
     _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 
+    POOR_MANS_ASSERT(get_thread_stack_init() == 0);
+
     test_current_thread();
 
     test_another_thread();
@@ -178,6 +189,8 @@ int main(void)
     test_current_thread_insufficient_memory();
 
     test_another_thread_insufficient_memory();
+
+    get_thread_stack_deinit();
 
     return 0;
 }

@@ -54,6 +54,8 @@ Note: No other `logger` API should be called while `logger_init` executes.
 
 **SRS_LOGGER_01_019: [** If `logger` is not already initialized: **]**
 
+- **SRS_LOGGER_02_001: [** `logger_init` shall call `get_thread_stack_init`. **]**
+
 - **SRS_LOGGER_01_020: [** `logger_init` shall set the logger initialization counter to 1. **]**
 
 - **SRS_LOGGER_01_003: [** `logger_init` shall call the `init` function of every sink that is configured to be used. **]**
@@ -81,6 +83,8 @@ Note: No other `logger` API should be called while `logger_deinit` executes.
 **SRS_LOGGER_01_022: [** If the initilization counter reaches 0: **]**
 
 - **SRS_LOGGER_01_007: [** `logger_deinit` shall call the `deinit` function of every sink that is configured to be used. **]**
+
+- **SRS_LOGGER_02_002: [** `logger_deinit` shall call `get_thread_stack_deinit`. **]**
 
 ### logger_get_config
 

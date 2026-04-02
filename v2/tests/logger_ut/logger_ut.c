@@ -29,6 +29,8 @@
 #define MAX_MOCK_CALL_COUNT (128)
 
 #define MOCK_CALL_TYPE_VALUES \
+    MOCK_CALL_TYPE_get_thread_stack_init, \
+    MOCK_CALL_TYPE_get_thread_stack_deinit, \
     MOCK_CALL_TYPE_log_sink1_init, \
     MOCK_CALL_TYPE_log_sink1_deinit, \
     MOCK_CALL_TYPE_log_sink1_log, \
@@ -48,6 +50,17 @@ MU_DEFINE_ENUM_STRINGS(LOG_CONTEXT_PROPERTY_TYPE, LOG_CONTEXT_PROPERTY_TYPE_VALU
 #define MAX_MESSAGE_STRING_LENGTH  1024
 
 #define MAX_PRINTF_CAPTURED_OUPUT_SIZE (LOG_MAX_MESSAGE_LENGTH * 2)
+
+typedef struct get_thread_stack_init_CALL_TAG
+{
+    bool override_result;
+    int call_result;
+} get_thread_stack_init_CALL;
+
+typedef struct get_thread_stack_deinit_CALL_TAG
+{
+    int dummy;
+} get_thread_stack_deinit_CALL;
 
 typedef struct log_sink1_init_CALL_TAG
 {
@@ -96,6 +109,8 @@ typedef struct MOCK_CALL_TAG
     MOCK_CALL_TYPE mock_call_type;
     union
     {
+        get_thread_stack_init_CALL get_thread_stack_init_call;
+        get_thread_stack_deinit_CALL get_thread_stack_deinit_call;
         log_sink1_init_CALL log_sink1_init_call;
         log_sink1_deinit_CALL log_sink1_deinit_call;
         log_sink1_log_CALL log_sink1_log_call;
@@ -146,10 +161,50 @@ static void cleanup_calls(void)
     }
 }
 
+int mock_get_thread_stack_init(void)
+{
+    int result;
+
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_get_thread_stack_init))
+    {
+        actual_and_expected_match = false;
+        result = MU_FAILURE;
+    }
+    else
+    {
+        if (expected_calls[actual_call_count].get_thread_stack_init_call.override_result)
+        {
+            result = expected_calls[actual_call_count].get_thread_stack_init_call.call_result;
+        }
+        else
+        {
+            result = 0;
+        }
+
+        actual_call_count++;
+    }
+
+    return result;
+}
+
+void mock_get_thread_stack_deinit(void)
+{
+    if ((actual_call_count == expected_call_count) ||
+        (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_get_thread_stack_deinit))
+    {
+        actual_and_expected_match = false;
+    }
+    else
+    {
+        actual_call_count++;
+    }
+}
+
 static int log_sink1_init(void)
 {
     int result;
-    
+
     if ((actual_call_count == expected_call_count) ||
         (expected_calls[actual_call_count].mock_call_type != MOCK_CALL_TYPE_log_sink1_init))
     {
@@ -166,10 +221,10 @@ static int log_sink1_init(void)
         {
             result = 0;
         }
-    
+
         actual_call_count++;
     }
-    
+
     return result;
 }
 
@@ -323,6 +378,19 @@ static const LOG_SINK_IF* test_log_sinks[] =
 const LOG_SINK_IF** log_sinks = test_log_sinks;
 uint32_t log_sink_count = MU_COUNT_ARRAY_ITEMS(test_log_sinks);
 
+static void setup_get_thread_stack_init_call(void)
+{
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_get_thread_stack_init;
+    expected_calls[expected_call_count].get_thread_stack_init_call.override_result = false;
+    expected_call_count++;
+}
+
+static void setup_get_thread_stack_deinit_call(void)
+{
+    expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_get_thread_stack_deinit;
+    expected_call_count++;
+}
+
 static void setup_log_sink1_init_call(void)
 {
     expected_calls[expected_call_count].mock_call_type = MOCK_CALL_TYPE_log_sink1_init;
@@ -393,9 +461,11 @@ static void when_the_1st_sink_init_fails_logger_init_fails(void)
 {
     // arrange
     setup_mocks();
+    setup_get_thread_stack_init_call();
     setup_log_sink1_init_call();
-    expected_calls[0].log_sink1_init_call.override_result = true;
-    expected_calls[0].log_sink1_init_call.call_result = MU_FAILURE;
+    expected_calls[1].log_sink1_init_call.override_result = true;
+    expected_calls[1].log_sink1_init_call.call_result = MU_FAILURE;
+    setup_get_thread_stack_deinit_call();
 
     // act
     int result = logger_init();
@@ -414,11 +484,13 @@ static void when_the_2nd_sink_init_fails_logger_init_fails(void)
 {
     // arrange
     setup_mocks();
+    setup_get_thread_stack_init_call();
     setup_log_sink1_init_call();
     setup_log_sink2_init_call();
-    expected_calls[1].log_sink2_init_call.override_result = true;
-    expected_calls[1].log_sink2_init_call.call_result = MU_FAILURE;
+    expected_calls[2].log_sink2_init_call.override_result = true;
+    expected_calls[2].log_sink2_init_call.call_result = MU_FAILURE;
     setup_log_sink1_deinit_call();
+    setup_get_thread_stack_deinit_call();
 
     // act
     int result = logger_init();
@@ -430,6 +502,7 @@ static void when_the_2nd_sink_init_fails_logger_init_fails(void)
 }
 
 /* Tests_SRS_LOGGER_01_019: [ If logger is not already initialized: ] */
+/* Tests_SRS_LOGGER_02_001: [ logger_init shall call get_thread_stack_init. ] */
 /* Tests_SRS_LOGGER_01_020: [ logger_init shall set the logger initialization counter to 1. ] */
 /* Tests_SRS_LOGGER_01_003: [ logger_init shall call the init function of every sink that is configured to be used. ] */
 /* Tests_SRS_LOGGER_01_005: [ Otherwise, logger_init shall succeed and return 0. ] */
@@ -437,6 +510,7 @@ static void logger_init_initializes_sinks(void)
 {
     // arrange
     setup_mocks();
+    setup_get_thread_stack_init_call();
     setup_log_sink1_init_call();
     setup_log_sink2_init_call();
 
@@ -456,6 +530,7 @@ static void logger_init_initializes_sinks(void)
 static void test_logger_init(void)
 {
     setup_mocks();
+    setup_get_thread_stack_init_call();
     setup_log_sink1_init_call();
     setup_log_sink2_init_call();
     POOR_MANS_ASSERT(logger_init() == 0);
@@ -479,6 +554,27 @@ static void logger_init_after_init_succeeds(void)
     // cleanup
     logger_deinit();
     logger_deinit();
+    cleanup_calls();
+}
+
+/* Tests_SRS_LOGGER_02_001: [ logger_init shall call get_thread_stack_init. ] */
+static void when_get_thread_stack_init_fails_logger_init_fails(void)
+{
+    // arrange
+    setup_mocks();
+    setup_get_thread_stack_init_call();
+    expected_calls[0].get_thread_stack_init_call.override_result = true;
+    expected_calls[0].get_thread_stack_init_call.call_result = MU_FAILURE;
+
+    // act
+    int result = logger_init();
+
+    // assert
+    POOR_MANS_ASSERT(result != 0);
+    POOR_MANS_ASSERT(expected_call_count == actual_call_count);
+    POOR_MANS_ASSERT(actual_and_expected_match);
+
+    // cleanup
     cleanup_calls();
 }
 
@@ -627,7 +723,7 @@ static void LOGGER_LOG_EX_works(void)
     uint32_t captured_context_property_count = log_context_get_property_value_pair_count(expected_calls[0].log_sink1_log_call.captured_log_context);
     const LOG_CONTEXT_PROPERTY_VALUE_PAIR* captured_context_properties = log_context_get_property_value_pairs(expected_calls[0].log_sink1_log_call.captured_log_context);
     // we expect one extra property as we're "copying" the context by creating a parent one
-    POOR_MANS_ASSERT(captured_context_property_count == 3); 
+    POOR_MANS_ASSERT(captured_context_property_count == 3);
     POOR_MANS_ASSERT(strcmp(captured_context_properties[1].name, "") == 0);
     POOR_MANS_ASSERT(captured_context_properties[1].type->get_type() == LOG_CONTEXT_PROPERTY_TYPE_struct);
     POOR_MANS_ASSERT(*(uint8_t*)captured_context_properties[1].value == 1);
@@ -987,6 +1083,9 @@ static void LOGGER_LOG_EX_with_message_works(void)
 /* logger_deinit */
 
 /* Tests_SRS_LOGGER_01_007: [ logger_deinit shall call the deinit function of every sink that is configured to be used. ] */
+/* Tests_SRS_LOGGER_01_022: [ If the initilization counter reaches 0: ] */
+/* Tests_SRS_LOGGER_01_007: [ logger_deinit shall call the deinit function of every sink that is configured to be used. ] */
+/* Tests_SRS_LOGGER_02_002: [ logger_deinit shall call get_thread_stack_deinit. ] */
 static void logger_deinit_deinitialized_all_sinks(void)
 {
     // arrange
@@ -994,6 +1093,7 @@ static void logger_deinit_deinitialized_all_sinks(void)
     setup_mocks();
     setup_log_sink1_deinit_call();
     setup_log_sink2_deinit_call();
+    setup_get_thread_stack_deinit_call();
 
     // act
     logger_deinit();
@@ -1040,6 +1140,7 @@ static void logger_deinit_when_initialized_twice_does_not_call_underlying_deinit
 
 /* Tests_SRS_LOGGER_01_022: [ If the initilization counter reaches 0: ] */
 /* Tests_SRS_LOGGER_01_007: [ logger_deinit shall call the deinit function of every sink that is configured to be used. ] */
+/* Tests_SRS_LOGGER_02_002: [ logger_deinit shall call get_thread_stack_deinit. ] */
 static void logger_deinit_twice_after_2_inits_calls_deinit_on_underlying_modules(void)
 {
     // arrange
@@ -1049,6 +1150,7 @@ static void logger_deinit_twice_after_2_inits_calls_deinit_on_underlying_modules
     setup_mocks();
     setup_log_sink1_deinit_call();
     setup_log_sink2_deinit_call();
+    setup_get_thread_stack_deinit_call();
 
     // act
     logger_deinit();
@@ -1303,9 +1405,10 @@ int main(void)
 
     when_the_1st_sink_init_fails_logger_init_fails();
     when_the_2nd_sink_init_fails_logger_init_fails();
+    when_get_thread_stack_init_fails_logger_init_fails();
     logger_init_initializes_sinks();
     logger_init_after_init_succeeds();
-    
+
     LOGGER_LOG_with_CRITICAL_works();
     LOGGER_LOG_with_ERROR_works();
     LOGGER_LOG_with_INFO_works();
