@@ -322,100 +322,195 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                 /*all following function calls are protected by the same SRW*/
                 AcquireSRWLockExclusive(&g.lockOverSymCalls);
                 {
-                    STACKFRAME64 stackFrame = { 0 };
-                    stackFrame.AddrPC.Offset = context.INSTRUCTION_POINTER_REGISTER;
-                    stackFrame.AddrPC.Mode = AddrModeFlat;
-                    stackFrame.AddrFrame.Offset = context.FRAME_POINTER_REGISTER;
-                    stackFrame.AddrFrame.Mode = AddrModeFlat;
-                    stackFrame.AddrStack.Offset = context.STACK_POINTER_REGISTER;
-                    stackFrame.AddrStack.Mode = AddrModeFlat;
-
                     /*skip the first frame only when capturing the current thread's stack,
                     because in that case the top frame is get_thread_stack itself.
                     For another thread the top frame is whatever that thread was executing,
                     so skipping it would lose real call-stack information.*/
                     bool skipFirstFrame = (currentThreadId == threadId) && CAPTURE_TOP_OF_STACK;
 
-                    /*4) once the context has been acquired, call StackWalk64 to get the stack frames. For every frame:*/
+                    /*TEMP DIAG*/
                     int frameIndex = 0;
-                    while (StackWalk64(
-                        STACK_WALK_IMAGE_TYPE,
-                        g.processHandle,
-                        hThread,
-                        &stackFrame,
-                        &context,
-                        NULL,
-                        SymFunctionTableAccess64,
-                        SymGetModuleBase64,
-                        NULL))
-                    {
+
 #if defined(_M_ARM64)
-                        /*strip PAC authentication bits from addresses (see detailed explanation in init).
-                        Without this, StackWalk64 returns PAC-signed return addresses that cannot be
-                        resolved by SymFromAddr and prevent the walk from continuing to the next frame.
-                        Stripping AddrPC fixes symbol lookup for the current frame.
-                        Stripping AddrReturn fixes the next iteration of StackWalk64 which uses it as
-                        the next frame's PC to find unwind info.*/
-                        stackFrame.AddrPC.Offset &= g.addressMask;
-                        stackFrame.AddrReturn.Offset &= g.addressMask;
-#endif
-                        /*TEMP DIAG: print raw hex address for each frame*/
-                        (void)printf("[DIAG] frame[%d]: AddrPC=0x%016" PRIX64 " AddrFrame=0x%016" PRIX64 " AddrReturn=0x%016" PRIX64 "\n",
-                            frameIndex, (uint64_t)stackFrame.AddrPC.Offset, (uint64_t)stackFrame.AddrFrame.Offset, (uint64_t)stackFrame.AddrReturn.Offset);
-                        (void)fflush(stdout);
-                        frameIndex++;
-                        if (skipFirstFrame)
+                    /*ARM64: use RtlVirtualUnwind for manual stack walking instead of StackWalk64.
+
+                    StackWalk64 cannot handle ARM64 Pointer Authentication Code (PAC). When PAC is
+                    enabled (e.g. on Microsoft Cobalt / Neoverse N2 processors), return addresses
+                    stored on the stack are cryptographically signed with authentication bits in the
+                    upper bits of the address. StackWalk64 reads these PAC-signed values internally
+                    and cannot find function unwind info for them, causing it to stop walking after
+                    only a few frames.
+
+                    RtlVirtualUnwind gives us control over each unwind step: after each frame is
+                    unwound, we strip the PAC bits from context.Pc before looking up the next
+                    function. This allows the walk to continue through the full call stack.
+
+                    The loop:
+                    1. Look up the RUNTIME_FUNCTION for the current PC (RtlLookupFunctionEntry)
+                    2. If found: unwind one frame (RtlVirtualUnwind), which updates the context
+                       to represent the caller's register state, including setting context.Pc to
+                       the return address (which may have PAC bits)
+                    3. If not found: this is a leaf function that did not push LR; the return
+                       address is still in context.Lr
+                    4. Strip PAC bits from the new context.Pc
+                    5. Use the PC for symbol lookup and output
+                    6. Repeat until PC is 0 (bottom of call stack)*/
+                    {
+                        DWORD64 currentPc = context.Pc;
+
+                        while (currentPc != 0)
                         {
-                            skipFirstFrame = false; /*no printing for the top of the stack, which is "us". us = get_thread_stack*/
-                            continue;
+                            DWORD64 imageBase = 0;
+                            PRUNTIME_FUNCTION pFunctionEntry = RtlLookupFunctionEntry(currentPc, &imageBase, NULL);
+
+                            if (pFunctionEntry == NULL)
+                            {
+                                /*leaf function: did not save LR on the stack, return address is in Lr*/
+                                currentPc = context.Lr & g.addressMask;
+                                /*clear Lr to avoid looping on the same leaf frame forever*/
+                                context.Lr = 0;
+                            }
+                            else
+                            {
+                                PVOID handlerData = NULL;
+                                DWORD64 establisherFrame = 0;
+                                RtlVirtualUnwind(UNW_FLAG_NHANDLER, imageBase, currentPc,
+                                    pFunctionEntry, &context, &handlerData, &establisherFrame, NULL);
+                                currentPc = context.Pc & g.addressMask;
+                            }
+
+                            /*TEMP DIAG*/
+                            (void)printf("[DIAG] frame[%d]: Pc=0x%016" PRIX64 "\n", frameIndex, (uint64_t)currentPc);
+                            (void)fflush(stdout);
+                            frameIndex++;
+
+                            if (skipFirstFrame)
+                            {
+                                skipFirstFrame = false;
+                                continue;
+                            }
+
+                            if (currentPc == 0)
+                            {
+                                break;
+                            }
+
+                            DWORD64 displacement = 0;
+                            SYMBOL_INFO_EXTENDED buffer;
+                            PSYMBOL_INFO pSymbol = &buffer.symbol;
+                            pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+                            pSymbol->MaxNameLen = MAX_SYM_NAME;
+                            const char* function_name;
+
+                            /*4.1) determine the function name*/
+                            if (!SymFromAddr(g.processHandle, currentPc, &displacement, pSymbol))
+                            {
+                                function_name = "failure in SymFromAddr";
+                            }
+                            else
+                            {
+                                function_name = pSymbol->Name;
+                            }
+
+                            IMAGEHLP_LINE64 line;
+                            line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+                            DWORD lineDisplacement;
+                            const char* file_name;
+                            uint32_t line_number;
+
+                            /*4.2) determine the file name and line number*/
+                            if (!SymGetLineFromAddr64(g.processHandle, currentPc, &lineDisplacement, &line))
+                            {
+                                file_name = "failure in SymGetLineFromAddr64";
+                                line_number = 0;
+                            }
+                            else
+                            {
+                                file_name = line.FileName;
+                                line_number = line.LineNumber;
+                            }
+
+                            /*4.3) append the function name, file name and line number to the destination*/
+                            snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "%s!%s %s:%" PRIu32 "", firstLine ? (firstLine = false, "") : "\n", function_name, file_name, line_number);
                         }
-
-                        DWORD64 displacement = 0;
-
-                        SYMBOL_INFO_EXTENDED buffer;
-
-                        PSYMBOL_INFO pSymbol = &buffer.symbol;
-
-                        pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-                        pSymbol->MaxNameLen = MAX_SYM_NAME;
-
-                        const char* function_name;
-
-                        /*4.1) determine the function name*/
-                        if (!SymFromAddr(g.processHandle, stackFrame.AddrPC.Offset, &displacement, pSymbol))
-                        {
-                            function_name = "failure in SymFromAddr";
-                        }
-                        else
-                        {
-                            function_name = pSymbol->Name;
-                        }
-
-                        IMAGEHLP_LINE64 line;
-                        line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
-                        DWORD lineDisplacement;
-                        const char* file_name;
-                        uint32_t line_number;
-
-                        /*4.2) determine the file name and line number*/
-                        if (!SymGetLineFromAddr64(g.processHandle, stackFrame.AddrPC.Offset, &lineDisplacement, &line))
-                        {
-                            file_name = "failure in SymGetLineFromAddr64";
-                            line_number = 0;
-                        }
-                        else
-                        {
-                            file_name = line.FileName;
-                            line_number = line.LineNumber;
-                        }
-
-                        /*4.3) append the function name, file name and line number to the destination*/
-                        snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "%s!%s %s:%" PRIu32 "", firstLine ? (firstLine = false, "") : "\n", function_name, file_name, line_number);
                     }
 
-                    /*TEMP DIAG: print why StackWalk64 stopped*/
-                    (void)printf("[DIAG] StackWalk64 stopped after %d frames, GetLastError=%" PRIu32 "\n", frameIndex, GetLastError());
+                    /*TEMP DIAG*/
+                    (void)printf("[DIAG] RtlVirtualUnwind walk stopped after %d frames\n", frameIndex);
                     (void)fflush(stdout);
+#else
+                    /*x86/x64: use StackWalk64 which works correctly on these architectures*/
+                    {
+                        STACKFRAME64 stackFrame = { 0 };
+                        stackFrame.AddrPC.Offset = context.INSTRUCTION_POINTER_REGISTER;
+                        stackFrame.AddrPC.Mode = AddrModeFlat;
+                        stackFrame.AddrFrame.Offset = context.FRAME_POINTER_REGISTER;
+                        stackFrame.AddrFrame.Mode = AddrModeFlat;
+                        stackFrame.AddrStack.Offset = context.STACK_POINTER_REGISTER;
+                        stackFrame.AddrStack.Mode = AddrModeFlat;
+
+                        /*4) once the context has been acquired, call StackWalk64 to get the stack frames. For every frame:*/
+                        while (StackWalk64(
+                            STACK_WALK_IMAGE_TYPE,
+                            g.processHandle,
+                            hThread,
+                            &stackFrame,
+                            &context,
+                            NULL,
+                            SymFunctionTableAccess64,
+                            SymGetModuleBase64,
+                            NULL))
+                        {
+                            if (skipFirstFrame)
+                            {
+                                skipFirstFrame = false; /*no printing for the top of the stack, which is "us". us = get_thread_stack*/
+                                continue;
+                            }
+
+                            DWORD64 displacement = 0;
+
+                            SYMBOL_INFO_EXTENDED buffer;
+
+                            PSYMBOL_INFO pSymbol = &buffer.symbol;
+
+                            pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+                            pSymbol->MaxNameLen = MAX_SYM_NAME;
+
+                            const char* function_name;
+
+                            /*4.1) determine the function name*/
+                            if (!SymFromAddr(g.processHandle, stackFrame.AddrPC.Offset, &displacement, pSymbol))
+                            {
+                                function_name = "failure in SymFromAddr";
+                            }
+                            else
+                            {
+                                function_name = pSymbol->Name;
+                            }
+
+                            IMAGEHLP_LINE64 line;
+                            line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+                            DWORD lineDisplacement;
+                            const char* file_name;
+                            uint32_t line_number;
+
+                            /*4.2) determine the file name and line number*/
+                            if (!SymGetLineFromAddr64(g.processHandle, stackFrame.AddrPC.Offset, &lineDisplacement, &line))
+                            {
+                                file_name = "failure in SymGetLineFromAddr64";
+                                line_number = 0;
+                            }
+                            else
+                            {
+                                file_name = line.FileName;
+                                line_number = line.LineNumber;
+                            }
+
+                            /*4.3) append the function name, file name and line number to the destination*/
+                            snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "%s!%s %s:%" PRIu32 "", firstLine ? (firstLine = false, "") : "\n", function_name, file_name, line_number);
+                        }
+                    }
+#endif
 
                     ReleaseSRWLockExclusive(&g.lockOverSymCalls);
                 }
