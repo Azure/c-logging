@@ -249,6 +249,7 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
     /*1) parameter validation*/
     if ((destination == NULL) || (destinationSize == 0))
     {
+        (void)printf("invalid parameter: DWORD threadId=%" PRIu32 ", destination=%p, destinationSize=%zu\n", threadId, destination, destinationSize);
         /*cannot compute if the output space is not sufficient (invalid args)*/
     }
     else if (g.symbolsState != SYM_INIT_INITIALIZED)
@@ -499,10 +500,14 @@ void get_thread_stack(pthread_t thread, char* destination, size_t destinationSiz
 {
     (void)thread;
 
-    /*just inform this is not supported*/
-
-    if ((destination != NULL) && (destinationSize > 0))
+    if ((destination == NULL) || (destinationSize == 0))
     {
+        (void)printf("invalid parameter: destination=%p, destinationSize=%zu\n", destination, destinationSize);
+        /*cannot compute if the output space is not sufficient (invalid args)*/
+    }
+    else
+    {
+        /*just inform this is not supported*/
         snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "currently running platform not supported.");
     }
 }
