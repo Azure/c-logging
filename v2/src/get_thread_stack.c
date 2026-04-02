@@ -328,9 +328,6 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                     so skipping it would lose real call-stack information.*/
                     bool skipFirstFrame = (currentThreadId == threadId) && CAPTURE_TOP_OF_STACK;
 
-                    /*TEMP DIAG*/
-                    int frameIndex = 0;
-
 #if defined(_M_ARM64)
                     /*ARM64: use RtlVirtualUnwind for manual stack walking instead of StackWalk64.
 
@@ -357,6 +354,8 @@ void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
                     6. Repeat until PC is 0 (bottom of call stack)*/
                     {
                         DWORD64 currentPc = context.Pc;
+                        /*TEMP DIAG*/
+                        int frameIndex = 0;
 
                         while (currentPc != 0)
                         {
