@@ -253,12 +253,29 @@ VsTest into testhost.exe) have their PDBs in different directories. This functio
 3. re-initializes the symbol handler with the updated search path so SymFromAddr can resolve their functions */
 void get_thread_stack_refresh_module_list(void)
 {
-    if (g.symbolsState == SYM_INIT_INITIALIZED)
+    if (g.symbolsState != SYM_INIT_INITIALIZED)
+    {
+        /*not initialized, nothing to refresh*/
+    }
+    else
     {
         AcquireSRWLockExclusive(&g.lockOverSymCalls);
         {
             HANDLE hModuleSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 0);
-            if (hModuleSnap != INVALID_HANDLE_VALUE)
+            if (hModuleSnap == INVALID_HANDLE_VALUE)
+            {
+                /*fall back to just refreshing the module list*/
+                if (!SymRefreshModuleList(g.processHandle))
+                {
+                    (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymRefreshModuleList(g.processHandle=%p)\n",
+                        GetLastError(), g.processHandle);
+                }
+                else
+                {
+                    /*SymRefreshModuleList succeeded*/
+                }
+            }
+            else
             {
                 char searchPath[32768];
                 size_t searchPathLen = 0;
@@ -267,21 +284,37 @@ void get_thread_stack_refresh_module_list(void)
                 MODULEENTRY32 me32;
                 me32.dwSize = sizeof(MODULEENTRY32);
 
-                if (Module32First(hModuleSnap, &me32))
+                if (!Module32First(hModuleSnap, &me32))
+                {
+                    /*no modules found, nothing to do*/
+                }
+                else
                 {
                     do
                     {
                         char* lastBackslash = strrchr(me32.szExePath, '\\');
-                        if (lastBackslash != NULL)
+                        if (lastBackslash == NULL)
+                        {
+                            /*no backslash in path, skip this module*/
+                        }
+                        else
                         {
                             size_t dirLen = (size_t)(lastBackslash - me32.szExePath);
                             char dir[MAX_PATH];
-                            if (dirLen < MAX_PATH)
+                            if (dirLen >= MAX_PATH)
+                            {
+                                /*directory path too long, skip this module*/
+                            }
+                            else
                             {
                                 (void)memcpy(dir, me32.szExePath, dirLen);
                                 dir[dirLen] = '\0';
 
-                                if (strstr(searchPath, dir) == NULL)
+                                if (strstr(searchPath, dir) != NULL)
+                                {
+                                    /*directory already in search path, skip*/
+                                }
+                                else
                                 {
                                     if (searchPathLen > 0 && searchPathLen + 1 < sizeof(searchPath))
                                     {
@@ -293,6 +326,10 @@ void get_thread_stack_refresh_module_list(void)
                                         searchPathLen += dirLen;
                                         searchPath[searchPathLen] = '\0';
                                     }
+                                    else
+                                    {
+                                        /*search path buffer full, stop adding directories*/
+                                    }
                                 }
                             }
                         }
@@ -301,7 +338,11 @@ void get_thread_stack_refresh_module_list(void)
                 }
                 (void)CloseHandle(hModuleSnap);
 
-                if (searchPathLen > 0)
+                if (searchPathLen == 0)
+                {
+                    /*no directories found, nothing to update*/
+                }
+                else
                 {
                     /*re-initialize the symbol handler with the updated search path*/
                     (void)SymCleanup(g.processHandle);
@@ -310,15 +351,10 @@ void get_thread_stack_refresh_module_list(void)
                         (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymInitialize during refresh(g.processHandle=%p, searchPath=%s, TRUE)\n",
                             GetLastError(), g.processHandle, searchPath);
                     }
-                }
-            }
-            else
-            {
-                /*fall back to just refreshing the module list*/
-                if (!SymRefreshModuleList(g.processHandle))
-                {
-                    (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymRefreshModuleList(g.processHandle=%p)\n",
-                        GetLastError(), g.processHandle);
+                    else
+                    {
+                        /*symbol handler re-initialized successfully with updated search path*/
+                    }
                 }
             }
         }
