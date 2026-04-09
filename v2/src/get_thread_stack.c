@@ -13,6 +13,7 @@
 #include "windows.h"
 #include "winnt.h"
 #include "dbghelp.h"
+#include "tlhelp32.h"
 #endif
 
 #include "macro_utils/macro_utils.h"
@@ -244,17 +245,81 @@ allok:
 }
 
 
-/*refreshes dbghelp's module list so that DLLs loaded after SymInitialize have their symbols available for resolution*/
+/*refreshes dbghelp's symbol handler so that DLLs loaded after SymInitialize have their symbols available for resolution.
+SymInitialize sets the PDB search path to the host executable's directory. DLLs loaded later (e.g. test DLLs loaded by
+VsTest into testhost.exe) have their PDBs in different directories. This function:
+1. enumerates all currently loaded modules
+2. builds a search path from their directories
+3. re-initializes the symbol handler with the updated search path so SymFromAddr can resolve their functions */
 void get_thread_stack_refresh_module_list(void)
 {
     if (g.symbolsState == SYM_INIT_INITIALIZED)
     {
         AcquireSRWLockExclusive(&g.lockOverSymCalls);
         {
-            if (!SymRefreshModuleList(g.processHandle))
+            HANDLE hModuleSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 0);
+            if (hModuleSnap != INVALID_HANDLE_VALUE)
             {
-                (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymRefreshModuleList(g.processHandle=%p)\n",
-                    GetLastError(), g.processHandle);
+                char searchPath[32768];
+                size_t searchPathLen = 0;
+                searchPath[0] = '\0';
+
+                MODULEENTRY32 me32;
+                me32.dwSize = sizeof(MODULEENTRY32);
+
+                if (Module32First(hModuleSnap, &me32))
+                {
+                    do
+                    {
+                        char* lastBackslash = strrchr(me32.szExePath, '\\');
+                        if (lastBackslash != NULL)
+                        {
+                            size_t dirLen = (size_t)(lastBackslash - me32.szExePath);
+                            char dir[MAX_PATH];
+                            if (dirLen < MAX_PATH)
+                            {
+                                (void)memcpy(dir, me32.szExePath, dirLen);
+                                dir[dirLen] = '\0';
+
+                                if (strstr(searchPath, dir) == NULL)
+                                {
+                                    if (searchPathLen > 0 && searchPathLen + 1 < sizeof(searchPath))
+                                    {
+                                        searchPath[searchPathLen++] = ';';
+                                    }
+                                    if (searchPathLen + dirLen < sizeof(searchPath))
+                                    {
+                                        (void)memcpy(searchPath + searchPathLen, dir, dirLen);
+                                        searchPathLen += dirLen;
+                                        searchPath[searchPathLen] = '\0';
+                                    }
+                                }
+                            }
+                        }
+                        me32.dwSize = sizeof(MODULEENTRY32);
+                    } while (Module32Next(hModuleSnap, &me32));
+                }
+                (void)CloseHandle(hModuleSnap);
+
+                if (searchPathLen > 0)
+                {
+                    /*re-initialize the symbol handler with the updated search path*/
+                    (void)SymCleanup(g.processHandle);
+                    if (!SymInitialize(g.processHandle, searchPath, TRUE))
+                    {
+                        (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymInitialize during refresh(g.processHandle=%p, searchPath=%s, TRUE)\n",
+                            GetLastError(), g.processHandle, searchPath);
+                    }
+                }
+            }
+            else
+            {
+                /*fall back to just refreshing the module list*/
+                if (!SymRefreshModuleList(g.processHandle))
+                {
+                    (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymRefreshModuleList(g.processHandle=%p)\n",
+                        GetLastError(), g.processHandle);
+                }
             }
         }
         ReleaseSRWLockExclusive(&g.lockOverSymCalls);
