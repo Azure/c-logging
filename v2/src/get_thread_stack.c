@@ -320,6 +320,7 @@ void get_thread_stack_refresh_module_list(void)
                                     {
                                         searchPath[searchPathLen++] = ';';
                                     }
+
                                     if (searchPathLen + dirLen < sizeof(searchPath))
                                     {
                                         (void)memcpy(searchPath + searchPathLen, dir, dirLen);
