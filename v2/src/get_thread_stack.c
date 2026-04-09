@@ -244,6 +244,24 @@ allok:
 }
 
 
+/*refreshes dbghelp's module list so that DLLs loaded after SymInitialize have their symbols available for resolution*/
+void get_thread_stack_refresh_module_list(void)
+{
+    if (g.symbolsState == SYM_INIT_INITIALIZED)
+    {
+        AcquireSRWLockExclusive(&g.lockOverSymCalls);
+        {
+            if (!SymRefreshModuleList(g.processHandle))
+            {
+                (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymRefreshModuleList(g.processHandle=%p)\n",
+                    GetLastError(), g.processHandle);
+            }
+        }
+        ReleaseSRWLockExclusive(&g.lockOverSymCalls);
+    }
+}
+
+
 void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
 {
     /*1) parameter validation*/
@@ -510,6 +528,11 @@ void get_thread_stack(pthread_t thread, char* destination, size_t destinationSiz
         /*just inform this is not supported*/
         snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "currently running platform not supported.");
     }
+}
+
+void get_thread_stack_refresh_module_list(void)
+{
+    /*no-op on Linux*/
 }
 
 void get_thread_stack_deinit(void)
