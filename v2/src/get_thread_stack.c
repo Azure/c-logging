@@ -13,6 +13,7 @@
 #include "windows.h"
 #include "winnt.h"
 #include "dbghelp.h"
+#include "tlhelp32.h"
 #endif
 
 #include "macro_utils/macro_utils.h"
@@ -241,6 +242,134 @@ int get_thread_stack_init(void)
     }
 allok:
     return result;
+}
+
+
+/*refreshes dbghelp's symbol search path so that DLLs loaded after SymInitialize have their PDBs findable.
+SymInitialize sets the PDB search path at init time. DLLs loaded later (e.g. test DLLs loaded by VsTest
+into testhost.exe) have their PDBs in different directories. This function:
+1. gets the current search path (preserving env variable defaults)
+2. enumerates all currently loaded modules
+3. appends any new module directories to the search path via SymSetSearchPath
+4. calls SymRefreshModuleList to pick up newly loaded modules with the updated path */
+void get_thread_stack_refresh_module_list(void)
+{
+    if (g.symbolsState != SYM_INIT_INITIALIZED)
+    {
+        /*not initialized, nothing to refresh*/
+    }
+    else
+    {
+        AcquireSRWLockExclusive(&g.lockOverSymCalls);
+        {
+            /*get the current search path so we can append to it rather than replace it*/
+            char currentSearchPath[32768];
+            if (!SymGetSearchPath(g.processHandle, currentSearchPath, sizeof(currentSearchPath)))
+            {
+                currentSearchPath[0] = '\0';
+            }
+            else
+            {
+                /*got current search path*/
+            }
+
+            size_t searchPathLen = strlen(currentSearchPath);
+            bool pathChanged = false;
+
+            HANDLE hModuleSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 0);
+            if (hModuleSnap == INVALID_HANDLE_VALUE)
+            {
+                /*cannot enumerate modules, fall back to just refreshing*/
+            }
+            else
+            {
+                MODULEENTRY32 me32;
+                me32.dwSize = sizeof(MODULEENTRY32);
+
+                if (!Module32First(hModuleSnap, &me32))
+                {
+                    /*no modules found*/
+                }
+                else
+                {
+                    do
+                    {
+                        char* lastBackslash = strrchr(me32.szExePath, '\\');
+                        if (lastBackslash == NULL)
+                        {
+                            /*no backslash in path, skip*/
+                        }
+                        else
+                        {
+                            size_t dirLen = (size_t)(lastBackslash - me32.szExePath);
+                            char dir[MAX_PATH];
+                            if (dirLen >= MAX_PATH)
+                            {
+                                /*directory path too long, skip*/
+                            }
+                            else
+                            {
+                                (void)memcpy(dir, me32.szExePath, dirLen);
+                                dir[dirLen] = '\0';
+
+                                if (strstr(currentSearchPath, dir) != NULL)
+                                {
+                                    /*directory already in search path, skip*/
+                                }
+                                else
+                                {
+                                    if (searchPathLen > 0 && searchPathLen + 1 < sizeof(currentSearchPath))
+                                    {
+                                        currentSearchPath[searchPathLen++] = ';';
+                                    }
+
+                                    if (searchPathLen + dirLen < sizeof(currentSearchPath))
+                                    {
+                                        (void)memcpy(currentSearchPath + searchPathLen, dir, dirLen);
+                                        searchPathLen += dirLen;
+                                        currentSearchPath[searchPathLen] = '\0';
+                                        pathChanged = true;
+                                    }
+                                    else
+                                    {
+                                        /*search path buffer full, stop adding directories*/
+                                    }
+                                }
+                            }
+                        }
+                        me32.dwSize = sizeof(MODULEENTRY32);
+                    } while (Module32Next(hModuleSnap, &me32));
+                }
+                (void)CloseHandle(hModuleSnap);
+            }
+
+            if (pathChanged)
+            {
+                if (!SymSetSearchPath(g.processHandle, currentSearchPath))
+                {
+                    (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymSetSearchPath\n", GetLastError());
+                }
+                else
+                {
+                    /*search path updated successfully*/
+                }
+            }
+            else
+            {
+                /*no new directories to add*/
+            }
+
+            if (!SymRefreshModuleList(g.processHandle))
+            {
+                (void)printf("failure (GetLastError()=0x%" PRIx32 ") in SymRefreshModuleList\n", GetLastError());
+            }
+            else
+            {
+                /*module list refreshed*/
+            }
+        }
+        ReleaseSRWLockExclusive(&g.lockOverSymCalls);
+    }
 }
 
 
@@ -510,6 +639,11 @@ void get_thread_stack(pthread_t thread, char* destination, size_t destinationSiz
         /*just inform this is not supported*/
         snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "currently running platform not supported.");
     }
+}
+
+void get_thread_stack_refresh_module_list(void)
+{
+    /*no-op on Linux*/
 }
 
 void get_thread_stack_deinit(void)
