@@ -31,6 +31,9 @@ extern "C" {
     void get_thread_stack(pthread_t threadId, char* destination, size_t destinationSize);
 #endif
 
+    /*refreshes the loaded module list so symbols from DLLs loaded after init are resolved*/
+    void get_thread_stack_refresh_module_list(void);
+
     /*deinitializes statics - not thread safe*/
     void get_thread_stack_deinit(void);
 
