@@ -12,7 +12,7 @@
 
 #if defined(_MSC_VER)
 #include "windows.h" /*needed for DWORD*/
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__APPLE__)
 #include <pthread.h> /*needed for pthread_t*/
 #else
 #error no other platform supported
@@ -27,7 +27,7 @@ extern "C" {
 
 #if defined(_MSC_VER)
     void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize);
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__APPLE__)
     void get_thread_stack(pthread_t threadId, char* destination, size_t destinationSize);
 #endif
 

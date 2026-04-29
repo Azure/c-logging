@@ -608,7 +608,7 @@ void get_thread_stack_deinit(void)
     }
 }
 
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__APPLE__)
 /*for all the others we don't provide a way to inspect another thread's call stack (yet).*/
 
 int get_thread_stack_init(void)
