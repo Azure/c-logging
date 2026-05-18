@@ -90,6 +90,15 @@ static void snprintf_fallback_impl(char** destination, size_t* destination_size,
 #define FRAME_POINTER_REGISTER Rbp
 #define STACK_POINTER_REGISTER Rsp
 #define CAPTURE_TOP_OF_STACK true
+#elif defined(_M_IX86)
+/* x86 (32-bit) does not have RtlVirtualUnwind or modern dbghelp support.
+   Provide stub implementations that succeed but do not capture a real stack trace.
+   This allows c-logging to link on x86 while clearly indicating the limitation. */
+#define INSTRUCTION_POINTER_REGISTER Eip
+#define FRAME_POINTER_REGISTER Ebp
+#define STACK_POINTER_REGISTER Esp
+#define CAPTURE_TOP_OF_STACK false
+#define IS_X86_STUB 1
 #else
 #error unsupported architecture
 #endif
@@ -134,6 +143,11 @@ static DWORD64 strip_pac(DWORD64 address)
     return address;
 #endif
 }
+
+#if !defined(_M_IX86)
+/*Full stack capture implementation for x64 and ARM64.
+x86 (32-bit) is handled by stubs below because RtlVirtualUnwind and modern dbghelp
+stack-walking APIs are not available or well-supported on 32-bit Windows.*/
 
 /*get_thread_stack_init is not thread safe. There should not be 2 threads that call this function - ever. Canon place to have it is: platform_init() -> logger_init() -> get_thread_stack_init() */
 int get_thread_stack_init(void)
@@ -607,6 +621,44 @@ void get_thread_stack_deinit(void)
         /*do nothing*/
     }
 }
+
+#else
+/*Stub implementations for x86 (32-bit).
+On x86, dbghelp's stack-walking functions (RtlVirtualUnwind, RtlLookupFunctionEntry) either don't exist
+or are not reliably available. These stubs allow the library to link on x86 while clearly indicating
+that full stack capture is not supported.*/
+
+int get_thread_stack_init(void)
+{
+    /*x86 stack capture is a no-op; return success anyway*/
+    return 0;
+}
+
+void get_thread_stack_refresh_module_list(void)
+{
+    /*x86 stub: no-op*/
+}
+
+void get_thread_stack(DWORD threadId, char* destination, size_t destinationSize)
+{
+    (void)threadId;
+
+    if ((destination == NULL) || (destinationSize == 0))
+    {
+        (void)printf("invalid parameter: DWORD threadId=%" PRIu32 ", destination=%p, destinationSize=%zu\n", threadId, destination, destinationSize);
+    }
+    else
+    {
+        snprintf_fallback(&destination, &destinationSize, snprintfFailed, sizeof(snprintfFailed), "stack capture not supported on x86");
+    }
+}
+
+void get_thread_stack_deinit(void)
+{
+    /*x86 stub: no-op*/
+}
+
+#endif
 
 #elif defined(__linux__)
 /*for all the others we don't provide a way to inspect another thread's call stack (yet).*/
