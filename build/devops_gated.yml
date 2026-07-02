@@ -56,6 +56,8 @@ jobs:
 
   # Shallow clone - only need the code at this commit, not full history
   - checkout: self
+    # Retry on failure to handle transient network connection failures (curl 56 / early EOF).
+    retryCountOnTaskFailure: 3
     submodules: false
     clean: false
     fetchDepth: 1
