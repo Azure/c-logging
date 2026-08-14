@@ -557,7 +557,7 @@ static void log_sink_console_log_prints_one_CRITICAL_log_line(void)
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[4].printf_call.captured_output, "\x1b[31;1m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_CRITICAL), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[4].printf_call.captured_output, "\x1b[31;1m%s Time:%%3s %%3s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%9s\r\n%%199s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_CRITICAL), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log shall obtain the time by calling time. ]*/
@@ -585,7 +585,7 @@ static void log_sink_console_log_prints_one_ERROR_log_line(void)
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[4].printf_call.captured_output, "\x1b[31m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_ERROR), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[4].printf_call.captured_output, "\x1b[31m%s Time:%%3s %%3s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%9s\r\n%%199s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_ERROR), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log shall obtain the time by calling time. ]*/
@@ -613,7 +613,7 @@ static void log_sink_console_log_prints_one_WARNING_log_line(void)
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[4].printf_call.captured_output, "\x1b[33m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_WARNING), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[4].printf_call.captured_output, "\x1b[33m%s Time:%%3s %%3s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%9s\r\n%%199s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_WARNING), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log shall obtain the time by calling time. ]*/
@@ -641,7 +641,7 @@ static void log_sink_console_log_prints_one_INFO_log_line(void)
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[4].printf_call.captured_output, "\x1b[37m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_INFO), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[4].printf_call.captured_output, "\x1b[37m%s Time:%%3s %%3s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%9s\r\n%%199s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_INFO), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_002: [ log_sink_console.log shall obtain the time by calling time. ]*/
@@ -669,7 +669,7 @@ static void log_sink_console_log_prints_one_VERBOSE_log_line(void)
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[4].printf_call.captured_output, "\x1b[90m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[4].printf_call.captured_output, "\x1b[90m%s Time:%%3s %%3s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %s%%9s\r\n%%199s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_022: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_console.log shall print Error formatting log line and return. ]*/
@@ -739,7 +739,7 @@ static void when_time_fails_log_sink_console_log_prints_time_as_NULL(void)
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line_with_NULL_time(expected_calls[3].printf_call.captured_output, "\x1b[90m%s Time:NULL File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line_with_NULL_time(expected_calls[3].printf_call.captured_output, "\x1b[90m%s Time:NULL File:%s:%d Func:%s %s%%9s\r\n%%199s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_024: [ If the call to ctime fails then log_sink_console.log shall print the time as NULL. ]*/
@@ -763,7 +763,7 @@ static void when_ctime_returns_NULL_log_sink_console_log_prints_time_as_NULL(voi
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line_with_NULL_time(expected_calls[4].printf_call.captured_output, "\x1b[90m%s Time:NULL File:%s:%d Func:%s %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line_with_NULL_time(expected_calls[4].printf_call.captured_output, "\x1b[90m%s Time:NULL File:%s:%d Func:%s %s%%9s\r\n%%199s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
@@ -795,7 +795,7 @@ static void log_sink_console_log_with_non_NULL_context_prints_one_property(void)
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[90m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { x = 42 } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[90m%s Time:%%3s %%3s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { x = 42 } %s%%9s\r\n%%199s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
@@ -827,7 +827,7 @@ static void log_sink_console_log_with_non_NULL_context_prints_2_properties(void)
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[90m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { x=42 y=1 } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[90m%s Time:%%3s %%3s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { x=42 y=1 } %s%%9s\r\n%%199s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
@@ -860,7 +860,7 @@ static void log_sink_console_log_with_non_NULL_context_with_2_levels_works(void)
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[90m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { { x=42 } y=1 } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[90m%s Time:%%3s %%3s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { { x=42 } y=1 } %s%%9s\r\n%%199s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
@@ -893,7 +893,7 @@ static void log_sink_console_log_with_non_NULL_named_contexts_with_2_levels_work
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[90m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s uaga = { haga = { x=42 } y=1 } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[90m%s Time:%%3s %%3s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s uaga = { haga = { x=42 } y=1 } %s%%9s\r\n%%199s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
@@ -925,7 +925,7 @@ static void log_sink_console_log_with_non_NULL_empty_context_works(void)
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[90m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[90m%s Time:%%3s %%3s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { } %s%%9s\r\n%%199s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CONSOLE_01_013: [ If log_context is non-NULL: ]*/
@@ -960,7 +960,7 @@ static void log_sink_console_log_with_non_NULL_dynamically_allocated_context(voi
     POOR_MANS_ASSERT(expected_call_count == actual_call_count);
     POOR_MANS_ASSERT(expected_calls[0].time_call.captured__time == NULL);
     POOR_MANS_ASSERT(actual_and_expected_match);
-    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[90m%s Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { { x=42 } y=1 } %s%%s\r\n%%s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[actual_call_count - 1].printf_call.captured_output, "\x1b[90m%s Time:%%3s %%3s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s { { x=42 } y=1 } %s%%9s\r\n%%199s", MU_ENUM_TO_STRING(LOG_LEVEL, LOG_LEVEL_VERBOSE), __FILE__, line_no, __FUNCTION__, "test");
 
     // cleanup
     LOG_CONTEXT_DESTROY(context_1);
