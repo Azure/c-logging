@@ -42,6 +42,14 @@ MU_DEFINE_ENUM(MOCK_CALL_TYPE, MOCK_CALL_TYPE_VALUES)
 
 #define MAX_PRINTF_CAPTURED_OUPUT_SIZE (LOG_MAX_MESSAGE_LENGTH * 2)
 
+// sscanf field widths used to validate log lines, the destination buffers are sized width + 1
+#define DAY_OF_WEEK_SCAN_WIDTH 3
+#define MONTH_SCAN_WIDTH 3
+#define MESSAGE_SCAN_WIDTH 4095 // LOG_MAX_MESSAGE_LENGTH - 1
+
+#define TIME_SCAN_FORMAT "Time:%%" MU_TOSTRING(DAY_OF_WEEK_SCAN_WIDTH) "s %%" MU_TOSTRING(MONTH_SCAN_WIDTH) "s %%d %%d:%%d:%%d %%d"
+#define MESSAGE_SCAN_FORMAT "%%" MU_TOSTRING(MESSAGE_SCAN_WIDTH) "[^\r\n]"
+
 typedef struct printf_CALL_TAG
 {
     bool override_result;
@@ -483,14 +491,14 @@ static void validate_log_line(const char* actual_string, const char* expected_fo
     char expected_string[LOG_MAX_MESSAGE_LENGTH * 2];
     int snprintf_result = snprintf(expected_string, sizeof(expected_string), expected_format, file, line, func);
     POOR_MANS_ASSERT(snprintf_result >= 0);
-    char day_of_week[4];
-    char month[4];
+    char day_of_week[DAY_OF_WEEK_SCAN_WIDTH + 1];
+    char month[MONTH_SCAN_WIDTH + 1];
     int day;
     int hour;
     int minute;
     int second;
     int year;
-    char message[LOG_MAX_MESSAGE_LENGTH];
+    char message[MESSAGE_SCAN_WIDTH + 1];
     int scanned_values = sscanf(actual_string, expected_string, day_of_week, month, &day, &hour, &minute, &second, &year, message);
     POOR_MANS_ASSERT(scanned_values == 8);
     POOR_MANS_ASSERT(strcmp(message, expected_message) == 0);
@@ -501,7 +509,7 @@ static void validate_log_line_with_NULL_time(const char* actual_string, const ch
     char expected_string[LOG_MAX_MESSAGE_LENGTH * 2];
     int snprintf_result = snprintf(expected_string, sizeof(expected_string), expected_format, file, line, func, expected_message);
     POOR_MANS_ASSERT(snprintf_result >= 0);
-    char message[LOG_MAX_MESSAGE_LENGTH];
+    char message[MESSAGE_SCAN_WIDTH + 1];
     int scanned_values = sscanf(actual_string, expected_string, message);
     POOR_MANS_ASSERT(scanned_values == 1);
     POOR_MANS_ASSERT(strcmp(message, expected_message) == 0);
@@ -626,7 +634,7 @@ static void log_sink_callback_log_calls_callback_with_one_CRITICAL_log_line(void
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_context == (void*)0x42);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_log_level == LOG_LEVEL_CRITICAL);
-    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, "Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %%[^\r\n]", __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, TIME_SCAN_FORMAT " File:%s:%d Func:%s " MESSAGE_SCAN_FORMAT, __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CALLBACK_42_007: [ log_sink_callback.log shall obtain the time by calling time. ]*/
@@ -655,7 +663,7 @@ static void log_sink_callback_log_calls_callback_with_one_ERROR_log_line(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_context == (void*)0x42);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_log_level == LOG_LEVEL_ERROR);
-    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, "Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %%[^\r\n]", __FILE__, line_no, __FUNCTION__, "other message");
+    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, TIME_SCAN_FORMAT " File:%s:%d Func:%s " MESSAGE_SCAN_FORMAT, __FILE__, line_no, __FUNCTION__, "other message");
 }
 
 /* Tests_SRS_LOG_SINK_CALLBACK_42_007: [ log_sink_callback.log shall obtain the time by calling time. ]*/
@@ -684,7 +692,7 @@ static void log_sink_callback_log_calls_callback_with_one_WARNING_log_line(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_context == (void*)0x42);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_log_level == LOG_LEVEL_WARNING);
-    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, "Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %%[^\r\n]", __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, TIME_SCAN_FORMAT " File:%s:%d Func:%s " MESSAGE_SCAN_FORMAT, __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CALLBACK_42_007: [ log_sink_callback.log shall obtain the time by calling time. ]*/
@@ -713,7 +721,7 @@ static void log_sink_callback_log_calls_callback_with_one_INFO_log_line(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_context == (void*)0x42);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_log_level == LOG_LEVEL_INFO);
-    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, "Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %%[^\r\n]", __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, TIME_SCAN_FORMAT " File:%s:%d Func:%s " MESSAGE_SCAN_FORMAT, __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CALLBACK_42_007: [ log_sink_callback.log shall obtain the time by calling time. ]*/
@@ -742,7 +750,7 @@ static void log_sink_callback_log_calls_callback_with_one_VERBOSE_log_line(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_context == (void*)0x42);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_log_level == LOG_LEVEL_VERBOSE);
-    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, "Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %%[^\r\n]", __FILE__, line_no, __FUNCTION__, "a very long and verbose message here 42");
+    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, TIME_SCAN_FORMAT " File:%s:%d Func:%s " MESSAGE_SCAN_FORMAT, __FILE__, line_no, __FUNCTION__, "a very long and verbose message here 42");
 }
 
 /* Tests_SRS_LOG_SINK_CALLBACK_42_017: [ If any encoding error occurs during formatting of the line (i.e. if any printf class functions fails), log_sink_callback.log shall call the log_callback with Error formatting log line and return. ]*/
@@ -822,7 +830,7 @@ static void when_time_fails_log_sink_callback_log_prints_time_as_NULL(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_context == (void*)0x42);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_log_level == LOG_LEVEL_VERBOSE);
-    validate_log_line_with_NULL_time(expected_calls[actual_call_count - 1].log_callback_call.captured_output, "Time:NULL File:%s:%d Func:%s %%[^\r\n]", __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line_with_NULL_time(expected_calls[actual_call_count - 1].log_callback_call.captured_output, "Time:NULL File:%s:%d Func:%s " MESSAGE_SCAN_FORMAT, __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CALLBACK_42_011: [ If the call to ctime fails then log_sink_callback.log shall format the time as NULL. ]*/
@@ -850,7 +858,7 @@ static void when_ctime_returns_NULL_log_sink_callback_log_prints_time_as_NULL(vo
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_context == (void*)0x42);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_log_level == LOG_LEVEL_VERBOSE);
-    validate_log_line_with_NULL_time(expected_calls[actual_call_count - 1].log_callback_call.captured_output, "Time:NULL File:%s:%d Func:%s %%[^\r\n]", __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line_with_NULL_time(expected_calls[actual_call_count - 1].log_callback_call.captured_output, "Time:NULL File:%s:%d Func:%s " MESSAGE_SCAN_FORMAT, __FILE__, line_no, __FUNCTION__, "test");
 }
 
 /* Tests_SRS_LOG_SINK_CALLBACK_42_012: [ If log_context is non-NULL: ]*/
@@ -886,7 +894,7 @@ static void log_sink_callback_log_with_non_NULL_context_prints_one_property(void
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_context == (void*)0x42);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_log_level == LOG_LEVEL_VERBOSE);
-    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, "Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %%[^\r\n]", __FILE__, line_no, __FUNCTION__, "{ x=42 } test");
+    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, TIME_SCAN_FORMAT " File:%s:%d Func:%s " MESSAGE_SCAN_FORMAT, __FILE__, line_no, __FUNCTION__, "{ x=42 } test");
 }
 
 /* Tests_SRS_LOG_SINK_CALLBACK_42_012: [ If log_context is non-NULL: ]*/
@@ -922,7 +930,7 @@ static void log_sink_callback_log_with_non_NULL_context_prints_2_properties(void
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_context == (void*)0x42);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_log_level == LOG_LEVEL_VERBOSE);
-    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, "Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %%[^\r\n]", __FILE__, line_no, __FUNCTION__, "{ x=42 y=1 } test");
+    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, TIME_SCAN_FORMAT " File:%s:%d Func:%s " MESSAGE_SCAN_FORMAT, __FILE__, line_no, __FUNCTION__, "{ x=42 y=1 } test");
 }
 
 /* Tests_SRS_LOG_SINK_CALLBACK_42_012: [ If log_context is non-NULL: ]*/
@@ -959,7 +967,7 @@ static void log_sink_callback_log_with_non_NULL_context_with_2_levels_works(void
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_context == (void*)0x42);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_log_level == LOG_LEVEL_VERBOSE);
-    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, "Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %%[^\r\n]", __FILE__, line_no, __FUNCTION__, "{ { x=42 } y=1 } test");
+    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, TIME_SCAN_FORMAT " File:%s:%d Func:%s " MESSAGE_SCAN_FORMAT, __FILE__, line_no, __FUNCTION__, "{ { x=42 } y=1 } test");
 }
 
 /* Tests_SRS_LOG_SINK_CALLBACK_42_012: [ If log_context is non-NULL: ]*/
@@ -996,7 +1004,7 @@ static void log_sink_callback_log_with_non_NULL_named_contexts_with_2_levels_wor
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_context == (void*)0x42);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_log_level == LOG_LEVEL_VERBOSE);
-    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, "Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %%[^\r\n]", __FILE__, line_no, __FUNCTION__, "uaga={ haga={ x=42 } y=1 } test");
+    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, TIME_SCAN_FORMAT " File:%s:%d Func:%s " MESSAGE_SCAN_FORMAT, __FILE__, line_no, __FUNCTION__, "uaga={ haga={ x=42 } y=1 } test");
 }
 
 /* Tests_SRS_LOG_SINK_CALLBACK_42_012: [ If log_context is non-NULL: ]*/
@@ -1032,7 +1040,7 @@ static void log_sink_callback_log_with_non_NULL_empty_context_works(void)
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_context == (void*)0x42);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_log_level == LOG_LEVEL_VERBOSE);
-    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, "Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %%[^\r\n]", __FILE__, line_no, __FUNCTION__, "{ } test");
+    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, TIME_SCAN_FORMAT " File:%s:%d Func:%s " MESSAGE_SCAN_FORMAT, __FILE__, line_no, __FUNCTION__, "{ } test");
 }
 
 /* Tests_SRS_LOG_SINK_CALLBACK_42_012: [ If log_context is non-NULL: ]*/
@@ -1071,7 +1079,7 @@ static void log_sink_callback_log_with_non_NULL_dynamically_allocated_context(vo
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_context == (void*)0x42);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_log_level == LOG_LEVEL_VERBOSE);
-    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, "Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %%[^\r\n]", __FILE__, line_no, __FUNCTION__, "{ { x=42 } y=1 } test");
+    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, TIME_SCAN_FORMAT " File:%s:%d Func:%s " MESSAGE_SCAN_FORMAT, __FILE__, line_no, __FUNCTION__, "{ { x=42 } y=1 } test");
 
     // cleanup
     LOG_CONTEXT_DESTROY(context_1);
@@ -1318,7 +1326,7 @@ static void test_case_log_sink_callback_log_with_max_level_does_call_callback(LO
     POOR_MANS_ASSERT(actual_and_expected_match);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_context == (void*)0x42);
     POOR_MANS_ASSERT(expected_calls[actual_call_count - 1].log_callback_call.captured_log_level == log_level);
-    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, "Time:%%s %%s %%d %%d:%%d:%%d %%d File:%s:%d Func:%s %%[^\r\n]", __FILE__, line_no, __FUNCTION__, "test");
+    validate_log_line(expected_calls[actual_call_count - 1].log_callback_call.captured_output, TIME_SCAN_FORMAT " File:%s:%d Func:%s " MESSAGE_SCAN_FORMAT, __FILE__, line_no, __FUNCTION__, "test");
 }
 
 static void test_case_log_sink_callback_log_with_max_level_does_not_call_callback(LOG_LEVEL log_level, LOG_LEVEL max_log_level)
