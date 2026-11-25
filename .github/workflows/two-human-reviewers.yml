@@ -1,0 +1,32 @@
+name: Two human reviewers
+# Calls the shared gate in c-build-tools. Keep `pull_request_review`, or approvals never re-run it. A
+# fork's PR gets a read-only token (`pull_request_target` is blocked by default), so a maintainer
+# publishes its status with "Run workflow" or the command below, again after each push or review.
+# Never add a checkout.
+#   gh workflow run two-human-reviewers.yml -R <owner>/<repo> -f pr=<number>
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: PR number to evaluate.
+        type: string
+        required: true
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+# Set here because a called workflow can never hold more permission than its caller.
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+
+jobs:
+  two-human-reviewers:
+    # Pin to a tag or commit SHA instead of a branch if you need the gate's behaviour to change only when
+    # you choose to update it.
+    uses: Azure/c-build-tools/.github/workflows/two-human-reviewers.yml@52eafd6a500cbf261a08d4adfe6cfbb2f0787c78
+    with:
+      pr: ${{ github.event.pull_request.number || inputs.pr }}
